@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -137,29 +138,44 @@ export const invitationServices = {
         return false;
       }
 
-      const { data, error } = await supabase.rpc('accept_invitation', { 
-        p_token: token, 
-        p_user_id: user.id 
-      });
+      // Use a raw query instead of rpc to work around type issues
+      const { data, error } = await supabase.from('invitations')
+        .select('organization_id, role')
+        .eq('token', token)
+        .gt('expires_at', new Date().toISOString())
+        .single();
 
-      if (error) {
+      if (error || !data) {
+        toast('Invalid or expired invitation', {
+          style: { backgroundColor: 'red', color: 'white' }
+        });
+        return false;
+      }
+      
+      // Add user to organization with the specified role
+      const { error: memberError } = await supabase.from('organization_members')
+        .insert({
+          organization_id: data.organization_id,
+          user_id: user.id,
+          role: data.role
+        });
+        
+      if (memberError) {
         toast('Error accepting invitation', { 
           style: { backgroundColor: 'red', color: 'white' } 
         });
-        throw error;
-      }
-
-      if (data) {
-        toast('Invitation accepted successfully', {
-          style: { backgroundColor: 'green', color: 'white' }
-        });
-        return true;
+        throw memberError;
       }
       
-      toast('Invalid or expired invitation', {
-        style: { backgroundColor: 'red', color: 'white' }
+      // Delete the invitation after it's been accepted
+      await supabase.from('invitations')
+        .delete()
+        .eq('token', token);
+      
+      toast('Invitation accepted successfully', {
+        style: { backgroundColor: 'green', color: 'white' }
       });
-      return false;
+      return true;
     } catch (error: any) {
       console.error('Error accepting invitation:', error);
       return false;
