@@ -137,11 +137,10 @@ export const invitationServices = {
         return false;
       }
 
-      const { data, error } = await supabase
-        .rpc('accept_invitation', { 
-          p_token: token, 
-          p_user_id: user.id 
-        });
+      const { data, error } = await supabase.rpc('accept_invitation', { 
+        p_token: token, 
+        p_user_id: user.id 
+      });
 
       if (error) {
         toast('Error accepting invitation', { 
