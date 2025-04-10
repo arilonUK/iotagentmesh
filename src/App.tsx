@@ -12,6 +12,8 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ProfileSettings from "./pages/ProfileSettings";
+import TeamSettings from "./pages/TeamSettings";
+import AcceptInvitation from "./pages/AcceptInvitation";
 import { AuthProvider } from "./contexts/auth";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -27,6 +29,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/accept-invitation" element={<AcceptInvitation />} />
             
             {/* Protected Dashboard Routes */}
             <Route element={<ProtectedRoute />}>
@@ -35,6 +38,7 @@ const App = () => (
                 <Route path="devices" element={<Devices />} />
                 <Route path="devices/:id" element={<DeviceDetail />} />
                 <Route path="settings/profile" element={<ProfileSettings />} />
+                <Route path="settings/team" element={<TeamSettings />} />
               </Route>
             </Route>
             

@@ -1,148 +1,136 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Gauge, HardDrive, BarChart3, Settings, Users, LogOut, UserCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/auth';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Home, Globe, Settings, LifeBuoy, Users } from 'lucide-react';
 
-const items = [
-  {
-    title: "Dashboard",
-    icon: <Home size={18} />,
-    href: "/dashboard",
+const navigation = [
+  { name: 'Dashboard', href: '/dashboard', icon: Home },
+  { name: 'Devices', href: '/dashboard/devices', icon: Globe },
+  { 
+    name: 'Settings', 
+    href: '/dashboard/settings', 
+    icon: Settings,
+    submenu: [
+      { name: 'Profile', href: '/dashboard/settings/profile' },
+      { name: 'Team', href: '/dashboard/settings/team' },
+    ]
   },
-  {
-    title: "Devices",
-    icon: <HardDrive size={18} />,
-    href: "/dashboard/devices",
-  },
-  {
-    title: "Statistics",
-    icon: <BarChart3 size={18} />,
-    href: "/dashboard/statistics",
-  },
-  {
-    title: "Projects",
-    icon: <Gauge size={18} />,
-    href: "/dashboard/projects",
-  },
-];
-
-const settingsItems = [
-  {
-    title: "Profile",
-    icon: <UserCircle size={18} />,
-    href: "/dashboard/settings/profile",
-  },
-  {
-    title: "Settings",
-    icon: <Settings size={18} />,
-    href: "/dashboard/settings",
-  },
+  { name: 'Help', href: '/dashboard/help', icon: LifeBuoy },
 ];
 
 const DashboardNav = () => {
   const location = useLocation();
-  const { user, profile, signOut } = useAuth();
+  const [openSubmenu, setOpenSubmenu] = React.useState<string | null>(null);
 
-  const handleSignOut = async () => {
-    await signOut();
-  };
+  // Check if the current path is in a submenu
+  React.useEffect(() => {
+    navigation.forEach(item => {
+      if (item.submenu && item.submenu.some(subItem => location.pathname === subItem.href)) {
+        setOpenSubmenu(item.name);
+      }
+    });
+  }, [location.pathname]);
 
-  const getUserInitials = () => {
-    if (profile?.full_name) {
-      return profile.full_name
-        .split(' ')
-        .map((name: string) => name[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2);
-    } else if (profile?.username) {
-      return profile.username.slice(0, 2).toUpperCase();
-    } else if (user?.email) {
-      return user.email.slice(0, 2).toUpperCase();
-    }
-    return 'U';
+  const toggleSubmenu = (name: string) => {
+    setOpenSubmenu(openSubmenu === name ? null : name);
   };
 
   return (
-    <aside className="fixed inset-y-0 left-0 w-64 border-r border-gray-100 bg-white hidden md:block">
-      <div className="flex h-16 items-center border-b px-6">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="size-8 rounded-lg iot-gradient-bg flex items-center justify-center">
-            <span className="font-bold text-lg">N</span>
-          </div>
-          <span className="text-xl font-semibold">NextGenIOT</span>
-        </Link>
-      </div>
-      
-      {user && (
-        <div className="p-4 border-b">
-          <div className="flex items-center gap-3">
-            <Avatar>
-              <AvatarImage src={profile?.avatar_url || ''} />
-              <AvatarFallback>{getUserInitials()}</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-medium text-sm">
-                {profile?.full_name || profile?.username || user.email?.split('@')[0]}
-              </p>
-              {profile?.username && (
-                <p className="text-xs text-muted-foreground">@{profile.username}</p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-      
-      <div className="flex flex-col gap-1 p-4">
-        <p className="text-xs font-medium text-muted-foreground px-2 py-1.5">Menu</p>
-        <nav className="grid gap-1 px-2">
-          {items.map((item) => (
-            <Link
-              key={item.href}
-              to={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-accent transition-colors",
-                location.pathname === item.href ? "bg-accent text-accent-foreground" : "text-muted-foreground"
-              )}
-            >
-              {item.icon}
-              <span>{item.title}</span>
-            </Link>
-          ))}
-        </nav>
-
-        <p className="text-xs font-medium text-muted-foreground px-2 py-1.5 mt-6">Settings</p>
-        <nav className="grid gap-1 px-2">
-          {settingsItems.map((item) => (
-            <Link
-              key={item.href}
-              to={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-accent transition-colors",
-                location.pathname === item.href ? "bg-accent text-accent-foreground" : "text-muted-foreground"
-              )}
-            >
-              {item.icon}
-              <span>{item.title}</span>
-            </Link>
-          ))}
-        </nav>
+    <nav className="space-y-1 px-2">
+      {navigation.map((item) => {
+        const isActive = item.submenu
+          ? item.submenu.some(subItem => location.pathname === subItem.href)
+          : location.pathname === item.href;
         
-        <div className="mt-auto px-2">
-          <Button 
-            variant="outline" 
-            className="w-full justify-start gap-3 mt-10" 
-            onClick={handleSignOut}
-          >
-            <LogOut size={18} />
-            <span>Log out</span>
-          </Button>
-        </div>
-      </div>
-    </aside>
+        return (
+          <div key={item.name}>
+            {item.submenu ? (
+              <>
+                <button
+                  onClick={() => toggleSubmenu(item.name)}
+                  className={cn(
+                    isActive
+                      ? 'bg-gray-900 text-white'
+                      : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                    'group w-full flex items-center px-2 py-2 text-sm font-medium rounded-md'
+                  )}
+                >
+                  <item.icon
+                    className={cn(
+                      isActive ? 'text-white' : 'text-gray-400 group-hover:text-white',
+                      'mr-3 h-5 w-5'
+                    )}
+                    aria-hidden="true"
+                  />
+                  <span className="flex-1 text-left">{item.name}</span>
+                  <svg
+                    className={cn(
+                      'h-5 w-5 transition-transform',
+                      openSubmenu === item.name ? 'rotate-90' : ''
+                    )}
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+
+                {/* Submenu */}
+                {openSubmenu === item.name && (
+                  <div className="pl-6 mt-1 space-y-1">
+                    {item.submenu.map((subItem) => (
+                      <Link
+                        key={subItem.name}
+                        to={subItem.href}
+                        className={cn(
+                          location.pathname === subItem.href
+                            ? 'bg-gray-800 text-white'
+                            : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                          'group flex items-center px-2 py-2 text-sm font-medium rounded-md'
+                        )}
+                      >
+                        {subItem.name === 'Team' ? (
+                          <Users className={cn(
+                            location.pathname === subItem.href ? 'text-white' : 'text-gray-400',
+                            'mr-3 h-4 w-4'
+                          )} />
+                        ) : null}
+                        {subItem.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <Link
+                to={item.href}
+                className={cn(
+                  isActive
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                  'group flex items-center px-2 py-2 text-sm font-medium rounded-md'
+                )}
+              >
+                <item.icon
+                  className={cn(
+                    isActive ? 'text-white' : 'text-gray-400 group-hover:text-white',
+                    'mr-3 h-5 w-5'
+                  )}
+                  aria-hidden="true"
+                />
+                {item.name}
+              </Link>
+            )}
+          </div>
+        );
+      })}
+    </nav>
   );
 };
 
