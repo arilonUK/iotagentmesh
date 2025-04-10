@@ -32,6 +32,7 @@ export const profileServices = {
 
   getUserOrganizations: async (userId: string): Promise<UserOrganization[]> => {
     try {
+      // Use correct function call for RPC with parameters
       const { data, error } = await supabase
         .rpc('get_user_organizations', { p_user_id: userId });
 
@@ -40,6 +41,7 @@ export const profileServices = {
         return [];
       }
 
+      // Ensure data is cast to the correct type
       return data as UserOrganization[];
     } catch (error: any) {
       console.error('Error fetching user organizations:', error);
@@ -49,6 +51,7 @@ export const profileServices = {
 
   switchOrganization: async (userId: string, organizationId: string): Promise<boolean> => {
     try {
+      // Use correct function call for RPC with parameters
       const { data, error } = await supabase
         .rpc('switch_user_organization', {
           p_user_id: userId,
