@@ -1,0 +1,33 @@
+
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { Profile } from './types';
+import { User } from '@supabase/supabase-js';
+
+export const profileServices = {
+  updateProfile: async (profileData: Partial<Profile>) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No user logged in');
+
+      const { error } = await supabase
+        .from('profiles')
+        .update(profileData)
+        .eq('id', user.id);
+
+      if (error) {
+        toast('Error updating profile', { 
+          style: { backgroundColor: 'red', color: 'white' } 
+        });
+        throw error;
+      }
+
+      toast('Profile updated successfully', {
+        style: { backgroundColor: 'green', color: 'white' }
+      });
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+  }
+};

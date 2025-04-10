@@ -12,7 +12,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ProfileSettings from "./pages/ProfileSettings";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider } from "./contexts/auth";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
