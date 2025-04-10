@@ -7,13 +7,17 @@ import { toast } from 'sonner';
 import { Database } from '@/integrations/supabase/types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
+type Organization = Database['public']['Tables']['organizations']['Row'];
+type OrganizationMember = Database['public']['Tables']['organization_members']['Row'];
 
 type AuthContextType = {
   session: Session | null;
   user: User | null;
   profile: Profile | null;
+  organization: Organization | null;
+  userRole: string | null;
   loading: boolean;
-  signUp: (email: string, password: string, userData?: { full_name?: string; username?: string }) => Promise<void>;
+  signUp: (email: string, password: string, userData?: { full_name?: string; username?: string; organization_name?: string }) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (profile: Partial<Profile>) => Promise<void>;
@@ -25,6 +29,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -37,6 +43,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (event === 'SIGNED_OUT') {
           setProfile(null);
+          setOrganization(null);
+          setUserRole(null);
         } else if (event === 'SIGNED_IN' && newSession?.user) {
           // Use setTimeout to prevent supabase deadlock
           setTimeout(() => {
@@ -64,23 +72,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
-      if (error) {
-        console.error('Error fetching profile:', error);
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
       } else {
-        setProfile(data);
+        setProfile(profileData);
+        
+        if (profileData.default_organization_id) {
+          await fetchOrganizationData(profileData.default_organization_id, userId);
+        }
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
   };
 
-  const signUp = async (email: string, password: string, userData?: { full_name?: string; username?: string }) => {
+  const fetchOrganizationData = async (orgId: string, userId: string) => {
+    try {
+      // Fetch organization details
+      const { data: orgData, error: orgError } = await supabase
+        .from('organizations')
+        .select('*')
+        .eq('id', orgId)
+        .single();
+
+      if (orgError) {
+        console.error('Error fetching organization:', orgError);
+      } else {
+        setOrganization(orgData);
+      }
+
+      // Fetch user's role in this organization
+      const { data: memberData, error: memberError } = await supabase
+        .from('organization_members')
+        .select('role')
+        .eq('organization_id', orgId)
+        .eq('user_id', userId)
+        .single();
+
+      if (memberError) {
+        console.error('Error fetching member role:', memberError);
+      } else {
+        setUserRole(memberData.role);
+      }
+    } catch (error) {
+      console.error('Error fetching organization data:', error);
+    }
+  };
+
+  const signUp = async (email: string, password: string, userData?: { full_name?: string; username?: string; organization_name?: string }) => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -184,6 +229,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     session,
     user,
     profile,
+    organization,
+    userRole,
     loading,
     signUp,
     signIn,

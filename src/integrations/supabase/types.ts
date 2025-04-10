@@ -9,9 +9,128 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      invitations: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          organization_id: string
+          role: Database["public"]["Enums"]["role_type"]
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          organization_id: string
+          role?: Database["public"]["Enums"]["role_type"]
+          token: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          organization_id?: string
+          role?: Database["public"]["Enums"]["role_type"]
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_members: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          role: Database["public"]["Enums"]["role_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          role?: Database["public"]["Enums"]["role_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          role?: Database["public"]["Enums"]["role_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      permissions: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          default_organization_id: string | null
           full_name: string | null
           id: string
           updated_at: string | null
@@ -19,6 +138,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          default_organization_id?: string | null
           full_name?: string | null
           id: string
           updated_at?: string | null
@@ -26,22 +146,77 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          default_organization_id?: string | null
           full_name?: string | null
           id?: string
           updated_at?: string | null
           username?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_default_organization_id_fkey"
+            columns: ["default_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          permission_id: string
+          role: Database["public"]["Enums"]["role_type"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          permission_id: string
+          role: Database["public"]["Enums"]["role_type"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          permission_id?: string
+          role?: Database["public"]["Enums"]["role_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { org_id: string; user_id: string }
+        Returns: Database["public"]["Enums"]["role_type"]
+      }
+      is_org_admin_or_owner: {
+        Args: { org_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      role_type: "owner" | "admin" | "member" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -156,6 +331,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      role_type: ["owner", "admin", "member", "viewer"],
+    },
   },
 } as const

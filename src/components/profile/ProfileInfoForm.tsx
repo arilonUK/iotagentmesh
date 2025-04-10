@@ -5,8 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Building2, User, UserRound } from 'lucide-react';
 import AvatarUpload from './AvatarUpload';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { roleColors } from '@/lib/utils';
 
 type ProfileFormData = {
   username: string;
@@ -15,7 +18,7 @@ type ProfileFormData = {
 };
 
 const ProfileInfoForm = () => {
-  const { user, profile, updateProfile } = useAuth();
+  const { user, profile, organization, userRole, updateProfile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<ProfileFormData>({
@@ -56,6 +59,10 @@ const ProfileInfoForm = () => {
     return null;
   }
 
+  const getRoleBadgeColor = (role: string | null) => {
+    return roleColors[role as keyof typeof roleColors] || 'bg-gray-500';
+  };
+
   return (
     <>
       {error && (
@@ -63,6 +70,32 @@ const ProfileInfoForm = () => {
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
+      )}
+
+      {organization && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5 text-muted-foreground" />
+                  <h3 className="text-lg font-medium">Organization</h3>
+                </div>
+                {userRole && (
+                  <Badge className={getRoleBadgeColor(userRole)}>
+                    {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
+                  </Badge>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <div>
+                  <p className="font-semibold">{organization.name}</p>
+                  <p className="text-sm text-muted-foreground">@{organization.slug}</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
