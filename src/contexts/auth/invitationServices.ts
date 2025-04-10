@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -22,10 +21,8 @@ export type CreateInvitationParams = {
 export const invitationServices = {
   createInvitation: async ({ email, role, organizationId }: CreateInvitationParams) => {
     try {
-      // Generate a unique token
       const token = uuidv4();
       
-      // Set expiration date (48 hours from now)
       const expiresAt = new Date();
       expiresAt.setHours(expiresAt.getHours() + 48);
       
@@ -103,7 +100,6 @@ export const invitationServices = {
 
   resendInvitation: async (invitationId: string) => {
     try {
-      // Update the expiration date (48 hours from now)
       const expiresAt = new Date();
       expiresAt.setHours(expiresAt.getHours() + 48);
       
@@ -111,7 +107,6 @@ export const invitationServices = {
         .from('invitations')
         .update({ 
           expires_at: expiresAt.toISOString(),
-          // Optionally generate a new token
           token: uuidv4()
         })
         .eq('id', invitationId);
