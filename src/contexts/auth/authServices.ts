@@ -50,7 +50,6 @@ export const authServices = {
         toast('Signed in successfully!', {
           style: { backgroundColor: 'green', color: 'white' }
         });
-        return data;
       }
     } catch (error: any) {
       console.error('Error signing in:', error);

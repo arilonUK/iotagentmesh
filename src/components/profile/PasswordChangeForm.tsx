@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/auth';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';

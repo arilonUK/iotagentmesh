@@ -1,8 +1,5 @@
-
-import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
+import React from 'react';
+import { Button } from "@/components/ui/button";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
 import Header from '@/components/Header';
+import { useAuth } from '@/contexts/auth';
 
 const Auth = () => {
   const { user, signIn, signUp } = useAuth();

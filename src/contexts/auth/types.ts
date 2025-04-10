@@ -22,6 +22,14 @@ export type OrganizationMember = {
   updated_at: string;
 };
 
+export type UserOrganization = {
+  id: string;
+  name: string;
+  slug: string;
+  role: string;
+  is_default: boolean;
+};
+
 export type AuthContextType = {
   session: Session | null;
   user: User | null;
@@ -29,8 +37,10 @@ export type AuthContextType = {
   organization: Organization | null;
   userRole: string | null;
   loading: boolean;
+  userOrganizations: UserOrganization[];
   signUp: (email: string, password: string, userData?: { full_name?: string; username?: string; organization_name?: string }) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (profile: Partial<Profile>) => Promise<void>;
+  switchOrganization: (organizationId: string) => Promise<boolean>;
 };

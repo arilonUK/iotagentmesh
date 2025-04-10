@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, Gauge, HardDrive, BarChart3, Settings, Users, LogOut, UserCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const items = [
@@ -51,7 +50,6 @@ const DashboardNav = () => {
     await signOut();
   };
 
-  // Helper function to get user initials for avatar fallback
   const getUserInitials = () => {
     if (profile?.full_name) {
       return profile.full_name

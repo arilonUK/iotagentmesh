@@ -1,8 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Profile } from './types';
-import { User } from '@supabase/supabase-js';
+import { Profile, UserOrganization } from './types';
 
 export const profileServices = {
   updateProfile: async (profileData: Partial<Profile>) => {
@@ -28,6 +27,51 @@ export const profileServices = {
     } catch (error: any) {
       console.error('Error updating profile:', error);
       throw error;
+    }
+  },
+
+  getUserOrganizations: async (userId: string): Promise<UserOrganization[]> => {
+    try {
+      const { data, error } = await supabase
+        .rpc('get_user_organizations', { p_user_id: userId });
+
+      if (error) {
+        console.error('Error fetching user organizations:', error);
+        return [];
+      }
+
+      return data as UserOrganization[];
+    } catch (error: any) {
+      console.error('Error fetching user organizations:', error);
+      return [];
+    }
+  },
+
+  switchOrganization: async (userId: string, organizationId: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase
+        .rpc('switch_user_organization', {
+          p_user_id: userId,
+          p_org_id: organizationId
+        });
+
+      if (error) {
+        toast('Error switching organization', {
+          style: { backgroundColor: 'red', color: 'white' }
+        });
+        throw error;
+      }
+
+      if (data) {
+        toast('Organization switched successfully', {
+          style: { backgroundColor: 'green', color: 'white' }
+        });
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error('Error switching organization:', error);
+      return false;
     }
   }
 };

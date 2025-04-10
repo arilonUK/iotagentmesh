@@ -206,12 +206,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_organizations: {
+        Args: { p_user_id: string }
+        Returns: {
+          id: string
+          name: string
+          slug: string
+          role: string
+          is_default: boolean
+        }[]
+      }
       get_user_role: {
         Args: { org_id: string; user_id: string }
         Returns: Database["public"]["Enums"]["role_type"]
       }
       is_org_admin_or_owner: {
         Args: { org_id: string }
+        Returns: boolean
+      }
+      switch_user_organization: {
+        Args: { p_user_id: string; p_org_id: string }
         Returns: boolean
       }
     }
