@@ -7,8 +7,22 @@ import { toast } from 'sonner';
 import { Database } from '@/integrations/supabase/types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
-type Organization = Database['public']['Tables']['organizations']['Row'];
-type OrganizationMember = Database['public']['Tables']['organization_members']['Row'];
+// We need to explicitly define these since the types file hasn't been updated yet
+type Organization = {
+  id: string;
+  name: string;
+  slug: string;
+  created_at: string;
+  updated_at: string;
+};
+type OrganizationMember = {
+  id: string;
+  organization_id: string;
+  user_id: string;
+  role: 'owner' | 'admin' | 'member' | 'viewer';
+  created_at: string;
+  updated_at: string;
+};
 
 type AuthContextType = {
   session: Session | null;
@@ -83,7 +97,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         setProfile(profileData);
         
-        if (profileData.default_organization_id) {
+        // Check if profileData has default_organization_id before trying to fetch org data
+        if (profileData && profileData.default_organization_id) {
           await fetchOrganizationData(profileData.default_organization_id, userId);
         }
       }
@@ -94,7 +109,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchOrganizationData = async (orgId: string, userId: string) => {
     try {
-      // Fetch organization details
+      // Fetch organization details - using raw SQL queries instead of typed queries
+      // since the types don't match yet
       const { data: orgData, error: orgError } = await supabase
         .from('organizations')
         .select('*')
@@ -104,7 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (orgError) {
         console.error('Error fetching organization:', orgError);
       } else {
-        setOrganization(orgData);
+        setOrganization(orgData as Organization);
       }
 
       // Fetch user's role in this organization
@@ -117,7 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (memberError) {
         console.error('Error fetching member role:', memberError);
-      } else {
+      } else if (memberData) {
         setUserRole(memberData.role);
       }
     } catch (error) {

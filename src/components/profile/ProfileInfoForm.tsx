@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Building2, User, UserRound } from 'lucide-react';
+import { AlertCircle, Building2 } from 'lucide-react';
 import AvatarUpload from './AvatarUpload';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -60,6 +60,7 @@ const ProfileInfoForm = () => {
   }
 
   const getRoleBadgeColor = (role: string | null) => {
+    if (!role) return 'bg-gray-500';
     return roleColors[role as keyof typeof roleColors] || 'bg-gray-500';
   };
 
