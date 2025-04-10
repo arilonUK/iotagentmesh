@@ -1,0 +1,87 @@
+
+import React from 'react';
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { Menu, X } from "lucide-react";
+
+const Header = () => {
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+
+  return (
+    <header className="w-full border-b border-gray-100">
+      <div className="container flex h-16 items-center justify-between px-4 md:px-8">
+        <div className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="size-8 rounded-lg iot-gradient-bg flex items-center justify-center">
+              <span className="font-bold text-lg">N</span>
+            </div>
+            <span className="text-xl font-semibold">NextGenIOT</span>
+          </Link>
+        </div>
+
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-6">
+          <Link to="/products" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            Products
+          </Link>
+          <Link to="/solutions" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            Solutions
+          </Link>
+          <Link to="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            Pricing
+          </Link>
+          <Link to="/docs" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            Documentation
+          </Link>
+        </nav>
+
+        <div className="hidden md:flex items-center gap-4">
+          <Link to="/login">
+            <Button variant="outline">Log in</Button>
+          </Link>
+          <Link to="/signup">
+            <Button>Sign up</Button>
+          </Link>
+        </div>
+
+        {/* Mobile menu button */}
+        <button 
+          className="md:hidden"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      {/* Mobile menu */}
+      {isMenuOpen && (
+        <div className="md:hidden py-4 px-6 border-t border-gray-100 bg-white animate-fade-in">
+          <nav className="flex flex-col gap-4">
+            <Link to="/products" className="text-sm font-medium py-2">
+              Products
+            </Link>
+            <Link to="/solutions" className="text-sm font-medium py-2">
+              Solutions
+            </Link>
+            <Link to="/pricing" className="text-sm font-medium py-2">
+              Pricing
+            </Link>
+            <Link to="/docs" className="text-sm font-medium py-2">
+              Documentation
+            </Link>
+            <div className="flex flex-col gap-2 pt-4">
+              <Link to="/login">
+                <Button variant="outline" className="w-full">Log in</Button>
+              </Link>
+              <Link to="/signup">
+                <Button className="w-full">Sign up</Button>
+              </Link>
+            </div>
+          </nav>
+        </div>
+      )}
+    </header>
+  );
+};
+
+export default Header;
