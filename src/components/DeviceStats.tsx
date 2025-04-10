@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, LineChart } from '@/components/ui/chart';
+import { LineChart } from '@/components/ui/line-chart';
+import { BarChart } from '@/components/ui/bar-chart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface DeviceStatsProps {
