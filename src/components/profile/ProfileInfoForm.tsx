@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import AvatarUpload from './AvatarUpload';
 
 type ProfileFormData = {
   username: string;
@@ -27,6 +28,13 @@ const ProfileInfoForm = () => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleAvatarChange = (url: string) => {
+    setFormData({
+      ...formData,
+      avatar_url: url,
     });
   };
 
@@ -58,6 +66,14 @@ const ProfileInfoForm = () => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="flex justify-center mb-6">
+          <AvatarUpload 
+            initialAvatarUrl={profile?.avatar_url || null}
+            username={profile?.username || null}
+            onAvatarChange={handleAvatarChange}
+          />
+        </div>
+
         <div className="space-y-4">
           <div>
             <Label htmlFor="email">Email</Label>
@@ -103,6 +119,9 @@ const ProfileInfoForm = () => {
               onChange={handleInputChange}
               placeholder="https://example.com/avatar.jpg"
             />
+            <p className="text-sm text-muted-foreground mt-1">
+              You can manually enter a URL or use the avatar upload above
+            </p>
           </div>
         </div>
 
