@@ -1,9 +1,11 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Gauge, HardDrive, BarChart3, Settings, Users, Bell, LogOut } from 'lucide-react';
+import { Home, Gauge, HardDrive, BarChart3, Settings, Users, LogOut, UserCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const items = [
   {
@@ -26,6 +28,14 @@ const items = [
     icon: <Gauge size={18} />,
     href: "/dashboard/projects",
   },
+];
+
+const settingsItems = [
+  {
+    title: "Profile",
+    icon: <UserCircle size={18} />,
+    href: "/dashboard/settings/profile",
+  },
   {
     title: "Settings",
     icon: <Settings size={18} />,
@@ -35,6 +45,28 @@ const items = [
 
 const DashboardNav = () => {
   const location = useLocation();
+  const { user, profile, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
+  // Helper function to get user initials for avatar fallback
+  const getUserInitials = () => {
+    if (profile?.full_name) {
+      return profile.full_name
+        .split(' ')
+        .map((name: string) => name[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+    } else if (profile?.username) {
+      return profile.username.slice(0, 2).toUpperCase();
+    } else if (user?.email) {
+      return user.email.slice(0, 2).toUpperCase();
+    }
+    return 'U';
+  };
 
   return (
     <aside className="fixed inset-y-0 left-0 w-64 border-r border-gray-100 bg-white hidden md:block">
@@ -46,6 +78,26 @@ const DashboardNav = () => {
           <span className="text-xl font-semibold">NextGenIOT</span>
         </Link>
       </div>
+      
+      {user && (
+        <div className="p-4 border-b">
+          <div className="flex items-center gap-3">
+            <Avatar>
+              <AvatarImage src={profile?.avatar_url || ''} />
+              <AvatarFallback>{getUserInitials()}</AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="font-medium text-sm">
+                {profile?.full_name || profile?.username || user.email?.split('@')[0]}
+              </p>
+              {profile?.username && (
+                <p className="text-xs text-muted-foreground">@{profile.username}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="flex flex-col gap-1 p-4">
         <p className="text-xs font-medium text-muted-foreground px-2 py-1.5">Menu</p>
         <nav className="grid gap-1 px-2">
@@ -63,12 +115,32 @@ const DashboardNav = () => {
             </Link>
           ))}
         </nav>
-        <div className="mt-auto px-2">
-          <Button variant="outline" className="w-full justify-start gap-3 mt-10" asChild>
-            <Link to="/logout">
-              <LogOut size={18} />
-              <span>Log out</span>
+
+        <p className="text-xs font-medium text-muted-foreground px-2 py-1.5 mt-6">Settings</p>
+        <nav className="grid gap-1 px-2">
+          {settingsItems.map((item) => (
+            <Link
+              key={item.href}
+              to={item.href}
+              className={cn(
+                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-accent transition-colors",
+                location.pathname === item.href ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+              )}
+            >
+              {item.icon}
+              <span>{item.title}</span>
             </Link>
+          ))}
+        </nav>
+        
+        <div className="mt-auto px-2">
+          <Button 
+            variant="outline" 
+            className="w-full justify-start gap-3 mt-10" 
+            onClick={handleSignOut}
+          >
+            <LogOut size={18} />
+            <span>Log out</span>
           </Button>
         </div>
       </div>
