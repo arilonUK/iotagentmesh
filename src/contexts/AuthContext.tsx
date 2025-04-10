@@ -3,17 +3,20 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
+import { Database } from '@/integrations/supabase/types';
+
+type Profile = Database['public']['Tables']['profiles']['Row'];
 
 type AuthContextType = {
   session: Session | null;
   user: User | null;
-  profile: any | null;
+  profile: Profile | null;
   loading: boolean;
   signUp: (email: string, password: string, userData?: { full_name?: string; username?: string }) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  updateProfile: (profile: any) => Promise<void>;
+  updateProfile: (profile: Partial<Profile>) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,7 +24,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<any | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -88,12 +91,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        toast.error(error.message);
+        toast(error.message, { 
+          style: { backgroundColor: 'red', color: 'white' } 
+        });
         throw error;
       }
 
       if (data) {
-        toast.success('Sign up successful! Please verify your email.');
+        toast('Sign up successful! Please verify your email.', {
+          style: { backgroundColor: 'green', color: 'white' }
+        });
         return;
       }
     } catch (error: any) {
@@ -110,12 +117,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        toast.error(error.message);
+        toast(error.message, { 
+          style: { backgroundColor: 'red', color: 'white' } 
+        });
         throw error;
       }
 
       if (data.session) {
-        toast.success('Signed in successfully!');
+        toast('Signed in successfully!', {
+          style: { backgroundColor: 'green', color: 'white' }
+        });
         navigate('/dashboard');
       }
     } catch (error: any) {
@@ -128,18 +139,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
-        toast.error('Error signing out');
+        toast('Error signing out', { 
+          style: { backgroundColor: 'red', color: 'white' } 
+        });
         throw error;
       }
       navigate('/');
-      toast.success('Signed out successfully');
+      toast('Signed out successfully', {
+        style: { backgroundColor: 'green', color: 'white' }
+      });
     } catch (error: any) {
       console.error('Error signing out:', error);
       throw error;
     }
   };
 
-  const updateProfile = async (profileData: any) => {
+  const updateProfile = async (profileData: Partial<Profile>) => {
     try {
       if (!user) throw new Error('No user logged in');
 
@@ -149,12 +164,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', user.id);
 
       if (error) {
-        toast.error('Error updating profile');
+        toast('Error updating profile', { 
+          style: { backgroundColor: 'red', color: 'white' } 
+        });
         throw error;
       }
 
-      setProfile({ ...profile, ...profileData });
-      toast.success('Profile updated successfully');
+      setProfile({ ...profile, ...profileData } as Profile);
+      toast('Profile updated successfully', {
+        style: { backgroundColor: 'green', color: 'white' }
+      });
     } catch (error: any) {
       console.error('Error updating profile:', error);
       throw error;
