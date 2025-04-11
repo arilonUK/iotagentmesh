@@ -17,6 +17,7 @@ const SignupForm = ({ setAuthError }: SignupFormProps) => {
   const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
   const [fullName, setFullName] = useState('');
+  const [organizationName, setOrganizationName] = useState('');
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,10 +31,18 @@ const SignupForm = ({ setAuthError }: SignupFormProps) => {
       return;
     }
 
+    // Validate organization name
+    if (!organizationName.trim()) {
+      setAuthError('Organization name is required');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       await signUp(signupEmail, signupPassword, {
         username,
         full_name: fullName,
+        organization_name: organizationName,
       });
     } catch (error: any) {
       setAuthError(error.message || 'Failed to sign up');
@@ -52,6 +61,18 @@ const SignupForm = ({ setAuthError }: SignupFormProps) => {
           placeholder="you@example.com"
           value={signupEmail}
           onChange={(e) => setSignupEmail(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="organization-name">Organization Name</Label>
+        <Input 
+          id="organization-name"
+          type="text"
+          placeholder="Your Company Name"
+          value={organizationName}
+          onChange={(e) => setOrganizationName(e.target.value)}
           required
         />
       </div>

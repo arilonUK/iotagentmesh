@@ -5,11 +5,31 @@ import { toast } from 'sonner';
 export const authServices = {
   signUp: async (email: string, password: string, userData?: { full_name?: string; username?: string; organization_name?: string }) => {
     try {
+      // If organization_name is provided, we'll create an organization and make the user an admin
+      const organization_name = userData?.organization_name;
+      const full_name = userData?.full_name;
+      const username = userData?.username;
+
+      // Create a slug from organization name if provided
+      let organization_slug = '';
+      if (organization_name) {
+        // Create a URL-friendly slug from the organization name
+        organization_slug = organization_name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: userData,
+          data: {
+            full_name,
+            username,
+            organization_name,
+            organization_slug
+          },
         },
       });
 
