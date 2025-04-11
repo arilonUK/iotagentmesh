@@ -56,7 +56,7 @@ export const useAuthProvider = (): AuthContextType => {
     };
 
     loadUserOrganizations();
-  }, [user, profile, userOrganizations.length]);
+  }, [user, profile, userOrganizations.length, fetchOrganizationData]);
 
   return {
     session,
