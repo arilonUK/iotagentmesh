@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { Organization, UserOrganization } from './types';
 import { profileServices } from './profileServices';
+import { supabase } from '@/integrations/supabase/client';
 
 export type OrganizationManagerReturn = {
   organization: Organization | null;
@@ -20,31 +21,32 @@ export const useOrganizationManager = (userId: string | undefined): Organization
 
   const fetchOrganizationData = async (orgId: string, userId: string) => {
     try {
-      // Fetch organization details
-      const { data: orgData, error: orgError } = await supabase
-        .from('organizations')
-        .select('*')
-        .eq('id', orgId)
-        .single();
+      // Use a single query to fetch both organization and member role
+      // This avoids the recursive policy issue
+      const { data, error } = await supabase.rpc(
+        'get_organization_with_role',
+        { 
+          p_org_id: orgId,
+          p_user_id: userId
+        }
+      );
 
-      if (orgError) {
-        console.error('Error fetching organization:', orgError);
-      } else {
-        setOrganization(orgData as Organization);
-      }
-
-      // Fetch user's role in this organization
-      const { data: memberData, error: memberError } = await supabase
-        .from('organization_members')
-        .select('role')
-        .eq('organization_id', orgId)
-        .eq('user_id', userId)
-        .single();
-
-      if (memberError) {
-        console.error('Error fetching member role:', memberError);
-      } else if (memberData) {
-        setUserRole(memberData.role);
+      if (error) {
+        console.error('Error fetching organization with role:', error);
+      } else if (data && data.length > 0) {
+        const orgData = data[0];
+        
+        // Set organization data
+        setOrganization({
+          id: orgData.id,
+          name: orgData.name,
+          slug: orgData.slug,
+          created_at: orgData.created_at,
+          updated_at: orgData.updated_at
+        });
+        
+        // Set user's role in this organization
+        setUserRole(orgData.role);
       }
     } catch (error) {
       console.error('Error fetching organization data:', error);
@@ -86,5 +88,3 @@ export const useOrganizationManager = (userId: string | undefined): Organization
     setUserOrganizations,
   };
 };
-
-import { supabase } from '@/integrations/supabase/client';

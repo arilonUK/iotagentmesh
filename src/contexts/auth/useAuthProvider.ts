@@ -5,6 +5,7 @@ import { authServices } from './authServices';
 import { profileServices } from './profileServices';
 import { useSessionManager } from './useSessionManager';
 import { useOrganizationManager } from './useOrganizationManager';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useAuthProvider = (): AuthContextType => {
   const navigate = useNavigate();
@@ -32,7 +33,9 @@ export const useAuthProvider = (): AuthContextType => {
     profileServices.getUserOrganizations(user.id).then(orgs => {
       setUserOrganizations(orgs);
       // Fetch default organization data
-      fetchOrganizationData(profile.default_organization_id, user.id);
+      if (profile.default_organization_id) {
+        fetchOrganizationData(profile.default_organization_id, user.id);
+      }
     });
   }
 
