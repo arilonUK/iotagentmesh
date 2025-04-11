@@ -28,64 +28,74 @@ export const useOrganizationManager = (userId: string | undefined): Organization
 
       console.log(`Fetching organization data for org: ${orgId}, user: ${userId}`);
 
-      // Use a direct query instead of RPC to avoid TypeScript issues
-      const { data, error } = await supabase
+      // Instead of using a complex query with inner joins that causes recursion,
+      // fetch organization data and role separately
+      
+      // 1. First, fetch the organization details
+      const { data: orgData, error: orgError } = await supabase
         .from('organizations')
-        .select(`
-          id,
-          name,
-          slug,
-          created_at,
-          updated_at,
-          organization_members!inner(role)
-        `)
+        .select('id, name, slug, created_at, updated_at')
         .eq('id', orgId)
-        .eq('organization_members.user_id', userId)
         .single();
 
-      if (error) {
-        console.error('Error fetching organization with role:', error);
-        
-        // If no organization found, check if user has any organizations
-        const userOrgs = await profileServices.getUserOrganizations(userId);
-        console.log('Available user organizations:', userOrgs);
-        
-        if (userOrgs.length > 0) {
-          // If user has other organizations, switch to the first one
-          console.log('Switching to organization:', userOrgs[0].id);
-          await switchOrganization(userOrgs[0].id);
-          return;
-        } else {
-          // If no organizations are found, reset the state
-          setOrganization(null);
-          setUserRole(null);
-          console.log('No organizations found for user');
-        }
-      } else if (data) {
-        console.log('Organization data fetched:', data);
-        
-        // Set organization data
-        setOrganization({
-          id: data.id,
-          name: data.name,
-          slug: data.slug,
-          created_at: data.created_at,
-          updated_at: data.updated_at
-        });
-        
-        // Set user's role in this organization
-        if (data.organization_members && Array.isArray(data.organization_members) && data.organization_members.length > 0) {
-          setUserRole(data.organization_members[0].role);
-          console.log('User role set to:', data.organization_members[0].role);
-        } else {
-          console.log('No role information found in organization data');
-          setUserRole(null);
-        }
+      if (orgError) {
+        console.error('Error fetching organization:', orgError);
+        throw orgError;
       }
+
+      // 2. Next, fetch the user's role in this organization
+      const { data: memberData, error: memberError } = await supabase
+        .from('organization_members')
+        .select('role')
+        .eq('organization_id', orgId)
+        .eq('user_id', userId)
+        .single();
+
+      if (memberError) {
+        console.error('Error fetching user role:', memberError);
+        // Don't throw here, we still want to set organization data
+      }
+
+      // Set organization data
+      setOrganization({
+        id: orgData.id,
+        name: orgData.name,
+        slug: orgData.slug,
+        created_at: orgData.created_at,
+        updated_at: orgData.updated_at
+      });
+      
+      // Set user's role
+      setUserRole(memberData?.role || null);
+      
     } catch (error) {
       console.error('Error fetching organization data:', error);
+      
+      // Handle error cases - check if user has other organizations available
+      if (userId && (!organization || !userOrganizations.length)) {
+        try {
+          const userOrgs = await profileServices.getUserOrganizations(userId);
+          
+          if (userOrgs.length > 0) {
+            console.log('Available user organizations:', userOrgs);
+            setUserOrganizations(userOrgs);
+            
+            // If the current organization fetch failed, try another one
+            if (orgId === organization?.id && userOrgs.length > 0) {
+              const nextOrg = userOrgs.find(org => org.id !== orgId) || userOrgs[0];
+              console.log('Switching to organization:', nextOrg.id);
+              await switchOrganization(nextOrg.id);
+            }
+          }
+        } catch (fetchError) {
+          console.error('Error fetching user organizations:', fetchError);
+        }
+      }
+      
       // Reset state on critical errors
-      setUserRole(null);
+      if (!organization) {
+        setUserRole(null);
+      }
     }
   };
 
