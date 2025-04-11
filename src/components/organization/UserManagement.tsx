@@ -1,30 +1,27 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '@/contexts/auth';
 import UserList from './UserList';
 import { useOrganizationMembers } from '@/hooks/useOrganizationMembers';
 
 const UserManagement = () => {
   const { organization, userRole } = useAuth();
-  const [actionInProgress, setActionInProgress] = useState<string | null>(null);
   
   const { 
     users, 
     loading, 
     removeUser,
-    updateUserRole
+    updateUserRole,
+    isRemovingUser,
+    isUpdatingRole
   } = useOrganizationMembers(organization?.id);
 
   const handleRemoveUser = async (userId: string) => {
-    setActionInProgress(userId);
     await removeUser(userId);
-    setActionInProgress(null);
   };
 
   const handleUpdateRole = async (userId: string, newRole: string) => {
-    setActionInProgress(userId);
     await updateUserRole(userId, newRole);
-    setActionInProgress(null);
   };
 
   // Only show to admins and owners
@@ -45,7 +42,7 @@ const UserManagement = () => {
       <UserList 
         users={users}
         isCurrentUserOwner={userRole === 'owner'}
-        actionInProgress={actionInProgress}
+        actionInProgress={isRemovingUser || isUpdatingRole ? 'loading' : null}
         onRemoveUser={handleRemoveUser}
         onUpdateRole={handleUpdateRole}
       />

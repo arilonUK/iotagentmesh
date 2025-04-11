@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      device_readings: {
+        Row: {
+          device_id: string
+          id: string
+          metadata: Json | null
+          organization_id: string
+          reading_type: string
+          timestamp: string
+          value: number
+        }
+        Insert: {
+          device_id: string
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          reading_type: string
+          timestamp?: string
+          value: number
+        }
+        Update: {
+          device_id?: string
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          reading_type?: string
+          timestamp?: string
+          value?: number
+        }
+        Relationships: []
+      }
       invitations: {
         Row: {
           created_at: string
@@ -206,6 +236,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_device_readings_aggregate: {
+        Args: {
+          p_device_id: string
+          p_reading_type: string
+          p_start_time: string
+          p_end_time: string
+          p_interval: unknown
+          p_aggregation_type?: string
+        }
+        Returns: {
+          time_bucket: string
+          value: number
+        }[]
+      }
+      get_device_readings_delta: {
+        Args: {
+          p_device_id: string
+          p_reading_type: string
+          p_start_time: string
+          p_end_time: string
+        }
+        Returns: {
+          start_timestamp: string
+          end_timestamp: string
+          start_value: number
+          end_value: number
+          delta: number
+        }[]
+      }
       get_organization_members: {
         Args: { p_org_id: string }
         Returns: {

@@ -107,16 +107,13 @@ export async function removeOrganizationMember(
       .eq('user_id', userId);
 
     if (error) {
-      toast.error('Error removing user');
       console.error('Error removing user:', error);
       return false;
     }
 
-    toast.success('User removed successfully');
     return true;
   } catch (error) {
     console.error('Error removing user:', error);
-    toast.error('Error removing user');
     return false;
   }
 }
@@ -140,16 +137,13 @@ export async function updateOrganizationMemberRole(
       .eq('user_id', userId);
 
     if (error) {
-      toast.error('Error updating role');
       console.error('Error updating role:', error);
       return false;
     }
 
-    toast.success('Role updated successfully');
     return true;
   } catch (error) {
     console.error('Error updating role:', error);
-    toast.error('Error updating role');
     return false;
   }
 }
