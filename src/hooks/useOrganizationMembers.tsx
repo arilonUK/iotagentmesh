@@ -1,62 +1,66 @@
 
 import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
 import { OrganizationUser } from '@/types/organization';
 import {
-  fetchOrganizationUsers,
-  removeUserFromOrganization,
-  updateUserRoleInOrganization
-} from '@/services/organizationMembersService';
+  fetchOrganizationMembers,
+  removeOrganizationMember,
+  updateOrganizationMemberRole
+} from '@/services/organizationMemberService';
 
+/**
+ * Hook for managing organization members
+ */
 export const useOrganizationMembers = (organizationId?: string) => {
   const [users, setUsers] = useState<OrganizationUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  // Load all members of the organization
   const loadMembers = async () => {
-    if (!organizationId) return;
+    if (!organizationId) {
+      setLoading(false);
+      return;
+    }
     
     setLoading(true);
     try {
-      const fetchedUsers = await fetchOrganizationUsers(organizationId);
+      const fetchedUsers = await fetchOrganizationMembers(organizationId);
       setUsers(fetchedUsers);
       setError(null);
     } catch (err) {
-      const error = err as Error;
-      setError(error);
+      setError(err as Error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Function to remove a user from the organization
+  // Remove a user from the organization
   const removeUser = async (userId: string) => {
     if (!organizationId) return;
     
-    const success = await removeUserFromOrganization(organizationId, userId);
+    const success = await removeOrganizationMember(organizationId, userId);
     if (success) {
-      // Update the user list
+      // Update the local state
       setUsers(users.filter(user => user.user_id !== userId));
     }
   };
 
-  // Function to update a user's role
+  // Update a user's role
   const updateUserRole = async (userId: string, newRole: string) => {
     if (!organizationId) return;
     
-    const success = await updateUserRoleInOrganization(organizationId, userId, newRole);
+    const success = await updateOrganizationMemberRole(organizationId, userId, newRole);
     if (success) {
-      // Update the user list
+      // Update the local state
       setUsers(users.map(user => 
         user.user_id === userId ? { ...user, role: newRole } : user
       ));
     }
   };
 
+  // Load members when the component mounts or organizationId changes
   useEffect(() => {
-    if (organizationId) {
-      loadMembers();
-    }
+    loadMembers();
   }, [organizationId]);
 
   return { 
@@ -68,5 +72,3 @@ export const useOrganizationMembers = (organizationId?: string) => {
     refreshUsers: loadMembers
   };
 };
-
-export type { OrganizationUser } from '@/types/organization';
