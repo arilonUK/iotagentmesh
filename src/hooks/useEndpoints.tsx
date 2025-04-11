@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { EndpointConfig, EndpointFormData } from '@/types/endpoint';
 import { 
@@ -7,7 +6,7 @@ import {
   updateEndpoint, 
   deleteEndpoint,
   triggerEndpoint
-} from '@/services/endpointService';
+} from '@/services/endpoints';
 
 export const useEndpoints = (organizationId?: string) => {
   const queryClient = useQueryClient();
