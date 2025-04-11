@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -34,9 +33,8 @@ export const useOrganizationMembers = (organizationId?: string) => {
     
     setLoading(true);
     try {
-      // Fix: Correctly specify function name as first parameter and return type as type parameter
-      const { data, error } = await supabase.rpc<OrgMemberResponse[]>(
-        'get_organization_members',
+      // Fix: Provide explicit type parameters for rpc call
+      const { data, error } = await supabase.rpc('get_organization_members', 
         { p_org_id: organizationId }
       );
       
@@ -170,7 +168,7 @@ export const useOrganizationMembers = (organizationId?: string) => {
     if (!organizationId) return;
     
     try {
-      // Fix: Ensure newRole is one of the allowed role types
+      // Fix: Cast newRole to the correct enum type to match database constraint
       const validRole = newRole as Database["public"]["Enums"]["role_type"];
       
       const { error } = await supabase
@@ -214,5 +212,3 @@ export const useOrganizationMembers = (organizationId?: string) => {
     refreshUsers: fetchOrganizationUsers
   };
 };
-
-export type { OrganizationUser };
