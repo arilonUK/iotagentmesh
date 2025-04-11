@@ -55,6 +55,8 @@ export const useSessionManager = (): SessionManagerReturn => {
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log('Fetching profile for user:', userId);
+      
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -67,6 +69,7 @@ export const useSessionManager = (): SessionManagerReturn => {
       }
       
       if (profileData) {
+        console.log('Profile found:', profileData);
         setProfile(profileData);
       } else {
         console.log('No profile found for user, creating a new one');
@@ -74,11 +77,27 @@ export const useSessionManager = (): SessionManagerReturn => {
         try {
           const { data: userData } = await supabase.auth.getUser();
           if (userData.user) {
+            // Create a default organization for the user if they don't have one
+            const { data: newOrg, error: orgError } = await supabase
+              .from('organizations')
+              .insert({
+                name: `${userData.user.email?.split('@')[0]}'s Organization`,
+                slug: `org-${Math.random().toString(36).substring(2, 10)}`
+              })
+              .select()
+              .single();
+              
+            if (orgError) {
+              console.error('Error creating organization:', orgError);
+              // Continue with profile creation without an organization
+            }
+            
             const newProfile = {
               id: userId,
               username: userData.user.email,
               full_name: userData.user.user_metadata?.full_name || '',
-              avatar_url: userData.user.user_metadata?.avatar_url || ''
+              avatar_url: userData.user.user_metadata?.avatar_url || '',
+              default_organization_id: newOrg?.id || null
             };
             
             const { data: insertedProfile, error: insertError } = await supabase
@@ -90,7 +109,25 @@ export const useSessionManager = (): SessionManagerReturn => {
             if (insertError) {
               console.error('Error creating profile:', insertError);
             } else {
+              console.log('New profile created:', insertedProfile);
               setProfile(insertedProfile);
+              
+              // If we created an organization, add the user as an owner
+              if (newOrg) {
+                const { error: memberError } = await supabase
+                  .from('organization_members')
+                  .insert({
+                    organization_id: newOrg.id,
+                    user_id: userId,
+                    role: 'owner'
+                  });
+                  
+                if (memberError) {
+                  console.error('Error adding user to organization:', memberError);
+                } else {
+                  console.log('User added as owner to new organization:', newOrg.id);
+                }
+              }
             }
           }
         } catch (createError) {

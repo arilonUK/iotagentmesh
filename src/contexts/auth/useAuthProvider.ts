@@ -7,6 +7,7 @@ import { useSessionManager } from './useSessionManager';
 import { useOrganizationManager } from './useOrganizationManager';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 
 export const useAuthProvider = (): AuthContextType => {
   const navigate = useNavigate();
@@ -54,10 +55,75 @@ export const useAuthProvider = (): AuthContextType => {
               await fetchOrganizationData(defaultOrg.id, user.id);
             }
           } else {
-            console.log('No organizations found for user');
+            console.log('No organizations found for user, creating default organization');
+            // Create a default organization for the user
+            try {
+              const orgName = user.email?.split('@')[0] + "'s Organization";
+              const orgSlug = 'org-' + Math.random().toString(36).substring(2, 10);
+              
+              const { data: newOrg, error: orgError } = await supabase
+                .from('organizations')
+                .insert({
+                  name: orgName,
+                  slug: orgSlug
+                })
+                .select()
+                .single();
+                
+              if (orgError) {
+                console.error('Error creating default organization:', orgError);
+                throw orgError;
+              }
+              
+              console.log('Created default organization:', newOrg.id);
+              
+              // Add the user as an owner of the organization
+              const { error: memberError } = await supabase
+                .from('organization_members')
+                .insert({
+                  organization_id: newOrg.id,
+                  user_id: user.id,
+                  role: 'owner'
+                });
+                
+              if (memberError) {
+                console.error('Error adding user to organization:', memberError);
+                throw memberError;
+              }
+              
+              // Set the organization as the default for the user
+              const { error: updateError } = await supabase
+                .from('profiles')
+                .update({ default_organization_id: newOrg.id })
+                .eq('id', user.id);
+                
+              if (updateError) {
+                console.error('Error updating default organization:', updateError);
+              }
+              
+              // Refresh user organizations
+              const updatedOrgs = await profileServices.getUserOrganizations(user.id);
+              if (updatedOrgs && updatedOrgs.length > 0) {
+                setUserOrganizations(updatedOrgs);
+                orgsLoaded.current = true;
+                await fetchOrganizationData(newOrg.id, user.id);
+                
+                toast('Default organization created', {
+                  style: { backgroundColor: 'green', color: 'white' }
+                });
+              }
+            } catch (createError) {
+              console.error('Error in organization creation flow:', createError);
+              toast('Error setting up your organization', {
+                style: { backgroundColor: 'red', color: 'white' }
+              });
+            }
           }
         } catch (error) {
           console.error('Error loading user organizations:', error);
+          toast('Error loading your organizations', {
+            style: { backgroundColor: 'red', color: 'white' }
+          });
         }
       }
     };

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Organization, UserOrganization } from './types';
 import { profileServices } from './profileServices';
@@ -29,43 +29,76 @@ export const useOrganizationManager = (userId: string | undefined): Organization
 
       console.log(`Fetching organization data for org: ${orgId}, user: ${userId}`);
       
-      // 1. Fetch the organization details
-      const { data: orgData, error: orgError } = await supabase
-        .from('organizations')
-        .select('id, name, slug, created_at, updated_at')
-        .eq('id', orgId)
-        .single();
+      // 1. First try to fetch the organization details
+      try {
+        const { data: orgData, error: orgError } = await supabase
+          .from('organizations')
+          .select('id, name, slug, created_at, updated_at')
+          .eq('id', orgId)
+          .single();
 
-      if (orgError) {
-        console.error('Error fetching organization:', orgError);
-        throw orgError;
+        if (orgError) {
+          console.error('Error fetching organization:', orgError);
+          // Don't throw here, we'll try to recover
+        } else if (orgData) {
+          // Set organization data immediately so UI can update
+          setOrganization({
+            id: orgData.id,
+            name: orgData.name,
+            slug: orgData.slug,
+            created_at: orgData.created_at,
+            updated_at: orgData.updated_at
+          });
+          console.log('Organization data fetched successfully:', orgData.name);
+        }
+      } catch (orgFetchError) {
+        console.error('Exception fetching organization:', orgFetchError);
+        // Continue to try to fetch role data
       }
-
-      // Set organization data immediately so UI can update
-      setOrganization({
-        id: orgData.id,
-        name: orgData.name,
-        slug: orgData.slug,
-        created_at: orgData.created_at,
-        updated_at: orgData.updated_at
-      });
       
-      // 2. In a separate query, fetch the user's role in this organization
-      const { data: memberData, error: memberError } = await supabase
-        .from('organization_members')
-        .select('role')
-        .eq('organization_id', orgId)
-        .eq('user_id', userId)
-        .maybeSingle();
+      // 2. In a separate try/catch block, fetch the user's role in this organization
+      try {
+        const { data: memberData, error: memberError } = await supabase
+          .from('organization_members')
+          .select('role')
+          .eq('organization_id', orgId)
+          .eq('user_id', userId)
+          .maybeSingle();
 
-      if (memberError) {
-        console.error('Error fetching user role:', memberError);
-        // Don't throw here, we can still continue with null role
+        if (memberError) {
+          console.error('Error fetching user role:', memberError);
+          // Don't throw here, we can still continue with null role
+        } else {
+          // Set user's role (or null if not found)
+          console.log('User role data:', memberData);
+          setUserRole(memberData?.role || null);
+          
+          // If no role was found but we have an organization, try to create a member record
+          if (!memberData?.role && organization) {
+            console.log('No role found, creating member role for user');
+            try {
+              const { error: createRoleError } = await supabase
+                .from('organization_members')
+                .insert({
+                  organization_id: orgId,
+                  user_id: userId,
+                  role: 'member'  // Default role
+                });
+                
+              if (createRoleError) {
+                console.error('Error creating member role:', createRoleError);
+              } else {
+                console.log('Created member role for user');
+                setUserRole('member');
+              }
+            } catch (createRoleError) {
+              console.error('Exception creating member role:', createRoleError);
+            }
+          }
+        }
+      } catch (roleFetchError) {
+        console.error('Exception fetching user role:', roleFetchError);
       }
-
-      // Set user's role (or null if not found)
-      console.log('User role data:', memberData);
-      setUserRole(memberData?.role || null);
       
     } catch (error) {
       console.error('Error fetching organization data:', error);
@@ -82,11 +115,6 @@ export const useOrganizationManager = (userId: string | undefined): Organization
         } catch (switchError) {
           console.error('Error switching organization after failed fetch:', switchError);
         }
-      }
-      
-      // Don't reset state if we already have data
-      if (!organization) {
-        setUserRole(null);
       }
     }
   };
