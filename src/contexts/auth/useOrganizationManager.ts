@@ -21,6 +21,11 @@ export const useOrganizationManager = (userId: string | undefined): Organization
 
   const fetchOrganizationData = async (orgId: string, userId: string) => {
     try {
+      if (!orgId || !userId) {
+        console.log('Missing organization ID or user ID');
+        return;
+      }
+
       // Use a direct query instead of RPC to avoid TypeScript issues
       const { data, error } = await supabase
         .from('organizations')
@@ -38,6 +43,14 @@ export const useOrganizationManager = (userId: string | undefined): Organization
 
       if (error) {
         console.error('Error fetching organization with role:', error);
+        
+        // If no organization found, check if user has any organizations
+        const userOrgs = await profileServices.getUserOrganizations(userId);
+        if (userOrgs.length > 0) {
+          // If user has other organizations, switch to the first one
+          await switchOrganization(userOrgs[0].id);
+          return;
+        }
       } else if (data) {
         // Set organization data
         setOrganization({

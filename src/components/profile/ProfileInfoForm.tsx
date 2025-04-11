@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { roleColors } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
 
 type ProfileFormData = {
   username: string;
@@ -49,6 +50,9 @@ const ProfileInfoForm = () => {
 
     try {
       await updateProfile(formData);
+      toast('Profile updated successfully', {
+        style: { backgroundColor: 'green', color: 'white' }
+      });
     } catch (error: any) {
       setError(error.message || 'Failed to update profile');
     } finally {
@@ -102,15 +106,21 @@ const ProfileInfoForm = () => {
                 <UserCog className="h-5 w-5 text-muted-foreground" />
                 <h3 className="text-md font-medium">Your Role</h3>
               </div>
-              {userRole && (
+              {userRole ? (
                 <Badge className={getRoleBadgeColor(userRole)}>
                   {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
                 </Badge>
+              ) : (
+                <Badge className="bg-gray-500">No Role Assigned</Badge>
               )}
             </div>
             
-            {userRole && (
+            {userRole ? (
               <p className="text-sm text-muted-foreground">{getRoleDescription(userRole)}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No role has been assigned. This might happen if you haven't been added to an organization.
+              </p>
             )}
 
             <Separator />
@@ -122,11 +132,15 @@ const ProfileInfoForm = () => {
               </div>
             </div>
             
-            {organization && (
+            {organization ? (
               <div className="grid gap-1">
                 <p className="font-medium">{organization.name}</p>
                 <p className="text-sm text-muted-foreground">@{organization.slug}</p>
               </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No organization found. Please contact an administrator.
+              </p>
             )}
           </div>
         </CardContent>

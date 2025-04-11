@@ -59,12 +59,43 @@ export const useSessionManager = (): SessionManagerReturn => {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle(); // Use maybeSingle instead of single to handle no rows case
 
-      if (profileError) {
+      if (profileError && profileError.code !== 'PGRST116') {
+        // Log other errors but not the "no rows returned" error
         console.error('Error fetching profile:', profileError);
-      } else {
+      }
+      
+      if (profileData) {
         setProfile(profileData);
+      } else {
+        console.log('No profile found for user, creating a new one');
+        // Create a default profile for the user
+        try {
+          const { data: userData } = await supabase.auth.getUser();
+          if (userData.user) {
+            const newProfile = {
+              id: userId,
+              username: userData.user.email,
+              full_name: userData.user.user_metadata?.full_name || '',
+              avatar_url: userData.user.user_metadata?.avatar_url || ''
+            };
+            
+            const { data: insertedProfile, error: insertError } = await supabase
+              .from('profiles')
+              .insert(newProfile)
+              .select()
+              .single();
+              
+            if (insertError) {
+              console.error('Error creating profile:', insertError);
+            } else {
+              setProfile(insertedProfile);
+            }
+          }
+        } catch (createError) {
+          console.error('Error creating user profile:', createError);
+        }
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
