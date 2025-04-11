@@ -20,10 +20,9 @@ interface SupabaseEndpoint {
  */
 export async function fetchEndpoints(organizationId: string): Promise<EndpointConfig[]> {
   try {
+    // Using the REST API directly instead of the typed client
     const { data, error } = await supabase
-      .from('endpoints')
-      .select('*')
-      .eq('organization_id', organizationId);
+      .rpc('get_endpoints_by_org', { p_organization_id: organizationId });
     
     if (error) {
       console.error('Error fetching endpoints:', error);
@@ -55,18 +54,16 @@ export async function createEndpoint(
   endpointData: EndpointFormData
 ): Promise<EndpointConfig | null> {
   try {
+    // Using the REST API directly
     const { error, data } = await supabase
-      .from('endpoints')
-      .insert({
-        name: endpointData.name,
-        description: endpointData.description,
-        type: endpointData.type,
-        organization_id: organizationId,
-        enabled: endpointData.enabled,
-        configuration: endpointData.configuration,
-      })
-      .select('*')
-      .single();
+      .rpc('create_endpoint', { 
+        p_name: endpointData.name,
+        p_description: endpointData.description,
+        p_type: endpointData.type,
+        p_organization_id: organizationId,
+        p_enabled: endpointData.enabled,
+        p_configuration: endpointData.configuration
+      });
 
     if (error) {
       console.error('Error creating endpoint:', error);
@@ -103,18 +100,16 @@ export async function updateEndpoint(
   endpointData: Partial<EndpointFormData>
 ): Promise<boolean> {
   try {
-    const updateData: any = {};
-    
-    if (endpointData.name !== undefined) updateData.name = endpointData.name;
-    if (endpointData.description !== undefined) updateData.description = endpointData.description;
-    if (endpointData.type !== undefined) updateData.type = endpointData.type;
-    if (endpointData.enabled !== undefined) updateData.enabled = endpointData.enabled;
-    if (endpointData.configuration !== undefined) updateData.configuration = endpointData.configuration;
-    
+    // Using the REST API directly
     const { error } = await supabase
-      .from('endpoints')
-      .update(updateData)
-      .eq('id', endpointId);
+      .rpc('update_endpoint', { 
+        p_id: endpointId,
+        p_name: endpointData.name,
+        p_description: endpointData.description,
+        p_type: endpointData.type,
+        p_enabled: endpointData.enabled !== undefined ? endpointData.enabled : null,
+        p_configuration: endpointData.configuration || null
+      });
 
     if (error) {
       console.error('Error updating endpoint:', error);
@@ -137,9 +132,7 @@ export async function updateEndpoint(
 export async function deleteEndpoint(endpointId: string): Promise<boolean> {
   try {
     const { error } = await supabase
-      .from('endpoints')
-      .delete()
-      .eq('id', endpointId);
+      .rpc('delete_endpoint', { p_id: endpointId });
 
     if (error) {
       console.error('Error deleting endpoint:', error);

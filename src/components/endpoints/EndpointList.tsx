@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { MoreHorizontal, Trash2, Edit, Play, AlertCircle } from 'lucide-react';
-import { EndpointConfig } from '@/types/endpoint';
+import { EndpointConfig, EndpointType, EmailEndpointConfig, TelegramEndpointConfig, WebhookEndpointConfig, DeviceActionEndpointConfig, IftttEndpointConfig } from '@/types/endpoint';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +37,27 @@ const endpointTypeLabels: Record<string, string> = {
   webhook: 'Webhook / API',
   device_action: 'Device Action',
   ifttt: 'IFTTT',
+};
+
+// Helper type guard functions
+const isEmailConfig = (config: any): config is EmailEndpointConfig => {
+  return 'to' in config && 'subject' in config && 'body_template' in config;
+};
+
+const isTelegramConfig = (config: any): config is TelegramEndpointConfig => {
+  return 'bot_token' in config && 'chat_id' in config && 'message_template' in config;
+};
+
+const isWebhookConfig = (config: any): config is WebhookEndpointConfig => {
+  return 'url' in config && 'method' in config;
+};
+
+const isDeviceActionConfig = (config: any): config is DeviceActionEndpointConfig => {
+  return 'target_device_id' in config && 'action' in config;
+};
+
+const isIftttConfig = (config: any): config is IftttEndpointConfig => {
+  return 'webhook_key' in config && 'event_name' in config;
 };
 
 interface EndpointListProps {
@@ -112,7 +133,7 @@ export default function EndpointList({
             </CardHeader>
             <CardContent>
               <div className="text-sm">
-                {endpoint.type === 'email' && (
+                {endpoint.type === 'email' && isEmailConfig(endpoint.configuration) && (
                   <div className="truncate">
                     To: {Array.isArray(endpoint.configuration.to) 
                       ? endpoint.configuration.to.join(', ') 
@@ -120,19 +141,19 @@ export default function EndpointList({
                   </div>
                 )}
                 
-                {endpoint.type === 'telegram' && (
+                {endpoint.type === 'telegram' && isTelegramConfig(endpoint.configuration) && (
                   <div className="truncate">Chat ID: {endpoint.configuration.chat_id || 'Not specified'}</div>
                 )}
 
-                {endpoint.type === 'webhook' && (
+                {endpoint.type === 'webhook' && isWebhookConfig(endpoint.configuration) && (
                   <div className="truncate">URL: {endpoint.configuration.url || 'Not specified'}</div>
                 )}
 
-                {endpoint.type === 'device_action' && (
+                {endpoint.type === 'device_action' && isDeviceActionConfig(endpoint.configuration) && (
                   <div className="truncate">Action: {endpoint.configuration.action || 'Not specified'}</div>
                 )}
 
-                {endpoint.type === 'ifttt' && (
+                {endpoint.type === 'ifttt' && isIftttConfig(endpoint.configuration) && (
                   <div className="truncate">Event: {endpoint.configuration.event_name || 'Not specified'}</div>
                 )}
               </div>
