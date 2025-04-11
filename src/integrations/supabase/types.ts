@@ -9,6 +9,159 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      alarm_endpoints: {
+        Row: {
+          alarm_id: string
+          created_at: string
+          endpoint_id: string
+          id: string
+        }
+        Insert: {
+          alarm_id: string
+          created_at?: string
+          endpoint_id: string
+          id?: string
+        }
+        Update: {
+          alarm_id?: string
+          created_at?: string
+          endpoint_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alarm_endpoints_alarm_id_fkey"
+            columns: ["alarm_id"]
+            isOneToOne: false
+            referencedRelation: "alarms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alarm_endpoints_endpoint_id_fkey"
+            columns: ["endpoint_id"]
+            isOneToOne: false
+            referencedRelation: "endpoints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      alarm_events: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alarm_id: string
+          device_id: string | null
+          id: string
+          message: string
+          resolved_at: string | null
+          status: Database["public"]["Enums"]["alarm_status"]
+          trigger_value: number | null
+          triggered_at: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alarm_id: string
+          device_id?: string | null
+          id?: string
+          message: string
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["alarm_status"]
+          trigger_value?: number | null
+          triggered_at?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alarm_id?: string
+          device_id?: string | null
+          id?: string
+          message?: string
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["alarm_status"]
+          trigger_value?: number | null
+          triggered_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alarm_events_alarm_id_fkey"
+            columns: ["alarm_id"]
+            isOneToOne: false
+            referencedRelation: "alarms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alarm_events_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "devices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      alarms: {
+        Row: {
+          condition_operator: Database["public"]["Enums"]["condition_operator"]
+          condition_value: Json
+          cooldown_minutes: number
+          created_at: string
+          description: string | null
+          device_id: string | null
+          enabled: boolean
+          id: string
+          name: string
+          organization_id: string
+          reading_type: string
+          severity: Database["public"]["Enums"]["alarm_severity"]
+          updated_at: string
+        }
+        Insert: {
+          condition_operator: Database["public"]["Enums"]["condition_operator"]
+          condition_value: Json
+          cooldown_minutes?: number
+          created_at?: string
+          description?: string | null
+          device_id?: string | null
+          enabled?: boolean
+          id?: string
+          name: string
+          organization_id: string
+          reading_type: string
+          severity?: Database["public"]["Enums"]["alarm_severity"]
+          updated_at?: string
+        }
+        Update: {
+          condition_operator?: Database["public"]["Enums"]["condition_operator"]
+          condition_value?: Json
+          cooldown_minutes?: number
+          created_at?: string
+          description?: string | null
+          device_id?: string | null
+          enabled?: boolean
+          id?: string
+          name?: string
+          organization_id?: string
+          reading_type?: string
+          severity?: Database["public"]["Enums"]["alarm_severity"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alarms_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alarms_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       data_buckets: {
         Row: {
           created_at: string
@@ -410,6 +563,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_alarm_condition: {
+        Args: {
+          p_operator: Database["public"]["Enums"]["condition_operator"]
+          p_value: Json
+          p_reading_value: number
+        }
+        Returns: boolean
+      }
       get_device_readings_aggregate: {
         Args: {
           p_device_id: string
@@ -485,6 +646,17 @@ export type Database = {
       }
     }
     Enums: {
+      alarm_severity: "info" | "warning" | "critical"
+      alarm_status: "active" | "acknowledged" | "resolved"
+      condition_operator:
+        | "gt"
+        | "lt"
+        | "gte"
+        | "lte"
+        | "eq"
+        | "neq"
+        | "between"
+        | "outside"
       role_type: "owner" | "admin" | "member" | "viewer"
     }
     CompositeTypes: {
@@ -601,6 +773,18 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      alarm_severity: ["info", "warning", "critical"],
+      alarm_status: ["active", "acknowledged", "resolved"],
+      condition_operator: [
+        "gt",
+        "lt",
+        "gte",
+        "lte",
+        "eq",
+        "neq",
+        "between",
+        "outside",
+      ],
       role_type: ["owner", "admin", "member", "viewer"],
     },
   },
