@@ -9,7 +9,8 @@ import {
   DatabaseZap,
   ChevronDown,
   ChevronRight,
-  Menu
+  Menu,
+  Webhook
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -41,6 +42,11 @@ export function DashboardNav() {
       title: "Data Buckets",
       href: "/dashboard/data-buckets",
       icon: DatabaseZap,
+    },
+    {
+      title: "Endpoints",
+      href: "/dashboard/endpoints",
+      icon: Webhook,
     },
     {
       title: "Settings",
