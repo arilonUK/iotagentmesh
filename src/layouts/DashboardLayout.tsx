@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/auth';
 import OrganizationSwitcher from '@/components/OrganizationSwitcher';
+import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 
 const DashboardLayout = () => {
   const { profile } = useAuth();
@@ -27,30 +28,33 @@ const DashboardLayout = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <DashboardNav />
-      <div className="flex-1 ml-16 md:ml-64 transition-all duration-300">
-        <header className="h-16 border-b border-gray-100 bg-white flex items-center justify-between px-4 lg:px-8 sticky top-0 z-10 shadow-sm">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-lg font-semibold text-gray-800">Dashboard</h1>
-            <OrganizationSwitcher />
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell size={20} />
-              <span className="absolute top-0 right-0 w-2 h-2 bg-iot-error rounded-full"></span>
-            </Button>
-            <Avatar className="cursor-pointer hover:ring-2 hover:ring-iot-purple-light transition-all">
-              <AvatarImage src={profile?.avatar_url || ""} />
-              <AvatarFallback className="bg-iot-purple-light text-white">{getUserInitials()}</AvatarFallback>
-            </Avatar>
-          </div>
-        </header>
-        <main className="p-4 lg:p-8">
-          <Outlet />
-        </main>
+    <SidebarProvider>
+      <div className="flex min-h-screen bg-gray-50 w-full">
+        <DashboardNav />
+        <SidebarInset>
+          <header className="h-16 border-b border-gray-100 bg-white flex items-center justify-between px-4 lg:px-8 sticky top-0 z-10 shadow-sm">
+            <div className="flex items-center space-x-4">
+              <SidebarTrigger className="md:hidden" />
+              <h1 className="text-lg font-semibold text-gray-800">Dashboard</h1>
+              <OrganizationSwitcher />
+            </div>
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell size={20} />
+                <span className="absolute top-0 right-0 w-2 h-2 bg-iot-error rounded-full"></span>
+              </Button>
+              <Avatar className="cursor-pointer hover:ring-2 hover:ring-iot-purple-light transition-all">
+                <AvatarImage src={profile?.avatar_url || ""} />
+                <AvatarFallback className="bg-iot-purple-light text-white">{getUserInitials()}</AvatarFallback>
+              </Avatar>
+            </div>
+          </header>
+          <main className="p-4 lg:p-8">
+            <Outlet />
+          </main>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 

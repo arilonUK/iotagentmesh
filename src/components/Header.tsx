@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -37,7 +38,7 @@ const Header = () => {
   };
 
   return (
-    <header className="w-full border-b border-gray-100">
+    <header className="w-full border-b border-gray-100 sticky top-0 bg-white z-50">
       <div className="container flex h-16 items-center justify-between px-4 md:px-8">
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center gap-2">
@@ -95,6 +96,7 @@ const Header = () => {
         <button 
           className="md:hidden"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
         >
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -138,10 +140,10 @@ const Header = () => {
                 </>
               ) : (
                 <>
-                  <Link to="/auth">
+                  <Link to="/auth" className="w-full">
                     <Button variant="outline" className="w-full">Log in</Button>
                   </Link>
-                  <Link to="/auth">
+                  <Link to="/auth" className="w-full">
                     <Button className="w-full">Sign up</Button>
                   </Link>
                 </>

@@ -4,7 +4,8 @@ import {
   Laptop2,
   Activity,
   ChevronDown,
-  Loader2
+  Loader2,
+  Bell
 } from "lucide-react";
 
 export const Icons = {
@@ -12,5 +13,6 @@ export const Icons = {
   devices: Laptop2,
   activity: Activity,
   chevronDown: ChevronDown,
-  spinner: Loader2
+  spinner: Loader2,
+  bell: Bell
 };
