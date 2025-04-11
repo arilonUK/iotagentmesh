@@ -5,11 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Building2 } from 'lucide-react';
+import { AlertCircle, Building2, UserCog } from 'lucide-react';
 import AvatarUpload from './AvatarUpload';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { roleColors } from '@/lib/utils';
+import { Separator } from '@/components/ui/separator';
 
 type ProfileFormData = {
   username: string;
@@ -64,6 +65,23 @@ const ProfileInfoForm = () => {
     return roleColors[role as keyof typeof roleColors] || 'bg-gray-500';
   };
 
+  const getRoleDescription = (role: string | null) => {
+    if (!role) return '';
+    
+    switch(role) {
+      case 'owner':
+        return 'Full control over the organization, including billing and user management';
+      case 'admin':
+        return 'Can manage users and organization settings';
+      case 'member':
+        return 'Regular access to organization resources';
+      case 'viewer':
+        return 'Read-only access to organization resources';
+      default:
+        return '';
+    }
+  };
+
   return (
     <>
       {error && (
@@ -73,31 +91,46 @@ const ProfileInfoForm = () => {
         </Alert>
       )}
 
-      {organization && (
-        <Card className="mb-6">
-          <CardContent className="pt-6">
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-muted-foreground" />
-                  <h3 className="text-lg font-medium">Organization</h3>
-                </div>
-                {userRole && (
-                  <Badge className={getRoleBadgeColor(userRole)}>
-                    {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
-                  </Badge>
-                )}
+      <Card className="mb-6">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Role & Permissions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <UserCog className="h-5 w-5 text-muted-foreground" />
+                <h3 className="text-md font-medium">Your Role</h3>
               </div>
-              <div className="grid gap-2">
-                <div>
-                  <p className="font-semibold">{organization.name}</p>
-                  <p className="text-sm text-muted-foreground">@{organization.slug}</p>
-                </div>
+              {userRole && (
+                <Badge className={getRoleBadgeColor(userRole)}>
+                  {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
+                </Badge>
+              )}
+            </div>
+            
+            {userRole && (
+              <p className="text-sm text-muted-foreground">{getRoleDescription(userRole)}</p>
+            )}
+
+            <Separator />
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-muted-foreground" />
+                <h3 className="text-md font-medium">Organization</h3>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+            
+            {organization && (
+              <div className="grid gap-1">
+                <p className="font-medium">{organization.name}</p>
+                <p className="text-sm text-muted-foreground">@{organization.slug}</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="flex justify-center mb-6">
