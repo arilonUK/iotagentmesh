@@ -27,6 +27,16 @@ type OrganizationUser = {
   username?: string;
 };
 
+// Define the type for the RPC function response
+type OrgMemberResponse = {
+  id: string;
+  user_id: string;
+  role: string;
+  username: string;
+  full_name: string;
+  email: string;
+};
+
 const UserManagement = () => {
   const { organization, userRole } = useAuth();
   const [users, setUsers] = useState<OrganizationUser[]>([]);
@@ -38,9 +48,8 @@ const UserManagement = () => {
     
     setLoading(true);
     try {
-      // Create a custom RPC function to fetch members with their profiles
-      // This avoids the RLS recursion issue
-      const { data, error } = await supabase.rpc('get_organization_members', {
+      // Use the get_organization_members RPC function with the correct type
+      const { data, error } = await supabase.rpc<OrgMemberResponse>('get_organization_members', {
         p_org_id: organization.id
       });
       
@@ -54,7 +63,16 @@ const UserManagement = () => {
       
       if (data && Array.isArray(data)) {
         console.log('Fetched organization members:', data);
-        setUsers(data as OrganizationUser[]);
+        // Map the response to OrganizationUser type
+        const mappedUsers: OrganizationUser[] = data.map(member => ({
+          id: member.id,
+          user_id: member.user_id,
+          role: member.role,
+          email: member.email,
+          full_name: member.full_name,
+          username: member.username
+        }));
+        setUsers(mappedUsers);
       } else {
         console.log('No members found or invalid data format');
         setUsers([]);

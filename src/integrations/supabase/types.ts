@@ -206,6 +206,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_organization_members: {
+        Args: { p_org_id: string }
+        Returns: {
+          id: string
+          user_id: string
+          role: string
+          username: string
+          full_name: string
+          email: string
+        }[]
+      }
       get_organization_with_role: {
         Args: { p_org_id: string; p_user_id: string }
         Returns: {
