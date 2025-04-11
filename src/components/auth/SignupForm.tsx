@@ -39,8 +39,11 @@ const SignupForm = ({ setAuthError }: SignupFormProps) => {
     }
 
     try {
+      // Generate a random username if none provided
+      const usernameToUse = username.trim() || `user_${Math.random().toString(36).substring(2, 10)}`;
+      
       await signUp(signupEmail, signupPassword, {
-        username,
+        username: usernameToUse,
         full_name: fullName,
         organization_name: organizationName,
       });
@@ -79,12 +82,13 @@ const SignupForm = ({ setAuthError }: SignupFormProps) => {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="username">Username</Label>
+          <Label htmlFor="username">Username (Optional)</Label>
           <Input 
             id="username"
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            placeholder="unique_username"
           />
         </div>
 
