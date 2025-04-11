@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +19,7 @@ type ProfileFormData = {
 };
 
 const ProfileInfoForm = () => {
-  const { user, profile, organization, userRole, updateProfile } = useAuth();
+  const { user, profile, organization, userRole, updateProfile, userOrganizations, switchOrganization } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<ProfileFormData>({
@@ -28,6 +27,16 @@ const ProfileInfoForm = () => {
     full_name: profile?.full_name || '',
     avatar_url: profile?.avatar_url || '',
   });
+
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        username: profile.username || '',
+        full_name: profile.full_name || '',
+        avatar_url: profile.avatar_url || '',
+      });
+    }
+  }, [profile]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -55,6 +64,23 @@ const ProfileInfoForm = () => {
       });
     } catch (error: any) {
       setError(error.message || 'Failed to update profile');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSwitchOrganization = async (orgId: string) => {
+    setIsLoading(true);
+    try {
+      await switchOrganization(orgId);
+      toast('Organization switched', {
+        style: { backgroundColor: 'green', color: 'white' }
+      });
+    } catch (error: any) {
+      console.error("Error switching organization:", error);
+      toast('Failed to switch organization', {
+        style: { backgroundColor: 'red', color: 'white' }
+      });
     } finally {
       setIsLoading(false);
     }
@@ -119,7 +145,7 @@ const ProfileInfoForm = () => {
               <p className="text-sm text-muted-foreground">{getRoleDescription(userRole)}</p>
             ) : (
               <p className="text-sm text-muted-foreground">
-                No role has been assigned. This might happen if you haven't been added to an organization.
+                No role has been assigned. This might happen if you haven't been added to an organization or there's an issue with your organization membership.
               </p>
             )}
 
@@ -141,6 +167,33 @@ const ProfileInfoForm = () => {
               <p className="text-sm text-muted-foreground">
                 No organization found. Please contact an administrator.
               </p>
+            )}
+
+            {userOrganizations.length > 1 && (
+              <>
+                <Separator />
+                <div>
+                  <h3 className="text-md font-medium mb-2">Your Organizations</h3>
+                  <div className="grid gap-2">
+                    {userOrganizations.map(org => (
+                      <div key={org.id} className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{org.name}</p>
+                          <p className="text-xs text-muted-foreground">Role: {org.role}</p>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          disabled={isLoading || (organization && org.id === organization.id)}
+                          onClick={() => handleSwitchOrganization(org.id)}
+                        >
+                          {organization && org.id === organization.id ? 'Current' : 'Switch'}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </CardContent>
