@@ -2,9 +2,10 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Database } from '@/integrations/supabase/types';
 
 // Define types
-type OrganizationUser = {
+export type OrganizationUser = {
   id: string;
   user_id: string;
   role: string;
@@ -33,11 +34,11 @@ export const useOrganizationMembers = (organizationId?: string) => {
     
     setLoading(true);
     try {
-      const { data, error } = await supabase.rpc<OrgMemberResponse[], {
-        p_org_id: string
-      }>('get_organization_members', {
-        p_org_id: organizationId
-      });
+      // Fix: Correctly specify function name as first parameter and return type as type parameter
+      const { data, error } = await supabase.rpc<OrgMemberResponse[]>(
+        'get_organization_members',
+        { p_org_id: organizationId }
+      );
       
       if (error) {
         console.error('Error fetching organization members:', error);
@@ -169,9 +170,12 @@ export const useOrganizationMembers = (organizationId?: string) => {
     if (!organizationId) return;
     
     try {
+      // Fix: Ensure newRole is one of the allowed role types
+      const validRole = newRole as Database["public"]["Enums"]["role_type"];
+      
       const { error } = await supabase
         .from('organization_members')
-        .update({ role: newRole })
+        .update({ role: validRole })
         .eq('organization_id', organizationId)
         .eq('user_id', userId);
 
@@ -188,7 +192,7 @@ export const useOrganizationMembers = (organizationId?: string) => {
       
       // Update the user list
       setUsers(users.map(user => 
-        user.user_id === userId ? { ...user, role: newRole } : user
+        user.user_id === userId ? { ...user, role: validRole } : user
       ));
     } catch (error) {
       console.error('Error updating role:', error);
