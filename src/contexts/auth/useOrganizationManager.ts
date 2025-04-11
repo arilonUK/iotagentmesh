@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Organization, UserOrganization } from './types';
 import { profileServices } from './profileServices';
 import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
 
 export type OrganizationManagerReturn = {
   organization: Organization | null;
@@ -13,6 +14,8 @@ export type OrganizationManagerReturn = {
   fetchOrganizationData: (orgId: string, userId: string) => Promise<void>;
   setUserOrganizations: (orgs: UserOrganization[]) => void;
 };
+
+type RoleType = Database['public']['Enums']['role_type'];
 
 export const useOrganizationManager = (userId: string | undefined): OrganizationManagerReturn => {
   const [organization, setOrganization] = useState<Organization | null>(null);
@@ -84,7 +87,7 @@ export const useOrganizationManager = (userId: string | undefined): Organization
   // Separate function to fetch organization and role data using direct queries
   // This avoids RLS recursion by fetching in separate queries
   const fetchOrganizationSeparately = async (orgId: string, userId: string) => {
-    // 1. First try to fetch the organization details using service role (bypasses RLS)
+    // 1. First try to fetch the organization details
     try {
       const { data: orgData, error: orgError } = await supabase
         .from('organizations')
@@ -112,27 +115,30 @@ export const useOrganizationManager = (userId: string | undefined): Organization
     // 2. In a separate try/catch block, fetch the user's role directly
     try {
       const { data: memberData, error: memberError } = await supabase
-        .rpc('get_user_role', {
-          org_id: orgId,
-          user_id: userId
-        });
+        .from('organization_members')
+        .select('role')
+        .eq('organization_id', orgId)
+        .eq('user_id', userId)
+        .maybeSingle();
 
       if (memberError) {
         console.error('Error fetching user role:', memberError);
+      } else if (memberData) {
+        console.log('User role data:', memberData.role);
+        setUserRole(memberData.role);
       } else {
-        console.log('User role data:', memberData);
-        setUserRole(memberData);
+        console.log('No role found for user in this organization');
         
         // If no role was found but we have an organization, try to create a member record
-        if (!memberData && organization) {
-          console.log('No role found, creating member role for user');
+        if (organization) {
+          console.log('Creating member role for user');
           try {
             const { error: createRoleError } = await supabase
               .from('organization_members')
               .insert({
                 organization_id: orgId,
                 user_id: userId,
-                role: 'member'  // Default role
+                role: 'member' as RoleType  // Default role
               });
               
             if (createRoleError) {

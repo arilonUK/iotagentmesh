@@ -32,6 +32,8 @@ export const profileServices = {
 
   getUserOrganizations: async (userId: string): Promise<UserOrganization[]> => {
     try {
+      console.log('Getting user organizations for user ID:', userId);
+      
       // First try the RPC method
       try {
         const { data, error } = await supabase
@@ -43,13 +45,16 @@ export const profileServices = {
         }
 
         if (data && data.length > 0) {
+          console.log('Successfully fetched user organizations with RPC:', data);
           return data as UserOrganization[];
+        } else {
+          console.log('No organizations found for user with RPC method');
         }
       } catch (rpcError) {
         console.error('RPC method failed, falling back to direct query:', rpcError);
       }
       
-      // Fallback to direct query if RPC fails
+      // Fallback to direct query if RPC fails or returns no data
       console.log('Using fallback method to fetch organizations');
       const { data: orgMembers, error: membersError } = await supabase
         .from('organization_members')
@@ -98,6 +103,7 @@ export const profileServices = {
         }
       }
       
+      console.log('Final organizations list from direct query:', orgs);
       return orgs;
     } catch (error: any) {
       console.error('Error fetching user organizations:', error);
@@ -109,6 +115,7 @@ export const profileServices = {
     try {
       // First try the RPC method
       try {
+        console.log(`Switching organization to ${organizationId} for user ${userId} using RPC`);
         const { data, error } = await supabase
           .rpc('switch_user_organization', {
             p_user_id: userId,
@@ -177,6 +184,74 @@ export const profileServices = {
     } catch (error: any) {
       console.error('Error switching organization:', error);
       return false;
+    }
+  },
+  
+  ensureUserHasOrganization: async (userId: string, userEmail: string): Promise<string | null> => {
+    try {
+      // First check if the user already has organizations
+      const userOrgs = await profileServices.getUserOrganizations(userId);
+      
+      if (userOrgs && userOrgs.length > 0) {
+        console.log('User already has organizations:', userOrgs);
+        return userOrgs[0].id;
+      }
+      
+      // User has no organizations, let's create one
+      console.log('Creating default organization for user', userId);
+      const username = userEmail.split('@')[0];
+      const orgName = `${username}'s Organization`;
+      const orgSlug = `org-${Math.random().toString(36).substring(2, 10)}`;
+      
+      // Create the organization
+      const { data: newOrg, error: orgError } = await supabase
+        .from('organizations')
+        .insert({
+          name: orgName,
+          slug: orgSlug
+        })
+        .select()
+        .single();
+        
+      if (orgError) {
+        console.error('Error creating default organization:', orgError);
+        return null;
+      }
+      
+      console.log('Created new organization:', newOrg);
+      
+      // Add the user as an owner
+      const { error: memberError } = await supabase
+        .from('organization_members')
+        .insert({
+          organization_id: newOrg.id,
+          user_id: userId,
+          role: 'owner'
+        });
+        
+      if (memberError) {
+        console.error('Error adding user to organization:', memberError);
+        return null;
+      }
+      
+      // Set as default organization
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ default_organization_id: newOrg.id })
+        .eq('id', userId);
+        
+      if (profileError) {
+        console.error('Error updating default organization in profile:', profileError);
+      }
+      
+      toast('Default organization created', {
+        style: { backgroundColor: 'green', color: 'white' }
+      });
+      
+      return newOrg.id;
+    } catch (error: any) {
+      console.error('Error ensuring user has organization:', error);
+      return null;
     }
   }
 };
