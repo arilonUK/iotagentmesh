@@ -33,8 +33,9 @@ export const useOrganizationMembers = (organizationId?: string) => {
     
     setLoading(true);
     try {
-      // Fix: Provide explicit type parameters for rpc call
-      const { data, error } = await supabase.rpc('get_organization_members', 
+      // Fix: Provide explicit type parameters for rpc call - both return type and function name
+      const { data, error } = await supabase.rpc<OrgMemberResponse[], 'get_organization_members'>(
+        'get_organization_members', 
         { p_org_id: organizationId }
       );
       
