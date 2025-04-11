@@ -133,6 +133,7 @@ export default function EndpointList({
             </CardHeader>
             <CardContent>
               <div className="text-sm">
+                {/* Email endpoint details */}
                 {endpoint.type === 'email' && isEmailConfig(endpoint.configuration) && (
                   <div className="truncate">
                     To: {Array.isArray(endpoint.configuration.to) 
@@ -141,18 +142,22 @@ export default function EndpointList({
                   </div>
                 )}
                 
+                {/* Telegram endpoint details */}
                 {endpoint.type === 'telegram' && isTelegramConfig(endpoint.configuration) && (
                   <div className="truncate">Chat ID: {endpoint.configuration.chat_id || 'Not specified'}</div>
                 )}
 
+                {/* Webhook endpoint details */}
                 {endpoint.type === 'webhook' && isWebhookConfig(endpoint.configuration) && (
                   <div className="truncate">URL: {endpoint.configuration.url || 'Not specified'}</div>
                 )}
 
+                {/* Device action endpoint details */}
                 {endpoint.type === 'device_action' && isDeviceActionConfig(endpoint.configuration) && (
                   <div className="truncate">Action: {endpoint.configuration.action || 'Not specified'}</div>
                 )}
 
+                {/* IFTTT endpoint details */}
                 {endpoint.type === 'ifttt' && isIftttConfig(endpoint.configuration) && (
                   <div className="truncate">Event: {endpoint.configuration.event_name || 'Not specified'}</div>
                 )}
