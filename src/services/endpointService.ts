@@ -20,18 +20,21 @@ interface SupabaseEndpoint {
  */
 export async function fetchEndpoints(organizationId: string): Promise<EndpointConfig[]> {
   try {
-    // Using direct table query instead of RPC function
+    // Using generic query to avoid TypeScript issues
     const { data, error } = await supabase
       .from('endpoints')
       .select('*')
-      .eq('organization_id', organizationId);
+      .eq('organization_id', organizationId) as { 
+        data: SupabaseEndpoint[] | null; 
+        error: any; 
+      };
     
     if (error) {
       console.error('Error fetching endpoints:', error);
       return [];
     }
     
-    return (data as SupabaseEndpoint[]).map(endpoint => ({
+    return (data || []).map(endpoint => ({
       id: endpoint.id,
       name: endpoint.name,
       description: endpoint.description || undefined,
@@ -56,7 +59,7 @@ export async function createEndpoint(
   endpointData: EndpointFormData
 ): Promise<EndpointConfig | null> {
   try {
-    // Direct table insert instead of RPC function
+    // Using generic query to avoid TypeScript issues
     const { error, data } = await supabase
       .from('endpoints')
       .insert({
@@ -69,8 +72,10 @@ export async function createEndpoint(
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
-      .select()
-      .single();
+      .select() as {
+        data: SupabaseEndpoint[] | null;
+        error: any;
+      };
 
     if (error) {
       console.error('Error creating endpoint:', error);
@@ -78,7 +83,12 @@ export async function createEndpoint(
       return null;
     }
 
-    const endpoint = data as SupabaseEndpoint;
+    if (!data || data.length === 0) {
+      toast.error('No endpoint data returned after creation');
+      return null;
+    }
+
+    const endpoint = data[0];
     toast.success('Endpoint created successfully');
     
     return {
@@ -118,11 +128,11 @@ export async function updateEndpoint(
     if (endpointData.enabled !== undefined) updateData.enabled = endpointData.enabled;
     if (endpointData.configuration !== undefined) updateData.configuration = endpointData.configuration;
     
-    // Direct table update instead of RPC function
+    // Using generic query to avoid TypeScript issues
     const { error } = await supabase
       .from('endpoints')
       .update(updateData)
-      .eq('id', endpointId);
+      .eq('id', endpointId) as { error: any };
 
     if (error) {
       console.error('Error updating endpoint:', error);
@@ -144,11 +154,11 @@ export async function updateEndpoint(
  */
 export async function deleteEndpoint(endpointId: string): Promise<boolean> {
   try {
-    // Direct table delete instead of RPC function
+    // Using generic query to avoid TypeScript issues
     const { error } = await supabase
       .from('endpoints')
       .delete()
-      .eq('id', endpointId);
+      .eq('id', endpointId) as { error: any };
 
     if (error) {
       console.error('Error deleting endpoint:', error);

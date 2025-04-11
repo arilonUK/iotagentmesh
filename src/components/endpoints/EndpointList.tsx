@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,23 +40,23 @@ const endpointTypeLabels: Record<string, string> = {
 
 // Helper type guard functions
 const isEmailConfig = (config: any): config is EmailEndpointConfig => {
-  return 'to' in config && 'subject' in config && 'body_template' in config;
+  return config && 'to' in config && 'subject' in config && 'body_template' in config;
 };
 
 const isTelegramConfig = (config: any): config is TelegramEndpointConfig => {
-  return 'bot_token' in config && 'chat_id' in config && 'message_template' in config;
+  return config && 'bot_token' in config && 'chat_id' in config && 'message_template' in config;
 };
 
 const isWebhookConfig = (config: any): config is WebhookEndpointConfig => {
-  return 'url' in config && 'method' in config;
+  return config && 'url' in config && 'method' in config;
 };
 
 const isDeviceActionConfig = (config: any): config is DeviceActionEndpointConfig => {
-  return 'target_device_id' in config && 'action' in config;
+  return config && 'target_device_id' in config && 'action' in config;
 };
 
 const isIftttConfig = (config: any): config is IftttEndpointConfig => {
-  return 'webhook_key' in config && 'event_name' in config;
+  return config && 'webhook_key' in config && 'event_name' in config;
 };
 
 interface EndpointListProps {
@@ -138,7 +137,7 @@ export default function EndpointList({
                   <div className="truncate">
                     To: {Array.isArray(endpoint.configuration.to) 
                       ? endpoint.configuration.to.join(', ') 
-                      : endpoint.configuration.to || 'No recipients specified'}
+                      : 'No recipients specified'}
                   </div>
                 )}
                 

@@ -137,6 +137,82 @@ export type Database = {
           },
         ]
       }
+      endpoint_executions: {
+        Row: {
+          endpoint_id: string
+          executed_at: string
+          id: string
+          payload: Json | null
+          success: boolean
+        }
+        Insert: {
+          endpoint_id: string
+          executed_at?: string
+          id?: string
+          payload?: Json | null
+          success: boolean
+        }
+        Update: {
+          endpoint_id?: string
+          executed_at?: string
+          id?: string
+          payload?: Json | null
+          success?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "endpoint_executions_endpoint_id_fkey"
+            columns: ["endpoint_id"]
+            isOneToOne: false
+            referencedRelation: "endpoints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      endpoints: {
+        Row: {
+          configuration: Json
+          created_at: string
+          description: string | null
+          enabled: boolean
+          id: string
+          name: string
+          organization_id: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          configuration: Json
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name: string
+          organization_id: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          configuration?: Json
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name?: string
+          organization_id?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "endpoints_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invitations: {
         Row: {
           created_at: string
