@@ -9,20 +9,22 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import UserTableRow from './UserTableRow';
-import type { OrganizationUser } from '@/hooks/useOrganizationMembers';
+import type { OrganizationUser } from '@/types/organization';
 
 interface UserListProps {
   users: OrganizationUser[];
   isCurrentUserOwner: boolean;
   actionInProgress: string | null;
   onRemoveUser: (userId: string) => void;
+  onUpdateRole?: (userId: string, newRole: string) => void;
 }
 
 const UserList: React.FC<UserListProps> = ({
   users,
   isCurrentUserOwner,
   actionInProgress,
-  onRemoveUser
+  onRemoveUser,
+  onUpdateRole
 }) => {
   return (
     <Table>
@@ -48,6 +50,7 @@ const UserList: React.FC<UserListProps> = ({
               isCurrentUserOwner={isCurrentUserOwner}
               isActionInProgress={actionInProgress === user.user_id}
               onRemoveUser={onRemoveUser}
+              onUpdateRole={onUpdateRole}
             />
           ))
         )}

@@ -11,12 +11,19 @@ const UserManagement = () => {
   const { 
     users, 
     loading, 
-    removeUser
+    removeUser,
+    updateUserRole
   } = useOrganizationMembers(organization?.id);
 
   const handleRemoveUser = async (userId: string) => {
     setActionInProgress(userId);
     await removeUser(userId);
+    setActionInProgress(null);
+  };
+
+  const handleUpdateRole = async (userId: string, newRole: string) => {
+    setActionInProgress(userId);
+    await updateUserRole(userId, newRole);
     setActionInProgress(null);
   };
 
@@ -40,6 +47,7 @@ const UserManagement = () => {
         isCurrentUserOwner={userRole === 'owner'}
         actionInProgress={actionInProgress}
         onRemoveUser={handleRemoveUser}
+        onUpdateRole={handleUpdateRole}
       />
     </div>
   );
