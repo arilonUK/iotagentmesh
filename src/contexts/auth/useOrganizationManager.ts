@@ -21,38 +21,31 @@ export const useOrganizationManager = (userId: string | undefined): Organization
 
   const fetchOrganizationData = async (orgId: string, userId: string) => {
     try {
-      // Use a custom query to fetch both organization and member role
-      // This avoids the recursive policy issue
-      const { data, error } = await supabase
-        .from('organizations')
-        .select(`
-          id,
-          name,
-          slug,
-          created_at,
-          updated_at,
-          organization_members!inner(role)
-        `)
-        .eq('id', orgId)
-        .eq('organization_members.user_id', userId)
-        .single();
+      // Use the new function we created to fetch both organization and role
+      const { data, error } = await supabase.rpc(
+        'get_organization_with_role',
+        { 
+          p_org_id: orgId,
+          p_user_id: userId
+        }
+      );
 
       if (error) {
         console.error('Error fetching organization with role:', error);
-      } else if (data) {
+      } else if (data && data.length > 0) {
+        const orgData = data[0];
+        
         // Set organization data
         setOrganization({
-          id: data.id,
-          name: data.name,
-          slug: data.slug,
-          created_at: data.created_at,
-          updated_at: data.updated_at
+          id: orgData.id,
+          name: orgData.name,
+          slug: orgData.slug,
+          created_at: orgData.created_at,
+          updated_at: orgData.updated_at
         });
         
         // Set user's role in this organization
-        if (data.organization_members && data.organization_members.length > 0) {
-          setUserRole(data.organization_members[0].role);
-        }
+        setUserRole(orgData.role);
       }
     } catch (error) {
       console.error('Error fetching organization data:', error);
