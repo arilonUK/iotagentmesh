@@ -39,8 +39,8 @@ const SignupForm = ({ setAuthError }: SignupFormProps) => {
     }
 
     try {
-      // Generate a random username if none provided
-      const usernameToUse = username.trim() || `user_${Math.random().toString(36).substring(2, 10)}`;
+      // Use email as username if none provided
+      const usernameToUse = username.trim() || signupEmail.split('@')[0];
       
       await signUp(signupEmail, signupPassword, {
         username: usernameToUse,
@@ -88,7 +88,7 @@ const SignupForm = ({ setAuthError }: SignupFormProps) => {
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="unique_username"
+            placeholder="Leave blank to use email"
           />
         </div>
 
