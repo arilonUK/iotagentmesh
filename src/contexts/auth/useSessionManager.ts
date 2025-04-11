@@ -4,6 +4,7 @@ import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile } from './types';
 import { profileServices } from './profileServices';
+import { Database } from '@/integrations/supabase/types';
 
 export type SessionManagerReturn = {
   session: Session | null;
@@ -12,6 +13,9 @@ export type SessionManagerReturn = {
   loading: boolean;
   fetchProfile: (userId: string) => Promise<void>;
 };
+
+// Define a type for role that matches the expected enum values
+type RoleType = Database['public']['Enums']['role_type'];
 
 export const useSessionManager = (): SessionManagerReturn => {
   const [session, setSession] = useState<Session | null>(null);
@@ -204,7 +208,7 @@ export const useSessionManager = (): SessionManagerReturn => {
   };
   
   // Helper function to assign a permission to a role
-  const assignPermissionToRole = async (organizationId: string, permissionId: string, role: string) => {
+  const assignPermissionToRole = async (organizationId: string, permissionId: string, role: RoleType) => {
     const { error } = await supabase
       .from('role_permissions')
       .insert({
@@ -219,7 +223,7 @@ export const useSessionManager = (): SessionManagerReturn => {
   };
   
   // Helper function to setup permissions for specific roles
-  const setupRolePermissions = async (organizationId: string, role: string, permissionNames: string[]) => {
+  const setupRolePermissions = async (organizationId: string, role: RoleType, permissionNames: string[]) => {
     for (const permName of permissionNames) {
       const { data: perm } = await supabase
         .from('permissions')
