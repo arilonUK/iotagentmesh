@@ -15,6 +15,7 @@ import ProfileSettings from "./pages/ProfileSettings";
 import TeamSettings from "./pages/TeamSettings";
 import DataBuckets from "./pages/DataBuckets";
 import AcceptInvitation from "./pages/AcceptInvitation";
+import Endpoints from "./pages/Endpoints"; // Add import for Endpoints page
 import { AuthProvider } from "./contexts/auth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import React from "react"; // Add explicit React import
@@ -40,6 +41,7 @@ const App = () => (
                 <Route path="devices" element={<Devices />} />
                 <Route path="devices/:id" element={<DeviceDetail />} />
                 <Route path="data-buckets" element={<DataBuckets />} />
+                <Route path="endpoints" element={<Endpoints />} /> {/* Add Endpoints route */}
                 <Route path="settings/profile" element={<ProfileSettings />} />
                 <Route path="settings/team" element={<TeamSettings />} />
               </Route>
