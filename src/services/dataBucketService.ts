@@ -3,6 +3,22 @@ import { supabase } from '@/integrations/supabase/client';
 import { DataBucketConfig, DataBucketFormData } from '@/types/dataBucket';
 import { toast } from 'sonner';
 
+interface SupabaseDataBucket {
+  id: string;
+  name: string;
+  description: string | null;
+  device_id: string;
+  organization_id: string;
+  storage_backend: string;
+  reading_type: string;
+  retention_days: number;
+  sampling_interval: number | null;
+  created_at: string;
+  updated_at: string;
+  enabled: boolean;
+  s3_config: any | null;
+}
+
 /**
  * Fetch all data buckets for an organization
  */
@@ -18,16 +34,16 @@ export async function fetchDataBuckets(organizationId: string): Promise<DataBuck
       return [];
     }
     
-    return data.map(bucket => ({
+    return (data as SupabaseDataBucket[]).map(bucket => ({
       id: bucket.id,
       name: bucket.name,
-      description: bucket.description,
+      description: bucket.description || undefined,
       deviceId: bucket.device_id,
       organizationId: bucket.organization_id,
-      storageBackend: bucket.storage_backend,
+      storageBackend: bucket.storage_backend as 'postgres' | 's3',
       readingType: bucket.reading_type,
       retentionDays: bucket.retention_days,
-      samplingInterval: bucket.sampling_interval,
+      samplingInterval: bucket.sampling_interval || undefined,
       createdAt: bucket.created_at,
       updatedAt: bucket.updated_at,
       enabled: bucket.enabled,
@@ -70,20 +86,21 @@ export async function createDataBucket(
       return null;
     }
 
+    const bucket = data as SupabaseDataBucket;
     return {
-      id: data.id,
-      name: data.name,
-      description: data.description,
-      deviceId: data.device_id,
-      organizationId: data.organization_id,
-      storageBackend: data.storage_backend,
-      readingType: data.reading_type,
-      retentionDays: data.retention_days,
-      samplingInterval: data.sampling_interval,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at,
-      enabled: data.enabled,
-      s3Config: data.s3_config,
+      id: bucket.id,
+      name: bucket.name,
+      description: bucket.description || undefined,
+      deviceId: bucket.device_id,
+      organizationId: bucket.organization_id,
+      storageBackend: bucket.storage_backend as 'postgres' | 's3',
+      readingType: bucket.reading_type,
+      retentionDays: bucket.retention_days,
+      samplingInterval: bucket.sampling_interval || undefined,
+      createdAt: bucket.created_at,
+      updatedAt: bucket.updated_at,
+      enabled: bucket.enabled,
+      s3Config: bucket.s3_config,
     };
   } catch (error) {
     console.error('Error in createDataBucket:', error);

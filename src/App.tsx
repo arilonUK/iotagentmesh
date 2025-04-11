@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ProfileSettings from "./pages/ProfileSettings";
 import TeamSettings from "./pages/TeamSettings";
+import DataBuckets from "./pages/DataBuckets";
 import AcceptInvitation from "./pages/AcceptInvitation";
 import { AuthProvider } from "./contexts/auth";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -38,6 +39,7 @@ const App = () => (
                 <Route index element={<Dashboard />} />
                 <Route path="devices" element={<Devices />} />
                 <Route path="devices/:id" element={<DeviceDetail />} />
+                <Route path="data-buckets" element={<DataBuckets />} />
                 <Route path="settings/profile" element={<ProfileSettings />} />
                 <Route path="settings/team" element={<TeamSettings />} />
               </Route>

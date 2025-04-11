@@ -9,6 +9,69 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      data_buckets: {
+        Row: {
+          created_at: string
+          description: string | null
+          device_id: string
+          enabled: boolean
+          id: string
+          name: string
+          organization_id: string
+          reading_type: string
+          retention_days: number
+          s3_config: Json | null
+          sampling_interval: number | null
+          storage_backend: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          device_id: string
+          enabled?: boolean
+          id?: string
+          name: string
+          organization_id: string
+          reading_type: string
+          retention_days: number
+          s3_config?: Json | null
+          sampling_interval?: number | null
+          storage_backend: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          device_id?: string
+          enabled?: boolean
+          id?: string
+          name?: string
+          organization_id?: string
+          reading_type?: string
+          retention_days?: number
+          s3_config?: Json | null
+          sampling_interval?: number | null
+          storage_backend?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_buckets_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_buckets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       device_readings: {
         Row: {
           device_id: string
@@ -38,6 +101,41 @@ export type Database = {
           value?: number
         }
         Relationships: []
+      }
+      devices: {
+        Row: {
+          id: string
+          last_active_at: string | null
+          name: string
+          organization_id: string
+          status: string
+          type: string
+        }
+        Insert: {
+          id?: string
+          last_active_at?: string | null
+          name: string
+          organization_id: string
+          status: string
+          type: string
+        }
+        Update: {
+          id?: string
+          last_active_at?: string | null
+          name?: string
+          organization_id?: string
+          status?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       invitations: {
         Row: {

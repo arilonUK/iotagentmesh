@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-interface Device {
+export interface Device {
   id: string;
   name: string;
   type: string;
@@ -32,7 +32,7 @@ export const useDevices = (organizationId?: string) => {
         return [];
       }
       
-      return data as Device[];
+      return data as unknown as Device[];
     },
     enabled: !!organizationId,
   });
