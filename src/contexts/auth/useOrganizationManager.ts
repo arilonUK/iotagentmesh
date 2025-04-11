@@ -18,6 +18,7 @@ export const useOrganizationManager = (userId: string | undefined): Organization
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userOrganizations, setUserOrganizations] = useState<UserOrganization[]>([]);
+  const [isProcessingSwitch, setIsProcessingSwitch] = useState<boolean>(false);
 
   const fetchOrganizationData = async (orgId: string, userId: string) => {
     try {
@@ -27,9 +28,6 @@ export const useOrganizationManager = (userId: string | undefined): Organization
       }
 
       console.log(`Fetching organization data for org: ${orgId}, user: ${userId}`);
-
-      // Instead of using a complex query with inner joins that causes recursion,
-      // fetch organization data and role separately
       
       // 1. First, fetch the organization details
       const { data: orgData, error: orgError } = await supabase
@@ -51,9 +49,9 @@ export const useOrganizationManager = (userId: string | undefined): Organization
         .eq('user_id', userId)
         .single();
 
-      if (memberError) {
+      if (memberError && memberError.code !== 'PGRST116') {
+        // PGRST116 is "No rows returned" error, which we can handle silently
         console.error('Error fetching user role:', memberError);
-        // Don't throw here, we still want to set organization data
       }
 
       // Set organization data
@@ -72,7 +70,8 @@ export const useOrganizationManager = (userId: string | undefined): Organization
       console.error('Error fetching organization data:', error);
       
       // Handle error cases - check if user has other organizations available
-      if (userId && (!organization || !userOrganizations.length)) {
+      // But avoid infinite recursion by not immediately trying to switch again
+      if (userId && userOrganizations.length === 0) {
         try {
           const userOrgs = await profileServices.getUserOrganizations(userId);
           
@@ -80,11 +79,13 @@ export const useOrganizationManager = (userId: string | undefined): Organization
             console.log('Available user organizations:', userOrgs);
             setUserOrganizations(userOrgs);
             
-            // If the current organization fetch failed, try another one
-            if (orgId === organization?.id && userOrgs.length > 0) {
+            // Only try to switch if we're not already processing a switch
+            // and this is genuinely a new organization list
+            if (!isProcessingSwitch && orgId !== userOrgs[0].id) {
               const nextOrg = userOrgs.find(org => org.id !== orgId) || userOrgs[0];
               console.log('Switching to organization:', nextOrg.id);
-              await switchOrganization(nextOrg.id);
+              // Don't await here to prevent blocking
+              switchOrganization(nextOrg.id);
             }
           }
         } catch (fetchError) {
@@ -92,7 +93,7 @@ export const useOrganizationManager = (userId: string | undefined): Organization
         }
       }
       
-      // Reset state on critical errors
+      // Reset state on critical errors only if we don't have data
       if (!organization) {
         setUserRole(null);
       }
@@ -107,23 +108,39 @@ export const useOrganizationManager = (userId: string | undefined): Organization
       return false;
     }
 
-    console.log(`Switching organization to: ${organizationId} for user: ${userId}`);
-    const success = await profileServices.switchOrganization(userId, organizationId);
-    
-    if (success) {
-      // Refresh organization data
-      fetchOrganizationData(organizationId, userId);
-      
-      // Update the current organization in the userOrganizations list
-      setUserOrganizations(prevOrgs => 
-        prevOrgs.map(org => ({
-          ...org,
-          is_default: org.id === organizationId
-        }))
-      );
+    // Prevent multiple simultaneous switches
+    if (isProcessingSwitch) {
+      console.log('Organization switch already in progress');
+      return false;
     }
-    
-    return success;
+
+    try {
+      setIsProcessingSwitch(true);
+      console.log(`Switching organization to: ${organizationId} for user: ${userId}`);
+      
+      const success = await profileServices.switchOrganization(userId, organizationId);
+      
+      if (success) {
+        // Update the current organization in the userOrganizations list
+        setUserOrganizations(prevOrgs => 
+          prevOrgs.map(org => ({
+            ...org,
+            is_default: org.id === organizationId
+          }))
+        );
+
+        // Fetch organization data but don't wait for it
+        fetchOrganizationData(organizationId, userId);
+      }
+      
+      return success;
+    } catch (error) {
+      console.error('Error switching organization:', error);
+      return false;
+    } finally {
+      // Always reset processing state when done
+      setIsProcessingSwitch(false);
+    }
   };
 
   return {

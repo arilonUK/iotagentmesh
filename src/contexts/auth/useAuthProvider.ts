@@ -6,10 +6,11 @@ import { profileServices } from './profileServices';
 import { useSessionManager } from './useSessionManager';
 import { useOrganizationManager } from './useOrganizationManager';
 import { supabase } from '@/integrations/supabase/client';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 export const useAuthProvider = (): AuthContextType => {
   const navigate = useNavigate();
+  const orgsLoaded = useRef(false);
   
   const {
     session,
@@ -31,16 +32,17 @@ export const useAuthProvider = (): AuthContextType => {
   // Track if organizations have been loaded to prevent multiple fetches
   useEffect(() => {
     const loadUserOrganizations = async () => {
-      if (user && !userOrganizations.length) {
+      if (user && !orgsLoaded.current) {
         console.log('Loading user organizations for', user.id);
         try {
           // Fetch user's organizations
           const orgs = await profileServices.getUserOrganizations(user.id);
           console.log('User organizations loaded:', orgs);
           setUserOrganizations(orgs);
+          orgsLoaded.current = true;
           
           // Fetch default organization data if it exists
-          if (profile?.default_organization_id) {
+          if (profile?.default_organization_id && orgs.length > 0) {
             console.log('Loading default organization:', profile.default_organization_id);
             fetchOrganizationData(profile.default_organization_id, user.id);
           } else if (orgs.length > 0) {
@@ -56,7 +58,14 @@ export const useAuthProvider = (): AuthContextType => {
     };
 
     loadUserOrganizations();
-  }, [user, profile, userOrganizations.length, fetchOrganizationData]);
+  }, [user, profile]);
+
+  // Reset organization data when user logs out
+  useEffect(() => {
+    if (!user) {
+      orgsLoaded.current = false;
+    }
+  }, [user]);
 
   return {
     session,
