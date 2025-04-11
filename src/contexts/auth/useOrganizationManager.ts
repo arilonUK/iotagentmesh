@@ -29,7 +29,7 @@ export const useOrganizationManager = (userId: string | undefined): Organization
 
       console.log(`Fetching organization data for org: ${orgId}, user: ${userId}`);
       
-      // 1. First, fetch the organization details
+      // 1. Fetch the organization details
       const { data: orgData, error: orgError } = await supabase
         .from('organizations')
         .select('id, name, slug, created_at, updated_at')
@@ -41,20 +41,7 @@ export const useOrganizationManager = (userId: string | undefined): Organization
         throw orgError;
       }
 
-      // 2. Next, fetch the user's role in this organization
-      const { data: memberData, error: memberError } = await supabase
-        .from('organization_members')
-        .select('role')
-        .eq('organization_id', orgId)
-        .eq('user_id', userId)
-        .single();
-
-      if (memberError && memberError.code !== 'PGRST116') {
-        // PGRST116 is "No rows returned" error, which we can handle silently
-        console.error('Error fetching user role:', memberError);
-      }
-
-      // Set organization data
+      // Set organization data immediately so UI can update
       setOrganization({
         id: orgData.id,
         name: orgData.name,
@@ -63,37 +50,41 @@ export const useOrganizationManager = (userId: string | undefined): Organization
         updated_at: orgData.updated_at
       });
       
-      // Set user's role
+      // 2. In a separate query, fetch the user's role in this organization
+      const { data: memberData, error: memberError } = await supabase
+        .from('organization_members')
+        .select('role')
+        .eq('organization_id', orgId)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (memberError) {
+        console.error('Error fetching user role:', memberError);
+        // Don't throw here, we can still continue with null role
+      }
+
+      // Set user's role (or null if not found)
+      console.log('User role data:', memberData);
       setUserRole(memberData?.role || null);
       
     } catch (error) {
       console.error('Error fetching organization data:', error);
       
-      // Handle error cases - check if user has other organizations available
-      // But avoid infinite recursion by not immediately trying to switch again
-      if (userId && userOrganizations.length === 0) {
+      // Only attempt to switch organizations if there was a critical error with the current one
+      // and we're not already processing a switch
+      if (!isProcessingSwitch && !organization && userId && userOrganizations.length > 0) {
         try {
-          const userOrgs = await profileServices.getUserOrganizations(userId);
-          
-          if (userOrgs.length > 0) {
-            console.log('Available user organizations:', userOrgs);
-            setUserOrganizations(userOrgs);
-            
-            // Only try to switch if we're not already processing a switch
-            // and this is genuinely a new organization list
-            if (!isProcessingSwitch && orgId !== userOrgs[0].id) {
-              const nextOrg = userOrgs.find(org => org.id !== orgId) || userOrgs[0];
-              console.log('Switching to organization:', nextOrg.id);
-              // Don't await here to prevent blocking
-              switchOrganization(nextOrg.id);
-            }
-          }
-        } catch (fetchError) {
-          console.error('Error fetching user organizations:', fetchError);
+          // Find an organization different from the one we just tried
+          const nextOrg = userOrganizations.find(org => org.id !== orgId) || userOrganizations[0];
+          console.log('Switching to organization:', nextOrg.id);
+          // Don't await here to prevent blocking
+          switchOrganization(nextOrg.id);
+        } catch (switchError) {
+          console.error('Error switching organization after failed fetch:', switchError);
         }
       }
       
-      // Reset state on critical errors only if we don't have data
+      // Don't reset state if we already have data
       if (!organization) {
         setUserRole(null);
       }
@@ -131,9 +122,10 @@ export const useOrganizationManager = (userId: string | undefined): Organization
 
         // Fetch organization data but don't wait for it
         fetchOrganizationData(organizationId, userId);
+        return true;
       }
       
-      return success;
+      return false;
     } catch (error) {
       console.error('Error switching organization:', error);
       return false;
