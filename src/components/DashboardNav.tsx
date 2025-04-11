@@ -1,137 +1,115 @@
 
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { Home, Globe, Settings, LifeBuoy, Users } from 'lucide-react';
+import { useLocation } from "react-router-dom";
+import {
+  Database,
+  Home,
+  LayoutDashboard,
+  Settings,
+  SmartphoneNfc,
+  Users,
+  DatabaseZap
+} from "lucide-react";
 
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: Home },
-  { name: 'Devices', href: '/dashboard/devices', icon: Globe },
-  { 
-    name: 'Settings', 
-    href: '/dashboard/settings', 
-    icon: Settings,
-    submenu: [
-      { name: 'Profile', href: '/dashboard/settings/profile' },
-      { name: 'Team', href: '/dashboard/settings/team' },
-    ]
-  },
-  { name: 'Help', href: '/dashboard/help', icon: LifeBuoy },
-];
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
-const DashboardNav = () => {
+export function DashboardNav() {
   const location = useLocation();
-  const [openSubmenu, setOpenSubmenu] = React.useState<string | null>(null);
+  const pathname = location.pathname;
 
-  // Check if the current path is in a submenu
-  React.useEffect(() => {
-    navigation.forEach(item => {
-      if (item.submenu && item.submenu.some(subItem => location.pathname === subItem.href)) {
-        setOpenSubmenu(item.name);
-      }
-    });
-  }, [location.pathname]);
+  // Navigation items with link configuration
+  const navItems = [
+    {
+      title: "Dashboard",
+      href: "/dashboard",
+      icon: LayoutDashboard,
+      exact: true,
+    },
+    {
+      title: "Devices",
+      href: "/dashboard/devices",
+      icon: SmartphoneNfc,
+    },
+    {
+      title: "Data Buckets",
+      href: "/dashboard/data-buckets",
+      icon: DatabaseZap,
+    },
+    {
+      title: "Settings",
+      href: "/dashboard/settings/profile",
+      icon: Settings,
+      subItems: [
+        {
+          title: "Profile",
+          href: "/dashboard/settings/profile",
+        },
+        {
+          title: "Team",
+          href: "/dashboard/settings/team",
+        },
+      ],
+    },
+  ];
 
-  const toggleSubmenu = (name: string) => {
-    setOpenSubmenu(openSubmenu === name ? null : name);
+  // Helper function to determine if a link is active
+  const isActive = (href: string, exact: boolean = false) => {
+    if (exact) {
+      return pathname === href;
+    }
+    return pathname.startsWith(href);
   };
 
-  return (
-    <nav className="space-y-1 px-2">
-      {navigation.map((item) => {
-        const isActive = item.submenu
-          ? item.submenu.some(subItem => location.pathname === subItem.href)
-          : location.pathname === item.href;
-        
-        return (
-          <div key={item.name}>
-            {item.submenu ? (
-              <>
-                <button
-                  onClick={() => toggleSubmenu(item.name)}
-                  className={cn(
-                    isActive
-                      ? 'bg-gray-900 text-white'
-                      : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                    'group w-full flex items-center px-2 py-2 text-sm font-medium rounded-md'
-                  )}
-                >
-                  <item.icon
-                    className={cn(
-                      isActive ? 'text-white' : 'text-gray-400 group-hover:text-white',
-                      'mr-3 h-5 w-5'
-                    )}
-                    aria-hidden="true"
-                  />
-                  <span className="flex-1 text-left">{item.name}</span>
-                  <svg
-                    className={cn(
-                      'h-5 w-5 transition-transform',
-                      openSubmenu === item.name ? 'rotate-90' : ''
-                    )}
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
+  // Helper function to determine if a subitem is active
+  const isSubItemActive = (subItems: any[]) => {
+    return subItems.some((item) => pathname === item.href);
+  };
 
-                {/* Submenu */}
-                {openSubmenu === item.name && (
-                  <div className="pl-6 mt-1 space-y-1">
-                    {item.submenu.map((subItem) => (
-                      <Link
-                        key={subItem.name}
-                        to={subItem.href}
-                        className={cn(
-                          location.pathname === subItem.href
-                            ? 'bg-gray-800 text-white'
-                            : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                          'group flex items-center px-2 py-2 text-sm font-medium rounded-md'
-                        )}
-                      >
-                        {subItem.name === 'Team' ? (
-                          <Users className={cn(
-                            location.pathname === subItem.href ? 'text-white' : 'text-gray-400',
-                            'mr-3 h-4 w-4'
-                          )} />
-                        ) : null}
-                        {subItem.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : (
-              <Link
-                to={item.href}
-                className={cn(
-                  isActive
-                    ? 'bg-gray-900 text-white'
-                    : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                  'group flex items-center px-2 py-2 text-sm font-medium rounded-md'
-                )}
-              >
-                <item.icon
-                  className={cn(
-                    isActive ? 'text-white' : 'text-gray-400 group-hover:text-white',
-                    'mr-3 h-5 w-5'
-                  )}
-                  aria-hidden="true"
-                />
-                {item.name}
+  // Render the navigation
+  return (
+    <nav className="grid gap-1 px-2">
+      {navItems.map((item) => {
+        const active = isActive(item.href, item.exact);
+        const subItemsActive = item.subItems ? isSubItemActive(item.subItems) : false;
+
+        return (
+          <div key={item.href} className="mb-2">
+            <Button
+              asChild
+              variant={active || subItemsActive ? "secondary" : "ghost"}
+              className={cn("w-full justify-start", 
+                active || subItemsActive ? "bg-muted font-medium" : ""
+              )}
+            >
+              <Link to={item.href} className="flex items-center">
+                <item.icon className="mr-2 h-4 w-4" />
+                {item.title}
               </Link>
+            </Button>
+
+            {/* Render sub-items if they exist */}
+            {item.subItems && (
+              <div className="ml-6 mt-1 grid gap-1">
+                {item.subItems.map((subItem) => (
+                  <Button
+                    key={subItem.href}
+                    asChild
+                    variant={pathname === subItem.href ? "secondary" : "ghost"}
+                    size="sm"
+                    className={cn(
+                      "justify-start",
+                      pathname === subItem.href ? "bg-muted font-medium" : ""
+                    )}
+                  >
+                    <Link to={subItem.href}>{subItem.title}</Link>
+                  </Button>
+                ))}
+              </div>
             )}
           </div>
         );
       })}
     </nav>
   );
-};
-
-export default DashboardNav;
+}
