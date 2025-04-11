@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { Button } from '@/components/ui/button';
@@ -48,8 +47,8 @@ const UserManagement = () => {
     
     setLoading(true);
     try {
-      // Use the get_organization_members RPC function with the correct type
-      const { data, error } = await supabase.rpc<OrgMemberResponse>('get_organization_members', {
+      // Fix: Properly type the RPC function call with the correct response type
+      const { data, error } = await supabase.rpc<OrgMemberResponse[]>('get_organization_members', {
         p_org_id: organization.id
       });
       
