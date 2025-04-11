@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, User } from "lucide-react";
 import { useAuth } from '@/contexts/auth';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -9,12 +8,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
-    await signOut();
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Error in sign out flow:', error);
+      navigate('/');
+    }
   };
 
-  // Helper function to get user initials for avatar fallback
   const getUserInitials = () => {
     if (profile?.full_name) {
       return profile.full_name
@@ -43,7 +48,6 @@ const Header = () => {
           </Link>
         </div>
 
-        {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6">
           <Link to="/products" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Products
@@ -88,7 +92,6 @@ const Header = () => {
           )}
         </div>
 
-        {/* Mobile menu button */}
         <button 
           className="md:hidden"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -97,7 +100,6 @@ const Header = () => {
         </button>
       </div>
 
-      {/* Mobile menu */}
       {isMenuOpen && (
         <div className="md:hidden py-4 px-6 border-t border-gray-100 bg-white animate-fade-in">
           <nav className="flex flex-col gap-4">

@@ -79,19 +79,34 @@ export const authServices = {
 
   signOut: async () => {
     try {
+      console.log('Attempting to sign out user');
+      // First check if we have a session before attempting to sign out
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      if (!sessionData.session) {
+        console.log('No active session found, considering user already signed out');
+        // Clear any local UI state regardless
+        return;
+      }
+      
       const { error } = await supabase.auth.signOut();
+      
       if (error) {
+        console.error('Error during sign out:', error);
         toast('Error signing out', { 
           style: { backgroundColor: 'red', color: 'white' } 
         });
         throw error;
       }
+      
+      console.log('User signed out successfully');
       toast('Signed out successfully', {
         style: { backgroundColor: 'green', color: 'white' }
       });
     } catch (error: any) {
-      console.error('Error signing out:', error);
-      throw error;
+      console.error('Error during sign out process:', error);
+      // Don't rethrow the error here - let the app continue even if signout had issues
+      // This prevents the user from getting stuck if there are session issues
     }
   }
 };
