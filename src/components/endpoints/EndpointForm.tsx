@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -16,7 +15,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 const endpointFormSchema = z.object({
   name: z.string().min(3, { message: 'Name must be at least 3 characters' }),
   description: z.string().optional(),
-  type: z.enum(['email', 'telegram', 'webhook', 'device_action', 'ifttt']),
+  type: z.enum(['email', 'telegram', 'webhook', 'device_action', 'ifttt', 'whatsapp']),
   enabled: z.boolean().default(true),
   configuration: z.record(z.any())
 });
@@ -117,6 +116,7 @@ export default function EndpointForm({ initialData, onSubmit, isSubmitting = fal
                         <SelectItem value="webhook">Webhook / REST API</SelectItem>
                         <SelectItem value="device_action">Device Action</SelectItem>
                         <SelectItem value="ifttt">IFTTT</SelectItem>
+                        <SelectItem value="whatsapp">WhatsApp</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -470,6 +470,70 @@ export default function EndpointForm({ initialData, onSubmit, isSubmitting = fal
                         <FormLabel>Value 3 Template</FormLabel>
                         <FormControl>
                           <Input placeholder="{{timestamp}}" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+
+              {selectedType === 'whatsapp' && (
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="configuration.phone_number_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number ID</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Your WhatsApp Business Phone Number ID" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="configuration.access_token"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Access Token</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Your WhatsApp Business API access token" type="password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="configuration.to_phone_number"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>To Phone Number</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Phone number with country code (e.g., +1234567890)" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="configuration.message_template"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Message Template</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="🚨 Alert from device {{device_name}}: {{value}}" 
+                            className="min-h-[100px]"
+                            {...field} 
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

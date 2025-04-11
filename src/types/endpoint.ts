@@ -1,5 +1,5 @@
 
-export type EndpointType = 'email' | 'telegram' | 'webhook' | 'device_action' | 'ifttt';
+export type EndpointType = 'email' | 'telegram' | 'webhook' | 'device_action' | 'ifttt' | 'whatsapp';
 
 export interface EndpointConfig {
   id: string;
@@ -8,7 +8,7 @@ export interface EndpointConfig {
   type: EndpointType;
   organization_id: string;
   enabled: boolean;
-  configuration: EmailEndpointConfig | TelegramEndpointConfig | WebhookEndpointConfig | DeviceActionEndpointConfig | IftttEndpointConfig;
+  configuration: EmailEndpointConfig | TelegramEndpointConfig | WebhookEndpointConfig | DeviceActionEndpointConfig | IftttEndpointConfig | WhatsappEndpointConfig;
   created_at: string;
   updated_at: string;
 }
@@ -46,10 +46,17 @@ export interface IftttEndpointConfig {
   value3?: string;
 }
 
+export interface WhatsappEndpointConfig {
+  phone_number_id: string;
+  access_token: string;
+  to_phone_number: string;
+  message_template: string;
+}
+
 export interface EndpointFormData {
   name: string;
   description?: string;
   type: EndpointType;
   enabled: boolean;
-  configuration: Partial<EmailEndpointConfig | TelegramEndpointConfig | WebhookEndpointConfig | DeviceActionEndpointConfig | IftttEndpointConfig>;
+  configuration: Partial<EmailEndpointConfig | TelegramEndpointConfig | WebhookEndpointConfig | DeviceActionEndpointConfig | IftttEndpointConfig | WhatsappEndpointConfig>;
 }

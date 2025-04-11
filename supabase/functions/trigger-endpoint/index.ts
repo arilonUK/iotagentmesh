@@ -127,6 +127,12 @@ serve(async (req) => {
           success = true;
           response = { message: `Email would be sent to ${endpoint.configuration.to}` };
           break;
+        case 'whatsapp':
+          console.log(`Would send WhatsApp message to ${endpoint.configuration.to_phone_number}`);
+          // For demo, we'll just pretend it worked
+          success = true;
+          response = { message: `WhatsApp message would be sent to ${endpoint.configuration.to_phone_number}` };
+          break;
         default:
           console.log(`Endpoint type ${endpoint.type} not implemented yet`);
           success = false;
