@@ -50,6 +50,7 @@ export interface AlarmEvent {
 }
 
 export interface AlarmFormData {
+  id?: string;  // Make id optional but available for form data
   name: string;
   description?: string;
   device_id: string | null;

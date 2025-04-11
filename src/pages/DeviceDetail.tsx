@@ -1,7 +1,9 @@
+
 import { useParams } from 'react-router-dom';
 import { useDevice } from '@/hooks/useDevices';
 import { Separator } from "@/components/ui/separator";
 import DeviceAlarms from '@/components/alarms/DeviceAlarms';
+import DeviceStats from '@/components/DeviceStats';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export default function DeviceDetail() {
@@ -42,6 +44,11 @@ export default function DeviceDetail() {
           </div>
         </CardContent>
       </Card>
+      
+      <Separator className="my-6" />
+      
+      {/* Display device statistics */}
+      <DeviceStats deviceId={id!} />
       
       <Separator className="my-6" />
       

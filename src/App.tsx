@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,6 +18,7 @@ import AcceptInvitation from "./pages/AcceptInvitation";
 import Endpoints from "./pages/Endpoints";
 import Alarms from "./pages/Alarms";
 import { AuthProvider } from "./contexts/auth";
+import { OrganizationProvider } from "./contexts/organization";
 import ProtectedRoute from "./components/ProtectedRoute";
 import React from "react";
 
@@ -30,32 +32,28 @@ function App() {
           <Toaster />
           <Sonner />
           <AuthProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/accept-invitation" element={<AcceptInvitation />} />
-              
-              <Route element={<ProtectedRoute />}>
-                <Route path="/dashboard" element={<DashboardLayout />}>
-                  <Route index element={<Dashboard />} />
-                  <Route path="devices" element={<Devices />} />
-                  <Route path="devices/:id" element={<DeviceDetail />} />
-                  <Route path="data-buckets" element={<DataBuckets />} />
-                  <Route path="endpoints" element={<Endpoints />} />
-                  <Route path="settings/profile" element={<ProfileSettings />} />
-                  <Route path="settings/team" element={<TeamSettings />} />
-                  <Route path="/dashboard/alarms" element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Alarms />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  } />
+            <OrganizationProvider>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/accept-invitation" element={<AcceptInvitation />} />
+                
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/dashboard" element={<DashboardLayout />}>
+                    <Route index element={<Dashboard />} />
+                    <Route path="devices" element={<Devices />} />
+                    <Route path="devices/:id" element={<DeviceDetail />} />
+                    <Route path="data-buckets" element={<DataBuckets />} />
+                    <Route path="endpoints" element={<Endpoints />} />
+                    <Route path="settings/profile" element={<ProfileSettings />} />
+                    <Route path="settings/team" element={<TeamSettings />} />
+                    <Route path="alarms" element={<Alarms />} />
+                  </Route>
                 </Route>
-              </Route>
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </OrganizationProvider>
           </AuthProvider>
         </TooltipProvider>
       </BrowserRouter>
