@@ -2,7 +2,7 @@
 import React from 'react';
 import { Bell } from 'lucide-react';
 import { Outlet } from 'react-router-dom';
-import DashboardNav from '@/components/DashboardNav';
+import { DashboardNav } from '@/components/DashboardNav';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/auth';
