@@ -17,7 +17,7 @@ import { useEndpoints } from "@/hooks/useEndpoints";
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters long" }),
   description: z.string().optional(),
-  device_id: z.string().optional(),
+  device_id: z.string().nullable(),
   enabled: z.boolean().default(true),
   reading_type: z.string().min(1, { message: "Reading type is required" }),
   condition_operator: z.enum(["gt", "lt", "gte", "lte", "eq", "neq", "between", "outside"]),
@@ -147,7 +147,7 @@ export default function AlarmForm({ organizationId, initialData, onSubmit, isSub
                     <FormLabel>Device (Optional)</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      value={field.value || ""}
+                      value={field.value || "null"}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -155,7 +155,7 @@ export default function AlarmForm({ organizationId, initialData, onSubmit, isSub
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Apply to all devices</SelectItem>
+                        <SelectItem value="null">Apply to all devices</SelectItem>
                         {devices.map((device) => (
                           <SelectItem key={device.id} value={device.id}>
                             {device.name} ({device.type})
