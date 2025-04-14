@@ -111,3 +111,9 @@ export const useStorageFiles = (profileId?: string, organizationId?: string, pat
     createDirectory
   };
 };
+
+// Export both hooks as part of useFileStorage for backward compatibility
+export const useFileStorage = {
+  useStorageProfiles,
+  useStorageFiles
+};
