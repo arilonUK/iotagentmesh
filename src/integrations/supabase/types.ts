@@ -372,9 +372,11 @@ export type Database = {
           description: string | null
           device_id: string | null
           id: string
+          index_file: string
           name: string
           organization_id: string
           path: string
+          public_read: boolean
           updated_at: string
         }
         Insert: {
@@ -382,9 +384,11 @@ export type Database = {
           description?: string | null
           device_id?: string | null
           id?: string
+          index_file?: string
           name: string
           organization_id: string
           path: string
+          public_read?: boolean
           updated_at?: string
         }
         Update: {
@@ -392,9 +396,11 @@ export type Database = {
           description?: string | null
           device_id?: string | null
           id?: string
+          index_file?: string
           name?: string
           organization_id?: string
           path?: string
+          public_read?: boolean
           updated_at?: string
         }
         Relationships: [

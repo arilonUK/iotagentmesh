@@ -12,7 +12,6 @@ import { FileStorageProfile } from '@/services/fileStorageService';
 import { useDevices } from '@/hooks/useDevices';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Checkbox } from '@/components/ui/checkbox';
 
 const formSchema = z.object({
   id: z.string().optional(),
