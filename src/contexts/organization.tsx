@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 interface Organization {
   id: string;
   name: string;
+  slug?: string;
   logo?: string;
 }
 

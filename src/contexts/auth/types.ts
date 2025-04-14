@@ -9,6 +9,7 @@ export type Organization = {
   id: string;
   name: string;
   slug: string;
+  logo?: string;
   created_at: string;
   updated_at: string;
 };
