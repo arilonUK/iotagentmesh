@@ -5,7 +5,10 @@ import {
   Activity,
   ChevronDown,
   Loader2,
-  Bell
+  Bell,
+  User,
+  DatabaseZap,
+  Users
 } from "lucide-react";
 
 export const Icons = {
@@ -14,5 +17,8 @@ export const Icons = {
   activity: Activity,
   chevronDown: ChevronDown,
   spinner: Loader2,
-  bell: Bell
+  bell: Bell,
+  user: User,
+  database: DatabaseZap,
+  users: Users
 };
