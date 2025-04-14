@@ -1,7 +1,8 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Profile, UserOrganization } from './types';
+import { Profile, UserOrganization } from '@/contexts/auth/types';
+import { Database } from '@/integrations/supabase/types';
 
 export const profileServices = {
   updateProfile: async (profileData: Partial<Profile>) => {
@@ -226,7 +227,7 @@ export const profileServices = {
         .insert({
           organization_id: newOrg.id,
           user_id: userId,
-          role: 'owner'
+          role: 'owner' as Database['public']['Enums']['role_type']
         });
         
       if (memberError) {
