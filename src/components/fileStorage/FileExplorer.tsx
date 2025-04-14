@@ -8,7 +8,7 @@ import {
   Folder, File, Upload, PlusCircle, MoreHorizontal, Download, Trash2, 
   ArrowLeft, FileEdit, Search
 } from 'lucide-react';
-import { StorageFile } from '@/services/fileStorageService';
+import { StorageFile } from '@/services/storage';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { fileStorageService } from '@/services/fileStorageService';
+import { fileService } from '@/services/storage';
 import { toast } from 'sonner';
 
 interface FileExplorerProps {
@@ -114,7 +114,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
   };
 
   const downloadFile = async (file: StorageFile) => {
-    const url = await fileStorageService.getFileUrl(organizationId, currentPath, file.name);
+    const url = await fileService.getFileUrl(organizationId, currentPath, file.name);
     if (!url) return;
     
     const link = document.createElement('a');
@@ -129,7 +129,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
       file.mimetype?.startsWith('text/') || 
       file.mimetype?.includes('pdf')
     ) {
-      const url = await fileStorageService.getFileUrl(organizationId, currentPath, file.name);
+      const url = await fileService.getFileUrl(organizationId, currentPath, file.name);
       if (url) {
         setFilePreviewUrl(url);
         setFilePreviewOpen(true);
