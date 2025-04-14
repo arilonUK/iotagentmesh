@@ -157,6 +157,24 @@ export function DashboardNav() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             )}
+
+            {userRole === 'owner' && (
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={pathname.startsWith("/dashboard/organization")} 
+                  tooltip="Organization"
+                >
+                  <Link to="/dashboard/organization" className={cn(
+                    "flex items-center gap-3 w-full",
+                    pathname.startsWith("/dashboard/organization") && "font-medium"
+                  )}>
+                    <Icons.building className="h-4 w-4" />
+                    <span>Organization Settings</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )}
           </SidebarMenu>
         </SidebarGroup>
 
@@ -178,12 +196,16 @@ export function DashboardNav() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-60" align="start">
-                <DropdownMenuItem>
-                  <Link to="/dashboard/organization" className="w-full">
-                    Organization Settings
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                {userRole === 'owner' && (
+                  <>
+                    <DropdownMenuItem>
+                      <Link to="/dashboard/organization" className="w-full">
+                        Organization Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem
                   onClick={() => {
                     setIsSigningOut(true);

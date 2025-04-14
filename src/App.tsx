@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ProfileSettings from "./pages/ProfileSettings";
 import TeamSettings from "./pages/TeamSettings";
+import OrganizationSettings from "./pages/OrganizationSettings";
 import DataBuckets from "./pages/DataBuckets";
 import AcceptInvitation from "./pages/AcceptInvitation";
 import Endpoints from "./pages/Endpoints";
@@ -47,6 +48,7 @@ function App() {
                     <Route path="endpoints" element={<Endpoints />} />
                     <Route path="settings/profile" element={<ProfileSettings />} />
                     <Route path="settings/team" element={<TeamSettings />} />
+                    <Route path="organization" element={<OrganizationSettings />} />
                     <Route path="alarms" element={<Alarms />} />
                   </Route>
                 </Route>

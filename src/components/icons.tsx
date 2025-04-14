@@ -8,7 +8,9 @@ import {
   Bell,
   User,
   DatabaseZap,
-  Users
+  Users,
+  Building,
+  Settings
 } from "lucide-react";
 
 export const Icons = {
@@ -20,5 +22,7 @@ export const Icons = {
   bell: Bell,
   user: User,
   database: DatabaseZap,
-  users: Users
+  users: Users,
+  building: Building,
+  settings: Settings
 };
