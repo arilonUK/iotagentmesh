@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Icons } from "@/components/icons";
-import { useOrganization } from "@/contexts/organization";
+import { useAuth } from "@/contexts/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -12,7 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/contexts/auth";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -26,8 +24,7 @@ import {
 
 export function DashboardNav() {
   const { pathname } = useLocation();
-  const { organization } = useOrganization();
-  const { signOut, profile, userRole } = useAuth();
+  const { signOut, profile, userRole, organization } = useAuth();
   const [isSigningOut, setIsSigningOut] = useState(false);
   
   // Check if user has admin or owner permissions for team settings
@@ -189,7 +186,7 @@ export function DashboardNav() {
                         <AvatarImage src={organization.logo} alt={organization.name} />
                         <AvatarFallback>{organization.name.slice(0, 2)}</AvatarFallback>
                       </Avatar>
-                      <span className="text-sm">{organization.name}</span>
+                      <span className="text-sm">{organization.name || 'My Organization'}</span>
                     </div>
                     <Icons.chevronDown className="h-4 w-4 opacity-50" />
                   </div>
