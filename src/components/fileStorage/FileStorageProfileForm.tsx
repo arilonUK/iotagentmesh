@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/contexts/auth';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
-import { FileStorageProfile } from '@/services/fileStorageService';
+import { FileStorageProfile } from '@/services/storage';
 import { formSchema, FormValues } from './FileStorageProfileFormSchema';
 import { BasicInfoSection, PublicAccessSection } from './form-sections';
 

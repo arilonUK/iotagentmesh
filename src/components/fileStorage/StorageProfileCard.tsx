@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileStorageProfile } from '@/services/fileStorageService';
+import { FileStorageProfile } from '@/services/storage';
 import { Button } from '@/components/ui/button';
 import { FolderOpen, Pencil, Trash2, ExternalLink, Copy } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';

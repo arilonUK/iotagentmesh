@@ -1,6 +1,5 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fileStorageService, FileStorageProfile, StorageFile } from '@/services/fileStorageService';
+import { FileStorageProfile, profileService, fileService } from '@/services/storage';
 import { useAuth } from '@/contexts/auth';
 
 export const useStorageProfiles = (organizationId?: string) => {
@@ -16,7 +15,7 @@ export const useStorageProfiles = (organizationId?: string) => {
     queryKey: ['storage-profiles', orgId],
     queryFn: async () => {
       if (!orgId) return [];
-      return fileStorageService.getStorageProfiles(orgId);
+      return profileService.getStorageProfiles(orgId);
     },
     enabled: !!orgId,
   });
@@ -25,7 +24,7 @@ export const useStorageProfiles = (organizationId?: string) => {
   
   const createProfile = useMutation({
     mutationFn: (profile: Omit<FileStorageProfile, 'id' | 'created_at' | 'updated_at' | 'device_id'>) => 
-      fileStorageService.createStorageProfile(profile),
+      profileService.createStorageProfile(profile),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['storage-profiles', orgId] });
     },
@@ -33,14 +32,14 @@ export const useStorageProfiles = (organizationId?: string) => {
   
   const updateProfile = useMutation({
     mutationFn: ({ id, updates }: { id: string, updates: Partial<Omit<FileStorageProfile, 'id' | 'created_at' | 'updated_at'>> }) => 
-      fileStorageService.updateStorageProfile(id, updates),
+      profileService.updateStorageProfile(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['storage-profiles', orgId] });
     },
   });
   
   const deleteProfile = useMutation({
-    mutationFn: (id: string) => fileStorageService.deleteStorageProfile(id),
+    mutationFn: (id: string) => profileService.deleteStorageProfile(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['storage-profiles', orgId] });
     },
@@ -70,7 +69,7 @@ export const useStorageFiles = (profileId?: string, organizationId?: string, pat
     queryKey: ['storage-files', orgId, path, profileId],
     queryFn: async () => {
       if (!orgId) return [];
-      return fileStorageService.listFiles(orgId, path);
+      return fileService.listFiles(orgId, path);
     },
     enabled: !!orgId,
   });
@@ -79,7 +78,7 @@ export const useStorageFiles = (profileId?: string, organizationId?: string, pat
   
   const uploadFile = useMutation({
     mutationFn: ({ file }: { file: File }) => 
-      fileStorageService.uploadFile(orgId!, path, file),
+      fileService.uploadFile(orgId!, path, file),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['storage-files', orgId, path] });
     },
@@ -87,7 +86,7 @@ export const useStorageFiles = (profileId?: string, organizationId?: string, pat
   
   const deleteFile = useMutation({
     mutationFn: ({ fileName }: { fileName: string }) => 
-      fileStorageService.deleteFile(orgId!, path, fileName),
+      fileService.deleteFile(orgId!, path, fileName),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['storage-files', orgId, path] });
     },
@@ -95,7 +94,7 @@ export const useStorageFiles = (profileId?: string, organizationId?: string, pat
   
   const createDirectory = useMutation({
     mutationFn: ({ dirName }: { dirName: string }) => 
-      fileStorageService.createDirectory(orgId!, path, dirName),
+      fileService.createDirectory(orgId!, path, dirName),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['storage-files', orgId, path] });
     },
@@ -112,7 +111,6 @@ export const useStorageFiles = (profileId?: string, organizationId?: string, pat
   };
 };
 
-// Export both hooks as part of useFileStorage for backward compatibility
 export const useFileStorage = {
   useStorageProfiles,
   useStorageFiles

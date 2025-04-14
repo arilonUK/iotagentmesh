@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { fileStorageService } from '@/services/fileStorageService';
+import { profileService } from '@/services/storage';
 import { ArrowLeft } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import FileExplorer from '@/components/fileStorage/FileExplorer';
@@ -18,7 +17,7 @@ const FileExplorerPage = () => {
     queryKey: ['storage-profile', profileId],
     queryFn: async () => {
       if (!profileId) return null;
-      return fileStorageService.getStorageProfile(profileId);
+      return profileService.getStorageProfile(profileId);
     },
     enabled: !!profileId,
   });
