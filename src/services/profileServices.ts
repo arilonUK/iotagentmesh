@@ -16,8 +16,3 @@ export const profileServices = {
   // Organization setup functions
   ensureUserHasOrganization: organizationSetupService.ensureUserHasOrganization
 };
-
-// Fix circular dependency in organizationSetupService
-import { profileServices as profileServicesImport } from './profileServices';
-// Workaround to avoid circular dependency issues
-(global as any).profileServices = profileServices;

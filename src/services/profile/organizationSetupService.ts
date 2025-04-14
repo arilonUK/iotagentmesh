@@ -2,12 +2,14 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Database } from '@/integrations/supabase/types';
+import { organizationService } from './organizationService';
+import { organizationSetupService as organizationDefaultSetupService } from '@/services/organizationSetupService';
 
 export const organizationSetupService = {  
   ensureUserHasOrganization: async (userId: string, userEmail: string): Promise<string | null> => {
     try {
       // First check if the user already has organizations
-      const userOrgs = await profileServices.getUserOrganizations(userId);
+      const userOrgs = await organizationService.getUserOrganizations(userId);
       
       if (userOrgs && userOrgs.length > 0) {
         console.log('User already has organizations:', userOrgs);
@@ -50,6 +52,9 @@ export const organizationSetupService = {
         console.error('Error adding user to organization:', memberError);
         return null;
       }
+      
+      // Set up default permissions for the organization
+      await organizationDefaultSetupService.setupDefaultPermissions(newOrg.id);
       
       // Set as default organization
       const { error: profileError } = await supabase
