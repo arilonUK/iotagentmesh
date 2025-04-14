@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileStorageProfile } from '@/services/fileStorageService';
@@ -70,11 +69,6 @@ const StorageProfileCard: React.FC<StorageProfileCardProps> = ({ profile }) => {
           <p className="text-sm">
             <strong>Path:</strong> {profile.path}
           </p>
-          {profile.device_id && profile.device_id !== 'none' && (
-            <p className="text-sm">
-              <strong>Associated Device:</strong> {profile.device_id}
-            </p>
-          )}
           {profile.public_read && (
             <>
               <p className="text-sm">

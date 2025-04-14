@@ -370,7 +370,6 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
-          device_id: string | null
           id: string
           index_file: string
           name: string
@@ -382,7 +381,6 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
-          device_id?: string | null
           id?: string
           index_file?: string
           name: string
@@ -394,7 +392,6 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
-          device_id?: string | null
           id?: string
           index_file?: string
           name?: string
@@ -404,13 +401,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "file_storage_profiles_device_id_fkey"
-            columns: ["device_id"]
-            isOneToOne: false
-            referencedRelation: "devices"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "file_storage_profiles_organization_id_fkey"
             columns: ["organization_id"]
