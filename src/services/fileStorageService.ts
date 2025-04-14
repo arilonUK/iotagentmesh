@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -11,6 +10,8 @@ export type FileStorageProfile = {
   path: string;
   created_at: string;
   updated_at: string;
+  public_read: boolean;
+  index_file: string;
 };
 
 export type StorageFile = {

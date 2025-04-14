@@ -3,11 +3,12 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileStorageProfile } from '@/services/fileStorageService';
 import { Button } from '@/components/ui/button';
-import { FolderOpen, Pencil, Trash2 } from 'lucide-react';
+import { FolderOpen, Pencil, Trash2, ExternalLink, Copy } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useStorageProfiles } from '@/hooks/useFileStorage';
 import FileStorageProfileForm from './FileStorageProfileForm';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface StorageProfileCardProps {
   profile: FileStorageProfile;
@@ -38,6 +39,23 @@ const StorageProfileCard: React.FC<StorageProfileCardProps> = ({ profile }) => {
   const openExplorer = () => {
     navigate(`/dashboard/storage/${profile.id}/explorer`);
   };
+
+  const copyUrl = () => {
+    if (profile.public_read) {
+      const baseUrl = window.location.origin;
+      const url = `${baseUrl}/api/storage/${profile.id}`;
+      navigator.clipboard.writeText(url);
+      toast.success('HTTP path copied to clipboard');
+    }
+  };
+
+  const openPublicUrl = () => {
+    if (profile.public_read) {
+      const baseUrl = window.location.origin;
+      const url = `${baseUrl}/api/storage/${profile.id}`;
+      window.open(url, '_blank');
+    }
+  };
   
   return (
     <Card>
@@ -47,21 +65,42 @@ const StorageProfileCard: React.FC<StorageProfileCardProps> = ({ profile }) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
+          <p className="text-sm font-medium">Storage ID: {profile.id}</p>
           {profile.description && <p className="text-sm">{profile.description}</p>}
           <p className="text-sm">
             <strong>Path:</strong> {profile.path}
           </p>
-          {profile.device_id && (
+          {profile.device_id && profile.device_id !== 'none' && (
             <p className="text-sm">
               <strong>Associated Device:</strong> {profile.device_id}
             </p>
+          )}
+          {profile.public_read && (
+            <>
+              <p className="text-sm">
+                <strong>Public Access:</strong> Enabled
+              </p>
+              <p className="text-sm">
+                <strong>Index File:</strong> {profile.index_file}
+              </p>
+              <div className="mt-4 flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={copyUrl}>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy HTTP Path
+                </Button>
+                <Button variant="outline" size="sm" onClick={openPublicUrl}>
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open
+                </Button>
+              </div>
+            </>
           )}
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button variant="default" onClick={openExplorer}>
           <FolderOpen className="h-4 w-4 mr-2" />
-          Open
+          Storage Explorer
         </Button>
         
         <div className="flex gap-2">

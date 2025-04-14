@@ -23,8 +23,13 @@ const FileStorage = () => {
   const handleCreateProfile = (data: any) => {
     if (!organization) return;
     
+    // Ensure we're not sending an ID when creating a new profile
+    const { id, ...profileData } = data;
+    
     createProfile.mutate({
-      ...data,
+      ...profileData,
+      // Convert device_id "none" to null
+      device_id: data.device_id === 'none' ? null : data.device_id,
       organization_id: organization.id
     }, {
       onSuccess: () => {
@@ -61,7 +66,7 @@ const FileStorage = () => {
           <DialogTrigger asChild>
             <Button>
               <PlusCircle className="h-4 w-4 mr-2" />
-              Create Profile
+              Add Storage
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -99,7 +104,7 @@ const FileStorage = () => {
           </div>
           <Button onClick={() => setIsCreateDialogOpen(true)}>
             <PlusCircle className="h-4 w-4 mr-2" />
-            Create Profile
+            Add Storage
           </Button>
         </div>
       )}
