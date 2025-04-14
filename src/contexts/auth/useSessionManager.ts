@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile } from './types';
-import { profileServices } from './profileServices';
+import { profileServices } from '@/services/profileServices';
 import { Database } from '@/integrations/supabase/types';
 
 export type SessionManagerReturn = {

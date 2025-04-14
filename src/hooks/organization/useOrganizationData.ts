@@ -39,7 +39,7 @@ export const useOrganizationData = (): OrganizationDataReturn => {
             id: orgData.id,
             name: orgData.name,
             slug: orgData.slug,
-            logo: orgData.logo,
+            logo: null, // Set default null since it's not in the RPC return
             created_at: orgData.created_at,
             updated_at: orgData.updated_at
           });
@@ -69,7 +69,7 @@ export const useOrganizationData = (): OrganizationDataReturn => {
     try {
       const { data: orgData, error: orgError } = await supabase
         .from('organizations')
-        .select('id, name, slug, logo, created_at, updated_at')
+        .select('id, name, slug, created_at, updated_at')
         .eq('id', orgId)
         .single();
 
@@ -81,7 +81,7 @@ export const useOrganizationData = (): OrganizationDataReturn => {
           id: orgData.id,
           name: orgData.name,
           slug: orgData.slug,
-          logo: orgData.logo,
+          logo: null, // Set default null since it's not in the database query
           created_at: orgData.created_at,
           updated_at: orgData.updated_at
         });

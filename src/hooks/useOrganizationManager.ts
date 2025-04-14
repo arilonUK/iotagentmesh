@@ -27,12 +27,11 @@ export const useOrganizationManager = (userId: string | undefined): Organization
     
     if (success) {
       // Update the current organization in the userOrganizations list
-      setUserOrganizations(prevOrgs => 
-        prevOrgs.map(org => ({
-          ...org,
-          is_default: org.id === organizationId
-        }))
-      );
+      const updatedOrgs = userOrganizations.map(org => ({
+        ...org,
+        is_default: org.id === organizationId
+      }));
+      setUserOrganizations(updatedOrgs);
 
       // Fetch organization data but don't wait for it
       fetchOrganizationData(organizationId, userId);
