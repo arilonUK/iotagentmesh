@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,8 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { FileStorageProfile } from '@/services/fileStorageService';
 import { formSchema, FormValues } from './FileStorageProfileFormSchema';
-import { BasicInfoSection } from './form-sections/BasicInfoSection';
-import { PublicAccessSection } from './form-sections/PublicAccessSection';
+import { BasicInfoSection, PublicAccessSection } from './form-sections';
 
 interface FileStorageProfileFormProps {
   profile?: FileStorageProfile;
