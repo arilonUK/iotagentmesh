@@ -1,98 +1,63 @@
-
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import { cn } from "@/lib/utils";
-import { Icons } from "@/components/icons";
-import {
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-} from "@/components/ui/sidebar";
+import { SidebarItem } from "@/components/ui/sidebar";
+import { usePathname } from "next/navigation";
+import { 
+  LayoutDashboard, LineChart, Clock, Bell, Hammer, Database, Radio, 
+  Settings, HardDrive 
+} from "lucide-react";
+
+function isActive(href: string) {
+  const pathname = usePathname();
+  return pathname === href;
+}
 
 export function DashboardMenuItems() {
-  const { pathname } = useLocation();
-  
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          asChild 
-          isActive={pathname === "/dashboard"}
-          tooltip="Home"
-        >
-          <Link to="/dashboard" className={cn(
-            "flex items-center gap-3 w-full",
-            pathname === "/dashboard" && "font-medium"
-          )}>
-            <Icons.home className="h-4 w-4" />
-            <span>Home</span>
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
+    <>
+      <SidebarItem active={isActive("/dashboard")} href="/dashboard">
+        <LayoutDashboard className="w-4 h-4" />
+        Dashboard
+      </SidebarItem>
       
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          asChild 
-          isActive={pathname.startsWith("/dashboard/devices")}
-          tooltip="Devices"
-        >
-          <Link to="/dashboard/devices" className={cn(
-            "flex items-center gap-3 w-full",
-            pathname.startsWith("/dashboard/devices") && "font-medium"
-          )}>
-            <Icons.devices className="h-4 w-4" />
-            <span>Devices</span>
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
+      <SidebarItem active={isActive("/dashboard/devices")} href="/dashboard/devices">
+        <Radio className="w-4 h-4" />
+        Devices
+      </SidebarItem>
       
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          asChild 
-          isActive={pathname.startsWith("/dashboard/endpoints")}
-          tooltip="Endpoints"
-        >
-          <Link to="/dashboard/endpoints" className={cn(
-            "flex items-center gap-3 w-full",
-            pathname.startsWith("/dashboard/endpoints") && "font-medium"
-          )}>
-            <Icons.activity className="h-4 w-4" />
-            <span>Endpoints</span>
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
+      <SidebarItem active={isActive("/dashboard/alarms")} href="/dashboard/alarms">
+        <Bell className="w-4 h-4" />
+        Alarms
+      </SidebarItem>
       
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          asChild 
-          isActive={pathname === "/dashboard/alarms"} 
-          tooltip="Alarms"
-        >
-          <Link to="/dashboard/alarms" className={cn(
-            "flex items-center gap-3 w-full",
-            pathname === "/dashboard/alarms" && "font-medium"
-          )}>
-            <Icons.bell className="h-4 w-4" />
-            <span>Alarms</span>
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          asChild 
-          isActive={pathname.startsWith("/dashboard/data-buckets")} 
-          tooltip="Data Buckets"
-        >
-          <Link to="/dashboard/data-buckets" className={cn(
-            "flex items-center gap-3 w-full",
-            pathname.startsWith("/dashboard/data-buckets") && "font-medium"
-          )}>
-            <Icons.database className="h-4 w-4" />
-            <span>Data Buckets</span>
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-    </SidebarMenu>
+      <SidebarItem active={isActive("/dashboard/endpoints")} href="/dashboard/endpoints">
+        <Hammer className="w-4 h-4" />
+        Endpoints
+      </SidebarItem>
+      
+      <SidebarItem active={isActive("/dashboard/data-buckets")} href="/dashboard/data-buckets">
+        <Database className="w-4 h-4" />
+        Data Buckets
+      </SidebarItem>
+      
+      <SidebarItem active={isActive("/dashboard/storage")} href="/dashboard/storage">
+        <HardDrive className="w-4 h-4" />
+        Storage
+      </SidebarItem>
+      
+      <SidebarItem>
+        <Clock className="w-4 h-4" />
+        History
+      </SidebarItem>
+      
+      <SidebarItem>
+        <LineChart className="w-4 h-4" />
+        Analysis
+      </SidebarItem>
+      
+      <SidebarItem>
+        <Settings className="w-4 h-4" />
+        Config
+      </SidebarItem>
+    </>
   );
 }

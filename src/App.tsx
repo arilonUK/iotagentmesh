@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +17,8 @@ import DataBuckets from "./pages/DataBuckets";
 import AcceptInvitation from "./pages/AcceptInvitation";
 import Endpoints from "./pages/Endpoints";
 import Alarms from "./pages/Alarms";
+import FileStorage from './pages/FileStorage';
+import FileExplorerPage from './pages/FileExplorerPage';
 import { AuthProvider } from "./contexts/auth";
 import { OrganizationProvider } from "./contexts/organization";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -50,6 +51,8 @@ function App() {
                     <Route path="settings/team" element={<TeamSettings />} />
                     <Route path="organization" element={<OrganizationSettings />} />
                     <Route path="alarms" element={<Alarms />} />
+                    <Route path="/dashboard/storage" element={<FileStorage />} />
+                    <Route path="/dashboard/storage/:profileId/explorer" element={<FileExplorerPage />} />
                   </Route>
                 </Route>
                 

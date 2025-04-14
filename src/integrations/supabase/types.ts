@@ -366,6 +366,54 @@ export type Database = {
           },
         ]
       }
+      file_storage_profiles: {
+        Row: {
+          created_at: string
+          description: string | null
+          device_id: string | null
+          id: string
+          name: string
+          organization_id: string
+          path: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          device_id?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          path: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          device_id?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          path?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "file_storage_profiles_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "file_storage_profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invitations: {
         Row: {
           created_at: string
