@@ -70,11 +70,14 @@ export const fileStorageService = {
     }
   },
   
-  createStorageProfile: async (profile: Omit<FileStorageProfile, 'id' | 'created_at' | 'updated_at'>): Promise<FileStorageProfile | null> => {
+  createStorageProfile: async (profile: Omit<FileStorageProfile, 'id' | 'created_at' | 'updated_at' | 'device_id'>): Promise<FileStorageProfile | null> => {
     try {
       const { data, error } = await supabase
         .from('file_storage_profiles')
-        .insert(profile)
+        .insert({
+          ...profile,
+          device_id: null
+        })
         .select()
         .single();
       

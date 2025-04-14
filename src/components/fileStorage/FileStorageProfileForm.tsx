@@ -9,15 +9,12 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDes
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { FileStorageProfile } from '@/services/fileStorageService';
-import { useDevices } from '@/hooks/useDevices';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 
 const formSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional(),
-  device_id: z.string().optional(),
   path: z.string().min(1, 'Path is required'),
   public_read: z.boolean().default(false),
   index_file: z.string().default('index.html'),
@@ -37,7 +34,6 @@ const FileStorageProfileForm: React.FC<FileStorageProfileFormProps> = ({
   isSubmitting
 }) => {
   const { organization } = useAuth();
-  const { devices, isLoading: isLoadingDevices } = useDevices(organization?.id);
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -45,7 +41,6 @@ const FileStorageProfileForm: React.FC<FileStorageProfileFormProps> = ({
       id: profile?.id || '',
       name: profile?.name || '',
       description: profile?.description || '',
-      device_id: profile?.device_id || 'none',
       path: profile?.path || '',
       public_read: profile?.public_read || false,
       index_file: profile?.index_file || 'index.html',
@@ -114,35 +109,6 @@ const FileStorageProfileForm: React.FC<FileStorageProfileFormProps> = ({
               <FormDescription>
                 Additional information about this storage profile
               </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="device_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Associated Device (Optional)</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a device (optional)" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  {devices.map(device => (
-                    <SelectItem key={device.id} value={device.id}>
-                      {device.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
               <FormMessage />
             </FormItem>
           )}

@@ -24,7 +24,7 @@ export const useStorageProfiles = (organizationId?: string) => {
   const queryClient = useQueryClient();
   
   const createProfile = useMutation({
-    mutationFn: (profile: Omit<FileStorageProfile, 'id' | 'created_at' | 'updated_at'>) => 
+    mutationFn: (profile: Omit<FileStorageProfile, 'id' | 'created_at' | 'updated_at' | 'device_id'>) => 
       fileStorageService.createStorageProfile(profile),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['storage-profiles', orgId] });

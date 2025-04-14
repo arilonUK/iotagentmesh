@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth';
@@ -28,8 +27,6 @@ const FileStorage = () => {
     
     createProfile.mutate({
       ...profileData,
-      // Convert device_id "none" to null
-      device_id: data.device_id === 'none' ? null : data.device_id,
       organization_id: organization.id
     }, {
       onSuccess: () => {
