@@ -92,7 +92,7 @@ const FileStorageProfileForm: React.FC<FileStorageProfileFormProps> = ({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {devices.map(device => (
                     <SelectItem key={device.id} value={device.id}>
                       {device.name}
