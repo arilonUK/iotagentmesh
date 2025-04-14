@@ -56,7 +56,7 @@ const FileStorageProfileForm: React.FC<FileStorageProfileFormProps> = ({
   
   // Generate a base URL for public access
   const baseUrl = window.location.origin;
-  const storageId = form.watch('id') || '[storage-id]';
+  const storageId = profile?.id || '[storage-id]';
   const httpPath = `${baseUrl}/api/storage/${storageId}`;
 
   return (
@@ -205,26 +205,26 @@ const FileStorageProfileForm: React.FC<FileStorageProfileFormProps> = ({
               )}
             />
             
-            {profile && (
-              <FormItem>
-                <FormLabel>HTTP Path</FormLabel>
-                <div className="flex items-center space-x-2">
-                  <Input readOnly value={httpPath} />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      navigator.clipboard.writeText(httpPath);
-                    }}
-                  >
-                    Copy
-                  </Button>
-                </div>
-                <FormDescription>
-                  This URL allows public read-only access to the index file
-                </FormDescription>
-              </FormItem>
-            )}
+            <FormItem>
+              <FormLabel>HTTP Path</FormLabel>
+              <div className="flex items-center space-x-2">
+                <Input readOnly value={httpPath} />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    navigator.clipboard.writeText(httpPath);
+                  }}
+                >
+                  Copy
+                </Button>
+              </div>
+              <FormDescription>
+                {profile ? 
+                  "This URL allows public read-only access to the index file" : 
+                  "This URL will be available after creating the storage profile"}
+              </FormDescription>
+            </FormItem>
           </>
         )}
         
