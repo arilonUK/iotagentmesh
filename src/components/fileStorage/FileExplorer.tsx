@@ -3,21 +3,13 @@ import React, { useState } from 'react';
 import { useStorageFiles } from '@/hooks/useFileStorage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { 
-  Folder, File, Upload, PlusCircle, MoreHorizontal, Download, Trash2, 
-  ArrowLeft, FileEdit, Search
-} from 'lucide-react';
+import { ArrowLeft, Search } from 'lucide-react';
 import { StorageFile } from '@/services/storage';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { fileService } from '@/services/storage';
 import { toast } from 'sonner';
+import { FileList } from './FileList';
+import { FileActions } from './FileActions';
+import { FilePreview } from './FilePreview';
 
 interface FileExplorerProps {
   organizationId: string;
@@ -43,7 +35,6 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
     uploadFile, 
     deleteFile, 
     createDirectory,
-    refetch 
   } = useStorageFiles(undefined, organizationId, currentPath);
 
   const handleFileClick = (file: StorageFile) => {
@@ -175,198 +166,44 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
         <div className="text-sm text-muted-foreground">
           {isLoading ? 'Loading...' : `${filteredFiles.length} item${filteredFiles.length !== 1 ? 's' : ''}`}
         </div>
-        <div className="flex gap-2">
-          <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm">
-                <Upload className="h-4 w-4 mr-2" />
-                Upload
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Upload File</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <Input type="file" onChange={handleUpload} />
-                <div className="text-sm text-muted-foreground">
-                  Current directory: {currentPath || 'Root'}
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-          
-          <Dialog open={newFolderDialogOpen} onOpenChange={setNewFolderDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" variant="outline">
-                <PlusCircle className="h-4 w-4 mr-2" />
-                New Folder
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Folder</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <Input 
-                  placeholder="Folder name" 
-                  value={newFolderName} 
-                  onChange={(e) => setNewFolderName(e.target.value)} 
-                />
-                <Button onClick={handleCreateFolder} disabled={createDirectory.isPending}>
-                  Create
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+        <FileActions 
+          currentPath={currentPath}
+          onUpload={handleUpload}
+          onCreateFolder={handleCreateFolder}
+          uploadDialogOpen={uploadDialogOpen}
+          setUploadDialogOpen={setUploadDialogOpen}
+          newFolderDialogOpen={newFolderDialogOpen}
+          setNewFolderDialogOpen={setNewFolderDialogOpen}
+          newFolderName={newFolderName}
+          setNewFolderName={setNewFolderName}
+        />
       </div>
       
       {isLoading ? (
         <div className="text-center py-8">Loading files...</div>
       ) : filteredFiles.length > 0 ? (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-8"></TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Size</TableHead>
-              <TableHead>Last Modified</TableHead>
-              <TableHead className="w-8"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredFiles.map((file) => (
-              <TableRow key={file.id} className="cursor-pointer hover:bg-muted/60">
-                <TableCell onClick={() => handleFileClick(file)}>
-                  {file.mimetype === 'folder' ? (
-                    <Folder className="h-4 w-4" />
-                  ) : (
-                    <File className="h-4 w-4" />
-                  )}
-                </TableCell>
-                <TableCell onClick={() => handleFileClick(file)}>{file.name}</TableCell>
-                <TableCell onClick={() => handleFileClick(file)}>
-                  {file.mimetype === 'folder' ? '--' : formatFileSize(file.size)}
-                </TableCell>
-                <TableCell onClick={() => handleFileClick(file)}>
-                  {new Date(file.created_at).toLocaleString()}
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {file.mimetype !== 'folder' && (
-                        <>
-                          <DropdownMenuItem onClick={() => previewFile(file)}>
-                            <FileEdit className="h-4 w-4 mr-2" />
-                            Preview
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => downloadFile(file)}>
-                            <Download className="h-4 w-4 mr-2" />
-                            Download
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                      <DropdownMenuItem 
-                        className="text-destructive"
-                        onClick={() => handleDeleteFile(file)}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <FileList
+          files={filteredFiles}
+          onFileClick={handleFileClick}
+          onPreview={previewFile}
+          onDownload={downloadFile}
+          onDelete={handleDeleteFile}
+        />
       ) : (
         <div className="text-center py-8 border rounded-md bg-muted/20">
           {searchQuery ? 'No files match your search' : 'This folder is empty'}
         </div>
       )}
       
-      <Dialog open={filePreviewOpen} onOpenChange={setFilePreviewOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>{selectedFile?.name}</DialogTitle>
-          </DialogHeader>
-          {filePreviewUrl && selectedFile?.mimetype && (
-            <div className="overflow-auto max-h-[70vh]">
-              {selectedFile.mimetype.startsWith('image/') ? (
-                <img 
-                  src={filePreviewUrl} 
-                  alt={selectedFile.name} 
-                  className="max-w-full" 
-                />
-              ) : selectedFile.mimetype === 'application/pdf' ? (
-                <iframe 
-                  src={filePreviewUrl} 
-                  title={selectedFile.name} 
-                  className="w-full h-[70vh]"
-                />
-              ) : selectedFile.mimetype.startsWith('text/') ? (
-                <pre className="bg-muted p-4 rounded overflow-auto max-h-[70vh]">
-                  {/* Fetch text content for display */}
-                  <TextPreview url={filePreviewUrl} />
-                </pre>
-              ) : (
-                <div className="text-center py-8">
-                  Preview not available for this file type
-                </div>
-              )}
-            </div>
-          )}
-          <div className="flex justify-end gap-2">
-            {selectedFile && (
-              <Button onClick={() => downloadFile(selectedFile)}>
-                <Download className="h-4 w-4 mr-2" />
-                Download
-              </Button>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <FilePreview 
+        open={filePreviewOpen}
+        onOpenChange={setFilePreviewOpen}
+        file={selectedFile}
+        previewUrl={filePreviewUrl}
+        onDownload={downloadFile}
+      />
     </div>
   );
-};
-
-// Helper component to fetch and display text content
-const TextPreview: React.FC<{ url: string }> = ({ url }) => {
-  const [text, setText] = useState<string>('Loading...');
-
-  React.useEffect(() => {
-    const fetchText = async () => {
-      try {
-        const response = await fetch(url);
-        const content = await response.text();
-        setText(content);
-      } catch (error) {
-        setText('Failed to load text content');
-      }
-    };
-    
-    fetchText();
-  }, [url]);
-
-  return <>{text}</>;
-};
-
-// Helper function to format file sizes
-const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 B';
-  
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
 export default FileExplorer;
