@@ -1,5 +1,7 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 export interface Device {
   id: string;
@@ -71,6 +73,7 @@ export const useDevice = (deviceId?: string) => {
           console.error('Error fetching device:', error);
           
           if (process.env.NODE_ENV === 'development') {
+            console.log('Returning mock data for deviceId:', deviceId);
             // Add mock data for deviceId '4'
             if (deviceId === '4') {
               return {
@@ -79,7 +82,8 @@ export const useDevice = (deviceId?: string) => {
                 type: 'Sensor',
                 status: 'warning' as const,
                 organization_id: '7dcfb1a6-d855-4ed7-9a45-2e9f54590c18',
-                last_active_at: new Date().toISOString()
+                last_active_at: new Date().toISOString(),
+                description: 'Monitors air quality and pollution levels'
               } as Device;
             }
             
@@ -116,7 +120,14 @@ export const useDevice = (deviceId?: string) => {
             }
           }
           
-          throw error;
+          // Show toast notification for error
+          toast({
+            title: "Error loading device",
+            description: `Database error: ${error.message}`,
+            variant: "destructive",
+          });
+          
+          throw new Error(`Failed to fetch device: ${error.message}`);
         }
         
         return data as Device;
@@ -126,7 +137,7 @@ export const useDevice = (deviceId?: string) => {
       }
     },
     enabled: !!deviceId,
-    retry: 0,
+    retry: 1,
     staleTime: 1000 * 60 * 5
   });
   
