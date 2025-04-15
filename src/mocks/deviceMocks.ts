@@ -34,6 +34,38 @@ export const getMockDevice = (deviceId: string): Device | null => {
       status: 'offline',
       organization_id: '7dcfb1a6-d855-4ed7-9a45-2e9f54590c18',
       last_active_at: new Date(Date.now() - 86400000).toISOString()
+    },
+    '55555555-5555-5555-5555-555555555555': {
+      id: '55555555-5555-5555-5555-555555555555',
+      name: 'Smart Plug',
+      type: 'Actuator',
+      status: 'online',
+      organization_id: '7dcfb1a6-d855-4ed7-9a45-2e9f54590c18',
+      last_active_at: new Date().toISOString()
+    },
+    '66666666-6666-6666-6666-666666666666': {
+      id: '66666666-6666-6666-6666-666666666666',
+      name: 'Security Camera',
+      type: 'Sensor',
+      status: 'online',
+      organization_id: '7dcfb1a6-d855-4ed7-9a45-2e9f54590c18',
+      last_active_at: new Date().toISOString()
+    },
+    '77777777-7777-7777-7777-777777777777': {
+      id: '77777777-7777-7777-7777-777777777777',
+      name: 'Humidity Sensor',
+      type: 'Sensor',
+      status: 'offline',
+      organization_id: '7dcfb1a6-d855-4ed7-9a45-2e9f54590c18',
+      last_active_at: new Date(Date.now() - 86400000).toISOString()
+    },
+    '88888888-8888-8888-8888-888888888888': {
+      id: '88888888-8888-8888-8888-888888888888',
+      name: 'Smart Thermostat',
+      type: 'Actuator',
+      status: 'online',
+      organization_id: '7dcfb1a6-d855-4ed7-9a45-2e9f54590c18',
+      last_active_at: new Date().toISOString()
     }
   };
 
