@@ -6,7 +6,7 @@ import DeviceAlarms from '@/components/alarms/DeviceAlarms';
 import DeviceStats from '@/components/DeviceStats';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { AlertTriangle } from 'lucide-react'; // Replace ExclamationTriangleIcon with AlertTriangle
 import { useEffect } from 'react';
 
 export default function DeviceDetail() {
@@ -37,7 +37,7 @@ export default function DeviceDetail() {
   if (error) {
     return (
       <Alert variant="destructive" className="my-4">
-        <ExclamationTriangleIcon className="h-4 w-4" />
+        <AlertTriangle className="h-4 w-4" /> {/* Replaced icon */}
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>
           <p>{error}</p>
