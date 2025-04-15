@@ -1,8 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { toast } from '@/components/ui/use-toast';
 import { fetchDevices, fetchDevice } from '@/services/deviceService';
-import { supabase } from '@/integrations/supabase/client';
 
 export const useDevices = (organizationId?: string) => {
   const {
@@ -12,21 +10,13 @@ export const useDevices = (organizationId?: string) => {
     refetch
   } = useQuery({
     queryKey: ['devices', organizationId],
-    queryFn: async () => {
+    queryFn: () => {
       if (!organizationId) return [];
-      try {
-        return await fetchDevices(organizationId);
-      } catch (err) {
-        console.error('Error in useDevices:', err);
-        toast({
-          title: "Failed to load devices",
-          description: "There was an error loading your devices. Please try again later.",
-          variant: "destructive",
-        });
-        return [];
-      }
+      return fetchDevices(organizationId);
     },
     enabled: !!organizationId,
+    retry: 1, // Only retry once to avoid hammering the server
+    staleTime: 1000 * 60, // Cache for 1 minute
   });
   
   return {
