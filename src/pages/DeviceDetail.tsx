@@ -1,18 +1,18 @@
-
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useDevice } from '@/hooks/useDevices';
 import { Separator } from "@/components/ui/separator";
 import DeviceAlarms from '@/components/alarms/DeviceAlarms';
 import DeviceStats from '@/components/DeviceStats';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, AlertCircle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 
 export default function DeviceDetail() {
   const { id } = useParams<{ id: string }>();
-  const { device, isLoading, error } = useDevice(id);
+  const navigate = useNavigate();
+  const { device, isLoading, error, refetch } = useDevice(id);
   
   // Log for debugging
   useEffect(() => {
@@ -43,16 +43,24 @@ export default function DeviceDetail() {
         <AlertDescription>
           <p>{error}</p>
           <p className="text-sm mt-2">
-            There was a problem loading the device details. This might be due to a database permission issue.
+            There was a problem loading the device details.
           </p>
-          <Button 
-            variant="outline" 
-            className="mt-4"
-            onClick={() => window.location.reload()}
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Retry
-          </Button>
+          <div className="flex gap-3 mt-4">
+            <Button 
+              variant="outline"
+              onClick={() => refetch()}
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => navigate('/dashboard/devices')}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Devices
+            </Button>
+          </div>
         </AlertDescription>
       </Alert>
     );
@@ -64,7 +72,15 @@ export default function DeviceDetail() {
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Device not found</AlertTitle>
         <AlertDescription>
-          We couldn't find a device with the ID: {id}
+          <p>We couldn't find a device with the ID: {id}</p>
+          <Button 
+            variant="outline" 
+            className="mt-4"
+            onClick={() => navigate('/dashboard/devices')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Devices List
+          </Button>
         </AlertDescription>
       </Alert>
     );

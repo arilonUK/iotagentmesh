@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Device } from '@/types/device';
 import { toast } from '@/components/ui/use-toast';
@@ -45,6 +46,9 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
 
 export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
   try {
+    console.log('Fetching device:', deviceId);
+    
+    // Use direct table query instead of complex joins that might cause recursion
     const { data, error } = await supabase
       .from('devices')
       .select('id, name, type, status, organization_id, last_active_at, description')
@@ -58,7 +62,7 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
         description: `Database error: ${error.message}`,
         variant: "destructive",
       });
-      return null;
+      throw new Error(`Failed to load device: ${error.message}`);
     }
     
     if (!data) {
@@ -84,6 +88,6 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
       description: "We couldn't load the device details. Please try again later.",
       variant: "destructive",
     });
-    return null;
+    throw new Error(error instanceof Error ? error.message : "Unknown error fetching device");
   }
 };

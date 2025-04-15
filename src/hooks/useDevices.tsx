@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { fetchDevices, fetchDevice } from '@/services/deviceService';
 import { toast } from '@/components/ui/use-toast';
@@ -67,17 +68,18 @@ export const useDevice = (deviceId?: string) => {
         const result = await fetchDevice(deviceId);
         if (!result) {
           console.log('Device not found:', deviceId);
+          return null;
         } else {
           console.log('Device fetched successfully:', result);
+          return result;
         }
-        return result;
       } catch (err) {
         console.error('Error fetching device:', err);
         throw err;
       }
     },
     enabled: !!deviceId,
-    retry: 2,
+    retry: 1,
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
     staleTime: 1000 * 60
   });
@@ -85,7 +87,7 @@ export const useDevice = (deviceId?: string) => {
   return {
     device,
     isLoading: isLoading || isRefetching,
-    error: error ? (error as Error).message : null,
+    error: error ? (error instanceof Error ? error.message : String(error)) : null,
     refetch
   };
 };
