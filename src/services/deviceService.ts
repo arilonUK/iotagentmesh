@@ -48,12 +48,9 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
   try {
     console.log('Fetching device:', deviceId);
     
-    // Use the simplest possible query - avoid joins completely
+    // Use direct RPC call instead of table query to bypass RLS complexity
     const { data, error } = await supabase
-      .from('devices')
-      .select('*')
-      .eq('id', deviceId)
-      .maybeSingle();
+      .rpc('get_device_by_id', { p_device_id: deviceId });
         
     if (error) {
       console.error('Error fetching device:', error);
