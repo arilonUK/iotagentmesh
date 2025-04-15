@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button'; // Add this import
 import { useDevices } from '@/hooks/useDevices';
 import { useOrganization } from '@/contexts/organization';
 import { toast } from '@/components/ui/use-toast';
