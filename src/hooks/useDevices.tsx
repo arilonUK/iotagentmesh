@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { toast } from '@/components/ui/use-toast';
 import { fetchDevices, fetchDevice } from '@/services/deviceService';
@@ -37,7 +36,8 @@ export const useDevice = (deviceId?: string) => {
   const {
     data: device,
     isLoading,
-    error
+    error,
+    refetch
   } = useQuery({
     queryKey: ['device', deviceId],
     queryFn: async () => {
@@ -51,11 +51,11 @@ export const useDevice = (deviceId?: string) => {
         
         toast({
           title: "Error loading device",
-          description: `Database error: ${err instanceof Error ? err.message : 'Unknown error'}`,
+          description: "We couldn't load the device details. Please try again later.",
           variant: "destructive",
         });
         
-        throw new Error(err instanceof Error ? err.message : 'Failed to fetch device');
+        throw new Error('Failed to fetch device');
       }
     },
     enabled: !!deviceId,
@@ -66,7 +66,8 @@ export const useDevice = (deviceId?: string) => {
   return {
     device,
     isLoading,
-    error: error ? (error as Error).message : null
+    error: error ? (error as Error).message : null,
+    refetch
   };
 };
 
