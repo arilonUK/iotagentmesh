@@ -40,7 +40,7 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
     // Prevent RLS policy recursion by using only essential fields and avoiding complex joins
     const { data, error } = await supabase
       .from('devices')
-      .select('id, name, type, status, organization_id, last_active_at, description')
+      .select('id, name, type, status, organization_id, last_active_at')
       .eq('id', deviceId)
       .maybeSingle();
       
