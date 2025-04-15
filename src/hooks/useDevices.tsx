@@ -71,6 +71,18 @@ export const useDevice = (deviceId?: string) => {
           console.error('Error fetching device:', error);
           
           if (process.env.NODE_ENV === 'development') {
+            // Add mock data for deviceId '4'
+            if (deviceId === '4') {
+              return {
+                id: '4',
+                name: 'Air Quality Monitor',
+                type: 'Sensor',
+                status: 'warning' as const,
+                organization_id: '7dcfb1a6-d855-4ed7-9a45-2e9f54590c18',
+                last_active_at: new Date().toISOString()
+              } as Device;
+            }
+            
             if (deviceId === '1') {
               return {
                 id: '1',
