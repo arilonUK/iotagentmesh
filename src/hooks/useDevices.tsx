@@ -14,7 +14,17 @@ export const useDevices = (organizationId?: string) => {
     queryKey: ['devices', organizationId],
     queryFn: async () => {
       if (!organizationId) return [];
-      return await fetchDevices(organizationId);
+      try {
+        return await fetchDevices(organizationId);
+      } catch (err) {
+        console.error('Error in useDevices:', err);
+        toast({
+          title: "Failed to load devices",
+          description: "There was an error loading your devices. Please try again later.",
+          variant: "destructive",
+        });
+        return [];
+      }
     },
     enabled: !!organizationId,
   });
