@@ -17,21 +17,64 @@ const Devices = () => {
   const { organization } = useOrganization();
   const { devices, isLoading, error, refetch } = useDevices(organization?.id);
   
-  // When organization changes, log for debugging
+  // Enhanced organization context logging
   useEffect(() => {
-    console.log('Current organization:', organization);
+    console.log('Devices page - Organization context:', organization);
     if (organization?.id) {
       console.log(`Devices page using organization ID: ${organization.id}`);
+    } else {
+      console.warn('No organization ID available in Devices page');
     }
   }, [organization]);
 
-  // Filter devices based on user criteria
-  const filteredDevices = devices.filter(device => {
-    const matchesSearch = device.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || device.status === filterStatus;
-    const matchesType = filterType === 'all' || device.type.toLowerCase() === filterType.toLowerCase();
-    return matchesSearch && matchesStatus && matchesType;
-  });
+  // Log when devices are loaded or updated
+  useEffect(() => {
+    console.log('Devices data updated:', { 
+      count: devices.length, 
+      isLoading, 
+      hasError: !!error 
+    });
+    
+    if (devices.length > 0) {
+      console.log('First device sample:', devices[0]);
+    } else {
+      console.log('No devices available to display');
+    }
+  }, [devices, isLoading, error]);
+
+  // Log filter changes
+  useEffect(() => {
+    console.log('Filter criteria changed:', {
+      searchTerm,
+      filterStatus,
+      filterType
+    });
+  }, [searchTerm, filterStatus, filterType]);
+
+  // Filter devices based on user criteria with logging
+  const filteredDevices = React.useMemo(() => {
+    console.log('Running device filtering logic...');
+    
+    const filtered = devices.filter(device => {
+      const matchesSearch = device.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = filterStatus === 'all' || device.status === filterStatus;
+      const matchesType = filterType === 'all' || device.type.toLowerCase() === filterType.toLowerCase();
+      
+      return matchesSearch && matchesStatus && matchesType;
+    });
+    
+    console.log(`Filtering results: ${filtered.length} devices matched out of ${devices.length} total`);
+    
+    if (devices.length > 0 && filtered.length === 0) {
+      console.log('All devices filtered out. Filter criteria:', {
+        searchTerm,
+        filterStatus,
+        filterType
+      });
+    }
+    
+    return filtered;
+  }, [devices, searchTerm, filterStatus, filterType]);
 
   // Handle retry on error
   const handleRetry = () => {
@@ -56,6 +99,7 @@ const Devices = () => {
 
   // Show error state
   if (error) {
+    console.error('Rendering error state:', error);
     return (
       <div className="space-y-8">
         <div>
@@ -75,6 +119,7 @@ const Devices = () => {
 
   // No organization selected
   if (!organization?.id) {
+    console.warn('Rendering no-organization state');
     return (
       <div className="space-y-8">
         <div>
@@ -142,11 +187,14 @@ const Devices = () => {
       </div>
 
       {/* Debug info */}
-      {process.env.NODE_ENV === 'development' && (
+      {true && (
         <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
           <p>Organization ID: {organization?.id}</p>
           <p>Total devices: {devices.length}</p>
           <p>Filtered devices: {filteredDevices.length}</p>
+          <p>Search term: "{searchTerm}"</p>
+          <p>Status filter: {filterStatus}</p>
+          <p>Type filter: {filterType}</p>
         </div>
       )}
 
@@ -166,16 +214,23 @@ const Devices = () => {
         </div>
       ) : (
         <div className="text-center py-12 border rounded-lg bg-muted/10">
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mb-2">
             {devices.length > 0 
               ? "No devices match your filter criteria" 
               : "No devices found for this organization"}
           </p>
-          {devices.length === 0 && (
-            <Button className="mt-4" variant="outline" onClick={handleRetry}>
-              Refresh
-            </Button>
-          )}
+          <p className="text-sm text-muted-foreground mb-4">
+            {devices.length > 0
+              ? "Try adjusting your search or filters above"
+              : "You can add devices using the 'Add Device' button above"}
+          </p>
+          <Button 
+            className="mt-4" 
+            variant="outline" 
+            onClick={handleRetry}
+          >
+            Refresh Devices
+          </Button>
         </div>
       )}
     </div>

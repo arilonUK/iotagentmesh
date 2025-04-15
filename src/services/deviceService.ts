@@ -5,9 +5,14 @@ import { toast } from '@/components/ui/use-toast';
 
 export const fetchDevices = async (organizationId: string): Promise<Device[]> => {
   try {
-    console.log(`Fetching devices for organization: ${organizationId}`);
+    console.log(`Starting fetchDevices with organization ID: ${organizationId}`);
     
-    const { data, error } = await supabase
+    if (!organizationId) {
+      console.error('fetchDevices called with empty organization ID');
+      return [];
+    }
+    
+    const { data, error, status, statusText } = await supabase
       .from('devices')
       .select(`
         id,
@@ -20,8 +25,18 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
       `)
       .eq('organization_id', organizationId);
       
+    console.log(`Supabase query completed with status: ${status} ${statusText}`);
+    
     if (error) {
-      console.error('Error fetching devices:', error);
+      console.error('Error fetching devices from Supabase:', error);
+      console.error('Error details:', {
+        errorCode: error.code,
+        errorMessage: error.message,
+        organizationId,
+        hint: error.hint,
+        details: error.details
+      });
+      
       toast({
         title: "Failed to load devices",
         description: `Database error: ${error.message}`,
@@ -30,14 +45,20 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
       return []; // Return empty array to prevent UI errors
     }
     
-    if (!data || data.length === 0) {
-      console.log('No devices found for organization:', organizationId);
+    if (!data) {
+      console.warn('No data returned from Supabase devices query');
       return [];
     }
     
-    console.log(`Successfully fetched ${data.length} devices:`, data);
+    console.log(`Successfully fetched ${data.length} devices for organization: ${organizationId}`);
     
-    return data.map(item => ({
+    if (data.length === 0) {
+      console.log('Zero devices found for organization:', organizationId);
+    } else {
+      console.log('Device sample:', data[0]);
+    }
+    
+    const mappedDevices = data.map(item => ({
       id: item.id,
       name: item.name,
       type: item.type,
@@ -46,8 +67,12 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
       last_active_at: item.last_active_at,
       description: item.description
     })) as Device[];
+    
+    console.log(`Mapped ${mappedDevices.length} devices successfully`);
+    
+    return mappedDevices;
   } catch (error) {
-    console.error('Error in fetchDevices:', error);
+    console.error('Unexpected error in fetchDevices:', error);
     toast({
       title: "Failed to load devices",
       description: "There was an error with the database query. Please try again later.",

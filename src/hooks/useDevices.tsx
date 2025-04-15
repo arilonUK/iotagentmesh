@@ -4,6 +4,8 @@ import { fetchDevices, fetchDevice } from '@/services/deviceService';
 import { toast } from '@/components/ui/use-toast';
 
 export const useDevices = (organizationId?: string) => {
+  console.log('useDevices hook called with organization ID:', organizationId);
+  
   const {
     data: devices = [],
     isLoading,
@@ -21,7 +23,7 @@ export const useDevices = (organizationId?: string) => {
       console.log('Fetching devices for organization:', organizationId);
       try {
         const result = await fetchDevices(organizationId);
-        console.log(`Found ${result.length} devices for organization ${organizationId}`);
+        console.log(`Found ${result.length} devices for organization ${organizationId}:`, result);
         return result;
       } catch (err) {
         console.error('Error in useDevices query function:', err);
@@ -34,9 +36,14 @@ export const useDevices = (organizationId?: string) => {
     staleTime: 1000 * 60, // Cache for 1 minute
   });
   
-  // Show toast only for actual error responses, not for empty results
-  if (error && !isLoading) {
+  // Enhanced error logging
+  if (error) {
     console.error('Error in useDevices hook:', error);
+    console.error('Error details:', {
+      error,
+      organizationId,
+      devicesCount: devices.length
+    });
   }
   
   return {
