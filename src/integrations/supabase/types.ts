@@ -647,6 +647,18 @@ export type Database = {
           delta: number
         }[]
       }
+      get_devices_by_org_id: {
+        Args: { p_organization_id: string }
+        Returns: {
+          description: string | null
+          id: string
+          last_active_at: string | null
+          name: string
+          organization_id: string
+          status: string
+          type: string
+        }[]
+      }
       get_organization_members: {
         Args: { p_org_id: string }
         Returns: {

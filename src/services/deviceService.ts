@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Device } from '@/types/device';
 import { toast } from '@/components/ui/use-toast';
@@ -12,17 +11,11 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
       return [];
     }
     
-    // Use a direct query instead of RPC
     const { data, error } = await supabase
-      .from('devices')
-      .select('id, name, type, status, organization_id, last_active_at, description')
-      .eq('organization_id', organizationId);
+      .rpc('get_devices_by_org_id', { p_organization_id: organizationId });
     
     if (error) {
       console.error('Error fetching devices:', error);
-      
-      // Try fallback approach with more detailed logging
-      console.log('Fallback query failed:', error.message);
       toast({
         title: "Failed to load devices",
         description: `Database error: ${error.message}`,
@@ -38,7 +31,6 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
     
     console.log(`Successfully fetched ${data.length} devices for organization: ${organizationId}`);
     
-    // Ensure we're returning the correct Device[] type
     return data as Device[];
   } catch (error) {
     console.error('Unexpected error in fetchDevices:', error);

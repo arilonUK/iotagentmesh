@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { fetchDevices, fetchDevice } from '@/services/deviceService';
 import { toast } from '@/components/ui/use-toast';
@@ -27,23 +26,17 @@ export const useDevices = (organizationId?: string) => {
         return result;
       } catch (err) {
         console.error('Error in useDevices query function:', err);
-        throw err; // Let the error handling in useQuery take care of this
+        throw err;
       }
     },
     enabled: !!organizationId,
-    retry: 3,
+    retry: 2,
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
-    staleTime: 1000 * 60, // Cache for 1 minute to reduce API calls but still be relatively fresh
+    staleTime: 1000 * 30, // Cache for 30 seconds
   });
   
-  // Enhanced error logging
   if (error) {
     console.error('Error in useDevices hook:', error);
-    console.error('Error details:', {
-      error,
-      organizationId,
-      devicesCount: devices.length
-    });
   }
   
   return {
