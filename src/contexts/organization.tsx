@@ -18,17 +18,19 @@ const OrganizationContext = createContext<OrganizationContextType | undefined>(u
 
 export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
   const [organization, setOrganization] = useState<Organization | null>(null);
-  const { user } = useAuth();
+  const { organization: authOrganization } = useAuth();
   
   // Initialize organization from auth context if available
   useEffect(() => {
-    if (user?.organizationId) {
+    if (authOrganization) {
       setOrganization({
-        id: user.organizationId,
-        name: user.organizationName || "My Organization",
+        id: authOrganization.id,
+        name: authOrganization.name,
+        slug: authOrganization.slug,
+        logo: authOrganization.logo
       });
     }
-  }, [user]);
+  }, [authOrganization]);
 
   return (
     <OrganizationContext.Provider value={{ organization, setOrganization }}>
