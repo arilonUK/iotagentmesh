@@ -1,74 +1,38 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Device } from '@/types/device';
-import { getMockDevice } from '@/mocks/deviceMocks';
 import { toast } from '@/components/ui/use-toast';
 
 export const fetchDevices = async (organizationId: string): Promise<Device[]> => {
-  try {
-    // Use a simpler query that avoids complex joins which might trigger recursive policies
-    const { data, error } = await supabase
-      .from('devices')
-      .select('id, name, type, status, organization_id, last_active_at')
-      .eq('organization_id', organizationId);
-      
-    if (error) {
-      console.error('Error fetching devices:', error);
-      throw error;
-    }
-      
-    return data as Device[];
-  } catch (err) {
-    console.error('Failed to fetch devices:', err);
+  const { data, error } = await supabase
+    .from('devices')
+    .select('id, name, type, status, organization_id, last_active_at')
+    .eq('organization_id', organizationId);
     
-    // In development, fall back to mock data
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Returning mock devices for development');
-      return [
-        getMockDevice('device-1'),
-        getMockDevice('device-2'),
-        getMockDevice('device-3')
-      ];
-    }
-    
-    throw err;
+  if (error) {
+    console.error('Error fetching devices:', error);
+    throw error;
   }
+    
+  return data as Device[];
 };
 
 export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
-  try {
-    // Prevent RLS policy recursion by using only essential fields and avoiding complex joins
-    const { data, error } = await supabase
-      .from('devices')
-      .select('id, name, type, status, organization_id, last_active_at')
-      .eq('id', deviceId)
-      .maybeSingle();
-      
-    if (error) {
-      console.error('Error fetching device:', error);
-      
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Returning mock data for deviceId:', deviceId);
-        toast({
-          title: "Using mock data",
-          description: "Database error encountered. Using mock device data for development.",
-        });
-        return getMockDevice(deviceId);
-      }
-      
-      throw error;
-    }
+  const { data, error } = await supabase
+    .from('devices')
+    .select('id, name, type, status, organization_id, last_active_at')
+    .eq('id', deviceId)
+    .maybeSingle();
     
-    return data as Device;
-  } catch (err) {
-    console.error('Device fetch failed:', err);
-    
-    // Fall back to mock data in development environment
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Falling back to mock data after error');
-      return getMockDevice(deviceId);
-    }
-    
-    throw err;
+  if (error) {
+    console.error('Error fetching device:', error);
+    toast({
+      title: "Error loading device",
+      description: "We couldn't load the device details. Please try again later.",
+      variant: "destructive",
+    });
+    throw error;
   }
+  
+  return data;
 };

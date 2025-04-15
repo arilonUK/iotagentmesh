@@ -4,40 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, ArrowUp, ArrowDown, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import DeviceCard from '@/components/DeviceCard';
-
-// Updated mock devices with real UUIDs that match those in the database
-const mockDevices = [
-  {
-    id: '11111111-1111-1111-1111-111111111111',
-    name: 'Temperature Sensor',
-    type: 'Sensor',
-    status: 'online' as const,
-    lastActive: '2 minutes ago'
-  },
-  {
-    id: '22222222-2222-2222-2222-222222222222',
-    name: 'Smart Light',
-    type: 'Actuator',
-    status: 'online' as const,
-    lastActive: '5 minutes ago'
-  },
-  {
-    id: '33333333-3333-3333-3333-333333333333',
-    name: 'Motion Detector',
-    type: 'Sensor',
-    status: 'offline' as const,
-    lastActive: '3 hours ago'
-  },
-  {
-    id: '44444444-4444-4444-4444-444444444444',
-    name: 'Air Quality Monitor',
-    type: 'Sensor',
-    status: 'warning' as const,
-    lastActive: 'Just now'
-  }
-];
+import { useDevices } from '@/hooks/useDevices';
+import { useOrganization } from '@/contexts/organization';
 
 const Dashboard = () => {
+  const { organization } = useOrganization();
+  const { devices, isLoading } = useDevices(organization?.id);
+
+  // Get only the first 4 devices for the dashboard preview
+  const recentDevices = devices.slice(0, 4);
+
   return (
     <div className="space-y-8">
       <div>
@@ -55,10 +31,10 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">24</div>
+              <div className="text-2xl font-bold">{devices.length}</div>
               <div className="text-xs font-medium flex items-center text-iot-success">
                 <ArrowUp className="mr-1 h-4 w-4" />
-                12%
+                Recent
               </div>
             </div>
           </CardContent>
@@ -72,27 +48,12 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">18</div>
-              <div className="text-xs font-medium flex items-center text-iot-success">
-                <ArrowUp className="mr-1 h-4 w-4" />
-                5%
+              <div className="text-2xl font-bold">
+                {devices.filter(d => d.status === 'online').length}
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Data Transfer
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">2.4 GB</div>
-              <div className="text-xs font-medium flex items-center text-iot-error">
-                <ArrowDown className="mr-1 h-4 w-4" />
-                3%
+              <div className="text-xs font-medium flex items-center text-iot-success">
+                <Activity className="mr-1 h-4 w-4" />
+                Online
               </div>
             </div>
           </CardContent>
@@ -111,6 +72,24 @@ const Dashboard = () => {
             </div>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Warnings
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="text-2xl font-bold">
+                {devices.filter(d => d.status === 'warning').length}
+              </div>
+              <div className="text-xs font-medium flex items-center text-yellow-500">
+                <Activity className="h-5 w-5" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Recent Devices */}
@@ -122,11 +101,22 @@ const Dashboard = () => {
             <ArrowRight className="ml-1 h-4 w-4" />
           </Link>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {mockDevices.map((device) => (
-            <DeviceCard key={device.id} {...device} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-48">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {recentDevices.map((device) => (
+              <DeviceCard key={device.id} {...device} />
+            ))}
+            {recentDevices.length === 0 && (
+              <div className="col-span-full text-center py-8 text-muted-foreground">
+                No devices found. Add your first device to get started.
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
