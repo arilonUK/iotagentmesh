@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AlarmEvent } from '@/types/alarm';
@@ -226,48 +227,51 @@ export default function DeviceAlarms({ deviceId }: DeviceAlarmsProps) {
     }
   }
 
-  function acknowledgeAlarm(eventId: string) {
+  async function acknowledgeAlarm(eventId: string) {
     try {
-      supabase
+      // Get the current user ID asynchronously first
+      const { data } = await supabase.auth.getUser();
+      const userId = data.user?.id || null;
+      
+      // Now update the alarm event with the user ID
+      const { error } = await supabase
         .from('alarm_events')
         .update({ 
           status: 'acknowledged',
           acknowledged_at: new Date().toISOString(),
-          acknowledged_by: supabase.auth.getUser().then(({ data }) => data.user?.id)
+          acknowledged_by: userId
         })
-        .eq('id', eventId)
-        .then(({ error }) => {
-          if (error) throw error;
+        .eq('id', eventId);
+        
+      if (error) throw error;
 
-          setAlarmEvents(prev => prev.map(event => 
-            event.id === eventId 
-              ? { ...event, status: 'acknowledged', acknowledged_at: new Date().toISOString() } 
-              : event
-          ));
-        });
+      setAlarmEvents(prev => prev.map(event => 
+        event.id === eventId 
+          ? { ...event, status: 'acknowledged', acknowledged_at: new Date().toISOString() } 
+          : event
+      ));
     } catch (err: any) {
       console.error('Error acknowledging alarm:', err);
     }
   }
 
-  function resolveAlarm(eventId: string) {
+  async function resolveAlarm(eventId: string) {
     try {
-      supabase
+      const { error } = await supabase
         .from('alarm_events')
         .update({ 
           status: 'resolved',
           resolved_at: new Date().toISOString()
         })
-        .eq('id', eventId)
-        .then(({ error }) => {
-          if (error) throw error;
+        .eq('id', eventId);
+        
+      if (error) throw error;
 
-          setAlarmEvents(prev => prev.map(event => 
-            event.id === eventId 
-              ? { ...event, status: 'resolved', resolved_at: new Date().toISOString() } 
-              : event
-          ));
-        });
+      setAlarmEvents(prev => prev.map(event => 
+        event.id === eventId 
+          ? { ...event, status: 'resolved', resolved_at: new Date().toISOString() } 
+          : event
+      ));
     } catch (err: any) {
       console.error('Error resolving alarm:', err);
     }
