@@ -11,16 +11,26 @@ export function useDeviceAlarms(deviceId: string) {
   useEffect(() => {
     const fetchAlarmEvents = async () => {
       setIsLoading(true);
+      setError(null);
+      
       try {
+        // Step 1: Get the alarm events for the device
         const { data: eventsData, error: eventsError } = await supabase
           .from('alarm_events')
-          .select('*')
+          .select('id, alarm_id, device_id, status, triggered_at, acknowledged_at, resolved_at, acknowledged_by, trigger_value, message')
           .eq('device_id', deviceId)
           .order('triggered_at', { ascending: false });
 
         if (eventsError) throw eventsError;
         
-        const alarmIds = eventsData?.map(event => event.alarm_id) || [];
+        if (!eventsData || eventsData.length === 0) {
+          setAlarmEvents([]);
+          setIsLoading(false);
+          return;
+        }
+        
+        // Step 2: Get the alarm details separately
+        const alarmIds = eventsData.map(event => event.alarm_id);
         const { data: alarmsData, error: alarmsError } = await supabase
           .from('alarms')
           .select('id, name, description, severity')
@@ -28,6 +38,7 @@ export function useDeviceAlarms(deviceId: string) {
           
         if (alarmsError) throw alarmsError;
         
+        // Step 3: Get the device details separately
         const { data: deviceData, error: deviceError } = await supabase
           .from('devices')
           .select('id, name, type')
@@ -36,7 +47,8 @@ export function useDeviceAlarms(deviceId: string) {
           
         if (deviceError && deviceError.code !== 'PGRST116') throw deviceError;
         
-        const combinedData = eventsData?.map(event => {
+        // Step 4: Combine the data
+        const combinedData = eventsData.map(event => {
           const alarm = alarmsData?.find(a => a.id === event.alarm_id);
           return {
             ...event,
@@ -52,7 +64,7 @@ export function useDeviceAlarms(deviceId: string) {
           };
         });
         
-        setAlarmEvents(combinedData || []);
+        setAlarmEvents(combinedData);
       } catch (err: any) {
         console.error('Error fetching alarm events:', err);
         setError(err.message);
@@ -66,9 +78,14 @@ export function useDeviceAlarms(deviceId: string) {
 
   const acknowledgeAlarm = async (eventId: string) => {
     try {
-      const { data } = await supabase.auth.getUser();
-      const userId = data.user?.id || null;
+      // First get the current user
+      const { data: userData, error: userError } = await supabase.auth.getUser();
       
+      if (userError) throw userError;
+      
+      const userId = userData?.user?.id || null;
+      
+      // Then update the alarm event
       const { error } = await supabase
         .from('alarm_events')
         .update({ 
