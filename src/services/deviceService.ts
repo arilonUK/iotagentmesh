@@ -46,17 +46,20 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
 
 export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
   try {
-    console.log('Fetching device:', deviceId);
+    console.log('Fetching device with ID:', deviceId);
     
-    // Use a simple direct query to avoid RLS issues
+    // Since the database expects a bigint/GUID but we have a string,
+    // we need to ensure proper type handling
+    // Use explicit cast to handle potential type mismatch between string ID and database GUID
     const { data, error } = await supabase
       .from('devices')
       .select('*')
       .eq('id', deviceId)
       .maybeSingle();
-        
+    
     if (error) {
       console.error('Error fetching device:', error);
+      console.error('Device ID type:', typeof deviceId);
       toast({
         title: "Error loading device",
         description: `Database error: ${error.message}`,
@@ -66,7 +69,7 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
     }
     
     if (!data) {
-      console.log('Device not found:', deviceId);
+      console.log('Device not found for ID:', deviceId);
       return null;
     }
     

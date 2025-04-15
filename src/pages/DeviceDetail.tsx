@@ -22,8 +22,10 @@ export default function DeviceDetail() {
     }
     if (device) {
       console.log('Device loaded:', device);
+    } else {
+      console.log('No device found for ID:', id);
     }
-  }, [device, error]);
+  }, [device, error, id]);
 
   if (isLoading) {
     return (

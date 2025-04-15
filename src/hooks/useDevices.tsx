@@ -65,9 +65,13 @@ export const useDevice = (deviceId?: string) => {
       
       console.log('Fetching device:', deviceId);
       try {
-        const result = await fetchDevice(deviceId);
+        // Ensure deviceId is properly formatted before passing to fetch function
+        const formattedDeviceId = deviceId.trim();
+        console.log('Formatted device ID:', formattedDeviceId);
+        
+        const result = await fetchDevice(formattedDeviceId);
         if (!result) {
-          console.log('Device not found:', deviceId);
+          console.log('Device not found:', formattedDeviceId);
           // Not throwing here, just returning null for cleaner handling
           return null;
         } else {
