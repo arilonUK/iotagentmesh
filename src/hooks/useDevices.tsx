@@ -136,3 +136,49 @@ export const useDevice = (deviceId?: string) => {
     error: error ? (error as Error).message : null
   };
 };
+
+export const verifyMockData = async (organizationId: string) => {
+  try {
+    // Verify devices
+    const { data: devices, error: deviceError } = await supabase
+      .from('devices')
+      .select('*')
+      .eq('organization_id', organizationId);
+
+    if (deviceError) {
+      console.error('Error fetching devices:', deviceError);
+      throw deviceError;
+    }
+
+    console.log('Devices in the database:', devices);
+
+    // Verify device readings
+    const { data: readings, error: readingsError } = await supabase
+      .from('device_readings')
+      .select('*')
+      .eq('organization_id', organizationId);
+
+    if (readingsError) {
+      console.error('Error fetching device readings:', readingsError);
+      throw readingsError;
+    }
+
+    console.log('Device Readings in the database:', readings);
+
+    return {
+      devices,
+      readings
+    };
+  } catch (err) {
+    console.error('Error verifying mock data:', err);
+    throw err;
+  }
+};
+
+export const useVerifyMockData = (organizationId?: string) => {
+  return useQuery({
+    queryKey: ['mock-data-verification', organizationId],
+    queryFn: () => verifyMockData(organizationId!),
+    enabled: !!organizationId
+  });
+};
