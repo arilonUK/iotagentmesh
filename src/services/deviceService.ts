@@ -48,10 +48,10 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
   try {
     console.log('Fetching device:', deviceId);
     
-    // Use direct table query instead of complex joins that might cause recursion
+    // Use a simpler direct query to avoid RLS recursion issues
     const { data, error } = await supabase
       .from('devices')
-      .select('id, name, type, status, organization_id, last_active_at, description')
+      .select('*')  // Simplified to select all fields directly
       .eq('id', deviceId)
       .maybeSingle();
         
@@ -72,15 +72,8 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
     
     console.log('Device fetched successfully:', data);
     
-    return {
-      id: data.id,
-      name: data.name,
-      type: data.type,
-      status: data.status as 'online' | 'offline' | 'warning',
-      organization_id: data.organization_id,
-      last_active_at: data.last_active_at,
-      description: data.description
-    };
+    // Cast to Device type
+    return data as Device;
   } catch (error) {
     console.error('Error fetching device details:', error);
     toast({
