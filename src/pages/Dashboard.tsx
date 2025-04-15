@@ -108,7 +108,14 @@ const Dashboard = () => {
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {recentDevices.map((device) => (
-              <DeviceCard key={device.id} {...device} />
+              <DeviceCard 
+                key={device.id} 
+                id={device.id}
+                name={device.name}
+                type={device.type}
+                status={device.status}
+                last_active_at={device.last_active_at}
+              />
             ))}
             {recentDevices.length === 0 && (
               <div className="col-span-full text-center py-8 text-muted-foreground">

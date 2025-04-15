@@ -85,7 +85,14 @@ const Devices = () => {
       {filteredDevices.length > 0 ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredDevices.map((device) => (
-            <DeviceCard key={device.id} {...device} />
+            <DeviceCard 
+              key={device.id}
+              id={device.id}
+              name={device.name}
+              type={device.type}
+              status={device.status}
+              last_active_at={device.last_active_at}
+            />
           ))}
         </div>
       ) : (

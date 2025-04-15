@@ -10,7 +10,7 @@ interface DeviceCardProps {
   name: string;
   type: string;
   status: 'online' | 'offline' | 'warning';
-  lastActive: string;
+  last_active_at: string;
 }
 
 const statusColors = {
@@ -19,7 +19,7 @@ const statusColors = {
   warning: 'bg-iot-warning',
 };
 
-const DeviceCard: React.FC<DeviceCardProps> = ({ id, name, type, status, lastActive }) => {
+const DeviceCard: React.FC<DeviceCardProps> = ({ id, name, type, status, last_active_at }) => {
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-2">
@@ -39,7 +39,7 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ id, name, type, status, lastAct
           </div>
           <div className="flex justify-between">
             <span>Last active:</span>
-            <span className="font-medium text-foreground">{lastActive}</span>
+            <span className="font-medium text-foreground">{new Date(last_active_at).toLocaleString()}</span>
           </div>
         </div>
       </CardContent>

@@ -14,7 +14,10 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
     throw error;
   }
     
-  return data as Device[];
+  return data.map(item => ({
+    ...item,
+    status: item.status as 'online' | 'offline' | 'warning'
+  })) as Device[];
 };
 
 export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
@@ -34,5 +37,10 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
     throw error;
   }
   
-  return data;
+  if (!data) return null;
+  
+  return {
+    ...data,
+    status: data.status as 'online' | 'offline' | 'warning'
+  };
 };
