@@ -17,6 +17,8 @@ export default function DeviceDetail() {
   
   // Log for debugging
   useEffect(() => {
+    console.log('DeviceDetail component - Device ID from URL:', id);
+    
     if (error) {
       console.error('Device detail error:', error);
     }

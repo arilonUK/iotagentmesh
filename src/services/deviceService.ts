@@ -3,6 +3,36 @@ import { supabase } from '@/integrations/supabase/client';
 import { Device } from '@/types/device';
 import { toast } from '@/components/ui/use-toast';
 
+/**
+ * Validates and formats a device ID to ensure it's in the correct format for the database
+ * @param deviceId The device ID to validate
+ * @returns A properly formatted device ID or the original if it's already valid
+ */
+const validateDeviceId = (deviceId: string): string => {
+  // Log the original input for debugging
+  console.log('Validating device ID:', deviceId, 'Type:', typeof deviceId);
+
+  if (!deviceId) {
+    console.warn('Empty device ID provided to validator');
+    return deviceId;
+  }
+
+  // Remove any extra whitespace
+  let formattedId = deviceId.trim();
+  
+  // Check if it's a valid UUID format (8-4-4-4-12)
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const isValidUuid = uuidRegex.test(formattedId);
+  
+  if (!isValidUuid) {
+    console.warn(`Device ID ${formattedId} is not in valid UUID format`);
+  } else {
+    console.log(`Device ID ${formattedId} is in valid UUID format`);
+  }
+  
+  return formattedId;
+};
+
 export const fetchDevices = async (organizationId: string): Promise<Device[]> => {
   try {
     console.log(`Starting fetchDevices with organization ID: ${organizationId}`);
@@ -46,20 +76,31 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
 
 export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
   try {
-    console.log('Fetching device with ID:', deviceId);
+    // Validate and format the device ID 
+    const validDeviceId = validateDeviceId(deviceId);
+    console.log('Fetching device with validated ID:', validDeviceId);
     
-    // Since the database expects a bigint/GUID but we have a string,
-    // we need to ensure proper type handling
-    // Use explicit cast to handle potential type mismatch between string ID and database GUID
+    if (!validDeviceId) {
+      console.error('Invalid device ID provided:', deviceId);
+      toast({
+        title: "Error loading device",
+        description: "Invalid device ID format",
+        variant: "destructive",
+      });
+      return null;
+    }
+    
+    // Using .maybeSingle() instead of .single() to handle the case where no device is found
     const { data, error } = await supabase
       .from('devices')
       .select('*')
-      .eq('id', deviceId)
+      .eq('id', validDeviceId)
       .maybeSingle();
     
     if (error) {
       console.error('Error fetching device:', error);
-      console.error('Device ID type:', typeof deviceId);
+      console.error('Device ID:', validDeviceId);
+      console.error('Device ID type:', typeof validDeviceId);
       toast({
         title: "Error loading device",
         description: `Database error: ${error.message}`,
@@ -69,7 +110,7 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
     }
     
     if (!data) {
-      console.log('Device not found for ID:', deviceId);
+      console.log('Device not found for ID:', validDeviceId);
       return null;
     }
     
