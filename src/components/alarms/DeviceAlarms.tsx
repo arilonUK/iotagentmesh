@@ -1,86 +1,21 @@
 
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { AlarmEvent } from '@/types/alarm';
-import { 
-  Table, 
-  TableHeader, 
-  TableRow, 
-  TableHead, 
-  TableBody, 
-  TableCell 
-} from '@/components/ui/table';
+import { useState } from 'react';
+import { formatDistanceToNow } from 'date-fns';
+import { CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Clock, AlertTriangle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { useDeviceAlarms } from '@/hooks/useDeviceAlarms';
+import { AlarmStatusBadge } from './AlarmStatusBadge';
+import { AlarmSeverityIcon } from './AlarmSeverityIcon';
 
 interface DeviceAlarmsProps {
   deviceId: string;
 }
 
 export default function DeviceAlarms({ deviceId }: DeviceAlarmsProps) {
-  const [alarmEvents, setAlarmEvents] = useState<AlarmEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
-
-  useEffect(() => {
-    const fetchAlarmEvents = async () => {
-      setIsLoading(true);
-      try {
-        const { data: eventsData, error: eventsError } = await supabase
-          .from('alarm_events')
-          .select('*')
-          .eq('device_id', deviceId)
-          .order('triggered_at', { ascending: false });
-
-        if (eventsError) throw eventsError;
-        
-        const alarmIds = eventsData?.map(event => event.alarm_id) || [];
-        const { data: alarmsData, error: alarmsError } = await supabase
-          .from('alarms')
-          .select('id, name, description, severity')
-          .in('id', alarmIds);
-          
-        if (alarmsError) throw alarmsError;
-        
-        const { data: deviceData, error: deviceError } = await supabase
-          .from('devices')
-          .select('id, name, type')
-          .eq('id', deviceId)
-          .single();
-          
-        if (deviceError && deviceError.code !== 'PGRST116') throw deviceError;
-        
-        const combinedData = eventsData?.map(event => {
-          const alarm = alarmsData?.find(a => a.id === event.alarm_id);
-          return {
-            ...event,
-            alarm: alarm ? {
-              name: alarm.name,
-              description: alarm.description,
-              severity: alarm.severity
-            } : undefined,
-            device: deviceData ? {
-              name: deviceData.name,
-              type: deviceData.type
-            } : undefined
-          };
-        });
-        
-        setAlarmEvents(combinedData || []);
-      } catch (err: any) {
-        console.error('Error fetching alarm events:', err);
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAlarmEvents();
-  }, [deviceId]);
+  const { alarmEvents, isLoading, error, acknowledgeAlarm, resolveAlarm } = useDeviceAlarms(deviceId);
 
   if (isLoading) {
     return (
@@ -165,7 +100,7 @@ export default function DeviceAlarms({ deviceId }: DeviceAlarmsProps) {
               {displayEvents.map((event) => (
                 <TableRow key={event.id}>
                   <TableCell>
-                    {getSeverityIcon(event.alarm?.severity || 'info')}
+                    <AlarmSeverityIcon severity={event.alarm?.severity || 'info'} />
                   </TableCell>
                   <TableCell className="font-medium">
                     <div className="font-medium">{event.alarm?.name}</div>
@@ -174,7 +109,9 @@ export default function DeviceAlarms({ deviceId }: DeviceAlarmsProps) {
                   <TableCell>
                     {formatDistanceToNow(new Date(event.triggered_at), { addSuffix: true })}
                   </TableCell>
-                  <TableCell>{getStatusBadge(event.status)}</TableCell>
+                  <TableCell>
+                    <AlarmStatusBadge status={event.status} />
+                  </TableCell>
                   <TableCell className="text-right">
                     {event.status === 'active' && (
                       <div className="flex justify-end gap-2">
@@ -200,80 +137,4 @@ export default function DeviceAlarms({ deviceId }: DeviceAlarmsProps) {
       </CardContent>
     </Card>
   );
-
-  function getStatusBadge(status: string) {
-    switch (status) {
-      case 'active':
-        return <Badge variant="destructive">Active</Badge>;
-      case 'acknowledged':
-        return <Badge variant="default">Acknowledged</Badge>;
-      case 'resolved':
-        return <Badge variant="secondary">Resolved</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  }
-
-  function getSeverityIcon(severity: string) {
-    switch (severity) {
-      case 'critical':
-        return <AlertCircle className="text-red-500" />;
-      case 'warning':
-        return <AlertTriangle className="text-yellow-500" />;
-      case 'info':
-        return <Clock className="text-blue-500" />;
-      default:
-        return <AlertCircle />;
-    }
-  }
-
-  async function acknowledgeAlarm(eventId: string) {
-    try {
-      // Get the current user ID asynchronously first
-      const { data } = await supabase.auth.getUser();
-      const userId = data.user?.id || null;
-      
-      // Now update the alarm event with the user ID
-      const { error } = await supabase
-        .from('alarm_events')
-        .update({ 
-          status: 'acknowledged',
-          acknowledged_at: new Date().toISOString(),
-          acknowledged_by: userId
-        })
-        .eq('id', eventId);
-        
-      if (error) throw error;
-
-      setAlarmEvents(prev => prev.map(event => 
-        event.id === eventId 
-          ? { ...event, status: 'acknowledged', acknowledged_at: new Date().toISOString() } 
-          : event
-      ));
-    } catch (err: any) {
-      console.error('Error acknowledging alarm:', err);
-    }
-  }
-
-  async function resolveAlarm(eventId: string) {
-    try {
-      const { error } = await supabase
-        .from('alarm_events')
-        .update({ 
-          status: 'resolved',
-          resolved_at: new Date().toISOString()
-        })
-        .eq('id', eventId);
-        
-      if (error) throw error;
-
-      setAlarmEvents(prev => prev.map(event => 
-        event.id === eventId 
-          ? { ...event, status: 'resolved', resolved_at: new Date().toISOString() } 
-          : event
-      ));
-    } catch (err: any) {
-      console.error('Error resolving alarm:', err);
-    }
-  }
 }
