@@ -33,7 +33,7 @@ export const useDevices = (organizationId?: string) => {
     enabled: !!organizationId,
     retry: 3,
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes to reduce API calls
+    staleTime: 1000 * 60, // Cache for 1 minute to reduce API calls but still be relatively fresh
   });
   
   // Enhanced error logging
@@ -86,7 +86,7 @@ export const useDevice = (deviceId?: string) => {
     enabled: !!deviceId,
     retry: 2,
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
-    staleTime: 1000 * 60 * 5
+    staleTime: 1000 * 60
   });
   
   return {

@@ -12,38 +12,22 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
       return [];
     }
     
-    // Use a raw SQL query to bypass RLS issues
-    const { data, error } = await supabase.rpc('get_devices_by_org_id', {
-      p_organization_id: organizationId
-    });
+    // Use a direct query instead of RPC
+    const { data, error } = await supabase
+      .from('devices')
+      .select('id, name, type, status, organization_id, last_active_at, description')
+      .eq('organization_id', organizationId);
     
     if (error) {
       console.error('Error fetching devices:', error);
       
-      // Try fallback approach - direct query with service key
-      console.log('Attempting fallback query for devices');
-      
-      // Simple select query
-      const { data: fallbackData, error: fallbackError } = await supabase
-        .from('devices')
-        .select('*')
-        .eq('organization_id', organizationId);
-      
-      if (fallbackError) {
-        console.error('Fallback query also failed:', fallbackError);
-        toast({
-          title: "Failed to load devices",
-          description: `Database error: ${fallbackError.message}`,
-          variant: "destructive",
-        });
-        return [];
-      }
-      
-      if (fallbackData) {
-        console.log(`Successfully fetched ${fallbackData.length} devices with fallback query`);
-        return fallbackData as Device[];
-      }
-      
+      // Try fallback approach with more detailed logging
+      console.log('Fallback query failed:', error.message);
+      toast({
+        title: "Failed to load devices",
+        description: `Database error: ${error.message}`,
+        variant: "destructive",
+      });
       return [];
     }
     
@@ -54,6 +38,7 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
     
     console.log(`Successfully fetched ${data.length} devices for organization: ${organizationId}`);
     
+    // Ensure we're returning the correct Device[] type
     return data as Device[];
   } catch (error) {
     console.error('Unexpected error in fetchDevices:', error);
