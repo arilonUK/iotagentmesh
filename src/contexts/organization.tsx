@@ -1,5 +1,6 @@
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { useAuth } from "@/contexts/auth";
 
 interface Organization {
   id: string;
@@ -16,10 +17,18 @@ interface OrganizationContextType {
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
 
 export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
-  const [organization, setOrganization] = useState<Organization | null>({
-    id: "1",
-    name: "Demo Org",
-  });
+  const [organization, setOrganization] = useState<Organization | null>(null);
+  const { user } = useAuth();
+  
+  // Initialize organization from auth context if available
+  useEffect(() => {
+    if (user?.organizationId) {
+      setOrganization({
+        id: user.organizationId,
+        name: user.organizationName || "My Organization",
+      });
+    }
+  }, [user]);
 
   return (
     <OrganizationContext.Provider value={{ organization, setOrganization }}>

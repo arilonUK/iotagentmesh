@@ -5,7 +5,9 @@ import { toast } from '@/components/ui/use-toast';
 
 export const fetchDevices = async (organizationId: string): Promise<Device[]> => {
   try {
-    // Direct query without any joins to avoid RLS policy issues
+    console.log(`Fetching devices for organization: ${organizationId}`);
+    
+    // Direct query to the devices table with the organization filter
     const { data, error } = await supabase
       .from('devices')
       .select('id, name, type, status, organization_id, last_active_at')
@@ -25,6 +27,8 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
       console.log('No devices found for organization:', organizationId);
       return [];
     }
+    
+    console.log(`Successfully fetched ${data.length} devices`);
     
     return data.map(item => ({
       ...item,
