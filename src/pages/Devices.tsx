@@ -1,20 +1,31 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Plus, Filter } from 'lucide-react';
+import { Search, Plus, Filter, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import DeviceCard from '@/components/DeviceCard';
 import { useDevices } from '@/hooks/useDevices';
 import { useOrganization } from '@/contexts/organization';
+import { toast } from '@/components/ui/use-toast';
 
 const Devices = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterType, setFilterType] = useState('all');
   const { organization } = useOrganization();
-  const { devices, isLoading } = useDevices(organization?.id);
+  const { devices, isLoading, error, refetch } = useDevices(organization?.id);
+  
+  // When organization changes, log for debugging
+  useEffect(() => {
+    console.log('Current organization:', organization);
+    if (organization?.id) {
+      console.log(`Devices page using organization ID: ${organization.id}`);
+    }
+  }, [organization]);
 
+  // Filter devices based on user criteria
   const filteredDevices = devices.filter(device => {
     const matchesSearch = device.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || device.status === filterStatus;
@@ -22,10 +33,59 @@ const Devices = () => {
     return matchesSearch && matchesStatus && matchesType;
   });
 
-  if (isLoading) {
+  // Handle retry on error
+  const handleRetry = () => {
+    toast({ title: "Retrying", description: "Attempting to fetch devices again." });
+    refetch();
+  };
+
+  // Show loading state
+  if (isLoading && devices.length === 0) {
     return (
-      <div className="flex items-center justify-center h-48">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Devices</h1>
+          <p className="text-muted-foreground">Loading your connected devices...</p>
+        </div>
+        <div className="flex items-center justify-center h-48">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Devices</h1>
+          <p className="text-muted-foreground">There was a problem fetching your devices.</p>
+        </div>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Error loading devices: {error instanceof Error ? error.message : String(error)}
+          </AlertDescription>
+        </Alert>
+        <Button onClick={handleRetry}>Retry</Button>
+      </div>
+    );
+  }
+
+  // No organization selected
+  if (!organization?.id) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Devices</h1>
+          <p className="text-muted-foreground">No organization selected.</p>
+        </div>
+        <Alert>
+          <AlertDescription>
+            Please select an organization to view devices.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
@@ -81,6 +141,15 @@ const Devices = () => {
         </div>
       </div>
 
+      {/* Debug info */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
+          <p>Organization ID: {organization?.id}</p>
+          <p>Total devices: {devices.length}</p>
+          <p>Filtered devices: {filteredDevices.length}</p>
+        </div>
+      )}
+
       {/* Devices Grid */}
       {filteredDevices.length > 0 ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -96,8 +165,17 @@ const Devices = () => {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No devices found matching your criteria</p>
+        <div className="text-center py-12 border rounded-lg bg-muted/10">
+          <p className="text-muted-foreground">
+            {devices.length > 0 
+              ? "No devices match your filter criteria" 
+              : "No devices found for this organization"}
+          </p>
+          {devices.length === 0 && (
+            <Button className="mt-4" variant="outline" onClick={handleRetry}>
+              Refresh
+            </Button>
+          )}
         </div>
       )}
     </div>

@@ -8,7 +8,8 @@ export const useDevices = (organizationId?: string) => {
     data: devices = [],
     isLoading,
     error,
-    refetch
+    refetch,
+    isRefetching
   } = useQuery({
     queryKey: ['devices', organizationId],
     queryFn: async () => {
@@ -20,31 +21,27 @@ export const useDevices = (organizationId?: string) => {
       console.log('Fetching devices for organization:', organizationId);
       try {
         const result = await fetchDevices(organizationId);
-        console.log(`Found ${result.length} devices`);
+        console.log(`Found ${result.length} devices for organization ${organizationId}`);
         return result;
       } catch (err) {
         console.error('Error in useDevices query function:', err);
-        return []; // Return empty array to prevent UI errors
+        throw err; // Let the error handling in useQuery take care of this
       }
     },
     enabled: !!organizationId,
-    retry: 1, // Only retry once to avoid hammering the server
+    retry: 2, // Retry twice to handle transient network issues
+    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000), // Exponential backoff
     staleTime: 1000 * 60, // Cache for 1 minute
   });
   
   // Show toast only for actual error responses, not for empty results
   if (error && !isLoading) {
     console.error('Error in useDevices hook:', error);
-    toast({
-      title: "Failed to load devices",
-      description: "There was an error loading your devices. Please try again later.",
-      variant: "destructive",
-    });
   }
   
   return {
     devices,
-    isLoading,
+    isLoading: isLoading || isRefetching,
     error,
     refetch
   };
@@ -55,21 +52,39 @@ export const useDevice = (deviceId?: string) => {
     data: device,
     isLoading,
     error,
-    refetch
+    refetch,
+    isRefetching
   } = useQuery({
     queryKey: ['device', deviceId],
     queryFn: async () => {
-      if (!deviceId) return null;
-      return await fetchDevice(deviceId);
+      if (!deviceId) {
+        console.log('No device ID provided, skipping fetch');
+        return null;
+      }
+      
+      console.log('Fetching device:', deviceId);
+      try {
+        const result = await fetchDevice(deviceId);
+        if (!result) {
+          console.log('Device not found:', deviceId);
+        } else {
+          console.log('Device fetched successfully:', result);
+        }
+        return result;
+      } catch (err) {
+        console.error('Error fetching device:', err);
+        throw err;
+      }
     },
     enabled: !!deviceId,
-    retry: 1,
+    retry: 2,
+    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
     staleTime: 1000 * 60 * 5
   });
   
   return {
     device,
-    isLoading,
+    isLoading: isLoading || isRefetching,
     error: error ? (error as Error).message : null,
     refetch
   };

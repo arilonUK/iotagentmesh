@@ -24,7 +24,7 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
       console.error('Error fetching devices:', error);
       toast({
         title: "Failed to load devices",
-        description: "There was an error with the database query. Please try again later.",
+        description: `Database error: ${error.message}`,
         variant: "destructive",
       });
       return []; // Return empty array to prevent UI errors
@@ -35,7 +35,7 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
       return [];
     }
     
-    console.log(`Successfully fetched ${data.length} devices`);
+    console.log(`Successfully fetched ${data.length} devices:`, data);
     
     return data.map(item => ({
       id: item.id,
@@ -69,13 +69,18 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
       console.error('Error fetching device:', error);
       toast({
         title: "Error loading device",
-        description: "We couldn't load the device details. Please try again later.",
+        description: `Database error: ${error.message}`,
         variant: "destructive",
       });
-      throw error;
+      return null;
     }
     
-    if (!data) return null;
+    if (!data) {
+      console.log('Device not found:', deviceId);
+      return null;
+    }
+    
+    console.log('Device fetched successfully:', data);
     
     return {
       id: data.id,
