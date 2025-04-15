@@ -5,38 +5,14 @@ import { toast } from '@/components/ui/use-toast';
 
 export const fetchDevices = async (organizationId: string): Promise<Device[]> => {
   try {
-    // Try using RPC function instead of direct table access to bypass RLS issues
-    const { data, error } = await supabase.rpc('get_organization_devices', {
-      p_org_id: organizationId
-    });
-    
-    if (error) {
-      console.error('Error fetching devices via RPC:', error);
-      // Fall back to a simple query without any joins if RPC fails
-      return await fallbackDeviceQuery(organizationId);
-    }
-      
-    return data.map(item => ({
-      ...item,
-      status: item.status as 'online' | 'offline' | 'warning'
-    })) as Device[];
-  } catch (error) {
-    console.error('Error in fetchDevices:', error);
-    // Fall back to simpler query if there's an exception
-    return await fallbackDeviceQuery(organizationId);
-  }
-};
-
-// Fallback query that avoids potential RLS issues
-const fallbackDeviceQuery = async (organizationId: string): Promise<Device[]> => {
-  try {
+    // Direct query without any joins to avoid RLS policy issues
     const { data, error } = await supabase
       .from('devices')
       .select('id, name, type, status, organization_id, last_active_at')
       .eq('organization_id', organizationId);
       
     if (error) {
-      console.error('Error in fallback query:', error);
+      console.error('Error fetching devices:', error);
       toast({
         title: "Failed to load devices",
         description: "There was an error with the database query. Please try again later.",
@@ -55,13 +31,13 @@ const fallbackDeviceQuery = async (organizationId: string): Promise<Device[]> =>
       status: item.status as 'online' | 'offline' | 'warning'
     })) as Device[];
   } catch (error) {
-    console.error('Error in fallback query:', error);
+    console.error('Error in fetchDevices:', error);
     toast({
       title: "Failed to load devices",
       description: "There was an error with the database query. Please try again later.",
       variant: "destructive",
     });
-    return [];
+    return []; // Return empty array to prevent UI errors
   }
 };
 
