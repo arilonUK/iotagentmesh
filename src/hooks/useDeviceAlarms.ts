@@ -14,7 +14,8 @@ export function useDeviceAlarms(deviceId: string) {
       setError(null);
       
       try {
-        // Step 1: Get the alarm events for the device
+        // Step 1: Get the alarm events for the device without any joins
+        // This avoids potential recursion in RLS policies
         const { data: eventsData, error: eventsError } = await supabase
           .from('alarm_events')
           .select('id, alarm_id, device_id, status, triggered_at, acknowledged_at, resolved_at, acknowledged_by, trigger_value, message')

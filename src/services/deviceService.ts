@@ -6,9 +6,10 @@ import { toast } from '@/components/ui/use-toast';
 
 export const fetchDevices = async (organizationId: string): Promise<Device[]> => {
   try {
+    // Use a simpler query that avoids complex joins which might trigger recursive policies
     const { data, error } = await supabase
       .from('devices')
-      .select('*')
+      .select('id, name, type, status, organization_id, last_active_at')
       .eq('organization_id', organizationId);
       
     if (error) {
@@ -36,10 +37,10 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
 
 export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
   try {
-    // Try to fetch directly without joins, which can cause RLS policy issues
+    // Prevent RLS policy recursion by using only essential fields and avoiding complex joins
     const { data, error } = await supabase
       .from('devices')
-      .select('id, name, type, status, organization_id, last_active_at')
+      .select('id, name, type, status, organization_id, last_active_at, description')
       .eq('id', deviceId)
       .maybeSingle();
       
