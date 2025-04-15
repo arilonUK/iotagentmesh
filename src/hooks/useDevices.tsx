@@ -139,7 +139,11 @@ export const useDevice = (deviceId?: string) => {
 
 export const verifyMockData = async (organizationId: string) => {
   try {
+    console.group('Mock Data Verification');
+    console.log('Starting verification for organization:', organizationId);
+    
     // Verify devices
+    console.group('Verifying Devices');
     const { data: devices, error: deviceError } = await supabase
       .from('devices')
       .select('*')
@@ -150,9 +154,17 @@ export const verifyMockData = async (organizationId: string) => {
       throw deviceError;
     }
 
-    console.log('Devices in the database:', devices);
+    console.log(`Found ${devices?.length || 0} devices`);
+    devices?.forEach(device => {
+      console.log(`- Device: ${device.name} (${device.id})`);
+      console.log(`  Type: ${device.type}`);
+      console.log(`  Status: ${device.status}`);
+      console.log(`  Last Active: ${device.last_active_at}`);
+    });
+    console.groupEnd();
 
     // Verify device readings
+    console.group('Verifying Device Readings');
     const { data: readings, error: readingsError } = await supabase
       .from('device_readings')
       .select('*')
@@ -163,7 +175,20 @@ export const verifyMockData = async (organizationId: string) => {
       throw readingsError;
     }
 
-    console.log('Device Readings in the database:', readings);
+    console.log(`Found ${readings?.length || 0} device readings`);
+    const readingsByDevice = readings?.reduce((acc, reading) => {
+      acc[reading.device_id] = (acc[reading.device_id] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    Object.entries(readingsByDevice || {}).forEach(([deviceId, count]) => {
+      const device = devices?.find(d => d.id === deviceId);
+      console.log(`- Device "${device?.name}" (${deviceId}): ${count} readings`);
+    });
+    console.groupEnd();
+
+    console.log('Verification completed successfully');
+    console.groupEnd();
 
     return {
       devices,
@@ -171,6 +196,7 @@ export const verifyMockData = async (organizationId: string) => {
     };
   } catch (err) {
     console.error('Error verifying mock data:', err);
+    console.groupEnd();
     throw err;
   }
 };
