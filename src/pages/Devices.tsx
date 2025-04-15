@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Plus, Filter } from 'lucide-react';
 import DeviceCard from '@/components/DeviceCard';
+import MockDataVerification from '@/components/MockDataVerification';
 
 const mockDevices = [
   {
@@ -69,6 +69,7 @@ const Devices = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterType, setFilterType] = useState('all');
+  const [showVerification, setShowVerification] = useState(false);
 
   const filteredDevices = mockDevices.filter(device => {
     const matchesSearch = device.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -79,10 +80,22 @@ const Devices = () => {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold mb-2">Devices</h1>
-        <p className="text-muted-foreground">View and manage all your connected devices.</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Devices</h1>
+          <p className="text-muted-foreground">View and manage all your connected devices.</p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => setShowVerification(!showVerification)}
+        >
+          {showVerification ? 'Hide' : 'Show'} Verification
+        </Button>
       </div>
+
+      {showVerification && (
+        <MockDataVerification />
+      )}
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
