@@ -12,7 +12,10 @@ export const useDevices = (organizationId?: string) => {
   } = useQuery({
     queryKey: ['devices', organizationId],
     queryFn: async () => {
-      if (!organizationId) return [];
+      if (!organizationId) {
+        console.log('No organization ID provided, skipping fetch');
+        return [];
+      }
       
       console.log('Fetching devices for organization:', organizationId);
       try {
