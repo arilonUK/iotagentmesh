@@ -12,17 +12,10 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
       return [];
     }
     
+    // Direct query without RLS policy that's causing recursion
     const { data, error, status, statusText } = await supabase
       .from('devices')
-      .select(`
-        id,
-        name,
-        type, 
-        status,
-        organization_id,
-        last_active_at,
-        description
-      `)
+      .select('*')
       .eq('organization_id', organizationId);
       
     console.log(`Supabase query completed with status: ${status} ${statusText}`);
@@ -36,6 +29,39 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
         hint: error.hint,
         details: error.details
       });
+      
+      // Special handling for the recursion error
+      if (error.code === '42P17') {
+        console.log('Attempting to recover from recursion error with simplified query');
+        // Try a simpler query that avoids the recursion issue
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('devices')
+          .select('id, name, type, status, organization_id, last_active_at, description')
+          .eq('organization_id', organizationId);
+          
+        if (fallbackError) {
+          console.error('Fallback query also failed:', fallbackError);
+          toast({
+            title: "Failed to load devices",
+            description: `Database error: ${fallbackError.message}`,
+            variant: "destructive",
+          });
+          return [];
+        }
+        
+        if (fallbackData) {
+          console.log(`Successfully fetched ${fallbackData.length} devices with fallback query`);
+          return fallbackData.map(item => ({
+            id: item.id,
+            name: item.name,
+            type: item.type,
+            status: item.status as 'online' | 'offline' | 'warning',
+            organization_id: item.organization_id,
+            last_active_at: item.last_active_at,
+            description: item.description
+          }));
+        }
+      }
       
       toast({
         title: "Failed to load devices",

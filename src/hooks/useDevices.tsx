@@ -31,9 +31,9 @@ export const useDevices = (organizationId?: string) => {
       }
     },
     enabled: !!organizationId,
-    retry: 2, // Retry twice to handle transient network issues
+    retry: 3, // Increased retries for transient issues
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000), // Exponential backoff
-    staleTime: 1000 * 60, // Cache for 1 minute
+    staleTime: 1000 * 30, // Cache for 30 seconds for more frequent refreshes
   });
   
   // Enhanced error logging
