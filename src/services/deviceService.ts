@@ -48,9 +48,12 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
   try {
     console.log('Fetching device:', deviceId);
     
-    // Use direct RPC call instead of table query to bypass RLS complexity
+    // Use a simple direct query to avoid RLS issues
     const { data, error } = await supabase
-      .rpc('get_device_by_id', { p_device_id: deviceId });
+      .from('devices')
+      .select('*')
+      .eq('id', deviceId)
+      .maybeSingle();
         
     if (error) {
       console.error('Error fetching device:', error);
