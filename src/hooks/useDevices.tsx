@@ -1,6 +1,8 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { toast } from '@/components/ui/use-toast';
 import { fetchDevices, fetchDevice } from '@/services/deviceService';
+import { supabase } from '@/integrations/supabase/client';
 import type { Device } from '@/types/device';
 
 export const useDevices = (organizationId?: string) => {
