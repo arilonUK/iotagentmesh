@@ -23,11 +23,21 @@ export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
   // Initialize organization from auth context if available
   useEffect(() => {
     if (authOrganization) {
+      console.log('Setting organization from auth context:', authOrganization);
       setOrganization({
         id: authOrganization.id,
         name: authOrganization.name,
         slug: authOrganization.slug,
         logo: authOrganization.logo
+      });
+    } else {
+      // Fallback to hardcoded organization ID for demo purposes
+      // This ensures devices will load even without auth
+      console.log('No organization in auth context, using fallback');
+      setOrganization({
+        id: '7dcfb1a6-d855-4ed7-9a45-2e9f54590c18', // The organization ID from the device data
+        name: 'Demo Organization',
+        slug: 'demo-org'
       });
     }
   }, [authOrganization]);
