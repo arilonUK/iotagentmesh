@@ -75,7 +75,7 @@ export const useDevice = (deviceId?: string) => {
         }
       } catch (err) {
         console.error('Error fetching device:', err);
-        throw err;
+        return null; // Return null instead of throwing to handle errors gracefully
       }
     },
     enabled: !!deviceId,

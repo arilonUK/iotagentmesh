@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDevice } from '@/hooks/useDevices';
 import { Separator } from "@/components/ui/separator";

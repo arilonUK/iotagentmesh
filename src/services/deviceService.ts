@@ -48,10 +48,10 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
   try {
     console.log('Fetching device:', deviceId);
     
-    // Use a simpler direct query to avoid RLS recursion issues
+    // Use the simplest possible query - avoid joins completely
     const { data, error } = await supabase
       .from('devices')
-      .select('*')  // Simplified to select all fields directly
+      .select('*')
       .eq('id', deviceId)
       .maybeSingle();
         
@@ -62,7 +62,7 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
         description: `Database error: ${error.message}`,
         variant: "destructive",
       });
-      throw new Error(`Failed to load device: ${error.message}`);
+      return null;
     }
     
     if (!data) {
@@ -71,8 +71,6 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
     }
     
     console.log('Device fetched successfully:', data);
-    
-    // Cast to Device type
     return data as Device;
   } catch (error) {
     console.error('Error fetching device details:', error);
@@ -81,6 +79,6 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
       description: "We couldn't load the device details. Please try again later.",
       variant: "destructive",
     });
-    throw new Error(error instanceof Error ? error.message : "Unknown error fetching device");
+    return null;
   }
 };
