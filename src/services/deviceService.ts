@@ -7,8 +7,6 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
   try {
     console.log(`Fetching devices for organization: ${organizationId}`);
     
-    // Direct query with minimal fields and no joins
-    // Ensure we only select fields that actually exist in the devices table
     const { data, error } = await supabase
       .from('devices')
       .select(`
@@ -17,7 +15,8 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
         type, 
         status,
         organization_id,
-        last_active_at
+        last_active_at,
+        description
       `)
       .eq('organization_id', organizationId);
       
@@ -38,7 +37,6 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
     
     console.log(`Successfully fetched ${data.length} devices`);
     
-    // Ensure we're properly mapping data that exists
     return data.map(item => ({
       id: item.id,
       name: item.name,
@@ -46,7 +44,7 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
       status: item.status as 'online' | 'offline' | 'warning',
       organization_id: item.organization_id,
       last_active_at: item.last_active_at,
-      description: undefined // Add empty description if it doesn't exist in the DB
+      description: item.description
     })) as Device[];
   } catch (error) {
     console.error('Error in fetchDevices:', error);
@@ -61,10 +59,9 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
 
 export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
   try {
-    // Use maybeSingle to handle case where device might not exist
     const { data, error } = await supabase
       .from('devices')
-      .select('id, name, type, status, organization_id, last_active_at')
+      .select('id, name, type, status, organization_id, last_active_at, description')
       .eq('id', deviceId)
       .maybeSingle();
         
@@ -80,7 +77,6 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
     
     if (!data) return null;
     
-    // Explicitly map all fields to ensure type safety
     return {
       id: data.id,
       name: data.name,
@@ -88,7 +84,7 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
       status: data.status as 'online' | 'offline' | 'warning',
       organization_id: data.organization_id,
       last_active_at: data.last_active_at,
-      description: undefined // Add empty description if it doesn't exist in the DB
+      description: data.description
     };
   } catch (error) {
     console.error('Error fetching device details:', error);

@@ -257,6 +257,7 @@ export type Database = {
       }
       devices: {
         Row: {
+          description: string | null
           id: string
           last_active_at: string | null
           name: string
@@ -265,6 +266,7 @@ export type Database = {
           type: string
         }
         Insert: {
+          description?: string | null
           id?: string
           last_active_at?: string | null
           name: string
@@ -273,6 +275,7 @@ export type Database = {
           type: string
         }
         Update: {
+          description?: string | null
           id?: string
           last_active_at?: string | null
           name?: string
