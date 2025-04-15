@@ -8,9 +8,10 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
     console.log(`Fetching devices for organization: ${organizationId}`);
     
     // Direct query to the devices table with the organization filter
+    // Using a simpler query approach to avoid triggering RLS recursion
     const { data, error } = await supabase
       .from('devices')
-      .select('id, name, type, status, organization_id, last_active_at')
+      .select('*')
       .eq('organization_id', organizationId);
       
     if (error) {
@@ -50,7 +51,7 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
     // Direct query without any joins
     const { data, error } = await supabase
       .from('devices')
-      .select('id, name, type, status, organization_id, last_active_at')
+      .select('*')
       .eq('id', deviceId)
       .maybeSingle();
       
