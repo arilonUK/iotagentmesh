@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -37,7 +36,6 @@ export const useDevices = (organizationId?: string) => {
         return data as unknown as Device[];
       } catch (err) {
         console.error('Failed to fetch devices:', err);
-        // Return empty array instead of throwing to prevent UI disruption
         return [];
       }
     },
@@ -62,21 +60,7 @@ export const useDevice = (deviceId?: string) => {
     queryFn: async () => {
       if (!deviceId) return null;
       
-      // Multiple approach strategy to avoid RLS issues
       try {
-        // First attempt: Direct SQL query using the function approach via RPC
-        const { data: rpcData, error: rpcError } = await supabase.rpc(
-          'get_device_by_id', 
-          { p_device_id: deviceId }
-        );
-        
-        if (!rpcError && rpcData) {
-          return rpcData as Device;
-        } else {
-          console.log('RPC method failed or not available, trying direct query');
-        }
-        
-        // Second attempt: Direct query with maybeSingle to avoid errors if no results
         const { data, error } = await supabase
           .from('devices')
           .select('*')
@@ -86,9 +70,7 @@ export const useDevice = (deviceId?: string) => {
         if (error) {
           console.error('Error fetching device:', error);
           
-          // Fallback for development
           if (process.env.NODE_ENV === 'development') {
-            // Use mock data for certain device IDs to help with development
             if (deviceId === '1') {
               return {
                 id: '1',
@@ -109,6 +91,16 @@ export const useDevice = (deviceId?: string) => {
                 last_active_at: new Date().toISOString(),
                 description: 'Smart light device for testing'
               } as Device;
+            } else if (deviceId === '3') {
+              return {
+                id: '3',
+                name: 'Motion Detector',
+                type: 'Sensor',
+                status: 'offline' as const,
+                organization_id: '7dcfb1a6-d855-4ed7-9a45-2e9f54590c18',
+                last_active_at: new Date(Date.now() - 86400000).toISOString(),
+                description: 'Motion detection sensor for testing'
+              } as Device;
             }
           }
           
@@ -122,8 +114,8 @@ export const useDevice = (deviceId?: string) => {
       }
     },
     enabled: !!deviceId,
-    retry: 0, // Don't retry to avoid hammering the API with recursive errors
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes to reduce API calls
+    retry: 0,
+    staleTime: 1000 * 60 * 5
   });
   
   return {
