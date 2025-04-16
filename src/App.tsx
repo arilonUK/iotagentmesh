@@ -23,6 +23,7 @@ import { AuthProvider } from "./contexts/auth";
 import { OrganizationProvider } from "./contexts/organization";
 import ProtectedRoute from "./components/ProtectedRoute";
 import React from "react";
+import Products from "./pages/Products";
 
 const queryClient = new QueryClient();
 

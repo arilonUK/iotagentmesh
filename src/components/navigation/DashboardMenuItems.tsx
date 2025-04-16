@@ -1,54 +1,60 @@
+
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { Home, BarChart, Settings, ListChecks, Box as BoxIcon } from "lucide-react";
-import { SidebarNav } from "@/components/ui/sidebar";
+import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 
 export function DashboardMenuItems() {
   return (
-    <SidebarNav>
-      <NavLink 
-        to="/dashboard" 
-        icon={<Home className="h-4 w-4" />}
-        exact // Match only the exact path
-      >
-        Home
-      </NavLink>
-      <NavLink 
-        to="/dashboard/devices" 
-        icon={<BarChart className="h-4 w-4" />}
-      >
-        Devices
-      </NavLink>
-      <NavLink 
-        to="/dashboard/data-buckets" 
-        icon={<ListChecks className="h-4 w-4" />}
-      >
-        Data Buckets
-      </NavLink>
-      <NavLink 
-        to="/dashboard/endpoints" 
-        icon={<Settings className="h-4 w-4" />}
-      >
-        Endpoints
-      </NavLink>
-      <NavLink 
-        to="/dashboard/alarms" 
-        icon={<Settings className="h-4 w-4" />}
-      >
-        Alarms
-      </NavLink>
-      <NavLink 
-        to="/dashboard/storage" 
-        icon={<Settings className="h-4 w-4" />}
-      >
-        File Storage
-      </NavLink>
-      <NavLink 
-        to="/dashboard/products" 
-        icon={<BoxIcon className="h-4 w-4" />}
-      >
-        Products
-      </NavLink>
-    </SidebarNav>
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild>
+          <NavLink 
+            to="/dashboard" 
+            className={({ isActive }) => isActive ? "text-primary" : ""}
+            end
+          >
+            <Home className="h-4 w-4 mr-2" />
+            Home
+          </NavLink>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild>
+          <NavLink 
+            to="/dashboard/devices" 
+            className={({ isActive }) => isActive ? "text-primary" : ""}
+          >
+            <BarChart className="h-4 w-4 mr-2" />
+            Devices
+          </NavLink>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild>
+          <NavLink 
+            to="/dashboard/data-buckets" 
+            className={({ isActive }) => isActive ? "text-primary" : ""}
+          >
+            <ListChecks className="h-4 w-4 mr-2" />
+            Data Buckets
+          </NavLink>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild>
+          <NavLink 
+            to="/dashboard/products" 
+            className={({ isActive }) => isActive ? "text-primary" : ""}
+          >
+            <BoxIcon className="h-4 w-4 mr-2" />
+            Products
+          </NavLink>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    </SidebarMenu>
   );
 }
