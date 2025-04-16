@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProducts } from '@/hooks/useProducts';
@@ -10,11 +11,19 @@ import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { useOrganization } from '@/contexts/organization';
 
 export function ProductList() {
+  console.log('ProductList rendered');
   const { products, isLoading, error } = useProducts();
   const [searchTerm, setSearchTerm] = React.useState('');
   const navigate = useNavigate();
+  const { organization } = useOrganization();
+
+  console.log('Organization:', organization);
+  console.log('Products:', products);
+  console.log('Loading:', isLoading);
+  console.log('Error:', error);
 
   const filteredProducts = React.useMemo(() => {
     if (!products) return [];
