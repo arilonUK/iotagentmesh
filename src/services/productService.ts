@@ -56,6 +56,8 @@ export const productServices = {
         throw new Error('Organization ID is required');
       }
 
+      console.log('Organization ID is valid:', product.organization_id);
+
       // Insert the product into the database
       const { data, error } = await supabase
         .from('product_templates')
@@ -195,4 +197,3 @@ export const productServices = {
     }
   }
 };
-

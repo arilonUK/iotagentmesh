@@ -22,21 +22,23 @@ export function useProducts() {
     mutationFn: (productData: Omit<ProductTemplate, 'id' | 'created_at' | 'updated_at'>) => {
       console.log('Creating product with mutation:', productData);
       
-      // Ensure organization_id is set
+      // Ensure organization_id is set and valid
       if (!productData.organization_id) {
+        console.error('Organization ID is missing in product data');
         throw new Error('Organization ID is required for creating a product');
       }
       
+      console.log('Proceeding with organization_id:', productData.organization_id);
       return productServices.createProduct(productData);
     },
-    onSuccess: () => {
-      console.log('Product created successfully, invalidating queries');
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+    onSuccess: (data) => {
+      console.log('Product created successfully, invalidating queries with result:', data);
+      queryClient.invalidateQueries({ queryKey: ['products', organization?.id] });
       toast.success('Product created successfully');
     },
     onError: (error) => {
       console.error('Error creating product in mutation:', error);
-      toast.error('Failed to create product');
+      toast.error(`Failed to create product: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   });
 

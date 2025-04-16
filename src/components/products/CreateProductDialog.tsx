@@ -23,11 +23,12 @@ export function CreateProductDialog() {
   const handleSubmit = async (data: any) => {
     try {
       if (!organization) {
+        console.error('No organization selected');
         toast.error('No organization selected');
         return;
       }
       
-      console.log('Submitting product data:', {
+      console.log('Submitting product data with organization:', {
         ...data,
         organization_id: organization.id,
       });
