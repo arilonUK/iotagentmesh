@@ -35,16 +35,18 @@ export function CreateProductDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
           <Plus className="mr-2 h-4 w-4" />
           New Product
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px] bg-background border border-border">
         <DialogHeader>
-          <DialogTitle>Create New Product</DialogTitle>
+          <DialogTitle className="text-lg font-semibold">Create New Product</DialogTitle>
         </DialogHeader>
-        <ProductForm onSubmit={handleSubmit} isLoading={isCreating} />
+        <div className="mt-4">
+          <ProductForm onSubmit={handleSubmit} isLoading={isCreating} />
+        </div>
       </DialogContent>
     </Dialog>
   );

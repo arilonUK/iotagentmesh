@@ -33,19 +33,21 @@ export function EditProductDialog({ product }: EditProductDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" title="Edit product">
+        <Button variant="ghost" size="icon" className="hover:bg-accent" title="Edit product">
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px] bg-background border border-border">
         <DialogHeader>
-          <DialogTitle>Edit Product</DialogTitle>
+          <DialogTitle className="text-lg font-semibold">Edit Product</DialogTitle>
         </DialogHeader>
-        <ProductForm 
-          onSubmit={handleSubmit} 
-          defaultValues={product} 
-          isLoading={isUpdating} 
-        />
+        <div className="mt-4">
+          <ProductForm 
+            onSubmit={handleSubmit} 
+            defaultValues={product} 
+            isLoading={isUpdating} 
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );
