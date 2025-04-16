@@ -43,10 +43,16 @@ export const productServices = {
       throw error;
     }
 
-    // Map the data to ensure data_type conforms to the expected type
+    // Map the data to ensure properties conform to the expected types
     return (data || []).map(property => ({
       ...property,
-      data_type: property.data_type as 'string' | 'number' | 'boolean' | 'location'
+      data_type: property.data_type as 'string' | 'number' | 'boolean' | 'location',
+      validation_rules: property.validation_rules as { 
+        min?: number; 
+        max?: number; 
+        pattern?: string; 
+        options?: string[] 
+      } | undefined
     }));
   }
 };
