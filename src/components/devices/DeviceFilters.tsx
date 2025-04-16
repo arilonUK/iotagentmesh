@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { Search, Filter, Plus } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AddDeviceDialog } from './AddDeviceDialog';
 
 interface DeviceFiltersProps {
   searchTerm: string;
@@ -12,6 +12,7 @@ interface DeviceFiltersProps {
   setFilterStatus: (status: string) => void;
   filterType: string;
   setFilterType: (type: string) => void;
+  onDeviceAdded?: () => void;
 }
 
 const DeviceFilters: React.FC<DeviceFiltersProps> = ({
@@ -20,7 +21,8 @@ const DeviceFilters: React.FC<DeviceFiltersProps> = ({
   filterStatus,
   setFilterStatus,
   filterType,
-  setFilterType
+  setFilterType,
+  onDeviceAdded
 }) => {
   return (
     <div className="flex flex-col sm:flex-row gap-4">
@@ -59,13 +61,10 @@ const DeviceFilters: React.FC<DeviceFiltersProps> = ({
           </SelectContent>
         </Select>
         
-        <Button variant="default">
-          <Plus className="mr-2 h-4 w-4" />
-          Add Device
-        </Button>
+        <AddDeviceDialog onDeviceAdded={onDeviceAdded} />
       </div>
     </div>
   );
-};
+}
 
 export default DeviceFilters;

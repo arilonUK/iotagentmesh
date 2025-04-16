@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button'; // Add this import
+import { Button } from '@/components/ui/button';
 import { useDevices } from '@/hooks/useDevices';
 import { useOrganization } from '@/contexts/organization';
 import { toast } from '@/components/ui/use-toast';
@@ -17,7 +16,6 @@ const Devices = () => {
   const { organization } = useOrganization();
   const { devices, isLoading, error, refetch } = useDevices(organization?.id);
 
-  // Enhanced organization context logging
   useEffect(() => {
     console.log('Devices page - Organization context:', organization);
     if (organization?.id) {
@@ -27,7 +25,6 @@ const Devices = () => {
     }
   }, [organization]);
 
-  // Log when devices are loaded or updated
   useEffect(() => {
     console.log('Devices data updated:', { 
       count: devices.length, 
@@ -42,7 +39,6 @@ const Devices = () => {
     }
   }, [devices, isLoading, error]);
 
-  // Filter devices based on user criteria
   const filteredDevices = React.useMemo(() => {
     console.log('Running device filtering logic...');
     
@@ -58,13 +54,16 @@ const Devices = () => {
     return filtered;
   }, [devices, searchTerm, filterStatus, filterType]);
 
-  // Handle retry on error
   const handleRetry = () => {
     toast({ title: "Retrying", description: "Attempting to fetch devices again." });
     refetch();
   };
 
-  // Show loading state
+  const handleDeviceAdded = () => {
+    console.log('Device added, refreshing list...');
+    refetch();
+  };
+
   if (isLoading && devices.length === 0) {
     return (
       <div className="space-y-8">
@@ -79,7 +78,6 @@ const Devices = () => {
     );
   }
 
-  // Show error state
   if (error) {
     console.error('Rendering error state:', error);
     return (
@@ -99,7 +97,6 @@ const Devices = () => {
     );
   }
 
-  // No organization selected
   if (!organization?.id) {
     console.warn('Rendering no-organization state');
     return (
@@ -131,6 +128,7 @@ const Devices = () => {
         setFilterStatus={setFilterStatus}
         filterType={filterType}
         setFilterType={setFilterType}
+        onDeviceAdded={handleDeviceAdded}
       />
 
       <DeviceDebugInfo
