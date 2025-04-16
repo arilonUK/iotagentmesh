@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useOrganization } from '@/contexts/organization';
+import { ProductTemplate } from '@/types/product';
 
 const productSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -20,13 +21,15 @@ type ProductFormValues = z.infer<typeof productSchema>;
 interface ProductFormProps {
   onSubmit: (data: ProductFormValues) => void;
   isLoading?: boolean;
+  defaultValues?: Partial<ProductTemplate>;
 }
 
-export function ProductForm({ onSubmit, isLoading }: ProductFormProps) {
+export function ProductForm({ onSubmit, isLoading, defaultValues }: ProductFormProps) {
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues: {
       version: '1.0',
+      ...defaultValues,
     },
   });
 
@@ -76,7 +79,7 @@ export function ProductForm({ onSubmit, isLoading }: ProductFormProps) {
         />
 
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Creating...' : 'Create Product'}
+          {isLoading ? 'Saving...' : defaultValues ? 'Update Product' : 'Create Product'}
         </Button>
       </form>
     </Form>

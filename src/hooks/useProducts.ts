@@ -31,10 +31,38 @@ export function useProducts() {
     }
   });
 
+  const updateProductMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<ProductTemplate> }) =>
+      productServices.updateProduct(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      toast.success('Product updated successfully');
+    },
+    onError: (error) => {
+      console.error('Error updating product:', error);
+      toast.error('Failed to update product');
+    }
+  });
+
+  const deleteProductMutation = useMutation({
+    mutationFn: productServices.deleteProduct,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      toast.success('Product deleted successfully');
+    },
+    onError: (error) => {
+      console.error('Error deleting product:', error);
+      toast.error('Failed to delete product');
+    }
+  });
+
   return {
     products,
     isLoading,
     error,
-    createProduct: createProductMutation.mutate
+    createProduct: createProductMutation.mutate,
+    updateProduct: (id: string, data: Partial<ProductTemplate>) =>
+      updateProductMutation.mutate({ id, data }),
+    deleteProduct: deleteProductMutation.mutate
   };
 }

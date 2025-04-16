@@ -3,6 +3,8 @@ import React from 'react';
 import { useProducts } from '@/hooks/useProducts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CreateProductDialog } from './CreateProductDialog';
+import { EditProductDialog } from './EditProductDialog';
+import { DeleteProductDialog } from './DeleteProductDialog';
 
 export function ProductList() {
   const { products, isLoading, error } = useProducts();
@@ -26,7 +28,13 @@ export function ProductList() {
         {products?.map((product) => (
           <Card key={product.id}>
             <CardHeader>
-              <CardTitle>{product.name}</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>{product.name}</CardTitle>
+                <div className="flex items-center gap-2">
+                  <EditProductDialog product={product} />
+                  <DeleteProductDialog productId={product.id} productName={product.name} />
+                </div>
+              </div>
               <CardDescription>Version {product.version}</CardDescription>
             </CardHeader>
             <CardContent>
