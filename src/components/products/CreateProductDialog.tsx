@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
@@ -38,14 +39,17 @@ export function CreateProductDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="default">
-          <Plus className="mr-2 h-4 w-4" />
+        <Button size="default" className="gap-2">
+          <Plus className="h-4 w-4" />
           New Product
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Product</DialogTitle>
+          <DialogDescription>
+            Define the details for your new product template. You can add properties, services, and other configurations later.
+          </DialogDescription>
         </DialogHeader>
         <div className="mt-4">
           <ProductForm onSubmit={handleSubmit} isLoading={isCreating} />

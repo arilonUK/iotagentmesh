@@ -4,6 +4,9 @@ export type ProductTemplate = {
   name: string;
   description?: string;
   version: string;
+  category?: string;
+  tags?: string;
+  status?: 'draft' | 'active' | 'archived';
   organization_id: string;
   created_at: string;
   updated_at: string;

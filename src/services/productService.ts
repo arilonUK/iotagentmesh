@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { ProductTemplate, ProductProperty } from '@/types/product';
 
