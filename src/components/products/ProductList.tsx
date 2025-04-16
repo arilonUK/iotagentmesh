@@ -2,8 +2,7 @@
 import React from 'react';
 import { useProducts } from '@/hooks/useProducts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { CreateProductDialog } from './CreateProductDialog';
 
 export function ProductList() {
   const { products, isLoading, error } = useProducts();
@@ -20,10 +19,7 @@ export function ProductList() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Products</h2>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          New Product
-        </Button>
+        <CreateProductDialog />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
