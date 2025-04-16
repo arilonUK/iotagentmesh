@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productServices } from '@/services/productService';
 import { useOrganization } from '@/contexts/organization';
@@ -25,7 +26,14 @@ export function useProducts() {
       // Ensure organization_id is set and valid
       if (!productData.organization_id) {
         console.error('Organization ID is missing in product data');
-        throw new Error('Organization ID is required for creating a product');
+        if (organization?.id) {
+          console.log('Using organization ID from context:', organization.id);
+          productData.organization_id = organization.id;
+        } else {
+          const error = new Error('Organization ID is required for creating a product and none is available');
+          console.error(error);
+          throw error;
+        }
       }
       
       console.log('Proceeding with organization_id:', productData.organization_id);

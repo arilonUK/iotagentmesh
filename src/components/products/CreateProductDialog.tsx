@@ -28,16 +28,17 @@ export function CreateProductDialog() {
         return;
       }
       
-      console.log('Submitting product data with organization:', {
+      // Explicitly add organization_id to the product data
+      const productData = {
         ...data,
         organization_id: organization.id,
-      });
+      };
       
-      await createProduct({
-        ...data,
-        organization_id: organization.id,
-      });
+      console.log('Submitting product data with organization:', productData);
       
+      await createProduct(productData);
+      
+      toast.success('Product creation initiated');
       setOpen(false);
     } catch (error) {
       console.error('Error creating product:', error);

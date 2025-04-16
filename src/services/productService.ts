@@ -53,24 +53,39 @@ export const productServices = {
       
       // Ensure organization_id is present
       if (!product.organization_id) {
-        throw new Error('Organization ID is required');
+        const error = new Error('Organization ID is required');
+        console.error(error);
+        throw error;
       }
 
       console.log('Organization ID is valid:', product.organization_id);
 
+      // Create product data object to avoid potential type issues
+      const productData = {
+        name: product.name,
+        description: product.description || null,
+        version: product.version || '1.0',
+        category: product.category || null,
+        tags: product.tags || null,
+        status: product.status || 'draft',
+        organization_id: product.organization_id
+      };
+      
+      console.log('Final product data being sent to Supabase:', productData);
+
       // Insert the product into the database
       const { data, error } = await supabase
         .from('product_templates')
-        .insert([product])  // Use array format to ensure consistent behavior
+        .insert([productData])  // Use array format to ensure consistent behavior
         .select()
         .single();
 
       if (error) {
-        console.error('Error creating product:', error);
+        console.error('Error creating product in Supabase:', error);
         throw error;
       }
 
-      console.log('Product created successfully:', data);
+      console.log('Product created successfully in Supabase:', data);
       return {
         ...data,
         status: (data.status || 'draft') as 'draft' | 'active' | 'archived'
