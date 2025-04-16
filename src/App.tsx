@@ -32,9 +32,9 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-          <Router>
+      <Router>
+        <AuthProvider>
+          <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
@@ -58,10 +58,10 @@ function App() {
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </Router>
-          <Toaster />
-        </ThemeProvider>
-      </AuthProvider>
+            <Toaster />
+          </ThemeProvider>
+        </AuthProvider>
+      </Router>
     </QueryClientProvider>
   );
 }
