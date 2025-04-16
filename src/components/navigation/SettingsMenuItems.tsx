@@ -57,23 +57,22 @@ export function SettingsMenuItems({ userRole }: SettingsMenuItemsProps) {
         </SidebarMenuButton>
       </SidebarMenuItem>
 
-      {userRole === 'owner' && (
-        <SidebarMenuItem>
-          <SidebarMenuButton 
-            asChild 
-            isActive={pathname === "/dashboard/organization"} 
-            tooltip="Organization"
-          >
-            <Link to="/dashboard/organization" className={cn(
-              "flex items-center gap-3 w-full",
-              pathname === "/dashboard/organization" && "font-medium"
-            )}>
-              <Icons.building className="h-4 w-4" />
-              <span>Organization Settings</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      )}
+      {/* Temporarily show organization menu to all users for debugging */}
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          asChild 
+          isActive={pathname === "/dashboard/organization"} 
+          tooltip="Organization"
+        >
+          <Link to="/dashboard/organization" className={cn(
+            "flex items-center gap-3 w-full",
+            pathname === "/dashboard/organization" && "font-medium"
+          )}>
+            <Icons.building className="h-4 w-4" />
+            <span>Organization Settings</span>
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
     </SidebarMenu>
   );
 }
