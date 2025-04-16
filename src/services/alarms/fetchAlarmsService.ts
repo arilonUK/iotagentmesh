@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { AlarmConfig } from '@/types/alarm';
-import { SupabaseAlarm, handleServiceError } from './baseAlarmService';
+import { SupabaseAlarm, handleServiceError, isValidUUID } from './baseAlarmService';
 
 /**
  * Fetch all alarms for an organization
@@ -9,6 +9,12 @@ import { SupabaseAlarm, handleServiceError } from './baseAlarmService';
 export async function fetchAlarms(organizationId: string): Promise<AlarmConfig[]> {
   try {
     console.log(`Fetching alarms for organization: ${organizationId}`);
+
+    // Validate organization ID format
+    if (!organizationId || !isValidUUID(organizationId)) {
+      console.error(`Invalid organization ID format: ${organizationId}`);
+      return [];
+    }
 
     // Use a regular query instead of RPC since the RPC function isn't created yet
     const { data, error } = await supabase

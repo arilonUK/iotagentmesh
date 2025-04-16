@@ -23,6 +23,16 @@ export interface SupabaseAlarm {
   endpoints?: string[];
 }
 
+/**
+ * Validates if a string is a valid UUID
+ * @param id The string to validate as UUID
+ * @returns boolean indicating if the string is a valid UUID format
+ */
+export const isValidUUID = (id: string): boolean => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(id);
+};
+
 export const handleServiceError = (error: any, operation: string): void => {
   console.error(`Error in ${operation}:`, error);
   toast.error(`Failed to ${operation}`);

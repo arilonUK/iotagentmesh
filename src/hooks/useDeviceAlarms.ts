@@ -1,6 +1,17 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AlarmEvent } from '@/types/alarm';
+
+/**
+ * Validates a UUID string
+ * @param uuid String to validate as UUID
+ * @returns boolean indicating if the string is a valid UUID
+ */
+function isValidUUID(uuid: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+}
 
 export function useDeviceAlarms(deviceId: string) {
   const [alarmEvents, setAlarmEvents] = useState<AlarmEvent[]>([]);
@@ -9,7 +20,7 @@ export function useDeviceAlarms(deviceId: string) {
 
   useEffect(() => {
     // Validate device ID
-    if (!deviceId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(deviceId)) {
+    if (!deviceId || !isValidUUID(deviceId)) {
       setError('Invalid device ID format');
       setIsLoading(false);
       return;
@@ -89,6 +100,11 @@ export function useDeviceAlarms(deviceId: string) {
   }, [deviceId]);
 
   const acknowledgeAlarm = async (eventId: string) => {
+    if (!isValidUUID(eventId)) {
+      console.error('Invalid alarm event ID format:', eventId);
+      return;
+    }
+    
     try {
       // First get the current user
       const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -120,6 +136,11 @@ export function useDeviceAlarms(deviceId: string) {
   };
 
   const resolveAlarm = async (eventId: string) => {
+    if (!isValidUUID(eventId)) {
+      console.error('Invalid alarm event ID format:', eventId);
+      return;
+    }
+    
     try {
       const { error } = await supabase
         .from('alarm_events')

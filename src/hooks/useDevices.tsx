@@ -3,6 +3,16 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchDevices, fetchDevice } from '@/services/deviceService';
 import { toast } from '@/components/ui/use-toast';
 
+/**
+ * Validates a UUID string
+ * @param uuid String to validate as UUID
+ * @returns boolean indicating if the string is a valid UUID
+ */
+function isValidUUID(uuid: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+}
+
 export const useDevices = (organizationId?: string) => {
   console.log('useDevices hook called with organization ID:', organizationId);
   
@@ -17,6 +27,11 @@ export const useDevices = (organizationId?: string) => {
     queryFn: async () => {
       if (!organizationId) {
         console.log('No organization ID provided, skipping fetch');
+        return [];
+      }
+      
+      if (!isValidUUID(organizationId)) {
+        console.error('Invalid organization ID format:', organizationId);
         return [];
       }
       
@@ -61,6 +76,11 @@ export const useDevice = (deviceId?: string) => {
       if (!deviceId) {
         console.log('No device ID provided, skipping fetch');
         return null;
+      }
+      
+      if (!isValidUUID(deviceId)) {
+        console.error('Invalid device ID format:', deviceId);
+        throw new Error('Invalid device ID format');
       }
       
       console.log('Fetching device:', deviceId);
