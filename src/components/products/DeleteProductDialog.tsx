@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Loader2, Trash2 } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
+import { toast } from 'sonner';
 
 interface DeleteProductDialogProps {
   productId: string;
@@ -28,15 +29,22 @@ export function DeleteProductDialog({ productId, productName }: DeleteProductDia
     try {
       await deleteProduct(productId);
       setIsOpen(false);
+      toast.success('Product deleted successfully');
     } catch (error) {
       console.error('Error deleting product:', error);
+      toast.error('Failed to delete product');
     }
   };
 
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="hover:bg-destructive/10" title="Delete product">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="hover:bg-destructive/10"
+          title="Delete product"
+        >
           <Trash2 className="h-4 w-4 text-destructive" />
         </Button>
       </AlertDialogTrigger>
