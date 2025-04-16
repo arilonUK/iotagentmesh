@@ -1,6 +1,6 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { productServices } from '@/services/productService';
+import { productServices } from '@/services/products';
 import { useOrganization } from '@/contexts/organization';
 import { ProductTemplate, ProductProperty } from '@/types/product';
 import { toast } from 'sonner';

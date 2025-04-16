@@ -1,4 +1,3 @@
-
 import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,13 +12,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { AlertCircle, Loader2 } from "lucide-react";
-import { productServices } from "@/services/productService";
+import { productServices } from "@/services/products";
 import { useToast } from "@/hooks/use-toast";
 
 export type DeleteProductDialogProps = {
   productId: string;
   productName: string;
-  onDelete: () => void; // Add the missing onDelete prop
+  onDelete: () => void;
 };
 
 export function DeleteProductDialog({ productId, productName, onDelete }: DeleteProductDialogProps) {
