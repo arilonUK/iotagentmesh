@@ -4,10 +4,10 @@ import { fetchProduct } from './fetchProduct';
 import { createProduct } from './createProduct';
 import { updateProduct } from './updateProduct';
 import { deleteProduct } from './deleteProduct';
-import { fetchProductProperties } from './productProperties';
-import { createProductProperty } from './productProperties';
-import { updateProductProperty } from './productProperties';
-import { deleteProductProperty } from './productProperties';
+import { fetchProductProperties } from './fetchProductProperties';
+import { createProductProperty } from './createProductProperty';
+import { updateProductProperty } from './updateProductProperty';
+import { deleteProductProperty } from './deleteProductProperty';
 
 // Export as a single service object for backward compatibility
 export const productServices = {
