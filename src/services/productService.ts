@@ -17,6 +17,21 @@ export const productServices = {
     return data || [];
   },
 
+  async fetchProduct(id: string): Promise<ProductTemplate> {
+    const { data, error } = await supabase
+      .from('product_templates')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching product:', error);
+      throw error;
+    }
+
+    return data;
+  },
+
   async createProduct(product: Omit<ProductTemplate, 'id' | 'created_at' | 'updated_at'>): Promise<ProductTemplate> {
     const { data, error } = await supabase
       .from('product_templates')
@@ -54,6 +69,49 @@ export const productServices = {
         options?: string[] 
       } | undefined
     }));
+  },
+
+  async createProductProperty(property: Omit<ProductProperty, 'id' | 'created_at' | 'updated_at'>): Promise<ProductProperty> {
+    const { data, error } = await supabase
+      .from('product_properties')
+      .insert(property)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating product property:', error);
+      throw error;
+    }
+
+    return data;
+  },
+
+  async updateProductProperty(id: string, data: Partial<ProductProperty>): Promise<ProductProperty> {
+    const { data: updatedProperty, error } = await supabase
+      .from('product_properties')
+      .update(data)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating product property:', error);
+      throw error;
+    }
+
+    return updatedProperty;
+  },
+
+  async deleteProductProperty(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('product_properties')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting product property:', error);
+      throw error;
+    }
   },
 
   async updateProduct(id: string, data: Partial<ProductTemplate>): Promise<ProductTemplate> {

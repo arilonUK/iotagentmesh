@@ -779,29 +779,38 @@ export type Database = {
       }
       product_templates: {
         Row: {
+          category: string | null
           created_at: string
           description: string | null
           id: string
           name: string
           organization_id: string
+          status: string | null
+          tags: string | null
           updated_at: string
           version: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
           description?: string | null
           id?: string
           name: string
           organization_id: string
+          status?: string | null
+          tags?: string | null
           updated_at?: string
           version?: string
         }
         Update: {
+          category?: string | null
           created_at?: string
           description?: string | null
           id?: string
           name?: string
           organization_id?: string
+          status?: string | null
+          tags?: string | null
           updated_at?: string
           version?: string
         }

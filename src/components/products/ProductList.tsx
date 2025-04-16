@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useProducts } from '@/hooks/useProducts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CreateProductDialog } from './CreateProductDialog';
@@ -9,10 +10,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 
 export function ProductList() {
   const { products, isLoading, error } = useProducts();
   const [searchTerm, setSearchTerm] = React.useState('');
+  const navigate = useNavigate();
 
   const filteredProducts = React.useMemo(() => {
     if (!products) return [];
@@ -21,6 +24,22 @@ export function ProductList() {
       (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [products, searchTerm]);
+
+  const getStatusBadgeColor = (status?: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-800 hover:bg-green-100';
+      case 'archived':
+        return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
+      case 'draft':
+      default:
+        return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100';
+    }
+  };
+
+  const handleProductClick = (productId: string) => {
+    navigate(`/dashboard/products/${productId}`);
+  };
 
   if (isLoading) {
     return (
@@ -100,11 +119,25 @@ export function ProductList() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredProducts.map((product) => (
-            <Card key={product.id} className="flex flex-col">
+            <Card 
+              key={product.id} 
+              className="flex flex-col cursor-pointer hover:border-primary/50 transition-all"
+              onClick={() => handleProductClick(product.id)}
+            >
               <CardHeader className="flex-1">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">{product.name}</CardTitle>
-                  <div className="flex items-center gap-2">
+                  <div>
+                    <CardTitle className="text-xl">{product.name}</CardTitle>
+                    {product.status && (
+                      <Badge className={`mt-1 ${getStatusBadgeColor(product.status)}`}>
+                        {product.status}
+                      </Badge>
+                    )}
+                  </div>
+                  <div 
+                    className="flex items-center gap-2"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <EditProductDialog product={product} />
                     <DeleteProductDialog productId={product.id} productName={product.name} />
                   </div>
@@ -115,6 +148,11 @@ export function ProductList() {
                 <p className="text-sm text-muted-foreground">
                   {product.description || "No description provided"}
                 </p>
+                {product.category && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Category: {product.category}
+                  </p>
+                )}
               </CardContent>
             </Card>
           ))}

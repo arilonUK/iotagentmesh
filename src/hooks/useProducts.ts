@@ -2,7 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productServices } from '@/services/productService';
 import { useOrganization } from '@/contexts/organization';
-import { ProductTemplate } from '@/types/product';
+import { ProductTemplate, ProductProperty } from '@/types/product';
 import { toast } from 'sonner';
 
 export function useProducts() {
@@ -56,7 +56,64 @@ export function useProducts() {
     }
   });
 
+  // Product Properties
+  const getProductProperties = (productId: string) => useQuery({
+    queryKey: ['productProperties', productId],
+    queryFn: () => productServices.fetchProductProperties(productId),
+    enabled: !!productId,
+  });
+
+  const createPropertyMutation = useMutation({
+    mutationFn: productServices.createProductProperty,
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['productProperties', variables.product_id] });
+      toast.success('Property added successfully');
+    },
+    onError: (error) => {
+      console.error('Error creating property:', error);
+      toast.error('Failed to add property');
+    }
+  });
+
+  const updatePropertyMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<ProductProperty> }) =>
+      productServices.updateProductProperty(id, data),
+    onSuccess: (_data, variables) => {
+      // We need to get the product_id from the cache to invalidate queries
+      const productProperty = queryClient.getQueryData<ProductProperty[]>(['productProperties'])?.find(
+        (prop) => prop.id === variables.id
+      );
+      if (productProperty) {
+        queryClient.invalidateQueries({ queryKey: ['productProperties', productProperty.product_id] });
+      }
+      toast.success('Property updated successfully');
+    },
+    onError: (error) => {
+      console.error('Error updating property:', error);
+      toast.error('Failed to update property');
+    }
+  });
+
+  const deletePropertyMutation = useMutation({
+    mutationFn: productServices.deleteProductProperty,
+    onSuccess: (_data, id) => {
+      // We need to get the product_id from the cache to invalidate queries
+      const productProperty = queryClient.getQueryData<ProductProperty[]>(['productProperties'])?.find(
+        (prop) => prop.id === id
+      );
+      if (productProperty) {
+        queryClient.invalidateQueries({ queryKey: ['productProperties', productProperty.product_id] });
+      }
+      toast.success('Property deleted successfully');
+    },
+    onError: (error) => {
+      console.error('Error deleting property:', error);
+      toast.error('Failed to delete property');
+    }
+  });
+
   return {
+    // Products
     products,
     isLoading,
     error,
@@ -69,6 +126,15 @@ export function useProducts() {
     isUpdating: updateProductMutation.isPending,
     // Delete operation
     deleteProduct: deleteProductMutation.mutate,
-    isDeleting: deleteProductMutation.isPending
+    isDeleting: deleteProductMutation.isPending,
+    // Properties
+    getProductProperties,
+    createProperty: createPropertyMutation.mutate,
+    isCreatingProperty: createPropertyMutation.isPending,
+    updateProperty: (id: string, data: Partial<ProductProperty>) =>
+      updatePropertyMutation.mutate({ id, data }),
+    isUpdatingProperty: updatePropertyMutation.isPending,
+    deleteProperty: deletePropertyMutation.mutate,
+    isDeletingProperty: deletePropertyMutation.isPending
   };
 }

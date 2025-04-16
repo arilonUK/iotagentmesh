@@ -30,3 +30,5 @@ export type ProductProperty = {
   created_at: string;
   updated_at: string;
 };
+
+export type PropertyFormValues = Omit<ProductProperty, 'id' | 'product_id' | 'created_at' | 'updated_at'>;
