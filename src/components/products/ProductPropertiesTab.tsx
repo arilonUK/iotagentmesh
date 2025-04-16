@@ -58,7 +58,8 @@ export function ProductPropertiesTab({ productId }: ProductPropertiesTabProps) {
 
   const { data: properties, isLoading, error } = getProductProperties(productId);
 
-  const handleAddProperty = (data: PropertyFormValues) => {
+  // Updated to return a Promise
+  const handleAddProperty = async (data: PropertyFormValues): Promise<void> => {
     createProperty({
       ...data,
       product_id: productId
@@ -66,7 +67,8 @@ export function ProductPropertiesTab({ productId }: ProductPropertiesTabProps) {
     setIsAddDialogOpen(false);
   };
 
-  const handleUpdateProperty = (data: PropertyFormValues) => {
+  // Updated to return a Promise
+  const handleUpdateProperty = async (data: PropertyFormValues): Promise<void> => {
     if (editingProperty) {
       updateProperty(editingProperty.id, data);
       setIsEditDialogOpen(false);
@@ -74,7 +76,8 @@ export function ProductPropertiesTab({ productId }: ProductPropertiesTabProps) {
     }
   };
 
-  const handleDeleteProperty = () => {
+  // Updated to return a Promise
+  const handleDeleteProperty = async (): Promise<void> => {
     if (deletingPropertyId) {
       deleteProperty(deletingPropertyId);
       setDeletingPropertyId(null);
