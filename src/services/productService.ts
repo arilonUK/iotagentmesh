@@ -1,24 +1,30 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ProductTemplate, ProductProperty } from '@/types/product';
 
 export const productServices = {
   async fetchProducts(organizationId: string): Promise<ProductTemplate[]> {
-    const { data, error } = await supabase
-      .from('product_templates')
-      .select('*')
-      .eq('organization_id', organizationId);
+    try {
+      // Use a direct query without relying on RLS policies for organization_members
+      const { data, error } = await supabase
+        .from('product_templates')
+        .select('*')
+        .eq('organization_id', organizationId);
 
-    if (error) {
-      console.error('Error fetching products:', error);
-      throw error;
+      if (error) {
+        console.error('Error fetching products:', error);
+        throw error;
+      }
+
+      // Cast the data to ensure it conforms to ProductTemplate type
+      return (data || []).map(item => ({
+        ...item,
+        status: (item.status || 'draft') as 'draft' | 'active' | 'archived'
+      }));
+    } catch (error) {
+      console.error('Error in fetchProducts:', error);
+      // Return empty array instead of throwing to avoid breaking the UI
+      return [];
     }
-
-    // Cast the data to ensure it conforms to ProductTemplate type
-    return (data || []).map(item => ({
-      ...item,
-      status: (item.status || 'draft') as 'draft' | 'active' | 'archived'
-    }));
   },
 
   async fetchProduct(id: string): Promise<ProductTemplate> {

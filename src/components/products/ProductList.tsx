@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProducts } from '@/hooks/useProducts';
@@ -59,7 +58,7 @@ export function ProductList() {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">Products</h2>
-          <div className="w-32 h-10"><Skeleton className="h-10 w-full" /></div>
+          <CreateProductDialog />
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map(i => (
@@ -119,7 +118,7 @@ export function ProductList() {
         />
       </div>
 
-      {products && products.length === 0 ? (
+      {!products || products.length === 0 ? (
         <Card className="p-8 text-center">
           <div className="flex flex-col items-center justify-center gap-2">
             <h3 className="text-lg font-medium">No products found</h3>
