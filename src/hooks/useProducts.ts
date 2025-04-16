@@ -20,13 +20,17 @@ export function useProducts() {
   });
 
   const createProductMutation = useMutation({
-    mutationFn: productServices.createProduct,
+    mutationFn: (productData: Omit<ProductTemplate, 'id' | 'created_at' | 'updated_at'>) => {
+      console.log('Creating product with mutation:', productData);
+      return productServices.createProduct(productData);
+    },
     onSuccess: () => {
+      console.log('Product created successfully, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['products'] });
       toast.success('Product created successfully');
     },
     onError: (error) => {
-      console.error('Error creating product:', error);
+      console.error('Error creating product in mutation:', error);
       toast.error('Failed to create product');
     }
   });

@@ -22,14 +22,22 @@ export function CreateProductDialog() {
 
   const handleSubmit = async (data: any) => {
     try {
-      if (organization) {
-        await createProduct({
-          ...data,
-          organization_id: organization.id,
-        });
-        setOpen(false);
-        toast.success('Product created successfully');
+      if (!organization) {
+        toast.error('No organization selected');
+        return;
       }
+      
+      console.log('Submitting product data:', {
+        ...data,
+        organization_id: organization.id,
+      });
+      
+      await createProduct({
+        ...data,
+        organization_id: organization.id,
+      });
+      
+      setOpen(false);
     } catch (error) {
       console.error('Error creating product:', error);
       toast.error('Failed to create product');

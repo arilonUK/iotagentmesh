@@ -47,21 +47,29 @@ export const productServices = {
   },
 
   async createProduct(product: Omit<ProductTemplate, 'id' | 'created_at' | 'updated_at'>): Promise<ProductTemplate> {
-    const { data, error } = await supabase
-      .from('product_templates')
-      .insert(product)
-      .select()
-      .single();
+    try {
+      console.log('Creating product with data:', product);
+      
+      const { data, error } = await supabase
+        .from('product_templates')
+        .insert(product)
+        .select()
+        .single();
 
-    if (error) {
-      console.error('Error creating product:', error);
+      if (error) {
+        console.error('Error creating product:', error);
+        throw error;
+      }
+
+      console.log('Product created successfully:', data);
+      return {
+        ...data,
+        status: (data.status || 'draft') as 'draft' | 'active' | 'archived'
+      };
+    } catch (error) {
+      console.error('Error in createProduct:', error);
       throw error;
     }
-
-    return {
-      ...data,
-      status: (data.status || 'draft') as 'draft' | 'active' | 'archived'
-    };
   },
 
   async fetchProductProperties(productId: string): Promise<ProductProperty[]> {
