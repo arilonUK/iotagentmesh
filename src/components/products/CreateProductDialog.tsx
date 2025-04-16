@@ -8,14 +8,14 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Loader2, Plus } from 'lucide-react';
 import { ProductForm } from './ProductForm';
 import { useProducts } from '@/hooks/useProducts';
 import { useOrganization } from '@/contexts/organization';
 
 export function CreateProductDialog() {
   const [open, setOpen] = React.useState(false);
-  const { createProduct } = useProducts();
+  const { createProduct, isCreating } = useProducts();
   const { organization } = useOrganization();
 
   const handleSubmit = async (data: any) => {
@@ -44,7 +44,7 @@ export function CreateProductDialog() {
         <DialogHeader>
           <DialogTitle>Create New Product</DialogTitle>
         </DialogHeader>
-        <ProductForm onSubmit={handleSubmit} />
+        <ProductForm onSubmit={handleSubmit} isLoading={isCreating} />
       </DialogContent>
     </Dialog>
   );

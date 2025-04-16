@@ -60,9 +60,15 @@ export function useProducts() {
     products,
     isLoading,
     error,
+    // Create operation
     createProduct: createProductMutation.mutate,
+    isCreating: createProductMutation.isPending,
+    // Update operation
     updateProduct: (id: string, data: Partial<ProductTemplate>) =>
       updateProductMutation.mutate({ id, data }),
-    deleteProduct: deleteProductMutation.mutate
+    isUpdating: updateProductMutation.isPending,
+    // Delete operation
+    deleteProduct: deleteProductMutation.mutate,
+    isDeleting: deleteProductMutation.isPending
   };
 }

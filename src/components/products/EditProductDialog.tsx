@@ -19,7 +19,7 @@ interface EditProductDialogProps {
 
 export function EditProductDialog({ product }: EditProductDialogProps) {
   const [open, setOpen] = React.useState(false);
-  const { updateProduct } = useProducts();
+  const { updateProduct, isUpdating } = useProducts();
 
   const handleSubmit = async (data: Partial<ProductTemplate>) => {
     try {
@@ -33,7 +33,7 @@ export function EditProductDialog({ product }: EditProductDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" title="Edit product">
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
@@ -41,7 +41,11 @@ export function EditProductDialog({ product }: EditProductDialogProps) {
         <DialogHeader>
           <DialogTitle>Edit Product</DialogTitle>
         </DialogHeader>
-        <ProductForm onSubmit={handleSubmit} defaultValues={product} isLoading={false} />
+        <ProductForm 
+          onSubmit={handleSubmit} 
+          defaultValues={product} 
+          isLoading={isUpdating} 
+        />
       </DialogContent>
     </Dialog>
   );
