@@ -5,8 +5,9 @@ import { supabase } from '@/integrations/supabase/client';
 export const databaseServices = {
   async createFunction(functionName: string, functionDefinition: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .rpc('exec_sql', { 
+      // Use type assertion to bypass TypeScript restriction
+      const { error } = await (supabase
+        .rpc as any)('exec_sql', { 
           sql: functionDefinition 
         });
       
@@ -25,8 +26,9 @@ export const databaseServices = {
   
   async functionExists(functionName: string): Promise<boolean> {
     try {
-      const { data, error } = await supabase
-        .rpc('function_exists', { 
+      // Use type assertion to bypass TypeScript restriction
+      const { data, error } = await (supabase
+        .rpc as any)('function_exists', { 
           function_name: functionName 
         });
       
