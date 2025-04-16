@@ -1,5 +1,5 @@
 
-import { Home, BarChart, ListChecks, Box } from "lucide-react";
+import { Home, BarChart, ListChecks, Box, MessageSquare, HardDrive } from "lucide-react";
 
 export const dashboardMenuItems = [
   {
@@ -18,6 +18,18 @@ export const dashboardMenuItems = [
     to: "/dashboard/data-buckets",
     icon: ListChecks,
     label: "Data Buckets",
+    end: false
+  },
+  {
+    to: "/dashboard/endpoints",
+    icon: MessageSquare,
+    label: "Endpoints",
+    end: false
+  },
+  {
+    to: "/dashboard/storage",
+    icon: HardDrive,
+    label: "File Storage",
     end: false
   },
   {
