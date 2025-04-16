@@ -11,16 +11,19 @@ export const dashboardMenuItems = [
   {
     to: "/dashboard/devices",
     icon: BarChart,
-    label: "Devices"
+    label: "Devices",
+    end: false
   },
   {
     to: "/dashboard/data-buckets",
     icon: ListChecks,
-    label: "Data Buckets"
+    label: "Data Buckets",
+    end: false
   },
   {
     to: "/dashboard/products",
     icon: Box,
-    label: "Products"
+    label: "Products",
+    end: false
   }
 ] as const;

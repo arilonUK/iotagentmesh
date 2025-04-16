@@ -43,6 +43,10 @@ export const productServices = {
       throw error;
     }
 
-    return data || [];
+    // Map the data to ensure data_type conforms to the expected type
+    return (data || []).map(property => ({
+      ...property,
+      data_type: property.data_type as 'string' | 'number' | 'boolean' | 'location'
+    }));
   }
 };
