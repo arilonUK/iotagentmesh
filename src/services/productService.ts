@@ -14,7 +14,11 @@ export const productServices = {
       throw error;
     }
 
-    return data || [];
+    // Cast the data to ensure it conforms to ProductTemplate type
+    return (data || []).map(item => ({
+      ...item,
+      status: (item.status || 'draft') as 'draft' | 'active' | 'archived'
+    }));
   },
 
   async fetchProduct(id: string): Promise<ProductTemplate> {
@@ -29,7 +33,11 @@ export const productServices = {
       throw error;
     }
 
-    return data;
+    // Cast the data to ensure it conforms to ProductTemplate type
+    return {
+      ...data,
+      status: (data.status || 'draft') as 'draft' | 'active' | 'archived'
+    };
   },
 
   async createProduct(product: Omit<ProductTemplate, 'id' | 'created_at' | 'updated_at'>): Promise<ProductTemplate> {
@@ -44,7 +52,10 @@ export const productServices = {
       throw error;
     }
 
-    return data;
+    return {
+      ...data,
+      status: (data.status || 'draft') as 'draft' | 'active' | 'archived'
+    };
   },
 
   async fetchProductProperties(productId: string): Promise<ProductProperty[]> {
@@ -83,7 +94,16 @@ export const productServices = {
       throw error;
     }
 
-    return data;
+    return {
+      ...data,
+      data_type: data.data_type as 'string' | 'number' | 'boolean' | 'location',
+      validation_rules: data.validation_rules as {
+        min?: number;
+        max?: number;
+        pattern?: string;
+        options?: string[];
+      } | undefined
+    };
   },
 
   async updateProductProperty(id: string, data: Partial<ProductProperty>): Promise<ProductProperty> {
@@ -99,7 +119,16 @@ export const productServices = {
       throw error;
     }
 
-    return updatedProperty;
+    return {
+      ...updatedProperty,
+      data_type: updatedProperty.data_type as 'string' | 'number' | 'boolean' | 'location',
+      validation_rules: updatedProperty.validation_rules as {
+        min?: number;
+        max?: number;
+        pattern?: string;
+        options?: string[];
+      } | undefined
+    };
   },
 
   async deleteProductProperty(id: string): Promise<void> {
@@ -127,7 +156,10 @@ export const productServices = {
       throw error;
     }
 
-    return updatedProduct;
+    return {
+      ...updatedProduct,
+      status: (updatedProduct.status || 'draft') as 'draft' | 'active' | 'archived'
+    };
   },
 
   async deleteProduct(id: string): Promise<void> {

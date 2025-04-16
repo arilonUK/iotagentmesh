@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from '@/pages/Dashboard';
@@ -24,40 +25,43 @@ import DashboardLayout from '@/layouts/DashboardLayout';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from '@/contexts/auth';
 
 const queryClient = new QueryClient();
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-        <Router>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
-            <Route element={<ProtectedRoute />}>
-              <Route path="/dashboard" element={<DashboardLayout />}>
-                <Route index element={<Dashboard />} />
-                <Route path="devices" element={<Devices />} />
-                <Route path="devices/:id" element={<DeviceDetail />} />
-                <Route path="products" element={<Products />} />
-                <Route path="products/:id" element={<ProductDetail />} />
-                <Route path="alarms" element={<Alarms />} />
-                <Route path="data-buckets" element={<DataBuckets />} />
-                <Route path="endpoints" element={<Endpoints />} />
-                <Route path="file-storage" element={<FileStorage />} />
-                <Route path="file-storage/:id" element={<FileExplorerPage />} />
-                <Route path="profile" element={<ProfileSettings />} />
-                <Route path="organization" element={<OrganizationSettings />} />
-                <Route path="team" element={<TeamSettings />} />
+      <AuthProvider>
+        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+          <Router>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
+              <Route element={<ProtectedRoute />}>
+                <Route path="/dashboard" element={<DashboardLayout />}>
+                  <Route index element={<Dashboard />} />
+                  <Route path="devices" element={<Devices />} />
+                  <Route path="devices/:id" element={<DeviceDetail />} />
+                  <Route path="products" element={<Products />} />
+                  <Route path="products/:id" element={<ProductDetail />} />
+                  <Route path="alarms" element={<Alarms />} />
+                  <Route path="data-buckets" element={<DataBuckets />} />
+                  <Route path="endpoints" element={<Endpoints />} />
+                  <Route path="file-storage" element={<FileStorage />} />
+                  <Route path="file-storage/:id" element={<FileExplorerPage />} />
+                  <Route path="profile" element={<ProfileSettings />} />
+                  <Route path="organization" element={<OrganizationSettings />} />
+                  <Route path="team" element={<TeamSettings />} />
+                </Route>
               </Route>
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Router>
-        <Toaster />
-      </ThemeProvider>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Router>
+          <Toaster />
+        </ThemeProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
