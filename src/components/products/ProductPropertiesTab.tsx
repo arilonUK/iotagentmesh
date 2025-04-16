@@ -12,7 +12,7 @@ import {
   CardTitle 
 } from '@/components/ui/card';
 import { ProductProperty, PropertyFormValues } from '@/types/product';
-import { ProductPropertyForm } from './ProductPropertyForm';
+import ProductPropertyForm from './ProductPropertyForm';
 import {
   Dialog,
   DialogContent,

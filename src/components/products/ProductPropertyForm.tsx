@@ -43,19 +43,23 @@ interface ProductPropertyFormProps {
   onSubmit: (data: PropertyFormValues) => Promise<void>;
   initialValues?: Partial<PropertyFormValues>;
   isEditing?: boolean;
+  defaultValues?: any;
+  isLoading?: boolean;
 }
 
 const ProductPropertyForm: React.FC<ProductPropertyFormProps> = ({
   onSubmit,
   initialValues,
-  isEditing = false
+  isEditing = false,
+  defaultValues,
+  isLoading = false
 }) => {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<PropertyFormSchema>({
     resolver: zodResolver(propertyFormSchema),
-    defaultValues: {
+    defaultValues: defaultValues || {
       name: initialValues?.name || '',
       description: initialValues?.description || '',
       data_type: initialValues?.data_type || 'string',

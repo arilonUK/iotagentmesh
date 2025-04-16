@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProducts } from '@/hooks/useProducts';
@@ -39,6 +38,11 @@ export function ProductList() {
 
   const handleProductClick = (productId: string) => {
     navigate(`/dashboard/products/${productId}`);
+  };
+
+  const handleProductDelete = () => {
+    // Refresh product list after deletion
+    // This is handled by the useProducts hook's mutation onSuccess callback
   };
 
   if (isLoading) {
@@ -139,7 +143,11 @@ export function ProductList() {
                     onClick={(e) => e.stopPropagation()}
                   >
                     <EditProductDialog product={product} />
-                    <DeleteProductDialog productId={product.id} productName={product.name} />
+                    <DeleteProductDialog 
+                      productId={product.id} 
+                      productName={product.name} 
+                      onDelete={handleProductDelete}
+                    />
                   </div>
                 </div>
                 <CardDescription className="mt-2">Version {product.version}</CardDescription>
