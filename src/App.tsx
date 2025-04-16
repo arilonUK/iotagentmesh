@@ -53,6 +53,7 @@ function App() {
                     <Route path="alarms" element={<Alarms />} />
                     <Route path="/dashboard/storage" element={<FileStorage />} />
                     <Route path="/dashboard/storage/:profileId/explorer" element={<FileExplorerPage />} />
+                    <Route path="products" element={<Products />} />
                   </Route>
                 </Route>
                 

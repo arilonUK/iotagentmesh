@@ -262,6 +262,7 @@ export type Database = {
           last_active_at: string | null
           name: string
           organization_id: string
+          product_template_id: string | null
           status: string
           type: string
         }
@@ -271,6 +272,7 @@ export type Database = {
           last_active_at?: string | null
           name: string
           organization_id: string
+          product_template_id?: string | null
           status: string
           type: string
         }
@@ -280,6 +282,7 @@ export type Database = {
           last_active_at?: string | null
           name?: string
           organization_id?: string
+          product_template_id?: string | null
           status?: string
           type?: string
         }
@@ -289,6 +292,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devices_product_template_id_fkey"
+            columns: ["product_template_id"]
+            isOneToOne: false
+            referencedRelation: "product_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -531,6 +541,272 @@ export type Database = {
         }
         Relationships: []
       }
+      product_buckets: {
+        Row: {
+          config: Json
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          product_id: string
+          property_id: string
+          retention_days: number
+          sampling_interval: number | null
+          storage_backend: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          product_id: string
+          property_id: string
+          retention_days: number
+          sampling_interval?: number | null
+          storage_backend: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          product_id?: string
+          property_id?: string
+          retention_days?: number
+          sampling_interval?: number | null
+          storage_backend?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_buckets_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_buckets_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "product_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_dashboards: {
+        Row: {
+          config: Json
+          created_at: string
+          description: string | null
+          id: string
+          is_default: boolean
+          name: string
+          product_id: string
+          updated_at: string
+        }
+        Insert: {
+          config: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          name: string
+          product_id: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          name?: string
+          product_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_dashboards_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_properties: {
+        Row: {
+          created_at: string
+          data_type: string
+          default_value: Json | null
+          description: string | null
+          id: string
+          is_required: boolean
+          name: string
+          product_id: string
+          unit: string | null
+          updated_at: string
+          validation_rules: Json | null
+        }
+        Insert: {
+          created_at?: string
+          data_type: string
+          default_value?: Json | null
+          description?: string | null
+          id?: string
+          is_required?: boolean
+          name: string
+          product_id: string
+          unit?: string | null
+          updated_at?: string
+          validation_rules?: Json | null
+        }
+        Update: {
+          created_at?: string
+          data_type?: string
+          default_value?: Json | null
+          description?: string | null
+          id?: string
+          is_required?: boolean
+          name?: string
+          product_id?: string
+          unit?: string | null
+          updated_at?: string
+          validation_rules?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_properties_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_scripts: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          enabled: boolean
+          id: string
+          name: string
+          product_id: string
+          script_type: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name: string
+          product_id: string
+          script_type: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name?: string
+          product_id?: string
+          script_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_scripts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_services: {
+        Row: {
+          config: Json
+          created_at: string
+          description: string | null
+          enabled: boolean
+          id: string
+          name: string
+          product_id: string
+          service_type: string
+          updated_at: string
+        }
+        Insert: {
+          config: Json
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name: string
+          product_id: string
+          service_type: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name?: string
+          product_id?: string
+          service_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_services_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -655,6 +931,7 @@ export type Database = {
           last_active_at: string | null
           name: string
           organization_id: string
+          product_template_id: string | null
           status: string
           type: string
         }[]
