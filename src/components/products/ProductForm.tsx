@@ -7,11 +7,10 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { useOrganization } from '@/contexts/organization';
 import { ProductTemplate } from '@/types/product';
 
 const productSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  name: z.string().min(1, 'Product name is required'),
   description: z.string().optional(),
   version: z.string().default('1.0'),
 });
@@ -35,50 +34,68 @@ export function ProductForm({ onSubmit, isLoading, defaultValues }: ProductFormP
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Enter product name" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid gap-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-muted-foreground">Product Name</FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field} 
+                    placeholder="Enter product name" 
+                    className="w-full"
+                  />
+                </FormControl>
+                <FormMessage className="text-xs text-destructive" />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea {...field} placeholder="Enter product description" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-muted-foreground">Description</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    {...field} 
+                    placeholder="Enter product description" 
+                    className="w-full min-h-[100px]"
+                  />
+                </FormControl>
+                <FormMessage className="text-xs text-destructive" />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="version"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Version</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="1.0" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="version"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-muted-foreground">Version</FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field} 
+                    placeholder="1.0" 
+                    className="w-full"
+                  />
+                </FormControl>
+                <FormMessage className="text-xs text-destructive" />
+              </FormItem>
+            )}
+          />
+        </div>
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        <Button 
+          type="submit" 
+          className="w-full mt-4" 
+          disabled={isLoading}
+        >
           {isLoading ? 'Saving...' : defaultValues ? 'Update Product' : 'Create Product'}
         </Button>
       </form>
