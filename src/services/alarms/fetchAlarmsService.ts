@@ -10,15 +10,24 @@ export async function fetchAlarms(organizationId: string): Promise<AlarmConfig[]
   try {
     console.log(`Fetching alarms for organization: ${organizationId}`);
 
-    // Use an RPC call to avoid RLS recursion issues
+    // Use a regular query instead of RPC since the RPC function isn't created yet
     const { data, error } = await supabase
-      .rpc('get_alarms_by_org_id', { p_organization_id: organizationId }) as {
-        data: SupabaseAlarm[] | null;
-        error: any;
+      .from('alarms')
+      .select(`
+        *,
+        devices(id, name, type),
+        alarm_endpoints(endpoint_id)
+      `)
+      .eq('organization_id', organizationId) as { 
+        data: (SupabaseAlarm & { 
+          devices: { id: string; name: string; type: string } | null;
+          alarm_endpoints: { endpoint_id: string }[] | null;
+        })[] | null; 
+        error: any; 
       };
     
     if (error) {
-      console.error('Error in fetchAlarms RPC call:', error);
+      console.error('Error in fetchAlarms query:', error);
       handleServiceError(error, 'fetching alarms');
       return [];
     }
@@ -33,14 +42,14 @@ export async function fetchAlarms(organizationId: string): Promise<AlarmConfig[]
     // Transform the data to match the AlarmConfig interface
     const alarms = data.map(alarm => {
       // Extract device data if available
-      const device = alarm.device_id && alarm.device_name && alarm.device_type ? {
-        id: alarm.device_id,
-        name: alarm.device_name,
-        type: alarm.device_type
+      const device = alarm.devices ? {
+        id: alarm.devices.id,
+        name: alarm.devices.name,
+        type: alarm.devices.type
       } : undefined;
       
       // Extract endpoints if available
-      const endpoints = alarm.endpoints ? alarm.endpoints : [];
+      const endpoints = alarm.alarm_endpoints?.map(ae => ae.endpoint_id) || [];
       
       return {
         id: alarm.id,

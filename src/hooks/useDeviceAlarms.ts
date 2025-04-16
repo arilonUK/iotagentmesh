@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AlarmEvent } from '@/types/alarm';
@@ -9,11 +8,20 @@ export function useDeviceAlarms(deviceId: string) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Validate device ID
+    if (!deviceId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(deviceId)) {
+      setError('Invalid device ID format');
+      setIsLoading(false);
+      return;
+    }
+    
     const fetchAlarmEvents = async () => {
       setIsLoading(true);
       setError(null);
       
       try {
+        console.log('Fetching alarm events for device:', deviceId);
+        
         // Step 1: Get the alarm events for the device without any joins
         // This avoids potential recursion in RLS policies
         const { data: eventsData, error: eventsError } = await supabase
@@ -25,10 +33,13 @@ export function useDeviceAlarms(deviceId: string) {
         if (eventsError) throw eventsError;
         
         if (!eventsData || eventsData.length === 0) {
+          console.log('No alarm events found for device:', deviceId);
           setAlarmEvents([]);
           setIsLoading(false);
           return;
         }
+        
+        console.log(`Found ${eventsData.length} alarm events for device ${deviceId}`);
         
         // Step 2: Get the alarm details separately
         const alarmIds = eventsData.map(event => event.alarm_id);
@@ -44,9 +55,9 @@ export function useDeviceAlarms(deviceId: string) {
           .from('devices')
           .select('id, name, type')
           .eq('id', deviceId)
-          .single();
+          .maybeSingle(); // Using maybeSingle() instead of single()
           
-        if (deviceError && deviceError.code !== 'PGRST116') throw deviceError;
+        if (deviceError) throw deviceError;
         
         // Step 4: Combine the data
         const combinedData = eventsData.map(event => {

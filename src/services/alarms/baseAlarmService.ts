@@ -16,6 +16,11 @@ export interface SupabaseAlarm {
   cooldown_minutes: number;
   created_at: string;
   updated_at: string;
+  
+  // Additional fields returned from the RPC function
+  device_name?: string;
+  device_type?: string;
+  endpoints?: string[];
 }
 
 export const handleServiceError = (error: any, operation: string): void => {
