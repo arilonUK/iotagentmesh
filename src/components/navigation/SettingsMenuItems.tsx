@@ -24,12 +24,12 @@ export function SettingsMenuItems({ userRole }: SettingsMenuItemsProps) {
       <SidebarMenuItem>
         <SidebarMenuButton 
           asChild 
-          isActive={pathname.startsWith("/dashboard/settings/profile")} 
+          isActive={pathname === "/dashboard/profile"} 
           tooltip="Profile"
         >
-          <Link to="/dashboard/settings/profile" className={cn(
+          <Link to="/dashboard/profile" className={cn(
             "flex items-center gap-3 w-full",
-            pathname.startsWith("/dashboard/settings/profile") && "font-medium"
+            pathname === "/dashboard/profile" && "font-medium"
           )}>
             <Icons.user className="h-4 w-4" />
             <span>Profile Settings</span>
@@ -41,12 +41,12 @@ export function SettingsMenuItems({ userRole }: SettingsMenuItemsProps) {
         <SidebarMenuItem>
           <SidebarMenuButton 
             asChild 
-            isActive={pathname.startsWith("/dashboard/settings/team")} 
+            isActive={pathname === "/dashboard/team"} 
             tooltip="Team"
           >
-            <Link to="/dashboard/settings/team" className={cn(
+            <Link to="/dashboard/team" className={cn(
               "flex items-center gap-3 w-full",
-              pathname.startsWith("/dashboard/settings/team") && "font-medium"
+              pathname === "/dashboard/team" && "font-medium"
             )}>
               <Icons.users className="h-4 w-4" />
               <span>Team Management</span>
@@ -59,12 +59,12 @@ export function SettingsMenuItems({ userRole }: SettingsMenuItemsProps) {
         <SidebarMenuItem>
           <SidebarMenuButton 
             asChild 
-            isActive={pathname.startsWith("/dashboard/organization")} 
+            isActive={pathname === "/dashboard/organization"} 
             tooltip="Organization"
           >
             <Link to="/dashboard/organization" className={cn(
               "flex items-center gap-3 w-full",
-              pathname.startsWith("/dashboard/organization") && "font-medium"
+              pathname === "/dashboard/organization" && "font-medium"
             )}>
               <Icons.building className="h-4 w-4" />
               <span>Organization Settings</span>
