@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productServices } from '@/services/productService';
 import { useOrganization } from '@/contexts/organization';
@@ -22,6 +21,12 @@ export function useProducts() {
   const createProductMutation = useMutation({
     mutationFn: (productData: Omit<ProductTemplate, 'id' | 'created_at' | 'updated_at'>) => {
       console.log('Creating product with mutation:', productData);
+      
+      // Ensure organization_id is set
+      if (!productData.organization_id) {
+        throw new Error('Organization ID is required for creating a product');
+      }
+      
       return productServices.createProduct(productData);
     },
     onSuccess: () => {

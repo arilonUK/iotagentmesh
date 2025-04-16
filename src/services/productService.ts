@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { ProductTemplate, ProductProperty } from '@/types/product';
 
@@ -50,9 +51,15 @@ export const productServices = {
     try {
       console.log('Creating product with data:', product);
       
+      // Ensure organization_id is present
+      if (!product.organization_id) {
+        throw new Error('Organization ID is required');
+      }
+
+      // Insert the product into the database
       const { data, error } = await supabase
         .from('product_templates')
-        .insert(product)
+        .insert([product])  // Use array format to ensure consistent behavior
         .select()
         .single();
 
@@ -188,3 +195,4 @@ export const productServices = {
     }
   }
 };
+
