@@ -36,7 +36,7 @@ export function DeleteProductDialog({ productId, productName }: DeleteProductDia
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="icon" title="Delete product">
+        <Button variant="ghost" size="icon" className="hover:bg-destructive/10" title="Delete product">
           <Trash2 className="h-4 w-4 text-destructive" />
         </Button>
       </AlertDialogTrigger>
@@ -50,13 +50,13 @@ export function DeleteProductDialog({ productId, productName }: DeleteProductDia
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
           <AlertDialogAction 
-            onClick={handleDelete} 
-            className="bg-destructive text-destructive-foreground"
+            onClick={handleDelete}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             disabled={isDeleting}
           >
             {isDeleting ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Deleting...
               </>
             ) : (

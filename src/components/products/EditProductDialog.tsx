@@ -12,6 +12,7 @@ import { Pencil } from 'lucide-react';
 import { ProductForm } from './ProductForm';
 import { useProducts } from '@/hooks/useProducts';
 import { ProductTemplate } from '@/types/product';
+import { toast } from 'sonner';
 
 interface EditProductDialogProps {
   product: ProductTemplate;
@@ -25,8 +26,10 @@ export function EditProductDialog({ product }: EditProductDialogProps) {
     try {
       await updateProduct(product.id, data);
       setOpen(false);
+      toast.success('Product updated successfully');
     } catch (error) {
       console.error('Error updating product:', error);
+      toast.error('Failed to update product');
     }
   };
 
@@ -37,9 +40,9 @@ export function EditProductDialog({ product }: EditProductDialogProps) {
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] bg-background border border-border">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold">Edit Product</DialogTitle>
+          <DialogTitle>Edit Product</DialogTitle>
         </DialogHeader>
         <div className="mt-4">
           <ProductForm 

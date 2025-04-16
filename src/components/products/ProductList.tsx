@@ -14,7 +14,6 @@ export function ProductList() {
   const { products, isLoading, error } = useProducts();
   const [searchTerm, setSearchTerm] = React.useState('');
 
-  // Filter products based on search term
   const filteredProducts = React.useMemo(() => {
     if (!products) return [];
     return products.filter(product => 
@@ -23,7 +22,6 @@ export function ProductList() {
     );
   }, [products, searchTerm]);
 
-  // Loading state with skeletons
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -55,7 +53,6 @@ export function ProductList() {
     );
   }
 
-  // Error state with descriptive alert
   if (error) {
     return (
       <div className="space-y-4">
@@ -67,14 +64,12 @@ export function ProductList() {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error loading products</AlertTitle>
           <AlertDescription>
-            There was a problem loading your products. Please try again later or contact support if the issue persists.
+            There was a problem loading your products. Please try again later.
           </AlertDescription>
         </Alert>
       </div>
     );
   }
-
-  const hasProducts = filteredProducts.length > 0;
 
   return (
     <div className="space-y-4">
@@ -83,7 +78,6 @@ export function ProductList() {
         <CreateProductDialog />
       </div>
       
-      {/* Search input */}
       <div className="mb-4">
         <Input
           placeholder="Search products..."
@@ -93,8 +87,7 @@ export function ProductList() {
         />
       </div>
 
-      {/* Empty state */}
-      {products && products.length === 0 && (
+      {products && products.length === 0 ? (
         <Card className="p-8 text-center">
           <div className="flex flex-col items-center justify-center gap-2">
             <h3 className="text-lg font-medium">No products found</h3>
@@ -104,36 +97,23 @@ export function ProductList() {
             <CreateProductDialog />
           </div>
         </Card>
-      )}
-
-      {/* Search no results state */}
-      {products && products.length > 0 && filteredProducts.length === 0 && (
-        <Alert>
-          <AlertTitle>No results found</AlertTitle>
-          <AlertDescription>
-            No products match your search criteria. Try adjusting your search term.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Product grid */}
-      {hasProducts && (
+      ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredProducts.map((product) => (
-            <Card key={product.id}>
-              <CardHeader>
+            <Card key={product.id} className="flex flex-col">
+              <CardHeader className="flex-1">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="truncate">{product.name}</CardTitle>
+                  <CardTitle className="text-xl">{product.name}</CardTitle>
                   <div className="flex items-center gap-2">
                     <EditProductDialog product={product} />
                     <DeleteProductDialog productId={product.id} productName={product.name} />
                   </div>
                 </div>
-                <CardDescription>Version {product.version}</CardDescription>
+                <CardDescription className="mt-2">Version {product.version}</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground line-clamp-3">
-                  {product.description || 'No description provided'}
+                <p className="text-sm text-muted-foreground">
+                  {product.description || "No description provided"}
                 </p>
               </CardContent>
             </Card>
