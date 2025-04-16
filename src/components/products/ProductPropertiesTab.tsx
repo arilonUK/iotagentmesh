@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useProducts } from '@/hooks/useProducts';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { ProductProperty } from '@/types/product';
+import { ProductProperty, PropertyFormValues } from '@/types/product';
 import {
   Dialog,
   DialogTrigger,
