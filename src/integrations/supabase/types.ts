@@ -976,6 +976,21 @@ export type Database = {
           type: string
         }[]
       }
+      get_org_products: {
+        Args: { p_org_id: string }
+        Returns: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          status: string | null
+          tags: string | null
+          updated_at: string
+          version: string
+        }[]
+      }
       get_organization_members: {
         Args: { p_org_id: string }
         Returns: {
