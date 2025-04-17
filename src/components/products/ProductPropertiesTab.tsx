@@ -42,31 +42,50 @@ export function ProductPropertiesTab({ productId }: ProductPropertiesTabProps) {
 
   // Updated to return a Promise
   const handleAddProperty = async (data: PropertyFormValues): Promise<void> => {
-    createProperty({
-      ...data,
-      product_id: productId
-    });
-    setIsAddDialogOpen(false);
+    try {
+      console.log("Adding property:", data);
+      await createProperty({
+        ...data,
+        product_id: productId
+      });
+      setIsAddDialogOpen(false);
+    } catch (error) {
+      console.error("Error adding property:", error);
+      throw error;
+    }
   };
 
   // Updated to return a Promise
   const handleUpdateProperty = async (data: PropertyFormValues): Promise<void> => {
     if (editingProperty) {
-      updateProperty(editingProperty.id, data);
-      setIsEditDialogOpen(false);
-      setEditingProperty(null);
+      try {
+        console.log("Updating property:", editingProperty.id, data);
+        await updateProperty(editingProperty.id, data);
+        setIsEditDialogOpen(false);
+        setEditingProperty(null);
+      } catch (error) {
+        console.error("Error updating property:", error);
+        throw error;
+      }
     }
   };
 
   // Updated to return a Promise
   const handleDeleteProperty = async (): Promise<void> => {
     if (deletingPropertyId) {
-      deleteProperty(deletingPropertyId);
-      setDeletingPropertyId(null);
+      try {
+        console.log("Deleting property:", deletingPropertyId);
+        await deleteProperty(deletingPropertyId);
+        setDeletingPropertyId(null);
+      } catch (error) {
+        console.error("Error deleting property:", error);
+        throw error;
+      }
     }
   };
 
   const handleEditProperty = (property: ProductProperty) => {
+    console.log("Setting editing property:", property);
     setEditingProperty(property);
     setIsEditDialogOpen(true);
   };

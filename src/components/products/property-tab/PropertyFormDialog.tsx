@@ -24,6 +24,8 @@ export function PropertyFormDialog({
   defaultValues,
   isLoading
 }: PropertyFormDialogProps) {
+  console.log("PropertyFormDialog defaultValues:", defaultValues);
+  
   return (
     <DialogContent className="sm:max-w-[600px]">
       <DialogHeader>
@@ -34,6 +36,7 @@ export function PropertyFormDialog({
         onSubmit={onSubmit}
         defaultValues={defaultValues}
         isLoading={isLoading}
+        isEditing={!!defaultValues}
       />
     </DialogContent>
   );

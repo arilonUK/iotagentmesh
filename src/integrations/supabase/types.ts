@@ -1013,6 +1013,37 @@ export type Database = {
           role: string
         }[]
       }
+      get_product_by_id: {
+        Args: { p_id: string }
+        Returns: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          status: string | null
+          tags: string | null
+          updated_at: string
+          version: string
+        }[]
+      }
+      get_product_properties: {
+        Args: { p_product_id: string }
+        Returns: {
+          created_at: string
+          data_type: string
+          default_value: Json | null
+          description: string | null
+          id: string
+          is_required: boolean
+          name: string
+          product_id: string
+          unit: string | null
+          updated_at: string
+          validation_rules: Json | null
+        }[]
+      }
       get_user_organizations: {
         Args: { p_user_id: string }
         Returns: {

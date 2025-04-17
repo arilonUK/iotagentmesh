@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -57,6 +56,8 @@ const ProductPropertyForm: React.FC<ProductPropertyFormProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  console.log("Form defaultValues:", defaultValues);
+
   const form = useForm<PropertyFormSchema>({
     resolver: zodResolver(propertyFormSchema),
     defaultValues: defaultValues || {
@@ -70,6 +71,19 @@ const ProductPropertyForm: React.FC<ProductPropertyFormProps> = ({
     }
   });
 
+  useEffect(() => {
+    if (defaultValues) {
+      console.log("Resetting form with defaultValues:", defaultValues);
+      
+      const validationRules = defaultValues.validation_rules || {};
+      
+      form.reset({
+        ...defaultValues,
+        validation_rules: validationRules
+      });
+    }
+  }, [defaultValues, form]);
+
   const dataType = form.watch('data_type');
 
   const handleFormSubmit = async (values: PropertyFormSchema) => {
@@ -77,7 +91,8 @@ const ProductPropertyForm: React.FC<ProductPropertyFormProps> = ({
     setError(null);
     
     try {
-      // Ensure the form values conform to the PropertyFormValues type
+      console.log("Submitting form with values:", values);
+      
       const formData: PropertyFormValues = {
         name: values.name,
         description: values.description,
@@ -200,7 +215,6 @@ const ProductPropertyForm: React.FC<ProductPropertyFormProps> = ({
               )}
             />
 
-            {/* Additional validation fields based on data type */}
             {dataType === 'number' && (
               <div className="md:col-span-2 grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField
@@ -323,9 +337,9 @@ const ProductPropertyForm: React.FC<ProductPropertyFormProps> = ({
           <div className="flex justify-end space-x-4">
             <Button 
               type="submit" 
-              disabled={isSubmitting}
+              disabled={isSubmitting || isLoading}
             >
-              {isSubmitting 
+              {isSubmitting || isLoading
                 ? (isEditing ? 'Updating...' : 'Creating...') 
                 : (isEditing ? 'Update Property' : 'Create Property')
               }
