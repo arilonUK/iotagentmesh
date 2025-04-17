@@ -25,11 +25,23 @@ export function EditProductDialog({ product }: EditProductDialogProps) {
 
   const handleSubmit = async (data: Partial<ProductTemplate>) => {
     try {
-      await updateProduct(product.id, data);
+      console.log('Submitting product update:', data);
+      
+      // Ensure we're not trying to update organization_id or other readonly fields
+      const updateData = {
+        name: data.name,
+        description: data.description,
+        version: data.version,
+        category: data.category,
+        tags: data.tags,
+        status: data.status,
+      };
+      
+      console.log('Submitting sanitized product update:', updateData);
+      await updateProduct(product.id, updateData);
       setOpen(false);
-      toast.success('Product updated successfully');
     } catch (error) {
-      console.error('Error updating product:', error);
+      console.error('Error updating product in dialog:', error);
       toast.error('Failed to update product');
     }
   };

@@ -16,7 +16,8 @@ type CustomSupabaseClient = ReturnType<typeof createClient<Database>> & {
       fn: 'create_property_bypass_rls' | 'update_property_bypass_rls' | 'delete_property_bypass_rls' |
           'create_device_bypass_rls' | 'update_device_bypass_rls' | 'delete_device_bypass_rls' |
           'get_user_organization_role_bypass_rls' | 'get_organization_members_bypass_rls' |
-          'is_org_admin_or_owner_bypass_rls' | 'is_org_member_bypass_rls',
+          'is_org_admin_or_owner_bypass_rls' | 'is_org_member_bypass_rls' |
+          'update_product_bypass_rls',
       params: Record<string, any>
     ): any;
   }
