@@ -1031,6 +1031,17 @@ export type Database = {
           email: string
         }[]
       }
+      get_organization_members_bypass_rls: {
+        Args: { p_org_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          organization_id: string
+          role: Database["public"]["Enums"]["role_type"]
+          updated_at: string
+          user_id: string
+        }[]
+      }
       get_organization_with_role: {
         Args: { p_org_id: string; p_user_id: string }
         Returns: {
@@ -1073,6 +1084,10 @@ export type Database = {
           validation_rules: Json | null
         }[]
       }
+      get_user_organization_role_bypass_rls: {
+        Args: { p_org_id: string; p_user_id: string }
+        Returns: string
+      }
       get_user_organizations: {
         Args: { p_user_id: string }
         Returns: {
@@ -1089,6 +1104,14 @@ export type Database = {
       }
       is_org_admin_or_owner: {
         Args: { org_id: string }
+        Returns: boolean
+      }
+      is_org_admin_or_owner_bypass_rls: {
+        Args: { p_org_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      is_org_member_bypass_rls: {
+        Args: { p_org_id: string; p_user_id: string }
         Returns: boolean
       }
       switch_user_organization: {

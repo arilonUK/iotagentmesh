@@ -24,10 +24,10 @@ export default function DeviceDetail() {
     }
     if (device) {
       console.log('Device loaded:', device);
-    } else {
+    } else if (!isLoading) {
       console.log('No device found for ID:', id);
     }
-  }, [device, error, id]);
+  }, [device, error, id, isLoading]);
 
   if (isLoading) {
     return (
@@ -120,7 +120,7 @@ export default function DeviceDetail() {
               </p>
             )}
             <p>
-              <strong>Last active:</strong> {new Date(device.last_active_at).toLocaleString()}
+              <strong>Last active:</strong> {device.last_active_at ? new Date(device.last_active_at).toLocaleString() : 'Never'}
             </p>
           </div>
         </CardContent>

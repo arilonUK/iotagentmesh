@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
-import { createDevice } from '@/services/deviceService';
+import { useDeviceManager } from '@/hooks/useDeviceManager';
 
 const deviceSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -27,6 +27,8 @@ interface AddDeviceFormProps {
 
 export function AddDeviceForm({ onSuccess, onCancel }: AddDeviceFormProps) {
   const { organization } = useOrganization();
+  const { createDevice } = useDeviceManager(organization?.id);
+  
   const form = useForm<DeviceFormValues>({
     resolver: zodResolver(deviceSchema),
     defaultValues: {
@@ -61,6 +63,7 @@ export function AddDeviceForm({ onSuccess, onCancel }: AddDeviceFormProps) {
           description: "Device added successfully",
         });
         
+        form.reset();
         onSuccess?.();
       }
     } catch (error) {

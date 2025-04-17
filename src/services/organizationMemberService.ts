@@ -8,9 +8,9 @@ import { OrganizationUser, RoleType } from '@/types/organization';
  */
 export async function fetchOrganizationMembers(organizationId: string): Promise<OrganizationUser[]> {
   try {
-    // First attempt: Use the RPC function
+    // First attempt: Use the RPC function that bypasses RLS
     const { data, error } = await supabase.rpc(
-      'get_organization_members',
+      'get_organization_members_bypass_rls',
       { p_org_id: organizationId }
     );
     
@@ -20,15 +20,29 @@ export async function fetchOrganizationMembers(organizationId: string): Promise<
       return fetchOrganizationMembersFallback(organizationId);
     }
     
+    // Need to join with profiles since RPC returns only organization_members
     if (data && Array.isArray(data)) {
-      return data.map(member => ({
-        id: member.id,
-        user_id: member.user_id,
-        role: member.role,
-        email: member.email,
-        full_name: member.full_name,
-        username: member.username
-      }));
+      // Get all the user IDs to fetch their profiles
+      const userIds = data.map(member => member.user_id);
+      
+      // Fetch profiles for all users in one go
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, username, full_name')
+        .in('id', userIds);
+      
+      // Map the profiles to their respective members
+      return data.map(member => {
+        const profile = profiles?.find(p => p.id === member.user_id);
+        return {
+          id: member.id,
+          user_id: member.user_id,
+          role: member.role,
+          email: profile?.username,
+          full_name: profile?.full_name,
+          username: profile?.username
+        };
+      });
     }
     
     return [];
@@ -45,7 +59,32 @@ async function fetchOrganizationMembersFallback(organizationId: string): Promise
   try {
     console.log('Using fallback method to fetch organization members');
     
-    // Get members with roles
+    // Get members with roles, trying both methods
+    let members = null;
+    
+    // Try the original get_organization_members RPC first
+    try {
+      const { data: rpcMembers, error: rpcError } = await supabase.rpc(
+        'get_organization_members',
+        { p_org_id: organizationId }
+      );
+      
+      if (!rpcError && rpcMembers && rpcMembers.length > 0) {
+        // If successful, map and return
+        return rpcMembers.map(member => ({
+          id: member.id,
+          user_id: member.user_id,
+          role: member.role,
+          email: member.email,
+          full_name: member.full_name,
+          username: member.username
+        }));
+      }
+    } catch (rpcError) {
+      console.error('Error using get_organization_members RPC:', rpcError);
+    }
+    
+    // If RPC failed, try direct query as last resort
     const { data: rawMembers, error: membersError } = await supabase
       .from('organization_members')
       .select('id, user_id, role')
@@ -53,7 +92,9 @@ async function fetchOrganizationMembersFallback(organizationId: string): Promise
     
     if (membersError) {
       console.error('Fallback error fetching members:', membersError);
-      toast.error('Error loading team members');
+      toast('Error loading team members', { 
+        style: { backgroundColor: 'red', color: 'white' } 
+      });
       return [];
     }
     
@@ -87,7 +128,9 @@ async function fetchOrganizationMembersFallback(organizationId: string): Promise
     return usersWithProfiles;
   } catch (error) {
     console.error('Error in fallback method:', error);
-    toast.error('Error loading team members');
+    toast('Error loading team members', {
+      style: { backgroundColor: 'red', color: 'white' }
+    });
     return [];
   }
 }

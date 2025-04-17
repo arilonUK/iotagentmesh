@@ -97,10 +97,10 @@ export const useDevice = (deviceId?: string) => {
         }
       } catch (err) {
         console.error('Error fetching device:', err);
-        return null; // Return null instead of throwing to handle errors gracefully
+        throw err; // Throw the error to trigger React Query's error handling
       }
     },
-    enabled: !!deviceId,
+    enabled: !!deviceId && isValidUUID(deviceId),
     retry: 1,
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
     staleTime: 1000 * 60
