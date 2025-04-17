@@ -903,6 +903,37 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_product_bypass_rls: {
+        Args: {
+          p_name: string
+          p_description: string
+          p_version: string
+          p_category: string
+          p_tags: string
+          p_status: string
+          p_organization_id: string
+        }
+        Returns: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          status: string | null
+          tags: string | null
+          updated_at: string
+          version: string
+        }
+      }
+      exec_sql: {
+        Args: { sql: string }
+        Returns: undefined
+      }
+      function_exists: {
+        Args: { function_name: string }
+        Returns: boolean
+      }
       get_device_readings_aggregate: {
         Args: {
           p_device_id: string
