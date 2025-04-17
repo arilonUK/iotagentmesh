@@ -66,7 +66,7 @@ export async function createProductProperty(
     }
     
     // Call the RPC function to create property (bypassing RLS)
-    const { data, error } = await supabase.rpc('create_property_bypass_rls', { 
+    const { data, error } = await supabase.rpc(functionName, { 
       p_product_id: property.product_id,
       p_name: property.name,
       p_description: property.description || null,
@@ -94,29 +94,11 @@ export async function createProductProperty(
       }
       
       console.log('Property created successfully using fallback:', fallbackData);
-      return {
-        ...fallbackData,
-        data_type: fallbackData.data_type as 'string' | 'number' | 'boolean' | 'location',
-        validation_rules: fallbackData.validation_rules as {
-          min?: number;
-          max?: number;
-          pattern?: string;
-          options?: string[];
-        } | undefined
-      };
+      return fallbackData as ProductProperty;
     }
 
     console.log('Property created successfully using RPC:', data);
-    return {
-      ...data,
-      data_type: data.data_type as 'string' | 'number' | 'boolean' | 'location',
-      validation_rules: data.validation_rules as {
-        min?: number;
-        max?: number;
-        pattern?: string;
-        options?: string[];
-      } | undefined
-    };
+    return data as ProductProperty;
   } catch (error) {
     console.error('Error in createProductProperty:', error);
     throw error;

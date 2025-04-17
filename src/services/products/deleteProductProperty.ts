@@ -34,7 +34,7 @@ export async function deleteProductProperty(id: string): Promise<void> {
     }
     
     // Call the RPC function to delete property (bypassing RLS)
-    const { error } = await supabase.rpc('delete_property_bypass_rls', { 
+    const { error } = await supabase.rpc(functionName, { 
       p_id: id
     });
     

@@ -53,7 +53,7 @@ export async function updateProductProperty(
     }
     
     // Call the RPC function to update property (bypassing RLS)
-    const { data: updatedProperty, error } = await supabase.rpc('update_property_bypass_rls', { 
+    const { data: updatedProperty, error } = await supabase.rpc(functionName, { 
       p_id: id,
       p_data: data
     });
@@ -76,29 +76,11 @@ export async function updateProductProperty(
       }
       
       console.log('Property updated successfully using fallback:', fallbackData);
-      return {
-        ...fallbackData,
-        data_type: fallbackData.data_type as 'string' | 'number' | 'boolean' | 'location',
-        validation_rules: fallbackData.validation_rules as {
-          min?: number;
-          max?: number;
-          pattern?: string;
-          options?: string[];
-        } | undefined
-      };
+      return fallbackData as ProductProperty;
     }
 
     console.log('Property updated successfully using RPC:', updatedProperty);
-    return {
-      ...updatedProperty,
-      data_type: updatedProperty.data_type as 'string' | 'number' | 'boolean' | 'location',
-      validation_rules: updatedProperty.validation_rules as {
-        min?: number;
-        max?: number;
-        pattern?: string;
-        options?: string[];
-      } | undefined
-    };
+    return updatedProperty as ProductProperty;
   } catch (error) {
     console.error('Error in updateProductProperty:', error);
     throw error;
