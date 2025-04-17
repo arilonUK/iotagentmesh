@@ -926,6 +926,35 @@ export type Database = {
           version: string
         }
       }
+      create_property_bypass_rls: {
+        Args: {
+          p_product_id: string
+          p_name: string
+          p_description: string
+          p_data_type: string
+          p_unit: string
+          p_is_required: boolean
+          p_default_value: Json
+          p_validation_rules: Json
+        }
+        Returns: {
+          created_at: string
+          data_type: string
+          default_value: Json | null
+          description: string | null
+          id: string
+          is_required: boolean
+          name: string
+          product_id: string
+          unit: string | null
+          updated_at: string
+          validation_rules: Json | null
+        }
+      }
+      delete_property_bypass_rls: {
+        Args: { p_id: string }
+        Returns: undefined
+      }
       exec_sql: {
         Args: { sql: string }
         Returns: undefined
@@ -1065,6 +1094,22 @@ export type Database = {
       switch_user_organization: {
         Args: { p_user_id: string; p_org_id: string }
         Returns: boolean
+      }
+      update_property_bypass_rls: {
+        Args: { p_id: string; p_data: Json }
+        Returns: {
+          created_at: string
+          data_type: string
+          default_value: Json | null
+          description: string | null
+          id: string
+          is_required: boolean
+          name: string
+          product_id: string
+          unit: string | null
+          updated_at: string
+          validation_rules: Json | null
+        }
       }
     }
     Enums: {
