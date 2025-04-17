@@ -9,8 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { createDevice } from '@/services/deviceService';
 
 const deviceSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -47,24 +47,22 @@ export function AddDeviceForm({ onSuccess, onCancel }: AddDeviceFormProps) {
         return;
       }
 
-      const { error } = await supabase
-        .from('devices')
-        .insert({
-          name: values.name,
-          type: values.type,
-          description: values.description || null,
-          organization_id: organization.id,
-          status: 'offline'
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Device added successfully",
+      const device = await createDevice({
+        name: values.name,
+        type: values.type,
+        description: values.description || null,
+        organization_id: organization.id,
+        status: 'offline'
       });
-      
-      onSuccess?.();
+
+      if (device) {
+        toast({
+          title: "Success",
+          description: "Device added successfully",
+        });
+        
+        onSuccess?.();
+      }
     } catch (error) {
       console.error('Error adding device:', error);
       toast({

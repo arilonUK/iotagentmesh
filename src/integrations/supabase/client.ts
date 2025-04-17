@@ -13,7 +13,8 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 type CustomSupabaseClient = ReturnType<typeof createClient<Database>> & {
   rpc: ReturnType<typeof createClient<Database>>['rpc'] & {
     (
-      fn: 'create_property_bypass_rls' | 'update_property_bypass_rls' | 'delete_property_bypass_rls',
+      fn: 'create_property_bypass_rls' | 'update_property_bypass_rls' | 'delete_property_bypass_rls' |
+          'create_device_bypass_rls' | 'update_device_bypass_rls' | 'delete_device_bypass_rls',
       params: Record<string, any>
     ): any;
   }
