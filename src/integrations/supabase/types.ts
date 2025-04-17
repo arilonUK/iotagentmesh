@@ -1118,6 +1118,21 @@ export type Database = {
         Args: { p_user_id: string; p_org_id: string }
         Returns: boolean
       }
+      update_product_bypass_rls: {
+        Args: { p_id: string; p_data: Json }
+        Returns: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          status: string | null
+          tags: string | null
+          updated_at: string
+          version: string
+        }
+      }
       update_property_bypass_rls: {
         Args: { p_id: string; p_data: Json }
         Returns: {

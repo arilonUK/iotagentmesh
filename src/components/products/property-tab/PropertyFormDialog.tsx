@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ProductProperty, PropertyFormValues } from '@/types/product';
-import ProductPropertyForm from '../ProductPropertyForm';
+import { PropertyForm } from '../property-form';
 
 interface PropertyFormDialogProps {
   title: string;
@@ -32,7 +32,7 @@ export function PropertyFormDialog({
         <DialogTitle>{title}</DialogTitle>
         <DialogDescription>{description}</DialogDescription>
       </DialogHeader>
-      <ProductPropertyForm
+      <PropertyForm
         onSubmit={onSubmit}
         defaultValues={defaultValues}
         isLoading={isLoading}
