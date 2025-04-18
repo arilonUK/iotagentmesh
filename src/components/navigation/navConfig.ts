@@ -1,5 +1,5 @@
 
-import { Home, BarChart, ListChecks, Box, MessageSquare, HardDrive } from "lucide-react";
+import { Home, BarChart, ListChecks, Box, MessageSquare, HardDrive, Bell } from "lucide-react";
 
 export const dashboardMenuItems = [
   {
@@ -12,6 +12,12 @@ export const dashboardMenuItems = [
     to: "/dashboard/devices",
     icon: BarChart,
     label: "Devices",
+    end: false
+  },
+  {
+    to: "/dashboard/alarms",
+    icon: Bell,
+    label: "Alarms",
     end: false
   },
   {
@@ -39,3 +45,4 @@ export const dashboardMenuItems = [
     end: false
   }
 ] as const;
+
