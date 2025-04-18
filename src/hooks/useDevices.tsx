@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { fetchDevices, fetchDevice } from '@/services/deviceService';
 import { toast } from '@/components/ui/use-toast';
@@ -63,12 +64,6 @@ export const useDevices = (organizationId?: string) => {
   };
 };
 
-export type DeviceWithAccessPolicyError = {
-  id: string;
-  error: 'access_policy';
-  errorMessage: string;
-};
-
 export const useDevice = (deviceId?: string) => {
   const {
     data: device,
@@ -91,7 +86,7 @@ export const useDevice = (deviceId?: string) => {
       
       console.log('Fetching device:', deviceId);
       try {
-        // Using the validation built into the fetchDevice function
+        // Using the updated fetchDevice function that uses our RLS-bypassing database function
         const result = await fetchDevice(deviceId);
         
         if (!result) {
@@ -102,34 +97,12 @@ export const useDevice = (deviceId?: string) => {
           return result;
         }
       } catch (err) {
-        // Detect and handle the specific infinite recursion error
-        if (err instanceof Error && 
-            (err.message.includes('infinite recursion') || 
-             err.message.includes('policy for relation "organization_members"'))) {
-          console.error('Database policy recursion error detected.');
-          // Return a special error object instead of null
-          return {
-            id: deviceId,
-            error: 'access_policy',
-            errorMessage: 'Cannot access device due to database policy restrictions.'
-          } as DeviceWithAccessPolicyError;
-        }
-        
         console.error('Error fetching device:', err);
         throw err; // Throw other errors to trigger React Query's error handling
       }
     },
     enabled: !!deviceId && isValidUUID(deviceId),
-    retry: (failureCount, error) => {
-      // Don't retry if it's the infinite recursion error
-      if (error instanceof Error && 
-          (error.message.includes('infinite recursion') || 
-           error.message.includes('policy for relation "organization_members"'))) {
-        return false;
-      }
-      // Otherwise retry once
-      return failureCount < 1;
-    },
+    retry: 1,
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
     staleTime: 1000 * 60
   });

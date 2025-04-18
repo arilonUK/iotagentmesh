@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Device } from '@/types/device';
 import { toast } from '@/components/ui/use-toast';
@@ -103,11 +102,10 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
       return null;
     }
     
-    // Using .maybeSingle() instead of .single() to handle the case where no device is found
+    // Use our new RLS-bypassing function instead of querying the table directly
+    // This avoids the RLS circular reference issue
     const { data, error } = await supabase
-      .from('devices')
-      .select('*')
-      .eq('id', validDeviceId)
+      .rpc('get_device_by_id_bypass_rls', { p_device_id: validDeviceId })
       .maybeSingle();
     
     if (error) {
