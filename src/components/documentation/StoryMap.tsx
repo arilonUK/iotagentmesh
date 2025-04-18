@@ -80,63 +80,83 @@ const StoryMap = () => {
   ];
 
   return (
-    <ScrollArea className="h-[800px] w-full rounded-md border p-4">
-      <div className="space-y-8">
-        <div>
+    <ScrollArea className="h-[800px] w-full rounded-md border">
+      <div className="p-4">
+        <div className="mb-6">
           <h2 className="text-2xl font-bold mb-4">IoT Platform Story Map</h2>
-          <p className="text-muted-foreground mb-6">
-            Visual representation of user activities, tasks, and stories prioritized by implementation phases.
+          <p className="text-muted-foreground">
+            Development roadmap in CSV format showing activities, tasks, and prioritized stories.
           </p>
         </div>
-        
-        <div className="space-y-6">
-          {activities.map((activity, i) => (
-            <Card key={i} className="w-full">
-              <CardHeader>
-                <CardTitle>{activity.name}</CardTitle>
-                <CardDescription>User activities and related tasks</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {activity.tasks.map((task, j) => (
-                    <div key={j} className="space-y-2">
-                      <h4 className="font-medium text-lg">{task.name}</h4>
-                      <div className="grid grid-cols-3 gap-2">
-                        {task.stories.map((story, k) => (
-                          <div
-                            key={k}
-                            className={`p-2 rounded-md text-sm ${
-                              story.priority === 1
-                                ? "bg-green-100 dark:bg-green-900/20"
-                                : story.priority === 2
-                                ? "bg-yellow-100 dark:bg-yellow-900/20"
-                                : "bg-blue-100 dark:bg-blue-900/20"
-                            }`}
-                          >
-                            {story.text}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[800px] border-collapse">
+            <thead>
+              <tr className="border-b">
+                <th className="px-4 py-2 text-left font-medium">Activity</th>
+                <th className="px-4 py-2 text-left font-medium">Task</th>
+                <th className="px-4 py-2 text-left font-medium">Priority</th>
+                <th className="px-4 py-2 text-left font-medium">User Story</th>
+              </tr>
+            </thead>
+            <tbody>
+              {activities.map((activity) =>
+                activity.tasks.flatMap((task) =>
+                  task.stories.map((story, storyIndex) => (
+                    <tr
+                      key={`${activity.name}-${task.name}-${storyIndex}`}
+                      className="border-b"
+                    >
+                      {storyIndex === 0 && (
+                        <td
+                          className="px-4 py-2 font-medium"
+                          rowSpan={task.stories.length}
+                        >
+                          {task === activity.tasks[0] ? activity.name : ""}
+                        </td>
+                      )}
+                      {storyIndex === 0 && (
+                        <td
+                          className="px-4 py-2"
+                          rowSpan={task.stories.length}
+                        >
+                          {task.name}
+                        </td>
+                      )}
+                      <td className="px-4 py-2">
+                        <span
+                          className={`inline-block px-2 py-1 rounded-full text-xs ${
+                            story.priority === 1
+                              ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                              : story.priority === 2
+                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
+                              : "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300"
+                          }`}
+                        >
+                          P{story.priority}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2">{story.text}</td>
+                    </tr>
+                  ))
+                )
+              )}
+            </tbody>
+          </table>
         </div>
 
-        <div className="flex gap-4 mt-4">
+        <div className="flex gap-4 mt-6">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            <span className="text-sm">Priority 1 (MVP)</span>
+            <span className="text-sm">P1 (MVP)</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-            <span className="text-sm">Priority 2</span>
+            <span className="text-sm">P2</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-            <span className="text-sm">Priority 3</span>
+            <span className="text-sm">P3</span>
           </div>
         </div>
       </div>
