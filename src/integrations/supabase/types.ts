@@ -895,6 +895,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_device: {
+        Args: { p_user_id: string; p_device_id: string }
+        Returns: boolean
+      }
       check_alarm_condition: {
         Args: {
           p_operator: Database["public"]["Enums"]["condition_operator"]
@@ -962,6 +966,19 @@ export type Database = {
       function_exists: {
         Args: { function_name: string }
         Returns: boolean
+      }
+      get_device_by_id_bypass_rls: {
+        Args: { p_device_id: string }
+        Returns: {
+          description: string | null
+          id: string
+          last_active_at: string | null
+          name: string
+          organization_id: string
+          product_template_id: string | null
+          status: string
+          type: string
+        }[]
       }
       get_device_readings_aggregate: {
         Args: {

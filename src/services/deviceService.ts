@@ -101,17 +101,15 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
       });
       return null;
     }
-    
-    // Use our new RLS-bypassing function instead of querying the table directly
-    // This avoids the RLS circular reference issue
-    const { data, error } = await supabase
+
+    // Use the RLS-bypassing function to fetch device
+    const { data: device, error } = await supabase
       .rpc('get_device_by_id_bypass_rls', { p_device_id: validDeviceId })
       .maybeSingle();
     
     if (error) {
       console.error('Error fetching device:', error);
       console.error('Device ID:', validDeviceId);
-      console.error('Device ID type:', typeof validDeviceId);
       toast({
         title: "Error loading device",
         description: `Database error: ${error.message}`,
@@ -120,13 +118,30 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
       return null;
     }
     
-    if (!data) {
+    if (!device) {
       console.log('Device not found for ID:', validDeviceId);
       return null;
     }
+
+    // Check if the current user has access to this device
+    const { data: hasAccess, error: accessError } = await supabase
+      .rpc('can_access_device', {
+        p_user_id: (await supabase.auth.getUser()).data.user?.id,
+        p_device_id: validDeviceId
+      });
+
+    if (accessError || !hasAccess) {
+      console.error('Access denied to device:', validDeviceId);
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to view this device",
+        variant: "destructive",
+      });
+      return null;
+    }
     
-    console.log('Device fetched successfully:', data);
-    return data as Device;
+    console.log('Device fetched successfully:', device);
+    return device as Device;
   } catch (error) {
     console.error('Error fetching device details:', error);
     toast({
