@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, Laptop, Cloud, Shield, BarChart2, Zap } from "lucide-react";
 import Header from '@/components/Header';
-import StoryMap from '@/components/documentation/StoryMap';
 
 const Index = () => {
   return (
@@ -72,19 +71,6 @@ const Index = () => {
               <div className="absolute -top-4 -left-4 -z-10 size-24 bg-iot-purple/10 rounded-full blur-xl"></div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Story Map Section */}
-      <section className="py-16 bg-gray-50 dark:bg-gray-900/50">
-        <div className="container mx-auto max-w-7xl px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Project Story Map</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Explore our platform's features and development roadmap through this interactive story map.
-            </p>
-          </div>
-          <StoryMap />
         </div>
       </section>
 
