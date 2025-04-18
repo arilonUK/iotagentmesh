@@ -6,7 +6,7 @@ import DeviceAlarms from '@/components/alarms/DeviceAlarms';
 import DeviceStats from '@/components/DeviceStats';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react';
+import { AlertTriangle, AlertCircle, RefreshCw, ArrowLeft, ShieldAlert } from 'lucide-react';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 
@@ -66,6 +66,30 @@ export default function DeviceDetail() {
               Back to Devices
             </Button>
           </div>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  // Check for the special access policy error case
+  if (device && 'error' in device && device.error === 'access_policy') {
+    return (
+      <Alert variant="warning" className="my-4">
+        <ShieldAlert className="h-4 w-4" />
+        <AlertTitle>Access Restricted</AlertTitle>
+        <AlertDescription>
+          <p>This device exists but cannot be accessed due to database policy restrictions.</p>
+          <p className="text-sm mt-2">
+            This is likely due to a recursion issue in the database policies. Please contact your administrator.
+          </p>
+          <Button 
+            variant="outline" 
+            className="mt-4"
+            onClick={() => navigate('/dashboard/devices')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Devices List
+          </Button>
         </AlertDescription>
       </Alert>
     );

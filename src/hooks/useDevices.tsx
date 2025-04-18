@@ -99,9 +99,13 @@ export const useDevice = (deviceId?: string) => {
         if (err instanceof Error && 
             (err.message.includes('infinite recursion') || 
              err.message.includes('policy for relation "organization_members"'))) {
-          console.error('Database policy recursion error detected. Using devices list as fallback.');
-          // Don't throw error, just return null and it will show not found
-          return null;
+          console.error('Database policy recursion error detected.');
+          // Return a special error object instead of null
+          return { 
+            id: deviceId,
+            error: 'access_policy',
+            errorMessage: 'Cannot access device due to database policy restrictions.'
+          };
         }
         
         console.error('Error fetching device:', err);
