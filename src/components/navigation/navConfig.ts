@@ -1,5 +1,5 @@
 
-import { Home, BarChart, ListChecks, Box, MessageSquare, HardDrive, Bell } from "lucide-react";
+import { Home, BarChart, ListChecks, Box, MessageSquare, HardDrive, Bell, Folder } from "lucide-react";
 
 export const dashboardMenuItems = [
   {
@@ -33,7 +33,7 @@ export const dashboardMenuItems = [
     end: false
   },
   {
-    to: "/dashboard/storage",
+    to: "/dashboard/file-storage",
     icon: HardDrive,
     label: "File Storage",
     end: false
