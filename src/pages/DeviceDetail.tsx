@@ -1,6 +1,6 @@
 
 import { useParams, useNavigate } from 'react-router-dom';
-import { useDevice } from '@/hooks/useDevices';
+import { useDevice, DeviceWithAccessPolicyError } from '@/hooks/useDevices';
 import { Separator } from "@/components/ui/separator";
 import DeviceAlarms from '@/components/alarms/DeviceAlarms';
 import DeviceStats from '@/components/DeviceStats';
@@ -9,11 +9,17 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, AlertCircle, RefreshCw, ArrowLeft, ShieldAlert } from 'lucide-react';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Device } from '@/types/device';
 
 export default function DeviceDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { device, isLoading, error, refetch } = useDevice(id);
+  
+  // Helper function to type check if the device has an access policy error
+  const hasAccessPolicyError = (device: Device | DeviceWithAccessPolicyError | null): device is DeviceWithAccessPolicyError => {
+    return device !== null && 'error' in device && device.error === 'access_policy';
+  };
   
   // Log for debugging
   useEffect(() => {
@@ -72,9 +78,9 @@ export default function DeviceDetail() {
   }
 
   // Check for the special access policy error case
-  if (device && 'error' in device && device.error === 'access_policy') {
+  if (hasAccessPolicyError(device)) {
     return (
-      <Alert variant="warning" className="my-4">
+      <Alert className="my-4">
         <ShieldAlert className="h-4 w-4" />
         <AlertTitle>Access Restricted</AlertTitle>
         <AlertDescription>
@@ -115,36 +121,39 @@ export default function DeviceDetail() {
     );
   }
 
+  // At this point device is definitely a Device type, not an error object
+  const deviceData = device as Device;
+
   return (
     <div className="space-y-8">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">{device.name}</CardTitle>
+          <CardTitle className="text-2xl font-bold">{deviceData.name}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             <p>
-              <strong>Type:</strong> {device.type}
+              <strong>Type:</strong> {deviceData.type}
             </p>
             <p>
               <strong>Status:</strong> <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              device.status === 'online' ? 'bg-green-100 text-green-800' : 
-              device.status === 'offline' ? 'bg-gray-100 text-gray-800' : 
+              deviceData.status === 'online' ? 'bg-green-100 text-green-800' : 
+              deviceData.status === 'offline' ? 'bg-gray-100 text-gray-800' : 
               'bg-yellow-100 text-yellow-800'
             }`}>
-              {device.status}
+              {deviceData.status}
             </span>
             </p>
             <p>
-              <strong>ID:</strong> {device.id}
+              <strong>ID:</strong> {deviceData.id}
             </p>
-            {device.description && (
+            {deviceData.description && (
               <p>
-                <strong>Description:</strong> {device.description}
+                <strong>Description:</strong> {deviceData.description}
               </p>
             )}
             <p>
-              <strong>Last active:</strong> {device.last_active_at ? new Date(device.last_active_at).toLocaleString() : 'Never'}
+              <strong>Last active:</strong> {deviceData.last_active_at ? new Date(deviceData.last_active_at).toLocaleString() : 'Never'}
             </p>
           </div>
         </CardContent>

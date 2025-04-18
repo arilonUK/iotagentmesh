@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchDevices, fetchDevice } from '@/services/deviceService';
 import { toast } from '@/components/ui/use-toast';
+import { Device } from '@/types/device';
 
 /**
  * Validates a UUID string
@@ -62,6 +63,12 @@ export const useDevices = (organizationId?: string) => {
   };
 };
 
+export type DeviceWithAccessPolicyError = {
+  id: string;
+  error: 'access_policy';
+  errorMessage: string;
+};
+
 export const useDevice = (deviceId?: string) => {
   const {
     data: device,
@@ -101,11 +108,11 @@ export const useDevice = (deviceId?: string) => {
              err.message.includes('policy for relation "organization_members"'))) {
           console.error('Database policy recursion error detected.');
           // Return a special error object instead of null
-          return { 
+          return {
             id: deviceId,
             error: 'access_policy',
             errorMessage: 'Cannot access device due to database policy restrictions.'
-          };
+          } as DeviceWithAccessPolicyError;
         }
         
         console.error('Error fetching device:', err);
