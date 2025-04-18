@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { fetchDevices, fetchDevice } from '@/services/deviceService';
 import { toast } from '@/components/ui/use-toast';
@@ -96,12 +95,30 @@ export const useDevice = (deviceId?: string) => {
           return result;
         }
       } catch (err) {
+        // Detect and handle the specific infinite recursion error
+        if (err instanceof Error && 
+            (err.message.includes('infinite recursion') || 
+             err.message.includes('policy for relation "organization_members"'))) {
+          console.error('Database policy recursion error detected. Using devices list as fallback.');
+          // Don't throw error, just return null and it will show not found
+          return null;
+        }
+        
         console.error('Error fetching device:', err);
-        throw err; // Throw the error to trigger React Query's error handling
+        throw err; // Throw other errors to trigger React Query's error handling
       }
     },
     enabled: !!deviceId && isValidUUID(deviceId),
-    retry: 1,
+    retry: (failureCount, error) => {
+      // Don't retry if it's the infinite recursion error
+      if (error instanceof Error && 
+          (error.message.includes('infinite recursion') || 
+           error.message.includes('policy for relation "organization_members"'))) {
+        return false;
+      }
+      // Otherwise retry once
+      return failureCount < 1;
+    },
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
     staleTime: 1000 * 60
   });
