@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProducts } from '@/hooks/useProducts';
@@ -8,14 +9,16 @@ import { DeleteProductDialog } from './DeleteProductDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Input } from '@/components/ui/input';
+// Removed Input import, since we're removing the search input section
+// import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useOrganization } from '@/contexts/organization';
 
 export function ProductList() {
   console.log('ProductList rendered');
   const { products, isLoading, error } = useProducts();
-  const [searchTerm, setSearchTerm] = React.useState('');
+  // Remove searchTerm state and setSearchTerm
+  // const [searchTerm, setSearchTerm] = React.useState('');
   const navigate = useNavigate();
   const { organization } = useOrganization();
 
@@ -24,13 +27,14 @@ export function ProductList() {
   console.log('Loading:', isLoading);
   console.log('Error:', error);
 
-  const filteredProducts = React.useMemo(() => {
-    if (!products) return [];
-    return products.filter(product => 
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-  }, [products, searchTerm]);
+  // Remove search filtering since the input is gone
+  // const filteredProducts = React.useMemo(() => {
+  //   if (!products) return [];
+  //   return products.filter(product => 
+  //     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  //   );
+  // }, [products, searchTerm]);
 
   const getStatusBadgeColor = (status?: string) => {
     switch (status) {
@@ -108,16 +112,17 @@ export function ProductList() {
         <h2 className="text-2xl font-bold">Products</h2>
         <CreateProductDialog />
       </div>
-      
-      <div className="mb-4">
+      {/* Removed search input section here */}
+      {/* <div className="mb-4">
         <Input
           placeholder="Search products..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-md"
         />
-      </div>
+      </div> */}
 
+      {/* Use products array directly since filtering is removed */}
       {!products || products.length === 0 ? (
         <Card className="p-8 text-center">
           <div className="flex flex-col items-center justify-center gap-2">
@@ -130,7 +135,7 @@ export function ProductList() {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredProducts.map((product) => (
+          {products.map((product) => (
             <Card 
               key={product.id} 
               className="flex flex-col cursor-pointer hover:border-primary/50 transition-all"
