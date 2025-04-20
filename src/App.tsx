@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from '@/pages/Dashboard';
@@ -5,7 +6,8 @@ import Devices from '@/pages/Devices';
 import DeviceDetail from '@/pages/DeviceDetail';
 import Products from '@/pages/Products';
 import ProductDetail from '@/pages/ProductDetail';
-import ProductRoadmap from '@/pages/ProductRoadmap';
+// Remove ProductRoadmap import
+// import ProductRoadmap from '@/pages/ProductRoadmap';
 import Alarms from '@/pages/Alarms';
 import DataBuckets from '@/pages/DataBuckets';
 import Endpoints from '@/pages/Endpoints';
@@ -47,7 +49,8 @@ function App() {
                     <Route path="devices" element={<Devices />} />
                     <Route path="devices/:id" element={<DeviceDetail />} />
                     <Route path="products" element={<Products />} />
-                    <Route path="products/roadmap" element={<ProductRoadmap />} />
+                    {/* Removed the Product Roadmap page route */}
+                    {/* <Route path="products/roadmap" element={<ProductRoadmap />} /> */}
                     <Route path="products/:id" element={<ProductDetail />} />
                     <Route path="alarms" element={<Alarms />} />
                     <Route path="data-buckets" element={<DataBuckets />} />
