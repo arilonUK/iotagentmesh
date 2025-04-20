@@ -1,9 +1,10 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { ProductList } from '@/components/products/ProductList';
-import { Button } from '@/components/ui/button';
-import { Map } from 'lucide-react';
+// Removed unused imports Link and Button, Map icon
+// import { Link } from 'react-router-dom';
+// import { Button } from '@/components/ui/button';
+// import { Map } from 'lucide-react';
 
 export default function Products() {
   return (
@@ -15,12 +16,7 @@ export default function Products() {
             Manage and monitor your IoT product templates
           </p>
         </div>
-        <Link to="/dashboard/products/roadmap">
-          <Button variant="outline" className="gap-2">
-            <Map className="h-4 w-4" />
-            View Roadmap
-          </Button>
-        </Link>
+        {/* Removed the "View Roadmap" button here */}
       </div>
       <ProductList />
     </div>
