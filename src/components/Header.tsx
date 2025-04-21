@@ -43,9 +43,9 @@ const Header = () => {
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center gap-2">
             <div className="size-8 rounded-lg iot-gradient-bg flex items-center justify-center">
-              <span className="font-bold text-lg">N</span>
+              <span className="font-bold text-lg">I</span>
             </div>
-            <span className="text-xl font-semibold">NextGenIOT</span>
+            <span className="text-xl font-semibold">IoTAgentMesh</span>
           </Link>
         </div>
 

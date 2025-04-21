@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -16,7 +17,7 @@ const Index = () => {
             <div className="flex flex-col space-y-6">
               <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-sm font-medium bg-white text-iot-purple">
                 <span className="flex h-1.5 w-1.5 rounded-full bg-iot-purple mr-1.5"></span>
-                Launching NextGenIOT
+                Launching IoTAgentMesh
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
                 The future of IoT management is here
@@ -154,7 +155,7 @@ const Index = () => {
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to transform your IoT infrastructure?</h2>
               <p className="text-lg text-muted-foreground mb-8">
-                Join thousands of companies already using NextGenIOT to power their connected devices.
+                Join thousands of companies already using IoTAgentMesh to power their connected devices.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link to="/signup">
@@ -176,9 +177,9 @@ const Index = () => {
             <div>
               <Link to="/" className="flex items-center gap-2 mb-4">
                 <div className="size-8 rounded-lg iot-gradient-bg flex items-center justify-center">
-                  <span className="font-bold text-lg">N</span>
+                  <span className="font-bold text-lg">I</span>
                 </div>
-                <span className="text-xl font-semibold">NextGenIOT</span>
+                <span className="text-xl font-semibold">IoTAgentMesh</span>
               </Link>
               <p className="text-sm text-muted-foreground">
                 The future of IoT management platform
@@ -210,7 +211,7 @@ const Index = () => {
             </div>
           </div>
           <div className="border-t border-gray-100 mt-12 pt-6 text-sm text-muted-foreground flex flex-col md:flex-row justify-between items-center gap-4">
-            <p>© 2025 NextGenIOT. All rights reserved.</p>
+            <p>© 2025 IoTAgentMesh. All rights reserved.</p>
             <div className="flex gap-4">
               <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
               <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
