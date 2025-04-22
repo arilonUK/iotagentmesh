@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -108,8 +107,35 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.5s ease-out",
         "pulse-slow": "pulse-slow 3s infinite"
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            'h1, h2, h3, h4': {
+              fontWeight: '600',
+              letterSpacing: '-0.02em',
+            },
+            'code': {
+              color: 'var(--tw-prose-code)',
+              fontWeight: '400',
+              backgroundColor: 'var(--tw-prose-pre-bg)',
+              borderRadius: '0.375rem',
+              padding: '0.125rem 0.25rem',
+            },
+            'blockquote': {
+              borderLeftColor: 'var(--tw-prose-quote-borders)',
+              borderLeftWidth: '2px',
+              fontStyle: 'italic',
+              marginLeft: '0',
+              paddingLeft: '1.25rem',
+            },
+          },
+        },
       }
     }
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    require('@tailwindcss/typography'),
+  ],
 } satisfies Config;
