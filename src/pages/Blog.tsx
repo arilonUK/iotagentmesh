@@ -1,29 +1,39 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ArrowLeft, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { 
+  getBlogPosts, 
+  getBlogCategories, 
+  searchBlogPosts, 
+  getBlogPostsByCategory 
+} from '@/services/blogService';
+import type { BlogPost } from '@/services/blogService';
 
 const Blog = () => {
-  const samplePosts = [
-    {
-      id: 1,
-      title: "Getting Started with IoTAgentMesh",
-      excerpt: "Learn how to set up and configure your first IoT device with IoTAgentMesh platform.",
-      date: "2025-04-20",
-      author: "IoT Team",
-      category: "Tutorials"
-    },
-    {
-      id: 2,
-      title: "Best Practices for IoT Device Management",
-      excerpt: "Discover the essential practices for managing your IoT devices at scale.",
-      date: "2025-04-18",
-      author: "IoT Team",
-      category: "Best Practices"
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const categories = getBlogCategories();
+
+  const getFilteredPosts = (): BlogPost[] => {
+    let posts = getBlogPosts();
+    
+    if (selectedCategory) {
+      posts = getBlogPostsByCategory(selectedCategory);
     }
-  ];
+    
+    if (searchQuery) {
+      posts = searchBlogPosts(searchQuery);
+    }
+    
+    return posts;
+  };
+
+  const filteredPosts = getFilteredPosts();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -42,9 +52,38 @@ const Blog = () => {
               Latest insights, tutorials, and updates from the IoTAgentMesh team
             </p>
           </div>
+
+          <div className="mb-8">
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Search posts..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {categories.map((category) => (
+                  <Badge
+                    key={category}
+                    variant={selectedCategory === category ? "default" : "outline"}
+                    className="cursor-pointer"
+                    onClick={() => setSelectedCategory(
+                      selectedCategory === category ? null : category
+                    )}
+                  >
+                    {category}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
           
           <div className="grid md:grid-cols-2 gap-8">
-            {samplePosts.map((post) => (
+            {filteredPosts.map((post) => (
               <article key={post.id} className="group">
                 <Link to={`/blog/${post.id}`} className="block">
                   <div className="iot-card p-6 h-full hover:border-primary transition-colors">
