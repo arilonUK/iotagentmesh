@@ -3,12 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDevice } from '@/hooks/useDevices';
 import { Separator } from "@/components/ui/separator";
 import DeviceAlarms from '@/components/alarms/DeviceAlarms';
-import DeviceStats from '@/components/DeviceStats';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { DeviceDashboard } from '@/components/dashboard/DeviceDashboard';
 
 export default function DeviceDetail() {
   const { id } = useParams<{ id: string }>();
@@ -93,47 +92,19 @@ export default function DeviceDetail() {
 
   return (
     <div className="space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">{device.name}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <p>
-              <strong>Type:</strong> {device.type}
-            </p>
-            <p>
-              <strong>Status:</strong> <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              device.status === 'online' ? 'bg-green-100 text-green-800' : 
-              device.status === 'offline' ? 'bg-gray-100 text-gray-800' : 
-              'bg-yellow-100 text-yellow-800'
-            }`}>
-              {device.status}
-            </span>
-            </p>
-            <p>
-              <strong>ID:</strong> {device.id}
-            </p>
-            {device.description && (
-              <p>
-                <strong>Description:</strong> {device.description}
-              </p>
-            )}
-            <p>
-              <strong>Last active:</strong> {device.last_active_at ? new Date(device.last_active_at).toLocaleString() : 'Never'}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <h1 className="text-2xl font-bold">{device.name}</h1>
+      
+      {/* Device Dashboard */}
+      <DeviceDashboard 
+        device={device}
+        isLoading={isLoading}
+        error={error}
+      />
       
       <Separator className="my-6" />
       
-      {/* Display device statistics */}
-      <DeviceStats deviceId={id!} />
-      
-      <Separator className="my-6" />
-      
+      {/* Device Alarms */}
       <DeviceAlarms deviceId={id!} />
     </div>
   );
-}
+};
