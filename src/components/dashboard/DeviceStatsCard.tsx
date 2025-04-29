@@ -3,11 +3,12 @@ import React, { useState } from 'react';
 import { DashboardCard } from './DashboardCard';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LineChart, BarChart, AreaChart } from '@/components/ui/charts';
+import { ChartDataPoint } from '@/components/ui/charts/chart-utils';
 
 interface DeviceStatsCardProps {
   deviceId: string;
   title: string;
-  data: Array<Record<string, any>>;
+  data: ChartDataPoint[];
   categories: string[];
   index: string;
   loading?: boolean;

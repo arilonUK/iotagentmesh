@@ -3,7 +3,6 @@ import { ClassValue } from "clsx";
 import { cn } from "@/lib/utils";
 
 export type ChartDataPoint = {
-  name: string;
   [key: string]: string | number;
 };
 

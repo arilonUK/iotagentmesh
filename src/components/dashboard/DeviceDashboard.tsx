@@ -49,13 +49,14 @@ export const DeviceDashboard = ({ device, isLoading, error }: DeviceDashboardPro
     { name: 'Sun', value: 190 }
   ];
   
+  // Modified to use 'name' instead of 'time' for the MultiSeriesChart
   const multiData = [
-    { time: '00:00', temperature: 22, humidity: 65 },
-    { time: '04:00', temperature: 21, humidity: 67 },
-    { time: '08:00', temperature: 23, humidity: 60 },
-    { time: '12:00', temperature: 26, humidity: 54 },
-    { time: '16:00', temperature: 25, humidity: 58 },
-    { time: '20:00', temperature: 23, humidity: 63 }
+    { name: '00:00', temperature: 22, humidity: 65 },
+    { name: '04:00', temperature: 21, humidity: 67 },
+    { name: '08:00', temperature: 23, humidity: 60 },
+    { name: '12:00', temperature: 26, humidity: 54 },
+    { name: '16:00', temperature: 25, humidity: 58 },
+    { name: '20:00', temperature: 23, humidity: 63 }
   ];
   
   const handleRefresh = () => {
@@ -145,7 +146,7 @@ export const DeviceDashboard = ({ device, isLoading, error }: DeviceDashboardPro
                 <div className="h-[300px]">
                   <MultiSeriesChart
                     data={multiData}
-                    index="time"
+                    index="name"
                     series={[
                       { dataKey: 'temperature', type: 'line', color: '#7E69AB', yAxisId: 'left' },
                       { dataKey: 'humidity', type: 'area', color: '#0EA5E9', yAxisId: 'right' }

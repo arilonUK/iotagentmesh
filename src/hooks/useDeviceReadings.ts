@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { ChartDataPoint } from '@/components/ui/charts/chart-utils';
 
 interface DeviceReading {
   id: string;
@@ -9,11 +10,6 @@ interface DeviceReading {
   reading_type: string;
   value: number;
   timestamp: string;
-}
-
-interface ReadingData {
-  name: string; // timestamp formatted
-  value: number;
 }
 
 interface UseDeviceReadingsOptions {
@@ -81,7 +77,7 @@ export function useDeviceReadings(
   };
 
   // Mock data for now - replace this with actual Supabase query later
-  const fetchReadings = async (): Promise<ReadingData[]> => {
+  const fetchReadings = async (): Promise<ChartDataPoint[]> => {
     if (!deviceId) {
       return [];
     }
