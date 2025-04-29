@@ -142,8 +142,8 @@ export const DeviceDashboard = ({ device, isLoading, error }: DeviceDashboardPro
               <CardHeader>
                 <CardTitle>Temperature & Humidity Correlation</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
+              <CardContent className="overflow-hidden">
+                <div className="h-[300px] w-full">
                   <MultiSeriesChart
                     data={multiData}
                     index="name"

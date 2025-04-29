@@ -42,12 +42,12 @@ export function LineChart({
   }, {} as Record<string, { color: string }>);
 
   return (
-    <div className={chartClasses.base + ' ' + (className || '')} style={{ height }}>
-      <ChartContainer className="h-full" config={chartConfig} data-testid="line-chart">
-        <RechartsPrimitive.ResponsiveContainer width="100%" height="100%">
+    <div className={chartClasses.base + ' ' + (className || '')} style={{ height, width: '100%' }}>
+      <ChartContainer className="h-full w-full" config={chartConfig} data-testid="line-chart">
+        <RechartsPrimitive.ResponsiveContainer width="99%" height="99%">
           <RechartsPrimitive.ComposedChart
             data={data}
-            margin={{ top: 16, right: 16, bottom: 16, left: 16 }}
+            margin={{ top: 5, right: 5, bottom: 20, left: 5 }}
           >
             {showGrid && (
               <RechartsPrimitive.CartesianGrid 
@@ -63,7 +63,7 @@ export function LineChart({
                 dataKey={index}
                 tickLine={false}
                 axisLine={false}
-                padding={{ left: 16, right: 16 }}
+                padding={{ left: 5, right: 5 }}
                 stroke="var(--muted-foreground)"
                 fontSize={12}
                 tickFormatter={(value) => String(value)}

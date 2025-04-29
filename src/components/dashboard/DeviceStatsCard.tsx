@@ -82,7 +82,7 @@ export const DeviceStatsCard = ({
         </Select>
       }
     >
-      <div className="h-[300px]">
+      <div className="h-[300px] w-full overflow-hidden">
         {renderChart()}
       </div>
     </DashboardCard>

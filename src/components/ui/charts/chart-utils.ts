@@ -36,7 +36,7 @@ export const getDefaultValueFormatter = (value: number): string => {
 };
 
 export const chartClasses = {
-  base: "w-full font-sans",
+  base: "w-full h-full font-sans overflow-hidden",
   axisLabel: "text-xs fill-muted-foreground",
   tooltip: "rounded-lg border bg-background p-2 shadow-md",
 };
