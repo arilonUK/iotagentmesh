@@ -105,7 +105,7 @@ export function BarChart({
               />
             )}
             
-            {stacked && <RechartsPrimitive.Stack />}
+            {/* Replace Stack with stackId prop on Bar components when stacked is true */}
             
             {categories.map((category, i) => (
               <RechartsPrimitive.Bar
@@ -114,6 +114,7 @@ export function BarChart({
                 fill={colors[i % colors.length]}
                 radius={barRadius}
                 barSize={barSize}
+                stackId={stacked ? "stack" : undefined}
               />
             ))}
             

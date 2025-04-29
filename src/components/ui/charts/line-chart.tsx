@@ -41,10 +41,6 @@ export function LineChart({
     return acc;
   }, {} as Record<string, { color: string }>);
 
-  const LineComponent = areaChart 
-    ? RechartsPrimitive.Area 
-    : RechartsPrimitive.Line;
-
   return (
     <div className={chartClasses.base + ' ' + (className || '')} style={{ height }}>
       <ChartContainer className="h-full" config={chartConfig} data-testid="line-chart">
@@ -103,17 +99,31 @@ export function LineChart({
             )}
             
             {categories.map((category, i) => (
-              <LineComponent
-                key={category}
-                dataKey={category}
-                stroke={colors[i % colors.length]}
-                fill={colors[i % colors.length]}
-                fillOpacity={fillOpacity}
-                strokeWidth={strokeWidth}
-                type={curved ? "monotone" : "linear"}
-                dot={{ r: dotSize, strokeWidth, fill: "#fff" }}
-                activeDot={{ r: activeDotSize, strokeWidth, fill: "#fff" }}
-              />
+              areaChart ? (
+                <RechartsPrimitive.Area
+                  key={category}
+                  dataKey={category}
+                  stroke={colors[i % colors.length]}
+                  fill={colors[i % colors.length]}
+                  fillOpacity={fillOpacity}
+                  strokeWidth={strokeWidth}
+                  type={curved ? "monotone" : "linear"}
+                  dot={{ r: dotSize, strokeWidth, fill: "#fff" }}
+                  activeDot={{ r: activeDotSize, strokeWidth, fill: "#fff" }}
+                />
+              ) : (
+                <RechartsPrimitive.Line
+                  key={category}
+                  dataKey={category}
+                  stroke={colors[i % colors.length]}
+                  fill={colors[i % colors.length]}
+                  fillOpacity={fillOpacity}
+                  strokeWidth={strokeWidth}
+                  type={curved ? "monotone" : "linear"}
+                  dot={{ r: dotSize, strokeWidth, fill: "#fff" }}
+                  activeDot={{ r: activeDotSize, strokeWidth, fill: "#fff" }}
+                />
+              )
             ))}
             
             {showLegend && (
