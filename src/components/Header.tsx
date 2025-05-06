@@ -1,159 +1,78 @@
+import { useState } from "react"
+import { useTheme } from "next-themes"
+import { useRouter } from "next/navigation"
+import { useSession, signOut } from "next-auth/react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { Icons } from "@/components/icons"
+import { OrganizationSwitcher } from "@/components/organization/organization-switcher"
+import { settingsMenuConfig } from "@/components/navigation/navConfig"
+import { NotificationBell } from './notifications/NotificationBell';
 
-import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, User } from "lucide-react";
-import { useAuth } from '@/contexts/auth';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const { user, profile, signOut } = useAuth();
-  const navigate = useNavigate();
+export const Header = () => {
+  const router = useRouter()
+  const { setTheme } = useTheme()
+  const { data: session } = useSession()
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   const handleSignOut = async () => {
-    try {
-      await signOut();
-      navigate('/');
-    } catch (error) {
-      console.error('Error in sign out flow:', error);
-      navigate('/');
-    }
-  };
-
-  const getUserInitials = () => {
-    if (profile?.full_name) {
-      return profile.full_name
-        .split(' ')
-        .map((name: string) => name[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2);
-    } else if (profile?.username) {
-      return profile.username.slice(0, 2).toUpperCase();
-    } else if (user?.email) {
-      return user.email.slice(0, 2).toUpperCase();
-    }
-    return 'U';
-  };
+    await signOut()
+    router.push("/login")
+  }
 
   return (
-    <header className="w-full border-b border-gray-100 sticky top-0 bg-white z-50">
-      <div className="container flex h-16 items-center justify-between px-4 md:px-8">
-        <div className="flex items-center gap-2">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="size-8 rounded-lg iot-gradient-bg flex items-center justify-center">
-              <span className="font-bold text-lg">I</span>
-            </div>
-            <span className="text-xl font-semibold">IoTAgentMesh</span>
-          </Link>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-14 items-center px-4">
+        <div className="flex items-center gap-4">
+          <OrganizationSwitcher />
         </div>
-
-        <nav className="hidden md:flex items-center gap-6">
-          <Link to="/products" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Products
-          </Link>
-          <Link to="/solutions" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Solutions
-          </Link>
-          <Link to="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Pricing
-          </Link>
-          <Link to="/docs" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Documentation
-          </Link>
-        </nav>
-
-        <div className="hidden md:flex items-center gap-4">
-          {user ? (
-            <div className="flex items-center gap-4">
-              {user && (
-                <Link to="/dashboard" className="text-sm font-medium hover:text-foreground transition-colors">
-                  Dashboard
-                </Link>
-              )}
-              <div className="flex items-center gap-2">
-                <Avatar>
-                  <AvatarImage src={profile?.avatar_url || ''} />
-                  <AvatarFallback>{getUserInitials()}</AvatarFallback>
+        <div className="ml-auto flex items-center space-x-2">
+          {/* Add NotificationBell before the other items */}
+          <NotificationBell />
+          
+          <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0 lg:h-10 lg:w-10">
+                <Avatar className="h-8 w-8 lg:h-10 lg:w-10">
+                  <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || "Avatar"} />
+                  <AvatarFallback>{session?.user?.name?.slice(0, 2).toUpperCase() || "AV"}</AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-medium">{profile?.username || user.email}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" forceMount>
+              <div className="flex flex-col space-y-1 p-2">
+                <p className="text-sm font-medium leading-none">{session?.user?.name}</p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {session?.user?.email}
+                </p>
               </div>
-              <Button onClick={handleSignOut} variant="outline">Log out</Button>
-            </div>
-          ) : (
-            <>
-              <Link to="/auth">
-                <Button variant="outline">Log in</Button>
-              </Link>
-              <Link to="/auth">
-                <Button>Sign up</Button>
-              </Link>
-            </>
-          )}
+              <DropdownMenuSeparator />
+              {settingsMenuConfig.map((item) => (
+                <DropdownMenuItem key={item.href} onSelect={() => {
+                  router.push(item.href)
+                  setIsDropdownOpen(false)
+                }}>
+                  {item.title}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={() => {
+                handleSignOut()
+                setIsDropdownOpen(false)
+              }}>
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-
-        <button 
-          className="md:hidden"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
       </div>
-
-      {isMenuOpen && (
-        <div className="md:hidden py-4 px-6 border-t border-gray-100 bg-white animate-fade-in">
-          <nav className="flex flex-col gap-4">
-            <Link to="/products" className="text-sm font-medium py-2">
-              Products
-            </Link>
-            <Link to="/solutions" className="text-sm font-medium py-2">
-              Solutions
-            </Link>
-            <Link to="/pricing" className="text-sm font-medium py-2">
-              Pricing
-            </Link>
-            <Link to="/docs" className="text-sm font-medium py-2">
-              Documentation
-            </Link>
-            
-            {user && (
-              <Link to="/dashboard" className="text-sm font-medium py-2">
-                Dashboard
-              </Link>
-            )}
-            
-            <div className="flex flex-col gap-2 pt-4">
-              {user ? (
-                <>
-                  {profile && (
-                    <div className="flex items-center gap-2 py-2">
-                      <Avatar>
-                        <AvatarImage src={profile?.avatar_url || ''} />
-                        <AvatarFallback>{getUserInitials()}</AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm font-medium">{profile?.username || user.email}</span>
-                    </div>
-                  )}
-                  <Button onClick={handleSignOut} variant="outline" className="w-full">Log out</Button>
-                </>
-              ) : (
-                <>
-                  <Link to="/auth" className="w-full">
-                    <Button variant="outline" className="w-full">Log in</Button>
-                  </Link>
-                  <Link to="/auth" className="w-full">
-                    <Button className="w-full">Sign up</Button>
-                  </Link>
-                </>
-              )}
-            </div>
-          </nav>
-        </div>
-      )}
     </header>
   );
 };
-
-export default Header;

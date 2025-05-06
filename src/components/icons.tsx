@@ -1,4 +1,3 @@
-
 import {
   Home,
   Laptop2,
@@ -25,4 +24,4 @@ export const Icons = {
   users: Users,
   building: Building,
   settings: Settings
-};
+} as const;

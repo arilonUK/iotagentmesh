@@ -28,10 +28,11 @@ import { Toaster } from '@/components/ui/toaster';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/contexts/auth';
 import { OrganizationProvider } from '@/contexts/organization';
+import NotificationSettings from './pages/NotificationSettings';
 
 const queryClient = new QueryClient();
 
-function App() {
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
@@ -61,6 +62,11 @@ function App() {
                 </Route>
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:id" element={<BlogPost />} />
+                <Route path="/notification-settings" element={
+                  <ProtectedRoute>
+                    <NotificationSettings />
+                  </ProtectedRoute>
+                } />
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <Toaster />
@@ -71,5 +77,3 @@ function App() {
     </QueryClientProvider>
   );
 }
-
-export default App;

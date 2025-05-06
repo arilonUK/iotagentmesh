@@ -461,6 +461,81 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          email_notifications: boolean
+          notify_device_alerts: boolean
+          notify_new_devices: boolean
+          notify_system_events: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_notifications?: boolean
+          notify_device_alerts?: boolean
+          notify_new_devices?: boolean
+          notify_system_events?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_notifications?: boolean
+          notify_device_alerts?: boolean
+          notify_new_devices?: boolean
+          notify_system_events?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          content: string
+          created_at: string
+          delivery_status: string
+          expires_at: string | null
+          id: string
+          is_read: boolean
+          priority: string
+          related_entity_id: string | null
+          related_entity_type: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          delivery_status?: string
+          expires_at?: string | null
+          id?: string
+          is_read?: boolean
+          priority?: string
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          delivery_status?: string
+          expires_at?: string | null
+          id?: string
+          is_read?: boolean
+          priority?: string
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       organization_members: {
         Row: {
           created_at: string
@@ -907,6 +982,19 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_notification: {
+        Args: {
+          p_user_id: string
+          p_title: string
+          p_content: string
+          p_type?: string
+          p_priority?: string
+          p_related_entity_type?: string
+          p_related_entity_id?: string
+          p_expires_at?: string
+        }
+        Returns: string
+      }
       create_product_bypass_rls: {
         Args: {
           p_name: string
@@ -954,6 +1042,10 @@ export type Database = {
           updated_at: string
           validation_rules: Json | null
         }
+      }
+      delete_expired_notifications: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
       delete_property_bypass_rls: {
         Args: { p_id: string }
@@ -1129,6 +1221,14 @@ export type Database = {
       }
       is_org_member_bypass_rls: {
         Args: { p_org_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      mark_all_notifications_as_read: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
+      mark_notification_as_read: {
+        Args: { p_notification_id: string; p_user_id: string }
         Returns: boolean
       }
       switch_user_organization: {

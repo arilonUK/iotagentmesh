@@ -1,48 +1,58 @@
+import {
+  LayoutDashboard,
+  Settings,
+  Users,
+  Building2,
+  Bell,
+} from 'lucide-react';
 
-import { Home, BarChart, ListChecks, Box, MessageSquare, HardDrive, Bell, Folder } from "lucide-react";
+export const mainNavConfig = [
+  {
+    title: 'Dashboard',
+    href: '/dashboard',
+    icon: LayoutDashboard,
+  },
+  {
+    title: 'Devices',
+    href: '/devices',
+    icon: 'IoT',
+  },
+  {
+    title: 'Alarms',
+    href: '/alarms',
+    icon: 'Alert',
+  },
+  {
+    title: 'Data Buckets',
+    href: '/data-buckets',
+    icon: 'Archive',
+  },
+  {
+    title: 'Endpoints',
+    href: '/endpoints',
+    icon: 'Mail',
+  },
+];
 
-export const dashboardMenuItems = [
+export const settingsMenuConfig = [
   {
-    to: "/dashboard",
-    icon: Home,
-    label: "Home",
-    end: true
+    title: 'Organization',
+    href: '/organization-settings',
+    icon: Building2,
   },
   {
-    to: "/dashboard/devices",
-    icon: BarChart,
-    label: "Devices",
-    end: false
+    title: 'Users',
+    href: '/user-management',
+    icon: Users,
   },
   {
-    to: "/dashboard/alarms",
-    icon: Bell,
-    label: "Alarms",
-    end: false
+    title: 'Settings',
+    href: '/account-settings',
+    icon: Settings,
   },
   {
-    to: "/dashboard/data-buckets",
-    icon: ListChecks,
-    label: "Data Buckets",
-    end: false
+    title: 'Notifications',
+    href: '/notification-settings',
+    icon: 'Bell', // Make sure this icon is imported in the icons.tsx file
   },
-  {
-    to: "/dashboard/endpoints",
-    icon: MessageSquare,
-    label: "Endpoints",
-    end: false
-  },
-  {
-    to: "/dashboard/file-storage",
-    icon: HardDrive,
-    label: "File Storage",
-    end: false
-  },
-  {
-    to: "/dashboard/products",
-    icon: Box,
-    label: "Products",
-    end: false
-  }
-] as const;
-
+];
