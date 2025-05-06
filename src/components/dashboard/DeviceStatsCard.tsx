@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
 import { DashboardCard } from './DashboardCard';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LineChart, BarChart, AreaChart } from '@/components/ui/charts';
 import { ChartDataPoint } from '@/components/ui/charts/chart-utils';
+import { ChartTypeSelector, ChartType } from './ChartTypeSelector';
+import { ChartRenderer } from './ChartRenderer';
 
 interface DeviceStatsCardProps {
   deviceId: string;
@@ -26,42 +26,7 @@ export const DeviceStatsCard = ({
   error,
   description
 }: DeviceStatsCardProps) => {
-  const [chartType, setChartType] = useState<'line' | 'bar' | 'area'>('line');
-
-  const renderChart = () => {
-    switch (chartType) {
-      case 'bar':
-        return (
-          <BarChart
-            data={data}
-            categories={categories}
-            index={index}
-            valueFormatter={(value) => `${value}`}
-          />
-        );
-      case 'area':
-        return (
-          <AreaChart
-            data={data}
-            categories={categories}
-            index={index}
-            valueFormatter={(value) => `${value}`}
-            curved
-          />
-        );
-      case 'line':
-      default:
-        return (
-          <LineChart
-            data={data}
-            categories={categories}
-            index={index}
-            valueFormatter={(value) => `${value}`}
-            curved
-          />
-        );
-    }
-  };
+  const [chartType, setChartType] = useState<ChartType>('line');
   
   return (
     <DashboardCard
@@ -70,20 +35,20 @@ export const DeviceStatsCard = ({
       loading={loading}
       error={error}
       headerAction={
-        <Select value={chartType} onValueChange={(value: 'line' | 'bar' | 'area') => setChartType(value)}>
-          <SelectTrigger className="w-[120px]">
-            <SelectValue placeholder="Chart type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="line">Line Chart</SelectItem>
-            <SelectItem value="bar">Bar Chart</SelectItem>
-            <SelectItem value="area">Area Chart</SelectItem>
-          </SelectContent>
-        </Select>
+        <ChartTypeSelector 
+          value={chartType} 
+          onValueChange={setChartType} 
+        />
       }
     >
       <div className="h-[300px] w-full overflow-hidden">
-        {renderChart()}
+        <ChartRenderer
+          chartType={chartType}
+          data={data}
+          categories={categories}
+          index={index}
+          valueFormatter={(value) => `${value}`}
+        />
       </div>
     </DashboardCard>
   );
