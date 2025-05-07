@@ -1,3 +1,4 @@
+
 import {
   LayoutDashboard,
   Settings,
@@ -32,6 +33,39 @@ export const mainNavConfig = [
     href: '/endpoints',
     icon: 'Mail',
   },
+];
+
+export const dashboardMenuItems = [
+  {
+    label: 'Dashboard',
+    to: '/dashboard',
+    icon: LayoutDashboard,
+    end: true
+  },
+  {
+    label: 'Devices',
+    to: '/devices',
+    icon: 'IoT',
+    end: false
+  },
+  {
+    label: 'Alarms',
+    to: '/alarms',
+    icon: 'Alert',
+    end: false
+  },
+  {
+    label: 'Data Buckets',
+    to: '/data-buckets',
+    icon: 'Archive',
+    end: false
+  },
+  {
+    label: 'Endpoints',
+    to: '/endpoints',
+    icon: 'Mail',
+    end: false
+  }
 ];
 
 export const settingsMenuConfig = [

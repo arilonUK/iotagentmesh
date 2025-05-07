@@ -1,7 +1,8 @@
+
 import { useState } from "react"
 import { useTheme } from "next-themes"
-import { useRouter } from "next/navigation"
-import { useSession, signOut } from "next-auth/react"
+import { useNavigate } from "react-router-dom"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,21 +11,28 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
-import { OrganizationSwitcher } from "@/components/organization/organization-switcher"
 import { settingsMenuConfig } from "@/components/navigation/navConfig"
-import { NotificationBell } from './notifications/NotificationBell';
+import { NotificationBell } from './notifications/NotificationBell'
+import { OrganizationSwitcher } from '@/components/organization/OrganizationSwitcher'
 
 export const Header = () => {
-  const router = useRouter()
+  const navigate = useNavigate()
   const { setTheme } = useTheme()
-  const { data: session } = useSession()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  
+  // Mock user session for now
+  const session = {
+    user: {
+      name: 'User Name',
+      email: 'user@example.com',
+      image: '',
+    }
+  }
 
   const handleSignOut = async () => {
-    await signOut()
-    router.push("/login")
+    // Placeholder for sign out functionality
+    navigate("/login")
   }
 
   return (
@@ -56,7 +64,7 @@ export const Header = () => {
               <DropdownMenuSeparator />
               {settingsMenuConfig.map((item) => (
                 <DropdownMenuItem key={item.href} onSelect={() => {
-                  router.push(item.href)
+                  navigate(item.href)
                   setIsDropdownOpen(false)
                 }}>
                   {item.title}
@@ -76,3 +84,5 @@ export const Header = () => {
     </header>
   );
 };
+
+export default Header;

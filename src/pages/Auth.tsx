@@ -2,8 +2,14 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import Header from '@/components/Header';
-import { useAuth } from '@/contexts/auth';
 import AuthContainer from '@/components/auth/AuthContainer';
+
+// Mock auth context for demonstration
+const useAuth = () => {
+  return {
+    user: null
+  };
+};
 
 const Auth = () => {
   const { user } = useAuth();

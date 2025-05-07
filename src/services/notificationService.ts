@@ -30,7 +30,13 @@ export const notificationService = {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data || [];
+      
+      // Type cast the response to match our interface
+      return (data || []).map(item => ({
+        ...item,
+        type: item.type as 'info' | 'warning' | 'error' | 'success',
+        priority: item.priority as 'low' | 'normal' | 'high' | 'urgent'
+      }));
     } catch (error) {
       console.error('Error fetching notifications:', error);
       return [];
@@ -39,10 +45,15 @@ export const notificationService = {
 
   async markAsRead(notificationId: string): Promise<boolean> {
     try {
+      const user = await supabase.auth.getUser();
+      const userId = user.data.user?.id;
+      
+      if (!userId) return false;
+      
       const { data, error } = await supabase
         .rpc('mark_notification_as_read', { 
           p_notification_id: notificationId,
-          p_user_id: supabase.auth.getUser().then(res => res.data.user?.id)
+          p_user_id: userId
         });
       
       if (error) throw error;

@@ -83,7 +83,8 @@ export function NotificationList({
               <NotificationItem 
                 key={notification.id} 
                 notification={notification} 
-                onMarkAsRead={onMarkAsRead} 
+                onMarkAsRead={onMarkAsRead}
+                getNotificationIcon={getNotificationIcon} 
               />
             ))}
           </ul>
@@ -96,9 +97,10 @@ export function NotificationList({
 interface NotificationItemProps {
   notification: Notification;
   onMarkAsRead: (id: string) => Promise<boolean>;
+  getNotificationIcon: (type: string) => React.ReactNode;
 }
 
-function NotificationItem({ notification, onMarkAsRead }: NotificationItemProps) {
+function NotificationItem({ notification, onMarkAsRead, getNotificationIcon }: NotificationItemProps) {
   const [isMarking, setIsMarking] = useState(false);
   const { id, title, content, type, created_at, is_read } = notification;
   

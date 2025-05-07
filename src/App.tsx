@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from '@/pages/Dashboard';
@@ -43,8 +44,8 @@ export default function App() {
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
-                <Route element={<ProtectedRoute />}>
-                  <Route path="/dashboard" element={<DashboardLayout />}>
+                <Route path="/dashboard" element={<ProtectedRoute />}>
+                  <Route element={<DashboardLayout />}>
                     <Route index element={<Dashboard />} />
                     <Route path="devices" element={<Devices />} />
                     <Route path="devices/:id" element={<DeviceDetail />} />
