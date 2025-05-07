@@ -2,7 +2,8 @@
 // This hook is used to provide toast functionality throughout the app
 import { createContext, useContext } from 'react';
 
-interface ToastProps {
+export interface ToastProps {
+  id?: string;
   title?: string;
   description?: string;
   variant?: 'default' | 'destructive';

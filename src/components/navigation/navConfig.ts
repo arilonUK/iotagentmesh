@@ -5,7 +5,12 @@ import {
   Users,
   Building2,
   Bell,
+  Archive,
+  Mail,
+  AlertTriangle,
+  CircuitBoard,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 export const mainNavConfig = [
   {
@@ -45,25 +50,25 @@ export const dashboardMenuItems = [
   {
     label: 'Devices',
     to: '/devices',
-    icon: 'IoT',
+    icon: CircuitBoard,
     end: false
   },
   {
     label: 'Alarms',
     to: '/alarms',
-    icon: 'Alert',
+    icon: AlertTriangle,
     end: false
   },
   {
     label: 'Data Buckets',
     to: '/data-buckets',
-    icon: 'Archive',
+    icon: Archive,
     end: false
   },
   {
     label: 'Endpoints',
     to: '/endpoints',
-    icon: 'Mail',
+    icon: Mail,
     end: false
   }
 ];

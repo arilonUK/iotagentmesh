@@ -44,30 +44,24 @@ export default function App() {
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
-                <Route path="/dashboard" element={<ProtectedRoute />}>
-                  <Route element={<DashboardLayout />}>
-                    <Route index element={<Dashboard />} />
-                    <Route path="devices" element={<Devices />} />
-                    <Route path="devices/:id" element={<DeviceDetail />} />
-                    <Route path="products" element={<Products />} />
-                    <Route path="products/:id" element={<ProductDetail />} />
-                    <Route path="alarms" element={<Alarms />} />
-                    <Route path="data-buckets" element={<DataBuckets />} />
-                    <Route path="endpoints" element={<Endpoints />} />
-                    <Route path="file-storage" element={<FileStorage />} />
-                    <Route path="file-storage/:id" element={<FileExplorerPage />} />
-                    <Route path="profile" element={<ProfileSettings />} />
-                    <Route path="organization" element={<OrganizationSettings />} />
-                    <Route path="team" element={<TeamSettings />} />
-                  </Route>
-                </Route>
+                
+                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/dashboard/devices" element={<ProtectedRoute><Devices /></ProtectedRoute>} />
+                <Route path="/dashboard/devices/:id" element={<ProtectedRoute><DeviceDetail /></ProtectedRoute>} />
+                <Route path="/dashboard/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
+                <Route path="/dashboard/products/:id" element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
+                <Route path="/dashboard/alarms" element={<ProtectedRoute><Alarms /></ProtectedRoute>} />
+                <Route path="/dashboard/data-buckets" element={<ProtectedRoute><DataBuckets /></ProtectedRoute>} />
+                <Route path="/dashboard/endpoints" element={<ProtectedRoute><Endpoints /></ProtectedRoute>} />
+                <Route path="/dashboard/file-storage" element={<ProtectedRoute><FileStorage /></ProtectedRoute>} />
+                <Route path="/dashboard/file-storage/:id" element={<ProtectedRoute><FileExplorerPage /></ProtectedRoute>} />
+                <Route path="/dashboard/profile" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
+                <Route path="/dashboard/organization" element={<ProtectedRoute><OrganizationSettings /></ProtectedRoute>} />
+                <Route path="/dashboard/team" element={<ProtectedRoute><TeamSettings /></ProtectedRoute>} />
+                
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:id" element={<BlogPost />} />
-                <Route path="/notification-settings" element={
-                  <ProtectedRoute>
-                    <NotificationSettings />
-                  </ProtectedRoute>
-                } />
+                <Route path="/notification-settings" element={<ProtectedRoute><NotificationSettings /></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <Toaster />
