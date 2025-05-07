@@ -1,6 +1,7 @@
 
-// This hook is used to provide toast functionality throughout the app
-import { createContext, useContext } from 'react';
+// This hook provides toast functionality throughout the app
+import { useContext } from 'react';
+import { ToastContext } from '@/contexts/toast';
 
 export interface ToastProps {
   id?: string;
@@ -10,22 +11,15 @@ export interface ToastProps {
   action?: React.ReactNode;
 }
 
-const ToastContext = createContext<{
-  toast: (props: ToastProps) => void;
-  toasts: ToastProps[];
-}>({
-  toast: () => {},
-  toasts: [],
-});
-
 export const useToast = () => {
   return useContext(ToastContext);
 };
 
 export const toast = (props: ToastProps) => {
-  const { toast } = useToast();
-  toast(props);
+  const toastContext = useContext(ToastContext);
+  if (toastContext) {
+    toastContext.toast(props);
+  }
 };
 
-// Re-export default toast for backward compatibility
 export default { useToast, toast };
