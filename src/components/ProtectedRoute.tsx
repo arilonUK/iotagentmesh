@@ -1,9 +1,13 @@
 
 import React from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 
-const ProtectedRoute: React.FC = () => {
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+}
+
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { session, loading } = useAuth();
 
   if (loading) {
@@ -14,7 +18,7 @@ const ProtectedRoute: React.FC = () => {
     return <Navigate to="/auth" />;
   }
 
-  return <Outlet />;
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;
