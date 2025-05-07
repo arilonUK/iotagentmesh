@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Bell } from 'lucide-react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { DashboardNav } from '@/components/DashboardNav';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -9,7 +9,11 @@ import { useAuth } from '@/contexts/auth';
 import OrganizationSwitcher from '@/components/OrganizationSwitcher';
 import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 
-const DashboardLayout = () => {
+interface DashboardLayoutProps {
+  children: React.ReactNode;
+}
+
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { profile } = useAuth();
   const { pathname } = useLocation();
   
@@ -23,6 +27,7 @@ const DashboardLayout = () => {
     if (pathname.includes('/settings/profile')) return 'Profile Settings';
     if (pathname.includes('/settings/team')) return 'Team Management';
     if (pathname.includes('/organization')) return 'Organization Settings';
+    if (pathname.includes('/notification-settings')) return 'Notification Settings';
     return 'Dashboard';
   };
   
@@ -64,7 +69,7 @@ const DashboardLayout = () => {
             </div>
           </header>
           <main className="p-4 lg:p-8">
-            <Outlet />
+            {children}
           </main>
         </SidebarInset>
       </div>
