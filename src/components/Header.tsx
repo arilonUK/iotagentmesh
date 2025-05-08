@@ -1,3 +1,4 @@
+
 import { useState } from "react"
 import { useTheme } from "next-themes"
 import { useNavigate } from "react-router-dom"
@@ -14,24 +15,21 @@ import { Icons } from "@/components/icons"
 import { settingsMenuConfig } from "@/components/navigation/navConfig"
 import { NotificationBell } from './notifications/NotificationBell'
 import { OrganizationSwitcher } from '@/components/organization/OrganizationSwitcher'
+import { useAuth } from "@/contexts/auth"
 
 export const Header = () => {
   const navigate = useNavigate()
   const { setTheme } = useTheme()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const { session, user, signOut } = useAuth()
   
-  // Mock user session for now
-  const session = {
-    user: {
-      name: 'User Name',
-      email: 'user@example.com',
-      image: '',
-    }
-  }
-
   const handleSignOut = async () => {
-    // Placeholder for sign out functionality
-    navigate("/auth") // Changed from "/login" to "/auth"
+    try {
+      await signOut()
+      // Redirect happens inside the signOut function
+    } catch (error) {
+      console.error("Error signing out:", error)
+    }
   }
 
   return (
@@ -48,16 +46,16 @@ export const Header = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0 lg:h-10 lg:w-10">
                 <Avatar className="h-8 w-8 lg:h-10 lg:w-10">
-                  <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || "Avatar"} />
-                  <AvatarFallback>{session?.user?.name?.slice(0, 2).toUpperCase() || "AV"}</AvatarFallback>
+                  <AvatarImage src={user?.user_metadata?.avatar_url || ""} alt={user?.user_metadata?.full_name || "Avatar"} />
+                  <AvatarFallback>{user?.user_metadata?.full_name?.slice(0, 2).toUpperCase() || "AV"}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" forceMount>
               <div className="flex flex-col space-y-1 p-2">
-                <p className="text-sm font-medium leading-none">{session?.user?.name}</p>
+                <p className="text-sm font-medium leading-none">{user?.user_metadata?.full_name || user?.email}</p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  {session?.user?.email}
+                  {user?.email}
                 </p>
               </div>
               <DropdownMenuSeparator />

@@ -27,38 +27,41 @@ import DashboardLayout from '@/layouts/DashboardLayout';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { OrganizationProvider } from '@/contexts/organization';
+import { AuthProvider } from '@/contexts/auth';
 import NotificationSettings from './pages/NotificationSettings';
 
 export default function App() {
   return (
-    <OrganizationProvider>
-      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
-          
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/dashboard/devices" element={<ProtectedRoute><Devices /></ProtectedRoute>} />
-          <Route path="/dashboard/devices/:id" element={<ProtectedRoute><DeviceDetail /></ProtectedRoute>} />
-          <Route path="/dashboard/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
-          <Route path="/dashboard/products/:id" element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
-          <Route path="/dashboard/alarms" element={<ProtectedRoute><Alarms /></ProtectedRoute>} />
-          <Route path="/dashboard/data-buckets" element={<ProtectedRoute><DataBuckets /></ProtectedRoute>} />
-          <Route path="/dashboard/endpoints" element={<ProtectedRoute><Endpoints /></ProtectedRoute>} />
-          <Route path="/dashboard/file-storage" element={<ProtectedRoute><FileStorage /></ProtectedRoute>} />
-          <Route path="/dashboard/file-storage/:id" element={<ProtectedRoute><FileExplorerPage /></ProtectedRoute>} />
-          <Route path="/dashboard/profile" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
-          <Route path="/dashboard/organization" element={<ProtectedRoute><OrganizationSettings /></ProtectedRoute>} />
-          <Route path="/dashboard/team" element={<ProtectedRoute><TeamSettings /></ProtectedRoute>} />
-          
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:id" element={<BlogPost />} />
-          <Route path="/notification-settings" element={<ProtectedRoute><NotificationSettings /></ProtectedRoute>} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
-      </ThemeProvider>
-    </OrganizationProvider>
+    <AuthProvider>
+      <OrganizationProvider>
+        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
+            
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/dashboard/devices" element={<ProtectedRoute><Devices /></ProtectedRoute>} />
+            <Route path="/dashboard/devices/:id" element={<ProtectedRoute><DeviceDetail /></ProtectedRoute>} />
+            <Route path="/dashboard/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
+            <Route path="/dashboard/products/:id" element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
+            <Route path="/dashboard/alarms" element={<ProtectedRoute><Alarms /></ProtectedRoute>} />
+            <Route path="/dashboard/data-buckets" element={<ProtectedRoute><DataBuckets /></ProtectedRoute>} />
+            <Route path="/dashboard/endpoints" element={<ProtectedRoute><Endpoints /></ProtectedRoute>} />
+            <Route path="/dashboard/file-storage" element={<ProtectedRoute><FileStorage /></ProtectedRoute>} />
+            <Route path="/dashboard/file-storage/:id" element={<ProtectedRoute><FileExplorerPage /></ProtectedRoute>} />
+            <Route path="/dashboard/profile" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
+            <Route path="/dashboard/organization" element={<ProtectedRoute><OrganizationSettings /></ProtectedRoute>} />
+            <Route path="/dashboard/team" element={<ProtectedRoute><TeamSettings /></ProtectedRoute>} />
+            
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:id" element={<BlogPost />} />
+            <Route path="/notification-settings" element={<ProtectedRoute><NotificationSettings /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+        </ThemeProvider>
+      </OrganizationProvider>
+    </AuthProvider>
   );
 }
