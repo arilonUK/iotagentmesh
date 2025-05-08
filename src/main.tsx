@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import './index.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
-import { AuthProvider } from '@/contexts/auth';
 import { ToastProvider } from '@/contexts/toast';
 import { NotificationProvider } from '@/contexts/notification';
 
@@ -26,11 +25,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme="light" storageKey="ui-theme">
           <ToastProvider>
-            <AuthProvider>
-              <NotificationProvider>
-                <App />
-              </NotificationProvider>
-            </AuthProvider>
+            <App />
           </ToastProvider>
         </ThemeProvider>
       </QueryClientProvider>

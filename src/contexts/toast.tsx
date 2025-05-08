@@ -1,8 +1,15 @@
 
 import React, { createContext, useState, useContext, useCallback } from 'react';
 import { Toaster } from '@/components/ui/toaster';
-import { ToastProps } from '@/hooks/use-toast';
 import { v4 as uuidv4 } from 'uuid';
+
+export interface ToastProps {
+  id?: string;
+  title?: string;
+  description?: string;
+  variant?: 'default' | 'destructive';
+  action?: React.ReactNode;
+}
 
 interface ToastContextValue {
   toast: (props: ToastProps) => void;
@@ -49,6 +56,10 @@ export const useToast = () => {
 };
 
 export const toast = (props: ToastProps) => {
-  const { toast } = useToast();
-  toast(props);
+  const context = useContext(ToastContext);
+  if (context) {
+    context.toast(props);
+  } else {
+    console.error('Toast context is not available');
+  }
 };
