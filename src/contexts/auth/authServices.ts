@@ -54,12 +54,14 @@ export const authServices = {
 
   signIn: async (email: string, password: string) => {
     try {
+      console.log(`Attempting to sign in user: ${email}`);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error('Sign in error:', error.message);
         toast(error.message, { 
           style: { backgroundColor: 'red', color: 'white' } 
         });
@@ -67,9 +69,11 @@ export const authServices = {
       }
 
       if (data.session) {
+        console.log('Sign in successful, redirecting to dashboard');
         toast('Signed in successfully!', {
           style: { backgroundColor: 'green', color: 'white' }
         });
+        // Redirect happens in the component based on session state
       }
     } catch (error: any) {
       console.error('Error signing in:', error);
