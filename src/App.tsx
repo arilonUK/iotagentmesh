@@ -148,7 +148,7 @@ export default function App() {
             </ProtectedRoute>
           } />
           
-          <Route path="/notification-settings" element={
+          <Route path="/dashboard/notification-settings" element={
             <ProtectedRoute>
               <DashboardLayout>
                 <NotificationSettings />

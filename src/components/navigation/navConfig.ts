@@ -20,22 +20,22 @@ export const mainNavConfig = [
   },
   {
     title: 'Devices',
-    href: '/devices',
+    href: '/dashboard/devices',
     icon: 'IoT',
   },
   {
     title: 'Alarms',
-    href: '/alarms',
+    href: '/dashboard/alarms',
     icon: 'Alert',
   },
   {
     title: 'Data Buckets',
-    href: '/data-buckets',
+    href: '/dashboard/data-buckets',
     icon: 'Archive',
   },
   {
     title: 'Endpoints',
-    href: '/endpoints',
+    href: '/dashboard/endpoints',
     icon: 'Mail',
   },
 ];
@@ -49,25 +49,25 @@ export const dashboardMenuItems = [
   },
   {
     label: 'Devices',
-    to: '/devices',
+    to: '/dashboard/devices',
     icon: CircuitBoard,
     end: false
   },
   {
     label: 'Alarms',
-    to: '/alarms',
+    to: '/dashboard/alarms',
     icon: AlertTriangle,
     end: false
   },
   {
     label: 'Data Buckets',
-    to: '/data-buckets',
+    to: '/dashboard/data-buckets',
     icon: Archive,
     end: false
   },
   {
     label: 'Endpoints',
-    to: '/endpoints',
+    to: '/dashboard/endpoints',
     icon: Mail,
     end: false
   }
@@ -76,22 +76,22 @@ export const dashboardMenuItems = [
 export const settingsMenuConfig = [
   {
     title: 'Organization',
-    href: '/organization-settings',
+    href: '/dashboard/organization',
     icon: Building2,
   },
   {
     title: 'Users',
-    href: '/user-management',
+    href: '/dashboard/team',
     icon: Users,
   },
   {
     title: 'Settings',
-    href: '/account-settings',
+    href: '/dashboard/profile',
     icon: Settings,
   },
   {
     title: 'Notifications',
-    href: '/notification-settings',
-    icon: 'Bell', // Make sure this icon is imported in the icons.tsx file
+    href: '/dashboard/notification-settings',
+    icon: Bell,
   },
 ];
