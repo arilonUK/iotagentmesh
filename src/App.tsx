@@ -39,23 +39,123 @@ export default function App() {
           <Route path="/auth" element={<Auth />} />
           <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
           
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/dashboard/devices" element={<ProtectedRoute><Devices /></ProtectedRoute>} />
-          <Route path="/dashboard/devices/:id" element={<ProtectedRoute><DeviceDetail /></ProtectedRoute>} />
-          <Route path="/dashboard/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
-          <Route path="/dashboard/products/:id" element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
-          <Route path="/dashboard/alarms" element={<ProtectedRoute><Alarms /></ProtectedRoute>} />
-          <Route path="/dashboard/data-buckets" element={<ProtectedRoute><DataBuckets /></ProtectedRoute>} />
-          <Route path="/dashboard/endpoints" element={<ProtectedRoute><Endpoints /></ProtectedRoute>} />
-          <Route path="/dashboard/file-storage" element={<ProtectedRoute><FileStorage /></ProtectedRoute>} />
-          <Route path="/dashboard/file-storage/:id" element={<ProtectedRoute><FileExplorerPage /></ProtectedRoute>} />
-          <Route path="/dashboard/profile" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
-          <Route path="/dashboard/organization" element={<ProtectedRoute><OrganizationSettings /></ProtectedRoute>} />
-          <Route path="/dashboard/team" element={<ProtectedRoute><TeamSettings /></ProtectedRoute>} />
-          
+          {/* Public routes */}
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:id" element={<BlogPost />} />
-          <Route path="/notification-settings" element={<ProtectedRoute><NotificationSettings /></ProtectedRoute>} />
+          
+          {/* All dashboard routes should be wrapped with DashboardLayout */}
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Dashboard />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/dashboard/devices" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Devices />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/dashboard/devices/:id" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <DeviceDetail />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/dashboard/products" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Products />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/dashboard/products/:id" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <ProductDetail />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/dashboard/alarms" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Alarms />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/dashboard/data-buckets" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <DataBuckets />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/dashboard/endpoints" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Endpoints />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/dashboard/file-storage" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <FileStorage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/dashboard/file-storage/:id" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <FileExplorerPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/dashboard/profile" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <ProfileSettings />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/dashboard/organization" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <OrganizationSettings />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/dashboard/team" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <TeamSettings />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/notification-settings" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <NotificationSettings />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />
