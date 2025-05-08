@@ -1,3 +1,4 @@
+
 import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { productServices } from "@/services/products";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/contexts/toast";
 
 export type DeleteProductDialogProps = {
   productId: string;

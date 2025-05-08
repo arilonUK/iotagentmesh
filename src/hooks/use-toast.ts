@@ -12,13 +12,19 @@ export interface ToastProps {
 }
 
 export const useToast = () => {
-  return useContext(ToastContext);
+  const context = useContext(ToastContext);
+  if (context === null) {
+    throw new Error('useToast must be used within a ToastProvider');
+  }
+  return context;
 };
 
 export const toast = (props: ToastProps) => {
-  const toastContext = useContext(ToastContext);
-  if (toastContext) {
-    toastContext.toast(props);
+  const context = useContext(ToastContext);
+  if (context) {
+    context.toast(props);
+  } else {
+    console.error('Toast context is not available');
   }
 };
 
