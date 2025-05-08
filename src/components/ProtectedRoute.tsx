@@ -23,7 +23,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       variant: "destructive",
     });
     
-    return <Navigate to="/auth" />;
+    return <Navigate to="/auth" />; // Changed from "/login" to "/auth"
   }
 
   return <>{children}</>;

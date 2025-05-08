@@ -103,6 +103,9 @@ export const authServices = {
       toast('Signed out successfully', {
         style: { backgroundColor: 'green', color: 'white' }
       });
+      
+      // Make sure we redirect to the auth page after signing out
+      window.location.href = "/auth";
     } catch (error: any) {
       console.error('Error during sign out process:', error);
       // Don't rethrow the error here - let the app continue even if signout had issues

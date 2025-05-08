@@ -1,4 +1,3 @@
-
 import { useState } from "react"
 import { useTheme } from "next-themes"
 import { useNavigate } from "react-router-dom"
@@ -32,7 +31,7 @@ export const Header = () => {
 
   const handleSignOut = async () => {
     // Placeholder for sign out functionality
-    navigate("/login")
+    navigate("/auth") // Changed from "/login" to "/auth"
   }
 
   return (
