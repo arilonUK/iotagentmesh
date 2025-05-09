@@ -66,7 +66,7 @@ export function BarChart({
                   type="category"
                   tickLine={false}
                   axisLine={false}
-                  padding={{ left: 5, right: 5 }}
+                  padding={{ top: 5, bottom: 5 }} // Modified from left/right to top/bottom
                   stroke="var(--muted-foreground)"
                   fontSize={12}
                   tickFormatter={(value) => String(value)}
@@ -77,7 +77,7 @@ export function BarChart({
                   type="category"
                   tickLine={false}
                   axisLine={false}
-                  padding={{ left: 5, right: 5 }}
+                  padding={{ left: 5, right: 5 }} // This is correct for XAxis
                   stroke="var(--muted-foreground)"
                   fontSize={12}
                   tickFormatter={(value) => String(value)}
