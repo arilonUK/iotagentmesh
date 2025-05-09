@@ -16,8 +16,7 @@ const Auth = () => {
     if (redirectReason === 'protected') {
       toast({
         title: "Authentication required",
-        description: "Please log in to access this page",
-        variant: "destructive",
+        description: "Please log in to access this page"
       });
     }
   }, []);

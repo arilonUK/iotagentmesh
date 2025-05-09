@@ -46,7 +46,6 @@ export const authServices = {
         toast({
           title: "Success",
           description: "Sign up successful! Please verify your email.",
-          variant: "default"
         });
         return;
       }
@@ -79,7 +78,6 @@ export const authServices = {
         toast({
           title: "Success",
           description: "Signed in successfully!",
-          variant: "default"
         });
         // Redirect happens in the component based on session state
       }
@@ -109,7 +107,6 @@ export const authServices = {
         toast({
           title: 'Error signing out',
           description: error.message,
-          variant: 'destructive'
         });
         throw error;
       }

@@ -25,7 +25,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme="light" storageKey="ui-theme">
           <ToastProvider>
-            <App />
+            <NotificationProvider>
+              <App />
+            </NotificationProvider>
           </ToastProvider>
         </ThemeProvider>
       </QueryClientProvider>
