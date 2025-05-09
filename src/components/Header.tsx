@@ -21,14 +21,19 @@ export const Header = () => {
   const navigate = useNavigate()
   const { setTheme } = useTheme()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isSigningOut, setIsSigningOut] = useState(false)
   const { session, user, signOut } = useAuth()
   
   const handleSignOut = async () => {
+    setIsSigningOut(true);
     try {
       await signOut()
       // Redirect happens inside the signOut function
     } catch (error) {
       console.error("Error signing out:", error)
+      setIsSigningOut(false);
+      // Fallback navigation in case the redirection in signOut fails
+      navigate('/auth');
     }
   }
 
@@ -68,11 +73,20 @@ export const Header = () => {
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => {
-                handleSignOut()
-                setIsDropdownOpen(false)
+              <DropdownMenuItem 
+                disabled={isSigningOut}
+                onSelect={() => {
+                  handleSignOut()
+                  setIsDropdownOpen(false)
               }}>
-                Log out
+                {isSigningOut ? (
+                  <div className="flex items-center gap-2">
+                    <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                    <span>Signing Out...</span>
+                  </div>
+                ) : (
+                  "Log out"
+                )}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

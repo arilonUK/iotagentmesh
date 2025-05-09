@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { Icons } from "@/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,8 +16,22 @@ import { Button } from "@/components/ui/button";
 export function OrganizationFooter() {
   const { signOut, organization, userRole } = useAuth();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const navigate = useNavigate();
   
   if (!organization) return null;
+  
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      await signOut();
+      // Redirection is handled in the signOut function
+    } catch (error) {
+      console.error("Error signing out:", error);
+      setIsSigningOut(false);
+      // Fallback navigation in case the redirection in signOut fails
+      navigate('/auth');
+    }
+  };
   
   return (
     <div className="mt-auto pt-4 px-3">
@@ -48,10 +62,7 @@ export function OrganizationFooter() {
             </>
           )}
           <DropdownMenuItem
-            onClick={() => {
-              setIsSigningOut(true);
-              signOut();
-            }}
+            onClick={handleSignOut}
             disabled={isSigningOut}
           >
             {isSigningOut ? (

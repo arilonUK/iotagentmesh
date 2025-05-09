@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { toast } from '@/contexts/toast';
 
 export const authServices = {
   signUp: async (email: string, password: string, userData?: { full_name?: string; username?: string; organization_name?: string }) => {
@@ -89,7 +89,8 @@ export const authServices = {
       
       if (!sessionData.session) {
         console.log('No active session found, considering user already signed out');
-        // Clear any local UI state regardless
+        // Still redirect to auth page even if no active session
+        window.location.href = "/auth";
         return;
       }
       
@@ -97,15 +98,18 @@ export const authServices = {
       
       if (error) {
         console.error('Error during sign out:', error);
-        toast('Error signing out', { 
-          style: { backgroundColor: 'red', color: 'white' } 
+        toast({
+          title: 'Error signing out',
+          description: error.message,
+          variant: 'destructive'
         });
         throw error;
       }
       
       console.log('User signed out successfully');
-      toast('Signed out successfully', {
-        style: { backgroundColor: 'green', color: 'white' }
+      toast({
+        title: 'Signed out',
+        description: 'You have been successfully signed out'
       });
       
       // Make sure we redirect to the auth page after signing out
@@ -113,7 +117,8 @@ export const authServices = {
     } catch (error: any) {
       console.error('Error during sign out process:', error);
       // Don't rethrow the error here - let the app continue even if signout had issues
-      // This prevents the user from getting stuck if there are session issues
+      // Redirect to auth page regardless of error
+      window.location.href = "/auth";
     }
   }
 };
