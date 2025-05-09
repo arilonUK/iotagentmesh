@@ -34,15 +34,19 @@ export const authServices = {
       });
 
       if (error) {
-        toast(error.message, { 
-          style: { backgroundColor: 'red', color: 'white' } 
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive"
         });
         throw error;
       }
 
       if (data) {
-        toast('Sign up successful! Please verify your email.', {
-          style: { backgroundColor: 'green', color: 'white' }
+        toast({
+          title: "Success",
+          description: "Sign up successful! Please verify your email.",
+          variant: "default"
         });
         return;
       }
@@ -62,16 +66,20 @@ export const authServices = {
 
       if (error) {
         console.error('Sign in error:', error.message);
-        toast(error.message, { 
-          style: { backgroundColor: 'red', color: 'white' } 
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive"
         });
         throw error;
       }
 
       if (data.session) {
         console.log('Sign in successful, redirecting to dashboard');
-        toast('Signed in successfully!', {
-          style: { backgroundColor: 'green', color: 'white' }
+        toast({
+          title: "Success",
+          description: "Signed in successfully!",
+          variant: "default"
         });
         // Redirect happens in the component based on session state
       }

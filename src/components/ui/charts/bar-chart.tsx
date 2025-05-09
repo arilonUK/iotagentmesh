@@ -38,10 +38,6 @@ export function BarChart({
     };
     return acc;
   }, {} as Record<string, { color: string }>);
-
-  // Choose the right components based on orientation
-  const XAxisComponent = horizontal ? RechartsPrimitive.YAxis : RechartsPrimitive.XAxis;
-  const YAxisComponent = horizontal ? RechartsPrimitive.XAxis : RechartsPrimitive.YAxis;
   
   return (
     <div className={chartClasses.base + ' ' + (className || '')} style={{ height, width: '100%' }}>
@@ -64,29 +60,49 @@ export function BarChart({
             )}
             
             {showXAxis && (
-              <XAxisComponent
-                dataKey={horizontal ? undefined : index}
-                type="category"
-                tickLine={false}
-                axisLine={false}
-                padding={{ left: 5, right: 5 }}
-                stroke="var(--muted-foreground)"
-                fontSize={12}
-                tickFormatter={(value) => String(value)}
-                className={chartClasses.axisLabel}
-              />
+              horizontal ? 
+                <RechartsPrimitive.YAxis
+                  dataKey={index}
+                  type="category"
+                  tickLine={false}
+                  axisLine={false}
+                  padding={{ left: 5, right: 5 }}
+                  stroke="var(--muted-foreground)"
+                  fontSize={12}
+                  tickFormatter={(value) => String(value)}
+                  className={chartClasses.axisLabel}
+                /> :
+                <RechartsPrimitive.XAxis
+                  dataKey={index}
+                  type="category"
+                  tickLine={false}
+                  axisLine={false}
+                  padding={{ left: 5, right: 5 }}
+                  stroke="var(--muted-foreground)"
+                  fontSize={12}
+                  tickFormatter={(value) => String(value)}
+                  className={chartClasses.axisLabel}
+                />
             )}
             
             {showYAxis && (
-              <YAxisComponent
-                dataKey={horizontal ? index : undefined}
-                tickLine={false}
-                axisLine={false}
-                stroke="var(--muted-foreground)"
-                fontSize={12}
-                tickFormatter={horizontal ? (value) => String(value) : valueFormatter}
-                className={chartClasses.axisLabel}
-              />
+              horizontal ?
+                <RechartsPrimitive.XAxis
+                  tickLine={false}
+                  axisLine={false}
+                  stroke="var(--muted-foreground)"
+                  fontSize={12}
+                  tickFormatter={valueFormatter}
+                  className={chartClasses.axisLabel}
+                /> :
+                <RechartsPrimitive.YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  stroke="var(--muted-foreground)"
+                  fontSize={12}
+                  tickFormatter={valueFormatter}
+                  className={chartClasses.axisLabel}
+                />
             )}
             
             {showTooltip && (
