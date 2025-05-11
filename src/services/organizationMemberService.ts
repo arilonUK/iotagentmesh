@@ -2,7 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 import { OrgMemberResponse, OrganizationUser, RoleType } from '@/types/organization';
-import { createAuditLog } from './auditLogService';
+import { createAuditLog } from '@/services/audit/createAuditLog';
 
 // Fetch organization members from the database
 export async function fetchOrganizationMembers(organizationId: string): Promise<OrganizationUser[]> {
