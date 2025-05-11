@@ -29,7 +29,7 @@ export function PropertyFormDialog({
   
   // Convert between PropertyFormValues and FormValues if needed
   const handleSubmit = async (data: FormValues): Promise<void> => {
-    return onSubmit(data as unknown as PropertyFormValues);
+    return onSubmit(data as PropertyFormValues);
   };
   
   return (

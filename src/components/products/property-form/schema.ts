@@ -1,5 +1,6 @@
 
 import { z } from 'zod';
+import { PropertyDataType } from '@/types/product';
 
 export const propertyFormSchema = z.object({
   name: z.string().min(1, "Property name is required"),
@@ -20,3 +21,6 @@ export const propertyFormSchema = z.object({
     allowed_values: z.array(z.any()).nullable().optional(),
   }).optional(),
 });
+
+// Add PropertyFormSchema type export for type consistency
+export type PropertyFormSchema = z.infer<typeof propertyFormSchema>;

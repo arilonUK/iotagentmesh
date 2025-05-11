@@ -3,9 +3,9 @@ import { z } from 'zod';
 import { propertyFormSchema } from './schema';
 import { ProductProperty, PropertyDataType } from '@/types/product';
 
+// Make both types derive from the same schema
 export type PropertyFormSchema = z.infer<typeof propertyFormSchema>;
 
-// Make PropertyFormSchema compatible with PropertyFormValues
 export type PropertyFormValues = {
   name: string;
   description?: string;

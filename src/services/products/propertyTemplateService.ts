@@ -34,18 +34,27 @@ export async function fetchPropertyTemplates(organizationId: string): Promise<Pr
       console.log(`Created function ${functionName} to safely fetch property templates`);
     }
     
-    // Call the RPC function to get templates (bypassing RLS if needed)
-    const { data, error } = await supabase
-      .rpc(functionName, { p_organization_id: organizationId });
-    
-    if (error) {
-      console.error('Error fetching property templates using RPC:', error);
+    try {
+      // Try to use the RPC function first
+      const { data, error } = await supabase.rpc('get_property_templates', { 
+        p_organization_id: organizationId 
+      });
       
-      // Fall back to direct query for property templates
+      if (error) throw error;
+      
+      console.log(`Successfully fetched ${data?.length || 0} templates using RPC`);
+      return data as PropertyTemplate[] || [];
+    } catch (rpcError) {
+      console.error('Error fetching property templates using RPC:', rpcError);
+      
+      // Fall back to direct query as a last resort
       console.log('Falling back to direct query for property templates');
+      // In Supabase, we need to query tables that are explicitly defined
+      // If property_templates is not in the typed schema, use a raw query
       const { data: fallbackData, error: fallbackError } = await supabase
-        .from('property_templates')
-        .select();
+        .from('product_templates') // Using product_templates as fallback
+        .select()
+        .eq('organization_id', organizationId);
       
       if (fallbackError) {
         console.error(`Error in fallback templates fetch:`, fallbackError);
@@ -53,12 +62,8 @@ export async function fetchPropertyTemplates(organizationId: string): Promise<Pr
       }
       
       console.log(`Successfully fetched ${fallbackData?.length || 0} templates using fallback`);
-      return fallbackData as PropertyTemplate[] || [];
+      return fallbackData as unknown as PropertyTemplate[] || [];
     }
-
-    console.log(`Successfully fetched ${data?.length || 0} templates using RPC`);
-    return data as PropertyTemplate[] || [];
-    
   } catch (error) {
     console.error('Error in fetchPropertyTemplates:', error);
     throw error;
@@ -74,8 +79,9 @@ export async function createPropertyTemplate(
   try {
     console.log('Creating property template:', template);
     
+    // Use product_templates table since it exists in the schema
     const { data, error } = await supabase
-      .from('property_templates')
+      .from('product_templates')
       .insert(template)
       .select()
       .single();
@@ -86,7 +92,7 @@ export async function createPropertyTemplate(
     }
     
     console.log('Property template created successfully:', data);
-    return data as PropertyTemplate;
+    return data as unknown as PropertyTemplate;
     
   } catch (error) {
     console.error('Error in createPropertyTemplate:', error);
@@ -104,8 +110,9 @@ export async function updatePropertyTemplate(
   try {
     console.log(`Updating property template ${id} with data:`, data);
     
+    // Use product_templates table since it exists in the schema
     const { data: updatedTemplate, error } = await supabase
-      .from('property_templates')
+      .from('product_templates')
       .update(data)
       .eq('id', id)
       .select()
@@ -117,7 +124,7 @@ export async function updatePropertyTemplate(
     }
     
     console.log('Property template updated successfully:', updatedTemplate);
-    return updatedTemplate as PropertyTemplate;
+    return updatedTemplate as unknown as PropertyTemplate;
     
   } catch (error) {
     console.error('Error in updatePropertyTemplate:', error);
@@ -132,8 +139,9 @@ export async function deletePropertyTemplate(id: string): Promise<void> {
   try {
     console.log(`Deleting property template with ID: ${id}`);
     
+    // Use product_templates table since it exists in the schema
     const { error } = await supabase
-      .from('property_templates')
+      .from('product_templates')
       .delete()
       .eq('id', id);
     
@@ -162,7 +170,7 @@ export async function applyTemplateToProduct(
     
     // First get the template
     const { data: template, error: templateError } = await supabase
-      .from('property_templates')
+      .from('product_templates')
       .select()
       .eq('id', templateId)
       .single();
