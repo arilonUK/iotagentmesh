@@ -15,7 +15,7 @@ interface ProductPropertyFormProps {
 const ProductPropertyForm: React.FC<ProductPropertyFormProps> = (props) => {
   // Convert between PropertyFormValues and FormValues if needed
   const handleSubmit = async (data: FormValues): Promise<void> => {
-    return props.onSubmit(data as PropertyFormValues);
+    return props.onSubmit(data as unknown as PropertyFormValues);
   };
 
   return <PropertyForm 

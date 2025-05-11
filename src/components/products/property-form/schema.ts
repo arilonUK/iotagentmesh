@@ -22,5 +22,4 @@ export const propertyFormSchema = z.object({
   }).optional(),
 });
 
-// Add PropertyFormSchema type export for type consistency
-export type PropertyFormSchema = z.infer<typeof propertyFormSchema>;
+// We'll export the type only in the types.ts file to avoid ambiguity
