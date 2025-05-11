@@ -9,6 +9,7 @@ import {
   Mail,
   AlertTriangle,
   CircuitBoard,
+  Package,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -22,6 +23,11 @@ export const mainNavConfig = [
     title: 'Devices',
     href: '/dashboard/devices',
     icon: 'IoT',
+  },
+  {
+    title: 'Products',
+    href: '/dashboard/products',
+    icon: 'Package',
   },
   {
     title: 'Alarms',
@@ -51,6 +57,12 @@ export const dashboardMenuItems = [
     label: 'Devices',
     to: '/dashboard/devices',
     icon: CircuitBoard,
+    end: false
+  },
+  {
+    label: 'Products',
+    to: '/dashboard/products',
+    icon: Package,
     end: false
   },
   {
