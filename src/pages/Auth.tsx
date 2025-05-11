@@ -4,11 +4,13 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import AuthContainer from '@/components/auth/AuthContainer';
 import { useAuth } from '@/contexts/auth';
-import { toast } from '@/contexts/toast';
+import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
+  // Use the hook within the component
+  const { toast } = useToast();
 
   useEffect(() => {
     // If user just landed on this page after being redirected from a protected route
@@ -19,7 +21,7 @@ const Auth = () => {
         description: "Please log in to access this page"
       });
     }
-  }, []);
+  }, [toast]); // Add toast to the dependency array
 
   // Show loading state while checking authentication
   if (loading) {

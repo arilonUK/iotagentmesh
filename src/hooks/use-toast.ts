@@ -19,13 +19,7 @@ export const useToast = () => {
   return context;
 };
 
-export const toast = (props: ToastProps) => {
-  const context = useContext(ToastContext);
-  if (context) {
-    context.toast(props);
-  } else {
-    console.error('Toast context is not available');
-  }
-};
+// Don't export a standalone toast function that uses hooks directly
+// Instead export the hook itself which should be used within components
 
-export default { useToast, toast };
+export default useToast;

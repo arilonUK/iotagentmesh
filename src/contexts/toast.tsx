@@ -1,5 +1,5 @@
 
-import React, { createContext, useState, useContext, useCallback } from 'react';
+import React, { createContext, useState, useCallback } from 'react';
 import { Toaster } from '@/components/ui/toaster';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -47,19 +47,4 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export const useToast = () => {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error('useToast must be used within a ToastProvider');
-  }
-  return context;
-};
-
-export const toast = (props: ToastProps) => {
-  const context = useContext(ToastContext);
-  if (context) {
-    context.toast(props);
-  } else {
-    console.error('Toast context is not available');
-  }
-};
+// Remove the standalone toast function that was causing the hook rules violation
