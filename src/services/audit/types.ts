@@ -13,7 +13,16 @@ export type AuditLogAction =
   | 'device_created'
   | 'device_deleted'
   | 'product_created'
-  | 'product_deleted';
+  | 'product_deleted'
+  | 'product_updated'
+  | 'property_created'
+  | 'property_updated'
+  | 'property_deleted'
+  | 'service_created'
+  | 'service_updated'
+  | 'service_deleted'
+  | 'service_activated'
+  | 'service_deactivated';
 
 export interface AuditLogEntry {
   id: string;

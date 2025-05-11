@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +16,8 @@ import {
   StringValidationField,
   BooleanDefaultField
 } from './form-fields';
+import { ValidationRuleBuilder } from './ValidationRuleBuilder';
+import { PropertyDataType } from '@/types/product';
 
 export function PropertyForm({
   onSubmit,
@@ -56,7 +57,7 @@ export function PropertyForm({
     }
   }, [defaultValues, form]);
 
-  const dataType = form.watch('data_type');
+  const dataType = form.watch('data_type') as PropertyDataType;
 
   const handleFormSubmit = async (values: any) => {
     setIsSubmitting(true);
@@ -85,6 +86,10 @@ export function PropertyForm({
         <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
           <BasicFields form={form} />
 
+          {/* Enhanced validation rules builder */}
+          <ValidationRuleBuilder form={form} dataType={dataType} />
+
+          {/* Legacy validation fields - we'll keep these for backward compatibility */}
           {dataType === 'number' && (
             <NumberValidationFields form={form} />
           )}

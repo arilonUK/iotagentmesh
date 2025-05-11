@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -9,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertCircle, ArrowLeft, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ProductPropertiesTab } from '@/components/products/ProductPropertiesTab';
+import { ProductServicesTab } from '@/components/products/ProductServicesTab';
 import { Badge } from '@/components/ui/badge';
 import { EditProductDialog } from '@/components/products/EditProductDialog';
 import { DeleteProductDialog } from '@/components/products/DeleteProductDialog';
@@ -121,21 +121,19 @@ export default function ProductDetail() {
       <Tabs defaultValue="properties" className="mt-8">
         <TabsList>
           <TabsTrigger value="properties">Properties</TabsTrigger>
-          <TabsTrigger value="dashboards">Dashboards</TabsTrigger>
           <TabsTrigger value="services">Services</TabsTrigger>
+          <TabsTrigger value="dashboards">Dashboards</TabsTrigger>
           <TabsTrigger value="buckets">Data Buckets</TabsTrigger>
         </TabsList>
         <TabsContent value="properties" className="mt-6">
           <ProductPropertiesTab productId={product.id} />
         </TabsContent>
+        <TabsContent value="services" className="mt-6">
+          <ProductServicesTab productId={product.id} />
+        </TabsContent>
         <TabsContent value="dashboards">
           <div className="text-center py-8 text-muted-foreground">
             <p>Dashboard management will be implemented in the next phase</p>
-          </div>
-        </TabsContent>
-        <TabsContent value="services">
-          <div className="text-center py-8 text-muted-foreground">
-            <p>Service configuration will be implemented in the next phase</p>
           </div>
         </TabsContent>
         <TabsContent value="buckets">

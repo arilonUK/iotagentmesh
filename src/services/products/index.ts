@@ -8,6 +8,8 @@ import { fetchProductProperties } from './fetchProductProperties';
 import { createProductProperty } from './createProductProperty';
 import { updateProductProperty } from './updateProductProperty';
 import { deleteProductProperty } from './deleteProductProperty';
+import { propertyTemplateService } from './propertyTemplateService';
+import { productServiceService } from './productServiceService';
 
 // Export as a single service object for backward compatibility
 export const productServices = {
@@ -19,7 +21,10 @@ export const productServices = {
   fetchProductProperties,
   createProductProperty,
   updateProductProperty,
-  deleteProductProperty
+  deleteProductProperty,
+  // Add new services
+  ...propertyTemplateService,
+  ...productServiceService
 };
 
 // Also export individual functions for more targeted imports
@@ -32,5 +37,7 @@ export {
   fetchProductProperties,
   createProductProperty,
   updateProductProperty,
-  deleteProductProperty
+  deleteProductProperty,
+  propertyTemplateService,
+  productServiceService
 };
