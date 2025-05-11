@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { InvitationType, CreateInvitationParams } from '@/contexts/auth/invitationServices';
+import { createAuditLog } from '@/services/auditLogService';
 
 export const invitationService = {
   createInvitation: async ({ email, role, organizationId }: CreateInvitationParams) => {
@@ -34,6 +35,13 @@ export const invitationService = {
         throw error;
       }
 
+      // Create audit log entry
+      await createAuditLog(
+        organizationId, 
+        'invitation_sent', 
+        { email, role }
+      );
+
       toast.success('Invitation sent successfully');
       return data;
     } catch (error: any) {
@@ -64,6 +72,13 @@ export const invitationService = {
 
   deleteInvitation: async (invitationId: string) => {
     try {
+      // Get invitation details for the audit log
+      const { data: invitation } = await supabase
+        .from('invitations')
+        .select('*')
+        .eq('id', invitationId)
+        .single();
+      
       const { error } = await supabase
         .from('invitations')
         .delete()
@@ -72,6 +87,15 @@ export const invitationService = {
       if (error) {
         toast.error(`Error deleting invitation: ${error.message}`);
         throw error;
+      }
+
+      // Create audit log entry if we have the invitation data
+      if (invitation) {
+        await createAuditLog(
+          invitation.organization_id, 
+          'invitation_deleted', 
+          { email: invitation.email, role: invitation.role }
+        );
       }
 
       toast.success('Invitation deleted successfully');

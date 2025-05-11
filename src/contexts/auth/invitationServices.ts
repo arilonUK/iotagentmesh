@@ -21,7 +21,67 @@ export type CreateInvitationParams = {
 
 export const invitationServices = {
   signUp: async (email: string, password: string, userData?: { full_name?: string; username?: string; organization_name?: string }) => {
-    // ... keep existing code (unrelated to invitations)
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: userData?.full_name,
+            username: userData?.username,
+          },
+        },
+      });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive"
+        });
+        throw error;
+      }
+
+      if (userData?.organization_name) {
+        // Create a new organization for the user
+        const { data: organization, error: orgError } = await supabase
+          .from('organizations')
+          .insert([{ name: userData.organization_name, slug: userData.organization_name.toLowerCase().replace(/ /g, '-') }])
+          .select('*')
+          .single();
+
+        if (orgError) {
+          toast({
+            title: "Error",
+            description: orgError.message,
+            variant: "destructive"
+          });
+          throw orgError;
+        }
+
+        // Add the user as an owner to the organization
+        const { error: memberError } = await supabase
+          .from('organization_members')
+          .insert([{ organization_id: organization.id, user_id: data.user?.id, role: 'owner' }]);
+
+        if (memberError) {
+          toast({
+            title: "Error",
+            description: memberError.message,
+            variant: "destructive"
+          });
+          throw memberError;
+        }
+      }
+
+      toast({
+        title: "Success",
+        description: "Account created successfully. Check your email to verify your account.",
+      });
+    } catch (error: any) {
+      console.error('Error signing up:', error);
+      throw error;
+    }
   },
 
   createInvitation: async ({ email, role, organizationId }: CreateInvitationParams) => {
@@ -44,11 +104,7 @@ export const invitationServices = {
         .single();
 
       if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive"
-        });
+        toast.error(error.message);
         throw error;
       }
 
@@ -59,10 +115,7 @@ export const invitationServices = {
         { email, role }
       );
 
-      toast({
-        title: "Success",
-        description: "Invitation created successfully",
-      });
+      toast.success("Invitation created successfully");
       return data;
     } catch (error: any) {
       console.error('Error creating invitation:', error);
@@ -105,11 +158,7 @@ export const invitationServices = {
         .eq('id', invitationId);
 
       if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive"
-        });
+        toast.error(error.message);
         throw error;
       }
 
@@ -122,10 +171,7 @@ export const invitationServices = {
         );
       }
 
-      toast({
-        title: "Success",
-        description: "Invitation deleted successfully",
-      });
+      toast.success("Invitation deleted successfully");
     } catch (error: any) {
       console.error('Error deleting invitation:', error);
       throw error;
@@ -146,15 +192,11 @@ export const invitationServices = {
         .eq('id', invitationId);
 
       if (error) {
-        toast('Error resending invitation', { 
-          style: { backgroundColor: 'red', color: 'white' } 
-        });
+        toast.error('Error resending invitation: ' + error.message);
         throw error;
       }
 
-      toast('Invitation resent successfully', {
-        style: { backgroundColor: 'green', color: 'white' }
-      });
+      toast.success('Invitation resent successfully');
     } catch (error: any) {
       console.error('Error resending invitation:', error);
       throw error;
@@ -165,11 +207,7 @@ export const invitationServices = {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast({
-          title: 'Error',
-          description: 'You must be logged in to accept an invitation',
-          variant: 'destructive'
-        });
+        toast.error('You must be logged in to accept an invitation');
         return false;
       }
 
@@ -181,11 +219,7 @@ export const invitationServices = {
         .single();
 
       if (error || !data) {
-        toast({
-          title: 'Error',
-          description: 'Invalid or expired invitation',
-          variant: 'destructive'
-        });
+        toast.error('Invalid or expired invitation');
         return false;
       }
       
@@ -198,11 +232,7 @@ export const invitationServices = {
         });
         
       if (memberError) {
-        toast({
-          title: 'Error',
-          description: 'Error accepting invitation: ' + memberError.message,
-          variant: 'destructive'
-        });
+        toast.error('Error accepting invitation: ' + memberError.message);
         throw memberError;
       }
       
@@ -218,10 +248,7 @@ export const invitationServices = {
         .delete()
         .eq('token', token);
       
-      toast({
-        title: 'Success',
-        description: 'Invitation accepted successfully'
-      });
+      toast.success('Invitation accepted successfully');
       return true;
     } catch (error: any) {
       console.error('Error accepting invitation:', error);
