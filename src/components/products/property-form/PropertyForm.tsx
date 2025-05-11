@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import {
@@ -9,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PropertyFormProps } from './types';
 import { propertyFormSchema } from './schema';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Save } from 'lucide-react';
 import { 
   BasicFields,
   NumberValidationFields,
@@ -106,11 +107,18 @@ export function PropertyForm({
             <Button 
               type="submit" 
               disabled={isSubmitting || isLoading}
+              className="w-full sm:w-auto"
             >
-              {isSubmitting || isLoading
-                ? (isEditing ? 'Updating...' : 'Creating...') 
-                : (isEditing ? 'Update Property' : 'Create Property')
-              }
+              {isSubmitting || isLoading ? (
+                <>
+                  {isEditing ? "Updating..." : "Creating..."}
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  {isEditing ? "Update Property" : "Add Property"}
+                </>
+              )}
             </Button>
           </div>
         </form>

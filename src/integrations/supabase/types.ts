@@ -1256,6 +1256,20 @@ export type Database = {
           validation_rules: Json | null
         }[]
       }
+      get_product_services: {
+        Args: { p_product_id: string }
+        Returns: {
+          config: Json
+          created_at: string
+          description: string | null
+          enabled: boolean
+          id: string
+          name: string
+          product_id: string
+          service_type: string
+          updated_at: string
+        }[]
+      }
       get_user_organization_role_bypass_rls: {
         Args: { p_org_id: string; p_user_id: string }
         Returns: string
