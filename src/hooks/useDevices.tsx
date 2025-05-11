@@ -1,7 +1,6 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { fetchDevices, fetchDevice } from '@/services/deviceService';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Device } from '@/types/device';
 
 /**
@@ -16,6 +15,7 @@ function isValidUUID(uuid: string): boolean {
 
 export const useDevices = (organizationId?: string) => {
   console.log('useDevices hook called with organization ID:', organizationId);
+  const { toast } = useToast();
   
   const {
     data: devices = [],
@@ -65,6 +65,8 @@ export const useDevices = (organizationId?: string) => {
 };
 
 export const useDevice = (deviceId?: string) => {
+  const { toast } = useToast();
+  
   const {
     data: device,
     isLoading,

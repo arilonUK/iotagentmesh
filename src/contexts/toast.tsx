@@ -1,7 +1,8 @@
 
-import React, { createContext, useState, useCallback } from 'react';
+import React, { createContext, useState, useCallback, useEffect } from 'react';
 import { Toaster } from '@/components/ui/toaster';
 import { v4 as uuidv4 } from 'uuid';
+import { toastEventEmitter, ToastEvent } from '@/services/toastService';
 
 export interface ToastProps {
   id?: string;
@@ -38,6 +39,22 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     },
     [dismissToast]
   );
+  
+  // Listen for toast events from services
+  useEffect(() => {
+    const unsubscribe = toastEventEmitter.addListener((event: ToastEvent) => {
+      toast({
+        title: event.title,
+        description: event.description,
+        variant: event.variant,
+        action: event.action
+      });
+    });
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [toast]);
 
   return (
     <ToastContext.Provider value={{ toast, toasts, dismissToast }}>

@@ -1,8 +1,7 @@
-
 import React, { createContext, useContext, useCallback } from 'react';
 import { useAuth } from './auth';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from './toast';
+import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface NotificationContextType {
@@ -30,6 +29,7 @@ export const useNotification = () => useContext(NotificationContext);
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { session } = useAuth();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   
   const markAsReadMutation = useMutation({
     mutationFn: async (notificationId: string) => {

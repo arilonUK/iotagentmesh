@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { useDeviceManager } from '@/hooks/useDeviceManager';
 
 const deviceSchema = z.object({
@@ -28,6 +28,7 @@ interface AddDeviceFormProps {
 export function AddDeviceForm({ onSuccess, onCancel }: AddDeviceFormProps) {
   const { organization } = useOrganization();
   const { createDevice } = useDeviceManager(organization?.id);
+  const { toast } = useToast();
   
   const form = useForm<DeviceFormValues>({
     resolver: zodResolver(deviceSchema),

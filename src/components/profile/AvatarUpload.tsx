@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { supabase } from '@/integrations/supabase/client';
 import { Camera, UserRound, X } from 'lucide-react';
-import { useToast } from '@/contexts/toast';
+import { useToast } from '@/hooks/use-toast';
 
 interface AvatarUploadProps {
   initialAvatarUrl: string | null;

@@ -1,15 +1,15 @@
-
 import { useState } from 'react';
 import { Device } from '@/types/device';
 import { createDevice, updateDevice, deleteDevice } from '@/services/deviceService';
 import { useDevices } from '@/hooks/useDevices';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 export const useDeviceManager = (organizationId?: string) => {
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { devices, isLoading, refetch } = useDevices(organizationId);
+  const { toast } = useToast();
 
   const handleCreateDevice = async (deviceData: Omit<Device, 'id' | 'last_active_at'>) => {
     if (!organizationId) {

@@ -1,6 +1,5 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 export interface Notification {
   id: string;
@@ -113,21 +112,11 @@ export const notificationService = {
       
       if (error) throw error;
       
-      toast({
-        title: "Settings Updated",
-        description: "Your notification preferences have been updated.",
-      });
+      console.log("Notification preferences updated");
       
       return true;
     } catch (error) {
       console.error('Error updating notification preferences:', error);
-      
-      toast({
-        title: "Update Failed",
-        description: "Failed to update notification preferences.",
-        variant: "destructive",
-      });
-      
       return false;
     }
   }

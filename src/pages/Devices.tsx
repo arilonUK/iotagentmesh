@@ -4,7 +4,7 @@ import { AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useDevices } from '@/hooks/useDevices';
 import { useOrganization } from '@/contexts/organization';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import DeviceFilters from '@/components/devices/DeviceFilters';
 import DeviceDebugInfo from '@/components/devices/DeviceDebugInfo';
 import DeviceGrid from '@/components/devices/DeviceGrid';
@@ -15,6 +15,7 @@ const Devices = () => {
   const [filterType, setFilterType] = useState('all');
   const { organization } = useOrganization();
   const { devices, isLoading, error, refetch } = useDevices(organization?.id);
+  const { toast } = useToast();
 
   useEffect(() => {
     console.log('Devices page - Organization context:', organization);

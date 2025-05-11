@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { PlusCircle } from 'lucide-react';
 import { ServiceForm, ServiceList } from './services';
-import { useToast } from '@/contexts/toast';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProductServicesTabProps {
   productId: string;

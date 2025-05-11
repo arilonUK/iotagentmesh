@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Device } from '@/types/device';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { databaseServices } from '@/services/databaseService';
 
 /**
@@ -46,11 +46,6 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(organizationId)) {
       console.error('fetchDevices called with invalid UUID format:', organizationId);
-      toast({
-        title: "Failed to load devices",
-        description: "Invalid organization ID format",
-        variant: "destructive",
-      });
       return [];
     }
     
@@ -59,11 +54,6 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
     
     if (error) {
       console.error('Error fetching devices:', error);
-      toast({
-        title: "Failed to load devices",
-        description: `Database error: ${error.message}`,
-        variant: "destructive",
-      });
       return [];
     }
     
@@ -77,11 +67,6 @@ export const fetchDevices = async (organizationId: string): Promise<Device[]> =>
     return data as Device[];
   } catch (error) {
     console.error('Unexpected error in fetchDevices:', error);
-    toast({
-      title: "Failed to load devices",
-      description: "There was an error with the database query. Please try again later.",
-      variant: "destructive",
-    });
     return [];
   }
 };
@@ -94,11 +79,6 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
     
     if (!validDeviceId) {
       console.error('Invalid device ID provided:', deviceId);
-      toast({
-        title: "Error loading device",
-        description: "Invalid device ID format",
-        variant: "destructive",
-      });
       return null;
     }
 
@@ -110,11 +90,6 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
     if (error) {
       console.error('Error fetching device:', error);
       console.error('Device ID:', validDeviceId);
-      toast({
-        title: "Error loading device",
-        description: `Database error: ${error.message}`,
-        variant: "destructive",
-      });
       return null;
     }
     
@@ -132,11 +107,6 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
 
     if (accessError || !hasAccess) {
       console.error('Access denied to device:', validDeviceId);
-      toast({
-        title: "Access Denied",
-        description: "You don't have permission to view this device",
-        variant: "destructive",
-      });
       return null;
     }
     
@@ -144,11 +114,6 @@ export const fetchDevice = async (deviceId: string): Promise<Device | null> => {
     return device as Device;
   } catch (error) {
     console.error('Error fetching device details:', error);
-    toast({
-      title: "Error loading device",
-      description: "We couldn't load the device details. Please try again later.",
-      variant: "destructive",
-    });
     return null;
   }
 };
@@ -234,11 +199,6 @@ export const createDevice = async (deviceData: Omit<Device, 'id' | 'last_active_
     return newDevice as Device;
   } catch (error) {
     console.error('Error creating device:', error);
-    toast({
-      title: "Failed to create device",
-      description: "There was an error creating the device. Please try again.",
-      variant: "destructive",
-    });
     return null;
   }
 };
@@ -323,11 +283,6 @@ export const updateDevice = async (id: string, deviceData: Partial<Device>): Pro
     return updatedDevice as Device;
   } catch (error) {
     console.error('Error updating device:', error);
-    toast({
-      title: "Failed to update device",
-      description: "There was an error updating the device. Please try again.",
-      variant: "destructive",
-    });
     return null;
   }
 };
@@ -386,11 +341,6 @@ export const deleteDevice = async (id: string): Promise<boolean> => {
     return true;
   } catch (error) {
     console.error('Error deleting device:', error);
-    toast({
-      title: "Failed to delete device",
-      description: "There was an error deleting the device. Please try again.",
-      variant: "destructive",
-    });
     return false;
   }
 };

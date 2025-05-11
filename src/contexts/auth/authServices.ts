@@ -1,6 +1,5 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/contexts/toast';
+import { useToast } from '@/hooks/use-toast';
 
 export const authServices = {
   signUp: async (email: string, password: string, userData?: { full_name?: string; username?: string; organization_name?: string }) => {
@@ -34,19 +33,12 @@ export const authServices = {
       });
 
       if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive"
-        });
+        // We need to handle this outside the context
         throw error;
       }
 
       if (data) {
-        toast({
-          title: "Success",
-          description: "Sign up successful! Please verify your email.",
-        });
+        // Will be handled by the component
         return;
       }
     } catch (error: any) {

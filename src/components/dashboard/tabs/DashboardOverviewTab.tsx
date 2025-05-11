@@ -4,7 +4,7 @@ import { DashboardGrid } from '../DashboardLayout';
 import { DeviceOverviewCard } from '../DeviceOverviewCard';
 import { LatestReadingsCard } from '../LatestReadingsCard';
 import { DeviceStatsCard } from '../DeviceStatsCard';
-import { useToast } from '@/contexts/toast';
+import { useToast } from '@/hooks/use-toast';
 import { Device } from '@/types/device';
 
 interface DashboardOverviewTabProps {

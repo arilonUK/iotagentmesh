@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { productServices } from "@/services/products";
-import { useToast } from "@/contexts/toast";
+import { useToast } from "@/hooks/use-toast";
 
 export type DeleteProductDialogProps = {
   productId: string;
