@@ -8,6 +8,7 @@ import './index.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { ToastProvider } from '@/contexts/toast';
 import { NotificationProvider } from '@/contexts/notification';
+import { AuthProvider } from '@/contexts/auth';
 
 // Create a Query Client
 const queryClient = new QueryClient({
@@ -22,15 +23,17 @@ const queryClient = new QueryClient({
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider defaultTheme="light" storageKey="ui-theme">
-          <ToastProvider>
-            <NotificationProvider>
-              <App />
-            </NotificationProvider>
-          </ToastProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
+      <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider defaultTheme="light" storageKey="ui-theme">
+            <ToastProvider>
+              <NotificationProvider>
+                <App />
+              </NotificationProvider>
+            </ToastProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>,
 );
