@@ -1,5 +1,6 @@
+
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toastService } from '@/services/toastService';
 
 export const authServices = {
   signUp: async (email: string, password: string, userData?: { full_name?: string; username?: string; organization_name?: string }) => {
@@ -57,20 +58,13 @@ export const authServices = {
 
       if (error) {
         console.error('Sign in error:', error.message);
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive"
-        });
+        toastService.error("Error", error.message);
         throw error;
       }
 
       if (data.session) {
         console.log('Sign in successful, redirecting to dashboard');
-        toast({
-          title: "Success",
-          description: "Signed in successfully!",
-        });
+        toastService.success("Success", "Signed in successfully!");
         // Redirect happens in the component based on session state
       }
     } catch (error: any) {
@@ -96,18 +90,12 @@ export const authServices = {
       
       if (error) {
         console.error('Error during sign out:', error);
-        toast({
-          title: 'Error signing out',
-          description: error.message,
-        });
+        toastService.error('Error signing out', error.message);
         throw error;
       }
       
       console.log('User signed out successfully');
-      toast({
-        title: 'Signed out',
-        description: 'You have been successfully signed out'
-      });
+      toastService.success('Signed out', 'You have been successfully signed out');
       
       // Make sure we redirect to the auth page after signing out
       window.location.href = "/auth";
