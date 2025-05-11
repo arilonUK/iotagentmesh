@@ -31,15 +31,15 @@ export type ProductProperty = {
 };
 
 export type PropertyValidationRules = {
-  min?: number;
-  max?: number;
-  pattern?: string;
-  options?: string[];
-  min_length?: number;
-  max_length?: number;
-  precision?: number;
-  format?: string;
-  allowed_values?: any[];
+  min?: number | null;
+  max?: number | null;
+  pattern?: string | null;
+  options?: string[] | null;
+  min_length?: number | null;
+  max_length?: number | null;
+  precision?: number | null;
+  format?: string | null;
+  allowed_values?: any[] | null;
 };
 
 export type PropertyFormValues = Omit<ProductProperty, 'id' | 'product_id' | 'created_at' | 'updated_at'>;

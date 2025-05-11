@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dialog';
 import { ProductProperty, PropertyFormValues } from '@/types/product';
 import { PropertyForm } from '../property-form';
+import { PropertyFormValues as FormValues } from '../property-form/types';
 
 interface PropertyFormDialogProps {
   title: string;
@@ -26,6 +27,11 @@ export function PropertyFormDialog({
 }: PropertyFormDialogProps) {
   console.log("PropertyFormDialog defaultValues:", defaultValues);
   
+  // Convert between PropertyFormValues and FormValues if needed
+  const handleSubmit = async (data: FormValues): Promise<void> => {
+    return onSubmit(data as unknown as PropertyFormValues);
+  };
+  
   return (
     <DialogContent className="sm:max-w-[600px]">
       <DialogHeader>
@@ -33,7 +39,7 @@ export function PropertyFormDialog({
         <DialogDescription>{description}</DialogDescription>
       </DialogHeader>
       <PropertyForm
-        onSubmit={onSubmit}
+        onSubmit={handleSubmit}
         defaultValues={defaultValues}
         isLoading={isLoading}
         isEditing={!!defaultValues}

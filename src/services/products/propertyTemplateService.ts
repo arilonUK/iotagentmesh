@@ -35,29 +35,25 @@ export async function fetchPropertyTemplates(organizationId: string): Promise<Pr
     }
     
     // Call the RPC function to get templates (bypassing RLS if needed)
-    const { data, error } = await (supabase.rpc as any)(
-      'get_property_templates', 
-      { p_organization_id: organizationId }
-    );
+    const { data, error } = await supabase
+      .rpc(functionName, { p_organization_id: organizationId });
     
     if (error) {
       console.error('Error fetching property templates using RPC:', error);
       
-      // Fall back to direct query
+      // Fall back to direct query for property templates
       console.log('Falling back to direct query for property templates');
       const { data: fallbackData, error: fallbackError } = await supabase
         .from('property_templates')
-        .select('*')
-        .eq('organization_id', organizationId)
-        .order('name');
+        .select();
       
       if (fallbackError) {
         console.error(`Error in fallback templates fetch:`, fallbackError);
         throw fallbackError;
       }
       
-      console.log(`Successfully fetched ${fallbackData.length} templates using fallback`);
-      return fallbackData as PropertyTemplate[];
+      console.log(`Successfully fetched ${fallbackData?.length || 0} templates using fallback`);
+      return fallbackData as PropertyTemplate[] || [];
     }
 
     console.log(`Successfully fetched ${data?.length || 0} templates using RPC`);
@@ -167,7 +163,7 @@ export async function applyTemplateToProduct(
     // First get the template
     const { data: template, error: templateError } = await supabase
       .from('property_templates')
-      .select('*')
+      .select()
       .eq('id', templateId)
       .single();
     
