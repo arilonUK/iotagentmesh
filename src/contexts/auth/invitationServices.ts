@@ -1,7 +1,7 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
+import { createAuditLog } from '@/services/auditLogService';
 
 export type InvitationType = {
   id: string;
@@ -20,6 +20,10 @@ export type CreateInvitationParams = {
 };
 
 export const invitationServices = {
+  signUp: async (email: string, password: string, userData?: { full_name?: string; username?: string; organization_name?: string }) => {
+    // ... keep existing code (unrelated to invitations)
+  },
+
   createInvitation: async ({ email, role, organizationId }: CreateInvitationParams) => {
     try {
       const token = uuidv4();
@@ -40,14 +44,24 @@ export const invitationServices = {
         .single();
 
       if (error) {
-        toast('Error creating invitation', { 
-          style: { backgroundColor: 'red', color: 'white' } 
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive"
         });
         throw error;
       }
 
-      toast('Invitation created successfully', {
-        style: { backgroundColor: 'green', color: 'white' }
+      // Create audit log entry
+      await createAuditLog(
+        organizationId, 
+        'invitation_sent', 
+        { email, role }
+      );
+
+      toast({
+        title: "Success",
+        description: "Invitation created successfully",
       });
       return data;
     } catch (error: any) {
@@ -78,20 +92,39 @@ export const invitationServices = {
 
   deleteInvitation: async (invitationId: string) => {
     try {
+      // Get invitation details for the audit log
+      const { data: invitation } = await supabase
+        .from('invitations')
+        .select('*')
+        .eq('id', invitationId)
+        .single();
+        
       const { error } = await supabase
         .from('invitations')
         .delete()
         .eq('id', invitationId);
 
       if (error) {
-        toast('Error deleting invitation', { 
-          style: { backgroundColor: 'red', color: 'white' } 
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive"
         });
         throw error;
       }
 
-      toast('Invitation deleted successfully', {
-        style: { backgroundColor: 'green', color: 'white' }
+      if (invitation) {
+        // Create audit log entry
+        await createAuditLog(
+          invitation.organization_id, 
+          'invitation_deleted', 
+          { email: invitation.email, role: invitation.role }
+        );
+      }
+
+      toast({
+        title: "Success",
+        description: "Invitation deleted successfully",
       });
     } catch (error: any) {
       console.error('Error deleting invitation:', error);
@@ -132,22 +165,26 @@ export const invitationServices = {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast('You must be logged in to accept an invitation', {
-          style: { backgroundColor: 'red', color: 'white' }
+        toast({
+          title: 'Error',
+          description: 'You must be logged in to accept an invitation',
+          variant: 'destructive'
         });
         return false;
       }
 
       // Use a raw query instead of rpc to work around type issues
       const { data, error } = await supabase.from('invitations')
-        .select('organization_id, role')
+        .select('organization_id, role, email')
         .eq('token', token)
         .gt('expires_at', new Date().toISOString())
         .single();
 
       if (error || !data) {
-        toast('Invalid or expired invitation', {
-          style: { backgroundColor: 'red', color: 'white' }
+        toast({
+          title: 'Error',
+          description: 'Invalid or expired invitation',
+          variant: 'destructive'
         });
         return false;
       }
@@ -161,19 +198,29 @@ export const invitationServices = {
         });
         
       if (memberError) {
-        toast('Error accepting invitation', { 
-          style: { backgroundColor: 'red', color: 'white' } 
+        toast({
+          title: 'Error',
+          description: 'Error accepting invitation: ' + memberError.message,
+          variant: 'destructive'
         });
         throw memberError;
       }
+      
+      // Create audit log entry
+      await createAuditLog(
+        data.organization_id, 
+        'invitation_accepted', 
+        { user_id: user.id, role: data.role, email: data.email }
+      );
       
       // Delete the invitation after it's been accepted
       await supabase.from('invitations')
         .delete()
         .eq('token', token);
       
-      toast('Invitation accepted successfully', {
-        style: { backgroundColor: 'green', color: 'white' }
+      toast({
+        title: 'Success',
+        description: 'Invitation accepted successfully'
       });
       return true;
     } catch (error: any) {

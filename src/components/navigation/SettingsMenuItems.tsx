@@ -8,6 +8,8 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
+import { hasPermission, PERMISSIONS } from "@/lib/permissions";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface SettingsMenuItemsProps {
   userRole: string | null;
@@ -16,11 +18,9 @@ interface SettingsMenuItemsProps {
 export function SettingsMenuItems({ userRole }: SettingsMenuItemsProps) {
   const { pathname } = useLocation();
   
-  console.log("Current user role:", userRole); // Debug log to see the actual role
-  
-  // Check if user has admin or owner permissions for team settings
-  // Adjusted to show team settings menu even if userRole is null (for debugging)
-  const canAccessTeamSettings = userRole === 'admin' || userRole === 'owner' || userRole === 'member' || userRole === null;
+  // Check permissions
+  const canManageTeam = hasPermission(userRole, PERMISSIONS.MANAGE_TEAM);
+  const canManageOrganization = hasPermission(userRole, PERMISSIONS.MANAGE_ORGANIZATION);
   
   return (
     <SidebarMenu>
@@ -40,38 +40,66 @@ export function SettingsMenuItems({ userRole }: SettingsMenuItemsProps) {
         </SidebarMenuButton>
       </SidebarMenuItem>
       
-      {/* Temporarily show team menu to all users for debugging */}
       <SidebarMenuItem>
-        <SidebarMenuButton 
-          asChild 
-          isActive={pathname === "/dashboard/team"} 
-          tooltip="Team"
-        >
-          <Link to="/dashboard/team" className={cn(
-            "flex items-center gap-3 w-full",
-            pathname === "/dashboard/team" && "font-medium"
-          )}>
-            <Icons.users className="h-4 w-4" />
-            <span>Team Management</span>
-          </Link>
-        </SidebarMenuButton>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={pathname === "/dashboard/team"} 
+                  tooltip="Team"
+                  disabled={!canManageTeam && userRole !== null}
+                >
+                  <Link to="/dashboard/team" className={cn(
+                    "flex items-center gap-3 w-full",
+                    pathname === "/dashboard/team" && "font-medium",
+                    (!canManageTeam && userRole !== null) && "opacity-50 cursor-not-allowed pointer-events-none"
+                  )}>
+                    <Icons.users className="h-4 w-4" />
+                    <span>Team Management</span>
+                  </Link>
+                </SidebarMenuButton>
+              </div>
+            </TooltipTrigger>
+            {!canManageTeam && userRole !== null && (
+              <TooltipContent>
+                <p>You need admin or owner permissions to manage team</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       </SidebarMenuItem>
 
-      {/* Temporarily show organization menu to all users for debugging */}
       <SidebarMenuItem>
-        <SidebarMenuButton 
-          asChild 
-          isActive={pathname === "/dashboard/organization"} 
-          tooltip="Organization"
-        >
-          <Link to="/dashboard/organization" className={cn(
-            "flex items-center gap-3 w-full",
-            pathname === "/dashboard/organization" && "font-medium"
-          )}>
-            <Icons.building className="h-4 w-4" />
-            <span>Organization Settings</span>
-          </Link>
-        </SidebarMenuButton>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={pathname === "/dashboard/organization"} 
+                  tooltip="Organization"
+                  disabled={!canManageOrganization && userRole !== null}
+                >
+                  <Link to="/dashboard/organization" className={cn(
+                    "flex items-center gap-3 w-full",
+                    pathname === "/dashboard/organization" && "font-medium",
+                    (!canManageOrganization && userRole !== null) && "opacity-50 cursor-not-allowed pointer-events-none"
+                  )}>
+                    <Icons.building className="h-4 w-4" />
+                    <span>Organization Settings</span>
+                  </Link>
+                </SidebarMenuButton>
+              </div>
+            </TooltipTrigger>
+            {!canManageOrganization && userRole !== null && (
+              <TooltipContent>
+                <p>Only organization owners can access organization settings</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       </SidebarMenuItem>
     </SidebarMenu>
   );

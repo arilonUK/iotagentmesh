@@ -1,90 +1,51 @@
-
 import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
-import { OrganizationUser, RoleType } from '@/types/organization';
+import { OrgMemberResponse, OrganizationUser, RoleType } from '@/types/organization';
+import { createAuditLog } from './auditLogService';
 
-/**
- * Fetch all members of an organization
- */
+// Fetch organization members from the database
 export async function fetchOrganizationMembers(organizationId: string): Promise<OrganizationUser[]> {
   try {
-    // First attempt: Use the RPC function that bypasses RLS
-    const { data, error } = await supabase.rpc(
-      'get_organization_members_bypass_rls',
+    console.log('Fetching members for organization:', organizationId);
+    const { data, error } = await supabase.rpc('get_organization_members', 
       { p_org_id: organizationId }
     );
     
     if (error) {
       console.error('Error fetching organization members:', error);
-      // Fall back to alternative method
-      return fetchOrganizationMembersFallback(organizationId);
+      return fetchOrganizationUsersFallback(organizationId);
     }
     
-    // Need to join with profiles since RPC returns only organization_members
     if (data && Array.isArray(data)) {
-      // Get all the user IDs to fetch their profiles
-      const userIds = data.map(member => member.user_id);
-      
-      // Fetch profiles for all users in one go
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, username, full_name')
-        .in('id', userIds);
-      
-      // Map the profiles to their respective members
-      return data.map(member => {
-        const profile = profiles?.find(p => p.id === member.user_id);
-        return {
-          id: member.id,
-          user_id: member.user_id,
-          role: member.role,
-          email: profile?.username,
-          full_name: profile?.full_name,
-          username: profile?.username
-        };
-      });
+      console.log(`Fetched ${data.length} organization members`);
+      // Map the response to OrganizationUser type
+      const mappedUsers: OrganizationUser[] = data.map(member => ({
+        id: member.id,
+        user_id: member.user_id,
+        role: member.role,
+        email: member.email,
+        full_name: member.full_name,
+        username: member.username
+      }));
+      return mappedUsers;
+    } else {
+      console.log('No members found or invalid data format');
+      return [];
     }
-    
-    return [];
   } catch (err) {
-    console.error('Error in fetchOrganizationMembers:', err);
-    return fetchOrganizationMembersFallback(organizationId);
+    const error = err as Error;
+    console.error('Error in fetchOrganizationMembers:', error);
+    return fetchOrganizationUsersFallback(organizationId);
   }
 }
 
-/**
- * Fallback method when the RPC function fails
- */
-async function fetchOrganizationMembersFallback(organizationId: string): Promise<OrganizationUser[]> {
+// Fallback method using separate queries
+export async function fetchOrganizationUsersFallback(organizationId: string): Promise<OrganizationUser[]> {
   try {
     console.log('Using fallback method to fetch organization members');
     
-    // Get members with roles, trying both methods
-    let members = null;
-    
-    // Try the original get_organization_members RPC first
-    try {
-      const { data: rpcMembers, error: rpcError } = await supabase.rpc(
-        'get_organization_members',
-        { p_org_id: organizationId }
-      );
-      
-      if (!rpcError && rpcMembers && rpcMembers.length > 0) {
-        // If successful, map and return
-        return rpcMembers.map(member => ({
-          id: member.id,
-          user_id: member.user_id,
-          role: member.role,
-          email: member.email,
-          full_name: member.full_name,
-          username: member.username
-        }));
-      }
-    } catch (rpcError) {
-      console.error('Error using get_organization_members RPC:', rpcError);
-    }
-    
-    // If RPC failed, try direct query as last resort
+    // First get user IDs with roles from organization_members table
     const { data: rawMembers, error: membersError } = await supabase
       .from('organization_members')
       .select('id, user_id, role')
@@ -92,13 +53,12 @@ async function fetchOrganizationMembersFallback(organizationId: string): Promise
     
     if (membersError) {
       console.error('Fallback error fetching members:', membersError);
-      toast('Error loading team members', { 
-        style: { backgroundColor: 'red', color: 'white' } 
-      });
+      toast.error('Error loading team members');
       return [];
     }
     
     if (!rawMembers || rawMembers.length === 0) {
+      console.log('No members found');
       return [];
     }
     
@@ -114,7 +74,7 @@ async function fetchOrganizationMembersFallback(organizationId: string): Promise
           
           return {
             ...member,
-            email: profile?.username,
+            email: profile?.username, // Username might be email
             full_name: profile?.full_name,
             username: profile?.username
           };
@@ -128,21 +88,21 @@ async function fetchOrganizationMembersFallback(organizationId: string): Promise
     return usersWithProfiles;
   } catch (error) {
     console.error('Error in fallback method:', error);
-    toast('Error loading team members', {
-      style: { backgroundColor: 'red', color: 'white' }
-    });
+    toast.error('Error loading team members');
     return [];
   }
 }
 
-/**
- * Remove a user from an organization
- */
-export async function removeOrganizationMember(
-  organizationId: string, 
-  userId: string
-): Promise<boolean> {
+// Remove a user from an organization
+export async function removeOrganizationMember(organizationId: string, userId: string): Promise<boolean> {
   try {
+    // Get user details for audit log
+    const { data: userData } = await supabase
+      .from('profiles')
+      .select('username, full_name')
+      .eq('id', userId)
+      .single();
+    
     const { error } = await supabase
       .from('organization_members')
       .delete()
@@ -150,10 +110,22 @@ export async function removeOrganizationMember(
       .eq('user_id', userId);
 
     if (error) {
-      console.error('Error removing user:', error);
+      toast.error('Error removing user'); 
       return false;
     }
+    
+    // Create audit log entry
+    await createAuditLog(
+      organizationId, 
+      'member_removed', 
+      { 
+        user_id: userId,
+        username: userData?.username,
+        full_name: userData?.full_name 
+      }
+    );
 
+    toast.success('User removed successfully');
     return true;
   } catch (error) {
     console.error('Error removing user:', error);
@@ -161,17 +133,32 @@ export async function removeOrganizationMember(
   }
 }
 
-/**
- * Update a user's role in an organization
- */
+// Update a user's role
 export async function updateOrganizationMemberRole(
   organizationId: string, 
   userId: string, 
   newRole: string
 ): Promise<boolean> {
   try {
-    // Cast newRole to the correct enum type
-    const validRole = newRole as RoleType;
+    // Get current role before update for audit log
+    const { data: currentMember } = await supabase
+      .from('organization_members')
+      .select('role')
+      .eq('organization_id', organizationId)
+      .eq('user_id', userId)
+      .single();
+    
+    const oldRole = currentMember?.role;
+    
+    // Get user details for audit log
+    const { data: userData } = await supabase
+      .from('profiles')
+      .select('username, full_name')
+      .eq('id', userId)
+      .single();
+    
+    // Cast newRole to the correct enum type to match database constraint
+    const validRole = newRole as Database["public"]["Enums"]["role_type"];
     
     const { error } = await supabase
       .from('organization_members')
@@ -180,10 +167,24 @@ export async function updateOrganizationMemberRole(
       .eq('user_id', userId);
 
     if (error) {
-      console.error('Error updating role:', error);
+      toast.error('Error updating role');
       return false;
     }
 
+    // Create audit log entry
+    await createAuditLog(
+      organizationId, 
+      'role_updated', 
+      { 
+        user_id: userId,
+        username: userData?.username,
+        full_name: userData?.full_name,
+        old_role: oldRole, 
+        new_role: newRole 
+      }
+    );
+
+    toast.success('Role updated successfully');
     return true;
   } catch (error) {
     console.error('Error updating role:', error);

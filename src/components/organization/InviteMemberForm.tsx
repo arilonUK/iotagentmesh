@@ -4,7 +4,8 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/contexts/auth';
-import { invitationServices } from '@/contexts/auth/invitationServices';
+import { invitationService } from '@/services/invitationService';
+import { PERMISSIONS, hasPermission } from '@/lib/permissions';
 
 import {
   Form,
@@ -13,6 +14,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form';
 import {
   Select,
@@ -23,6 +25,9 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
+import { Shield, Mail } from 'lucide-react';
 
 const inviteFormSchema = z.object({
   email: z.string().email('Valid email address required'),
@@ -32,8 +37,11 @@ const inviteFormSchema = z.object({
 type InviteFormValues = z.infer<typeof inviteFormSchema>;
 
 const InviteMemberForm = () => {
-  const { organization } = useAuth();
+  const { organization, userRole } = useAuth();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  
+  // Check if the user has permission to invite members
+  const canInvite = hasPermission(userRole, PERMISSIONS.INVITE_MEMBERS);
 
   const form = useForm<InviteFormValues>({
     resolver: zodResolver(inviteFormSchema),
@@ -44,13 +52,14 @@ const InviteMemberForm = () => {
   });
 
   const onSubmit = async (values: InviteFormValues) => {
-    if (!organization) {
+    if (!organization || !canInvite) {
+      toast.error("You don't have permission to invite members");
       return;
     }
     
     setIsSubmitting(true);
     try {
-      await invitationServices.createInvitation({
+      await invitationService.createInvitation({
         email: values.email,
         role: values.role,
         organizationId: organization.id,
@@ -68,9 +77,25 @@ const InviteMemberForm = () => {
     return null;
   }
 
+  if (!canInvite) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-amber-500" />
+            <span>Permission Required</span>
+          </CardTitle>
+          <CardDescription>
+            You need admin or owner privileges to invite team members.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="email"
@@ -83,6 +108,9 @@ const InviteMemberForm = () => {
                   {...field}
                 />
               </FormControl>
+              <FormDescription>
+                An invitation will be sent to this email address.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -104,12 +132,20 @@ const InviteMemberForm = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="member">Member</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="viewer">Viewer</SelectItem>
-                  <SelectItem value="owner">Owner</SelectItem>
+                  <SelectItem value="viewer">Viewer (Read-only)</SelectItem>
+                  <SelectItem value="member">Member (Standard access)</SelectItem>
+                  <SelectItem value="admin">Admin (Administrative access)</SelectItem>
+                  {userRole === 'owner' && (
+                    <SelectItem value="owner">Owner (Full access)</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
+              <FormDescription>
+                {field.value === 'viewer' && 'Can view resources but not modify them.'}
+                {field.value === 'member' && 'Can create and manage most resources.'}
+                {field.value === 'admin' && 'Can manage team members and all resources.'}
+                {field.value === 'owner' && 'Has full control over the organization.'}
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -117,9 +153,10 @@ const InviteMemberForm = () => {
         
         <Button 
           type="submit" 
-          className="w-full"
+          className="w-full flex items-center gap-2"
           disabled={isSubmitting}
         >
+          <Mail className="h-4 w-4" />
           {isSubmitting ? 'Sending Invitation...' : 'Send Invitation'}
         </Button>
       </form>

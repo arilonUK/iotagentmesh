@@ -6,21 +6,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InviteMemberForm from '@/components/organization/InviteMemberForm';
 import PendingInvitations from '@/components/organization/PendingInvitations';
 import UserManagement from '@/components/organization/UserManagement';
-import { Mail, Users, UserPlus, Building } from 'lucide-react';
+import { Mail, Users, UserPlus, Building, Shield } from 'lucide-react';
+import { hasPermission, PERMISSIONS } from '@/lib/permissions';
 
 const TeamSettings = () => {
   const { organization, userRole } = useAuth();
   
-  // Only show this page for admins and owners
-  if (!organization || (userRole !== 'admin' && userRole !== 'owner')) {
+  // Check if user has permission to view team settings
+  const canViewTeam = hasPermission(userRole, PERMISSIONS.VIEW_DEVICES); // Lowest permission level
+  
+  if (!organization || !canViewTeam) {
     return (
       <div className="container max-w-3xl py-8">
         <Card>
-          <CardHeader>
-            <CardTitle>Team Settings</CardTitle>
-            <CardDescription>
-              You don't have permission to access team settings.
-            </CardDescription>
+          <CardHeader className="flex flex-row items-center gap-2">
+            <Shield className="h-5 w-5 text-amber-500" />
+            <div>
+              <CardTitle>Team Settings</CardTitle>
+              <CardDescription>
+                You don't have permission to access team settings.
+              </CardDescription>
+            </div>
           </CardHeader>
         </Card>
       </div>

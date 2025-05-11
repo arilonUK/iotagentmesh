@@ -10,6 +10,10 @@ import {
 } from '@/components/ui/table';
 import UserTableRow from './UserTableRow';
 import type { OrganizationUser } from '@/types/organization';
+import { useAuth } from '@/contexts/auth';
+import { hasPermission, PERMISSIONS } from '@/lib/permissions';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Shield } from 'lucide-react';
 
 interface UserListProps {
   users: OrganizationUser[];
@@ -26,6 +30,24 @@ const UserList: React.FC<UserListProps> = ({
   onRemoveUser,
   onUpdateRole
 }) => {
+  const { user, userRole } = useAuth();
+  const currentUserId = user?.id || '';
+  
+  // Check permissions
+  const canManageTeam = hasPermission(userRole, PERMISSIONS.MANAGE_TEAM);
+  
+  if (!canManageTeam && users.length > 0) {
+    return (
+      <Alert className="mb-6">
+        <Shield className="h-4 w-4" />
+        <AlertTitle>Permission required</AlertTitle>
+        <AlertDescription>
+          You need admin or owner permissions to manage team members.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
     <Table>
       <TableHeader>
@@ -49,6 +71,8 @@ const UserList: React.FC<UserListProps> = ({
               user={user}
               isCurrentUserOwner={isCurrentUserOwner}
               isActionInProgress={actionInProgress === user.user_id}
+              currentUserId={currentUserId}
+              userRole={userRole}
               onRemoveUser={onRemoveUser}
               onUpdateRole={onUpdateRole}
             />
