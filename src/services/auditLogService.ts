@@ -41,9 +41,8 @@ export const createAuditLog = async (
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return false;
     
-    // Using rpc function to bypass type checking since 'audit_logs' table
-    // might not be included in the generated types yet
-    const { error } = await supabase.rpc('create_audit_log_entry', {
+    // Call the RPC function to create an audit log entry
+    const { data, error } = await supabase.rpc('create_audit_log_entry', {
       p_organization_id: organizationId,
       p_user_id: user.id,
       p_action: action,
@@ -55,7 +54,7 @@ export const createAuditLog = async (
       return false;
     }
     
-    return true;
+    return data === true;
   } catch (error) {
     console.error('Exception in createAuditLog:', error);
     return false;
@@ -86,9 +85,8 @@ export const fetchAuditLogs = async (
       endDate,
     } = options;
     
-    // Using rpc function to bypass type checking since 'audit_logs' table
-    // might not be included in the generated types yet
-    const { data, error, count } = await supabase.rpc('get_audit_logs', {
+    // Call RPC function to get audit logs with filtering
+    const { data, error } = await supabase.rpc('get_audit_logs', {
       p_organization_id: organizationId,
       p_limit: limit,
       p_offset: page * limit,
@@ -103,10 +101,10 @@ export const fetchAuditLogs = async (
       return { logs: [], count: 0 };
     }
     
-    // Since we're using an RPC call, we need to cast the returned data to our AuditLogEntry type
+    // Cast the returned data to our AuditLogEntry type
     return {
-      logs: (data || []) as AuditLogEntry[],
-      count: count || 0,
+      logs: (data as AuditLogEntry[]) || [],
+      count: Array.isArray(data) ? data.length : 0,
     };
   } catch (error) {
     console.error('Exception in fetchAuditLogs:', error);

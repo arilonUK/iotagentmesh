@@ -162,6 +162,39 @@ export type Database = {
           },
         ]
       }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: string | null
+          organization_id: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          organization_id: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          organization_id?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       data_buckets: {
         Row: {
           created_at: string
@@ -982,6 +1015,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_audit_log_entry: {
+        Args: {
+          p_organization_id: string
+          p_user_id: string
+          p_action: string
+          p_details?: Json
+        }
+        Returns: boolean
+      }
       create_notification: {
         Args: {
           p_user_id: string
@@ -1058,6 +1100,27 @@ export type Database = {
       function_exists: {
         Args: { function_name: string }
         Returns: boolean
+      }
+      get_audit_logs: {
+        Args: {
+          p_organization_id: string
+          p_limit?: number
+          p_offset?: number
+          p_action?: string
+          p_user_id?: string
+          p_start_date?: string
+          p_end_date?: string
+        }
+        Returns: {
+          id: string
+          organization_id: string
+          user_id: string
+          action: string
+          details: Json
+          created_at: string
+          ip_address: string
+          user_agent: string
+        }[]
       }
       get_device_by_id_bypass_rls: {
         Args: { p_device_id: string }

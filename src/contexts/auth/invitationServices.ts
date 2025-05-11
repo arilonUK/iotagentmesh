@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -34,11 +35,7 @@ export const invitationServices = {
       });
 
       if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive"
-        });
+        toast.error("Error: " + error.message);
         throw error;
       }
 
@@ -51,11 +48,7 @@ export const invitationServices = {
           .single();
 
         if (orgError) {
-          toast({
-            title: "Error",
-            description: orgError.message,
-            variant: "destructive"
-          });
+          toast.error("Error: " + orgError.message);
           throw orgError;
         }
 
@@ -65,19 +58,12 @@ export const invitationServices = {
           .insert([{ organization_id: organization.id, user_id: data.user?.id, role: 'owner' }]);
 
         if (memberError) {
-          toast({
-            title: "Error",
-            description: memberError.message,
-            variant: "destructive"
-          });
+          toast.error("Error: " + memberError.message);
           throw memberError;
         }
       }
 
-      toast({
-        title: "Success",
-        description: "Account created successfully. Check your email to verify your account.",
-      });
+      toast.success("Account created successfully. Check your email to verify your account.");
     } catch (error: any) {
       console.error('Error signing up:', error);
       throw error;
