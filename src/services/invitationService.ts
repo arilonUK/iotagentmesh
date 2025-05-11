@@ -1,10 +1,17 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { InvitationType, CreateInvitationParams } from '@/contexts/auth/invitationServices';
+import { v4 as uuidv4 } from 'uuid';
 import { createAuditLog } from '@/services/auditLogService';
+import { InvitationType, CreateInvitationParams } from '@/types/invitation';
 
+/**
+ * Services for managing organization invitations
+ */
 export const invitationService = {
+  /**
+   * Create a new invitation for a user to join an organization
+   */
   createInvitation: async ({ email, role, organizationId }: CreateInvitationParams) => {
     try {
       // Generate expiration date (48 hours from now)
@@ -12,7 +19,7 @@ export const invitationService = {
       expiresAt.setHours(expiresAt.getHours() + 48);
       
       // Generate a secure invitation token
-      const token = crypto.randomUUID();
+      const token = uuidv4();
       
       const { data, error } = await supabase
         .from('invitations')
@@ -27,11 +34,7 @@ export const invitationService = {
         .single();
 
       if (error) {
-        if (error.code === '23505') { // Unique violation error code
-          toast.error('This email already has a pending invitation');
-        } else {
-          toast.error(`Error creating invitation: ${error.message}`);
-        }
+        toast.error(error.message);
         throw error;
       }
 
@@ -42,14 +45,17 @@ export const invitationService = {
         { email, role }
       );
 
-      toast.success('Invitation sent successfully');
-      return data;
+      toast.success("Invitation created successfully");
+      return data as InvitationType;
     } catch (error: any) {
       console.error('Error creating invitation:', error);
       throw error;
     }
   },
 
+  /**
+   * Get all pending invitations for an organization
+   */
   getOrganizationInvitations: async (organizationId: string): Promise<InvitationType[]> => {
     try {
       const { data, error } = await supabase
@@ -59,7 +65,7 @@ export const invitationService = {
         .order('created_at', { ascending: false });
 
       if (error) {
-        toast.error(`Error fetching invitations: ${error.message}`);
+        console.error('Error fetching invitations:', error);
         return [];
       }
 
@@ -70,6 +76,9 @@ export const invitationService = {
     }
   },
 
+  /**
+   * Delete an invitation by its ID
+   */
   deleteInvitation: async (invitationId: string) => {
     try {
       // Get invitation details for the audit log
@@ -78,19 +87,19 @@ export const invitationService = {
         .select('*')
         .eq('id', invitationId)
         .single();
-      
+        
       const { error } = await supabase
         .from('invitations')
         .delete()
         .eq('id', invitationId);
 
       if (error) {
-        toast.error(`Error deleting invitation: ${error.message}`);
+        toast.error(error.message);
         throw error;
       }
 
-      // Create audit log entry if we have the invitation data
       if (invitation) {
+        // Create audit log entry
         await createAuditLog(
           invitation.organization_id, 
           'invitation_deleted', 
@@ -98,7 +107,7 @@ export const invitationService = {
         );
       }
 
-      toast.success('Invitation deleted successfully');
+      toast.success("Invitation deleted successfully");
       return true;
     } catch (error: any) {
       console.error('Error deleting invitation:', error);
@@ -106,9 +115,11 @@ export const invitationService = {
     }
   },
 
+  /**
+   * Resend an invitation by refreshing its expiration date and token
+   */
   resendInvitation: async (invitationId: string) => {
     try {
-      // Generate a new token and reset expiration
       const expiresAt = new Date();
       expiresAt.setHours(expiresAt.getHours() + 48);
       
@@ -116,12 +127,12 @@ export const invitationService = {
         .from('invitations')
         .update({ 
           expires_at: expiresAt.toISOString(),
-          token: crypto.randomUUID()
+          token: uuidv4()
         })
         .eq('id', invitationId);
 
       if (error) {
-        toast.error(`Error resending invitation: ${error.message}`);
+        toast.error('Error resending invitation: ' + error.message);
         throw error;
       }
 
