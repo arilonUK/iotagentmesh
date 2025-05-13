@@ -33,17 +33,19 @@ export function PropertyFormDialog({
   };
   
   return (
-    <DialogContent className="sm:max-w-[600px]">
+    <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>{title}</DialogTitle>
         <DialogDescription>{description}</DialogDescription>
       </DialogHeader>
-      <PropertyForm
-        onSubmit={handleSubmit}
-        defaultValues={defaultValues}
-        isLoading={isLoading}
-        isEditing={!!defaultValues}
-      />
+      <div className="py-4">
+        <PropertyForm
+          onSubmit={handleSubmit}
+          defaultValues={defaultValues}
+          isLoading={isLoading}
+          isEditing={!!defaultValues}
+        />
+      </div>
     </DialogContent>
   );
 }

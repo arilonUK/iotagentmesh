@@ -103,11 +103,12 @@ export function PropertyForm({
             <BooleanDefaultField form={form} />
           )}
 
-          <div className="flex justify-end space-x-4">
+          <div className="flex justify-end sticky bottom-0 pt-4 pb-2 bg-white dark:bg-gray-950 border-t mt-6">
             <Button 
               type="submit" 
               disabled={isSubmitting || isLoading}
               className="w-full sm:w-auto"
+              size="lg"
             >
               {isSubmitting || isLoading ? (
                 <>
