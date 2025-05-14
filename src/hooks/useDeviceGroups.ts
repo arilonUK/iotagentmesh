@@ -10,7 +10,7 @@ import {
   removeDeviceFromGroup,
   batchAddDevicesToGroup,
   batchRemoveDevicesFromGroup
-} from '@/services/deviceGroupService';
+} from '@/services/deviceGroups';
 import { DeviceGroupFormData } from '@/types/deviceGroup';
 import { useToast } from '@/hooks/use-toast';
 
