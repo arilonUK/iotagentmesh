@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
@@ -8,14 +9,33 @@ import { useToast } from '@/hooks/use-toast';
 import DeviceFilters from '@/components/devices/DeviceFilters';
 import DeviceDebugInfo from '@/components/devices/DeviceDebugInfo';
 import DeviceGrid from '@/components/devices/DeviceGrid';
+import { DeviceGroupList } from '@/components/devices/groups/DeviceGroupList';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DeviceGroupSelector } from '@/components/devices/groups/DeviceGroupSelector';
+import { useDeviceGroups } from '@/hooks/useDeviceGroups';
+import { Device } from '@/types/device';
 
 const Devices = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterType, setFilterType] = useState('all');
+  const [filterGroup, setFilterGroup] = useState('all');
+  const [activeTab, setActiveTab] = useState('devices');
+  const [selectedDevices, setSelectedDevices] = useState<string[]>([]);
   const { organization } = useOrganization();
   const { devices, isLoading, error, refetch } = useDevices(organization?.id);
+  const { 
+    deviceGroups, 
+    isLoading: isLoadingGroups, 
+    batchAddToGroup,
+    batchRemoveFromGroup
+  } = useDeviceGroups(organization?.id);
   const { toast } = useToast();
+
+  // Reset selections when changing tabs
+  useEffect(() => {
+    setSelectedDevices([]);
+  }, [activeTab]);
 
   useEffect(() => {
     console.log('Devices page - Organization context:', organization);
@@ -48,6 +68,8 @@ const Devices = () => {
       const matchesStatus = filterStatus === 'all' || device.status === filterStatus;
       const matchesType = filterType === 'all' || device.type.toLowerCase() === filterType.toLowerCase();
       
+      // Group filtering will be applied in the component after we have the initial filtered list
+      
       return matchesSearch && matchesStatus && matchesType;
     });
     
@@ -63,6 +85,48 @@ const Devices = () => {
   const handleDeviceAdded = () => {
     console.log('Device added, refreshing list...');
     refetch();
+  };
+
+  const handleSelectDevice = (deviceId: string, isSelected: boolean) => {
+    if (isSelected) {
+      setSelectedDevices(prev => [...prev, deviceId]);
+    } else {
+      setSelectedDevices(prev => prev.filter(id => id !== deviceId));
+    }
+  };
+
+  const handleSelectAllDevices = (devices: Device[], isSelected: boolean) => {
+    if (isSelected) {
+      setSelectedDevices(devices.map(device => device.id));
+    } else {
+      setSelectedDevices([]);
+    }
+  };
+
+  const handleAddToGroup = (groupId: string) => {
+    if (selectedDevices.length === 0) {
+      toast({
+        title: "No devices selected",
+        description: "Please select at least one device to add to a group.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    batchAddToGroup({ deviceIds: selectedDevices, groupId });
+  };
+
+  const handleRemoveFromGroup = (groupId: string) => {
+    if (selectedDevices.length === 0) {
+      toast({
+        title: "No devices selected",
+        description: "Please select at least one device to remove from the group.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    batchRemoveFromGroup({ deviceIds: selectedDevices, groupId });
   };
 
   if (isLoading && devices.length === 0) {
@@ -122,30 +186,91 @@ const Devices = () => {
         <p className="text-muted-foreground">View and manage all your connected devices.</p>
       </div>
 
-      <DeviceFilters
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        filterStatus={filterStatus}
-        setFilterStatus={setFilterStatus}
-        filterType={filterType}
-        setFilterType={setFilterType}
-        onDeviceAdded={handleDeviceAdded}
-      />
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="devices">Devices</TabsTrigger>
+          <TabsTrigger value="groups">Device Groups</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="devices" className="mt-6 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
+            <DeviceFilters
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              filterStatus={filterStatus}
+              setFilterStatus={setFilterStatus}
+              filterType={filterType}
+              setFilterType={setFilterType}
+              onDeviceAdded={handleDeviceAdded}
+            />
+            
+            <div className="flex-1 max-w-xs">
+              <DeviceGroupSelector 
+                onSelect={setFilterGroup}
+                selectedGroupId={filterGroup}
+                placeholder="Filter by group"
+              />
+            </div>
+          </div>
 
-      <DeviceDebugInfo
-        organizationId={organization.id}
-        totalDevices={devices.length}
-        filteredDevices={filteredDevices.length}
-        searchTerm={searchTerm}
-        filterStatus={filterStatus}
-        filterType={filterType}
-      />
+          {selectedDevices.length > 0 && (
+            <div className="bg-muted p-4 rounded-lg flex items-center justify-between">
+              <span className="text-sm font-medium">
+                {selectedDevices.length} device(s) selected
+              </span>
+              <div className="flex items-center gap-2">
+                {filterGroup !== 'all' ? (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handleRemoveFromGroup(filterGroup)}
+                  >
+                    Remove from Group
+                  </Button>
+                ) : (
+                  <DeviceGroupSelector
+                    onSelect={handleAddToGroup}
+                    placeholder="Add to group..."
+                    className="w-44"
+                  />
+                )}
+                <Button 
+                  size="sm" 
+                  variant="ghost"
+                  onClick={() => setSelectedDevices([])}
+                >
+                  Clear Selection
+                </Button>
+              </div>
+            </div>
+          )}
 
-      <DeviceGrid
-        devices={devices}
-        filteredDevices={filteredDevices}
-        onRetry={handleRetry}
-      />
+          <DeviceDebugInfo
+            organizationId={organization.id}
+            totalDevices={devices.length}
+            filteredDevices={filteredDevices.length}
+            searchTerm={searchTerm}
+            filterStatus={filterStatus}
+            filterType={filterType}
+            filterGroup={filterGroup}
+          />
+
+          <DeviceGrid
+            devices={devices}
+            filteredDevices={filteredDevices}
+            onRetry={handleRetry}
+            enableSelection={true}
+            selectedDevices={selectedDevices}
+            onSelectDevice={handleSelectDevice}
+            onSelectAll={handleSelectAllDevices}
+            filterGroup={filterGroup}
+          />
+        </TabsContent>
+        
+        <TabsContent value="groups" className="mt-6">
+          <DeviceGroupList />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

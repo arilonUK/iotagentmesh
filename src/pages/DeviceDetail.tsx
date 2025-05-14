@@ -5,14 +5,23 @@ import { Separator } from "@/components/ui/separator";
 import DeviceAlarms from '@/components/alarms/DeviceAlarms';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { DeviceDashboard } from '@/components/dashboard/DeviceDashboard';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DeviceRealTimeMonitor } from '@/components/devices/DeviceRealTimeMonitor';
+import { DeviceActivityTimeline } from '@/components/devices/DeviceActivityTimeline';
+import { useDeviceReadings } from '@/hooks/useDeviceReadings';
 
 export default function DeviceDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { device, isLoading, error, refetch } = useDevice(id);
+  const [activeTab, setActiveTab] = useState("overview");
+  
+  // Get temperature data for the charts
+  const { data: temperatureData, isLoading: isLoadingTemperature, refetch: refetchTemperature } = 
+    useDeviceReadings(id, 'temperature', { timeframe: 'day' });
   
   // Log for debugging
   useEffect(() => {
@@ -27,6 +36,10 @@ export default function DeviceDetail() {
       console.log('No device found for ID:', id);
     }
   }, [device, error, id, isLoading]);
+
+  const handleRefreshData = () => {
+    refetchTemperature();
+  };
 
   if (isLoading) {
     return (
@@ -92,19 +105,56 @@ export default function DeviceDetail() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold">{device.name}</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">{device.name}</h1>
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/dashboard/devices')}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Devices
+        </Button>
+      </div>
       
-      {/* Device Dashboard */}
-      <DeviceDashboard 
-        device={device}
-        isLoading={isLoading}
-        error={error}
-      />
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="monitoring">Real-Time Monitoring</TabsTrigger>
+          <TabsTrigger value="activity">Activity</TabsTrigger>
+          <TabsTrigger value="alarms">Alarms</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="overview" className="space-y-4 mt-4">
+          {/* Device Dashboard */}
+          <DeviceDashboard 
+            device={device}
+            isLoading={isLoading}
+            error={error}
+          />
+        </TabsContent>
+        
+        <TabsContent value="monitoring" className="space-y-4 mt-4">
+          <DeviceRealTimeMonitor 
+            device={device}
+            onRefresh={handleRefreshData}
+          />
+        </TabsContent>
+        
+        <TabsContent value="activity" className="space-y-4 mt-4">
+          <DeviceActivityTimeline 
+            deviceId={id!}
+            onRefresh={() => refetch()}
+            isLoading={isLoading}
+          />
+        </TabsContent>
+        
+        <TabsContent value="alarms" className="space-y-4 mt-4">
+          {/* Device Alarms */}
+          <DeviceAlarms deviceId={id!} />
+        </TabsContent>
+      </Tabs>
       
       <Separator className="my-6" />
-      
-      {/* Device Alarms */}
-      <DeviceAlarms deviceId={id!} />
     </div>
   );
 };
