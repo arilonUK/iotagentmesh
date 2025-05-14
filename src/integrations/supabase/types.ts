@@ -258,6 +258,69 @@ export type Database = {
           },
         ]
       }
+      device_group_memberships: {
+        Row: {
+          added_at: string
+          device_id: string
+          group_id: string
+          id: string
+        }
+        Insert: {
+          added_at?: string
+          device_id: string
+          group_id: string
+          id?: string
+        }
+        Update: {
+          added_at?: string
+          device_id?: string
+          group_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "device_group_memberships_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "device_group_memberships_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "device_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      device_groups: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       device_readings: {
         Row: {
           device_id: string

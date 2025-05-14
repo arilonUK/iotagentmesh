@@ -10,7 +10,7 @@ export const fetchDeviceGroups = async (organizationId: string): Promise<DeviceG
       .from('device_groups')
       .select(`
         *,
-        device_group_memberships:device_group_memberships(count)
+        device_count:device_group_memberships(count)
       `)
       .eq('organization_id', organizationId);
     
@@ -22,10 +22,10 @@ export const fetchDeviceGroups = async (organizationId: string): Promise<DeviceG
     // Process the results to get the device count for each group
     const groupsWithCount = data.map(group => ({
       ...group,
-      device_count: group.device_group_memberships[0].count
+      device_count: group.device_count?.[0]?.count || 0
     }));
     
-    return groupsWithCount;
+    return groupsWithCount as DeviceGroup[];
   } catch (error) {
     console.error('Unexpected error in fetchDeviceGroups:', error);
     return [];
@@ -38,8 +38,8 @@ export const fetchDeviceGroup = async (groupId: string): Promise<DeviceGroup | n
       .from('device_groups')
       .select(`
         *,
-        device_group_memberships:device_group_memberships(
-          devices:devices(id, name, type, status)
+        devices:device_group_memberships(
+          device:devices(id, name, type, status)
         )
       `)
       .eq('id', groupId)
@@ -50,7 +50,7 @@ export const fetchDeviceGroup = async (groupId: string): Promise<DeviceGroup | n
       return null;
     }
     
-    return data;
+    return data as unknown as DeviceGroup;
   } catch (error) {
     console.error('Error in fetchDeviceGroup:', error);
     return null;
@@ -76,7 +76,7 @@ export const createDeviceGroup = async (
       return null;
     }
     
-    return data;
+    return data as DeviceGroup;
   } catch (error) {
     console.error('Error in createDeviceGroup:', error);
     return null;
@@ -100,7 +100,7 @@ export const updateDeviceGroup = async (
       return null;
     }
     
-    return data;
+    return data as DeviceGroup;
   } catch (error) {
     console.error('Error in updateDeviceGroup:', error);
     return null;
@@ -181,7 +181,8 @@ export const getDeviceGroups = async (deviceId: string): Promise<DeviceGroup[]> 
       return [];
     }
     
-    return data.map(item => item.group);
+    // Extract the groups from the data
+    return data.map(item => item.group) as unknown as DeviceGroup[];
   } catch (error) {
     console.error('Error in getDeviceGroups:', error);
     return [];
