@@ -1,4 +1,6 @@
 
+// Update the charts index file to add our new chart components
+
 export * from './chart-utils';
 export * from './line-chart';
 export * from './bar-chart';

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export type ChartType = 'line' | 'bar' | 'area';
+export type ChartType = 'line' | 'bar' | 'area' | 'scatter';
 
 interface ChartTypeSelectorProps {
   value: ChartType;
@@ -19,6 +19,7 @@ export const ChartTypeSelector = ({ value, onValueChange }: ChartTypeSelectorPro
         <SelectItem value="line">Line Chart</SelectItem>
         <SelectItem value="bar">Bar Chart</SelectItem>
         <SelectItem value="area">Area Chart</SelectItem>
+        <SelectItem value="scatter">Scatter Chart</SelectItem>
       </SelectContent>
     </Select>
   );

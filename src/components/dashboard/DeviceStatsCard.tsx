@@ -4,6 +4,7 @@ import { DashboardCard } from './DashboardCard';
 import { ChartDataPoint } from '@/components/ui/charts/chart-utils';
 import { ChartTypeSelector, ChartType } from './ChartTypeSelector';
 import { ChartRenderer } from './ChartRenderer';
+import { DataExportMenu } from '../exports/DataExportMenu';
 
 interface DeviceStatsCardProps {
   deviceId: string;
@@ -35,10 +36,17 @@ export const DeviceStatsCard = ({
       loading={loading}
       error={error}
       headerAction={
-        <ChartTypeSelector 
-          value={chartType} 
-          onValueChange={setChartType} 
-        />
+        <div className="flex items-center gap-2">
+          <ChartTypeSelector 
+            value={chartType} 
+            onValueChange={setChartType} 
+          />
+          <DataExportMenu
+            data={data}
+            fileName={`${title.toLowerCase().replace(/\s+/g, '-')}`}
+            triggerClassName="h-9"
+          />
+        </div>
       }
     >
       <div className="h-[300px] w-full overflow-hidden">

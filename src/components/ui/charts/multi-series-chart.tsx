@@ -2,69 +2,59 @@
 import React from 'react';
 import * as RechartsPrimitive from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@/components/ui/chart';
-import { BaseChartProps, defaultColors, getDefaultValueFormatter, chartClasses } from './chart-utils';
+import { defaultColors, chartClasses } from './chart-utils';
 
-type SeriesType = 'bar' | 'line' | 'area';
-
-export interface SeriesConfig {
+interface ChartSeries {
   dataKey: string;
-  type: SeriesType;
+  type: 'line' | 'bar' | 'area';
   color?: string;
   yAxisId?: 'left' | 'right';
-  strokeWidth?: number;
+  strokeDasharray?: string;
   fillOpacity?: number;
-  barSize?: number;
 }
 
-export interface MultiSeriesChartProps extends Omit<BaseChartProps, 'categories'> {
-  series: SeriesConfig[];
+export interface MultiSeriesChartProps {
+  data: Array<Record<string, any>>;
+  index: string;
+  series: ChartSeries[];
+  height?: number | string;
+  className?: string;
   dualYAxis?: boolean;
-  rightAxisValueFormatter?: (value: number) => string;
   leftAxisValueFormatter?: (value: number) => string;
-  syncId?: string;
+  rightAxisValueFormatter?: (value: number) => string;
+  showLegend?: boolean;
+  showGrid?: boolean;
+  showTooltip?: boolean;
 }
 
 export function MultiSeriesChart({
   data,
   index,
   series,
-  colors = defaultColors,
   height = 300,
-  valueFormatter = getDefaultValueFormatter,
-  leftAxisValueFormatter = valueFormatter,
-  rightAxisValueFormatter = valueFormatter,
   className,
+  dualYAxis = false,
+  leftAxisValueFormatter = (value) => `${value}`,
+  rightAxisValueFormatter = (value) => `${value}`,
   showLegend = true,
   showGrid = true,
   showTooltip = true,
-  showXAxis = true,
-  showYAxis = true,
-  dualYAxis = false,
-  syncId,
 }: MultiSeriesChartProps) {
-  // Generate a unique config ID for each series to avoid styling conflicts
-  const chartConfig = series.reduce((acc, s, index) => {
+  // Generate a config for chart colors
+  const chartConfig = series.reduce((acc, s, i) => {
     acc[s.dataKey] = { 
-      color: s.color || colors[index % colors.length]
+      color: s.color || defaultColors[i % defaultColors.length]
     };
     return acc;
   }, {} as Record<string, { color: string }>);
 
-  // Assign default yAxisId if not provided
-  const seriesWithAxis = series.map(s => ({
-    ...s,
-    yAxisId: s.yAxisId || (dualYAxis ? 'left' : undefined),
-    color: s.color || colors[series.indexOf(s) % colors.length]
-  }));
-
   return (
-    <div className={chartClasses.base + ' ' + (className || '')} style={{ height }}>
-      <ChartContainer className="h-full" config={chartConfig} data-testid="multi-series-chart">
-        <RechartsPrimitive.ResponsiveContainer width="100%" height="100%">
+    <div className={chartClasses.base + ' ' + (className || '')} style={{ height, width: '100%' }}>
+      <ChartContainer className="h-full w-full" config={chartConfig} data-testid="multi-series-chart">
+        <RechartsPrimitive.ResponsiveContainer width="99%" height="99%">
           <RechartsPrimitive.ComposedChart
             data={data}
-            margin={{ top: 16, right: dualYAxis ? 24 : 16, bottom: 16, left: 16 }}
-            syncId={syncId}
+            margin={{ top: 5, right: 5, bottom: 20, left: 5 }}
           >
             {showGrid && (
               <RechartsPrimitive.CartesianGrid 
@@ -75,32 +65,28 @@ export function MultiSeriesChart({
               />
             )}
             
-            {showXAxis && (
-              <RechartsPrimitive.XAxis
-                dataKey={index}
-                tickLine={false}
-                axisLine={false}
-                padding={{ left: 16, right: 16 }}
-                stroke="var(--muted-foreground)"
-                fontSize={12}
-                tickFormatter={(value) => String(value)}
-                className={chartClasses.axisLabel}
-              />
-            )}
+            <RechartsPrimitive.XAxis
+              dataKey={index}
+              tickLine={false}
+              axisLine={false}
+              padding={{ left: 5, right: 5 }}
+              stroke="var(--muted-foreground)"
+              fontSize={12}
+              tickFormatter={(value) => String(value)}
+              className={chartClasses.axisLabel}
+            />
             
-            {showYAxis && (
-              <RechartsPrimitive.YAxis
-                yAxisId="left"
-                tickLine={false}
-                axisLine={false}
-                stroke="var(--muted-foreground)"
-                fontSize={12}
-                tickFormatter={leftAxisValueFormatter}
-                className={chartClasses.axisLabel}
-              />
-            )}
+            <RechartsPrimitive.YAxis
+              yAxisId="left"
+              tickLine={false}
+              axisLine={false}
+              stroke="var(--muted-foreground)"
+              fontSize={12}
+              tickFormatter={leftAxisValueFormatter}
+              className={chartClasses.axisLabel}
+            />
             
-            {showYAxis && dualYAxis && (
+            {dualYAxis && (
               <RechartsPrimitive.YAxis
                 yAxisId="right"
                 orientation="right"
@@ -119,83 +105,71 @@ export function MultiSeriesChart({
                   if (!active || !payload?.length) {
                     return null;
                   }
+                  
                   return (
-                    <div className={chartClasses.tooltip}>
-                      <p className="text-sm font-medium mb-1">
-                        {String(payload[0]?.payload[index] || '')}
-                      </p>
-                      {payload.map((entry, idx) => {
-                        const seriesConfig = seriesWithAxis.find(s => s.dataKey === entry.dataKey);
-                        const formatter = seriesConfig?.yAxisId === 'right' 
-                          ? rightAxisValueFormatter 
-                          : leftAxisValueFormatter;
+                    <ChartTooltipContent
+                      className={chartClasses.tooltip}
+                      formatter={(value, name, item) => {
+                        const seriesItem = series.find(s => s.dataKey === item.dataKey);
                         
-                        return (
-                          <div 
-                            key={`item-${idx}`} 
-                            className="flex items-center justify-between text-sm"
-                          >
-                            <span className="flex items-center">
-                              <span 
-                                className="inline-block w-2 h-2 mr-1 rounded-full" 
-                                style={{ backgroundColor: entry.color }} 
-                              />
-                              <span className="mr-2">{entry.name}:</span>
-                            </span>
-                            <span className="font-medium">
-                              {formatter(entry.value as number)}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
+                        if (seriesItem?.yAxisId === "right") {
+                          return [rightAxisValueFormatter(value as number)];
+                        }
+                        return [leftAxisValueFormatter(value as number)];
+                      }}
+                    />
                   );
                 }}
               />
             )}
             
-            {seriesWithAxis.map((s) => {
+            {series.map((s, i) => {
+              const color = s.color || defaultColors[i % defaultColors.length];
+              const yAxisId = s.yAxisId || "left";
+              
               if (s.type === 'line') {
                 return (
                   <RechartsPrimitive.Line
                     key={s.dataKey}
-                    type="monotone"
                     dataKey={s.dataKey}
-                    yAxisId={s.yAxisId}
-                    stroke={s.color}
-                    strokeWidth={s.strokeWidth || 2}
-                    dot={{ r: 4, strokeWidth: s.strokeWidth || 2, fill: "#fff" }}
-                    activeDot={{ r: 6, strokeWidth: s.strokeWidth || 2, fill: "#fff" }}
+                    stroke={color}
+                    strokeWidth={2}
+                    yAxisId={yAxisId}
+                    dot={{ r: 3, strokeWidth: 2, fill: "#fff" }}
+                    activeDot={{ r: 5, strokeWidth: 2, fill: "#fff" }}
+                    strokeDasharray={s.strokeDasharray}
+                    type="monotone"
                   />
                 );
-              } else if (s.type === 'area') {
-                return (
-                  <RechartsPrimitive.Area
-                    key={s.dataKey}
-                    type="monotone"
-                    dataKey={s.dataKey}
-                    yAxisId={s.yAxisId}
-                    stroke={s.color}
-                    fill={s.color}
-                    strokeWidth={s.strokeWidth || 2}
-                    fillOpacity={s.fillOpacity || 0.2}
-                    dot={{ r: 4, strokeWidth: s.strokeWidth || 2, fill: "#fff" }}
-                    activeDot={{ r: 6, strokeWidth: s.strokeWidth || 2, fill: "#fff" }}
-                  />
-                );
-              } else {
+              }
+              
+              if (s.type === 'bar') {
                 return (
                   <RechartsPrimitive.Bar
                     key={s.dataKey}
                     dataKey={s.dataKey}
-                    yAxisId={s.yAxisId}
-                    fill={s.color}
-                    fillOpacity={s.fillOpacity || 1}
-                    barSize={s.barSize}
-                    radius={[4, 4, 0, 0]}
+                    fill={color}
+                    yAxisId={yAxisId}
+                    radius={4}
                   />
                 );
               }
+              
+              if (s.type === 'area') {
+                return (
+                  <RechartsPrimitive.Area
+                    key={s.dataKey}
+                    dataKey={s.dataKey}
+                    stroke={color}
+                    fill={color}
+                    yAxisId={yAxisId}
+                    fillOpacity={s.fillOpacity || 0.2}
+                    type="monotone"
+                  />
+                );
+              }
+              
+              return null;
             })}
             
             {showLegend && (
