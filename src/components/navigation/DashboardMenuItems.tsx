@@ -1,10 +1,11 @@
 
-import { Home, Settings, Laptop, BarChart2, AlertTriangle, Package, LifeBuoy, Upload, Bell, Layers, Link, Calendar } from 'lucide-react';
+import { Home, Settings, Laptop, AlertTriangle, Package, LifeBuoy, Upload, Bell, Layers, Link } from 'lucide-react';
 import { NavMenuItem } from '@/components/navigation/NavMenuItem';
+import { SidebarMenu } from '@/components/ui/sidebar';
 
 export default function DashboardMenuItems() {
   return (
-    <>
+    <SidebarMenu className="list-none p-0 m-0">
       <NavMenuItem to="/dashboard" icon={Home} end>
         Dashboard
       </NavMenuItem>
@@ -79,6 +80,6 @@ export default function DashboardMenuItems() {
       >
         Documentation
       </NavMenuItem>
-    </>
+    </SidebarMenu>
   );
 }

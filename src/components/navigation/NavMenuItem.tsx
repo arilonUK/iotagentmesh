@@ -21,7 +21,7 @@ export function NavMenuItem({ to, icon: Icon, children, end, external }: NavMenu
   );
 
   return (
-    <SidebarMenuItem>
+    <SidebarMenuItem className="list-none">
       <SidebarMenuButton asChild>
         {external ? (
           <a href={to} target="_blank" rel="noopener noreferrer">

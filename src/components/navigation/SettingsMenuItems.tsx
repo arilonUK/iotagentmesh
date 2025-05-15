@@ -23,8 +23,8 @@ export function SettingsMenuItems({ userRole }: SettingsMenuItemsProps) {
   const canManageOrganization = hasPermission(userRole, PERMISSIONS.MANAGE_ORGANIZATION);
   
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
+    <SidebarMenu className="list-none p-0 m-0">
+      <SidebarMenuItem className="list-none">
         <SidebarMenuButton 
           asChild 
           isActive={pathname === "/dashboard/profile"} 
@@ -40,7 +40,7 @@ export function SettingsMenuItems({ userRole }: SettingsMenuItemsProps) {
         </SidebarMenuButton>
       </SidebarMenuItem>
       
-      <SidebarMenuItem>
+      <SidebarMenuItem className="list-none">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -71,7 +71,7 @@ export function SettingsMenuItems({ userRole }: SettingsMenuItemsProps) {
         </TooltipProvider>
       </SidebarMenuItem>
 
-      <SidebarMenuItem>
+      <SidebarMenuItem className="list-none">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
