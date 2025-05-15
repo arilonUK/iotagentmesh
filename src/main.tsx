@@ -29,7 +29,6 @@ import BlogPost from './pages/BlogPost.tsx';
 import ApiKeyManagement from './pages/ApiKeyManagement.tsx';
 import OAuthConnections from './pages/OAuthConnections.tsx';
 import IntegrationsAndConnectivity from './pages/IntegrationsAndConnectivity.tsx';
-import { AuthProvider } from '@/contexts/auth';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
 const router = createBrowserRouter([
@@ -45,7 +44,7 @@ const router = createBrowserRouter([
       { path: 'accept-invitation', element: <AcceptInvitation /> },
       {
         path: 'dashboard',
-        element: <ProtectedRoute><DashboardLayout>Dashboard Content</DashboardLayout></ProtectedRoute>,
+        element: <ProtectedRoute><DashboardLayout /></ProtectedRoute>,
         children: [
           { index: true, element: <Dashboard /> },
           { path: 'devices', element: <Devices /> },
@@ -73,9 +72,7 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ThemeProvider>
-      <AuthProvider>
-        <RouterProvider router={router} />
-      </AuthProvider>
+      <RouterProvider router={router} />
     </ThemeProvider>
   </React.StrictMode>,
 );
