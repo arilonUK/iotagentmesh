@@ -75,10 +75,11 @@ export const Header = () => {
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 disabled={isSigningOut}
-                onSelect={() => {
-                  handleSignOut()
-                  setIsDropdownOpen(false)
-              }}>
+                onSelect={(e) => {
+                  e.preventDefault();
+                  handleSignOut();
+                  setIsDropdownOpen(false);
+                }}>
                 {isSigningOut ? (
                   <div className="flex items-center gap-2">
                     <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />

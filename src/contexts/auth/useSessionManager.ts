@@ -24,7 +24,7 @@ export const useSessionManager = (): SessionManagerReturn => {
         fetchProfile(user.id);
       }, 0);
     }
-  }, [user]);
+  }, [user?.id]); // Add user?.id as dependency to prevent unnecessary refetches
 
   return {
     session,

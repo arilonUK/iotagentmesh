@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import Header from '@/components/Header';
 import AuthContainer from '@/components/auth/AuthContainer';
 import { useAuth } from '@/contexts/auth';
@@ -8,10 +8,9 @@ import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
   const { session, loading } = useAuth();
-  const navigate = useNavigate();
-  // Use the hook within the component
+  const location = useLocation();
   const { toast } = useToast();
-
+  
   useEffect(() => {
     // If user just landed on this page after being redirected from a protected route
     const redirectReason = new URLSearchParams(window.location.search).get('reason');
@@ -21,7 +20,7 @@ const Auth = () => {
         description: "Please log in to access this page"
       });
     }
-  }, [toast]); // Add toast to the dependency array
+  }, [toast]);
 
   // Show loading state while checking authentication
   if (loading) {
@@ -35,7 +34,9 @@ const Auth = () => {
   // If already logged in, redirect to dashboard
   if (session) {
     console.log("User is already authenticated, redirecting to dashboard");
-    return <Navigate to="/dashboard" replace />;
+    // Get the redirect path from location state, or default to dashboard
+    const from = location.state?.from?.pathname || '/dashboard';
+    return <Navigate to={from} replace />;
   }
 
   return (

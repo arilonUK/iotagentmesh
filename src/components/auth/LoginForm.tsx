@@ -24,7 +24,7 @@ const LoginForm = ({ setAuthError }: LoginFormProps) => {
     try {
       console.log("Login form submitted with email:", loginEmail);
       await signIn(loginEmail, loginPassword);
-      // The redirect will be handled by the Auth component when the session changes
+      // No need to redirect here - the Auth component will handle redirect once session changes
     } catch (error: any) {
       console.error("Login error:", error.message);
       setAuthError(error.message || 'Failed to sign in');

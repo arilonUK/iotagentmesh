@@ -18,6 +18,7 @@ export const useAuthSession = (): AuthSessionReturn => {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
+        console.log("Auth state changed:", event, newSession?.user?.email);
         setSession(newSession);
         setUser(newSession?.user ?? null);
       }
@@ -25,6 +26,7 @@ export const useAuthSession = (): AuthSessionReturn => {
     
     // Then check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      console.log("Got existing session:", currentSession?.user?.email);
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       setLoading(false);
