@@ -29,6 +29,8 @@ import BlogPost from './pages/BlogPost.tsx';
 import ApiKeyManagement from './pages/ApiKeyManagement.tsx';
 import OAuthConnections from './pages/OAuthConnections.tsx';
 import IntegrationsAndConnectivity from './pages/IntegrationsAndConnectivity.tsx';
+import { AuthProvider } from '@/contexts/auth';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 const router = createBrowserRouter([
   {
@@ -70,6 +72,10 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <ThemeProvider>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </ThemeProvider>
   </React.StrictMode>,
 );

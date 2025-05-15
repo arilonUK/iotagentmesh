@@ -24,7 +24,6 @@ import AcceptInvitation from '@/pages/AcceptInvitation';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import DashboardLayout from '@/layouts/DashboardLayout';
 
-import { ThemeProvider } from '@/components/ThemeProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { OrganizationProvider } from '@/contexts/organization';
 import NotificationSettings from './pages/NotificationSettings';
