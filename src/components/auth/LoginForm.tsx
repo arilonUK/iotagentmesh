@@ -44,6 +44,7 @@ const LoginForm = ({ setAuthError }: LoginFormProps) => {
           value={loginEmail}
           onChange={(e) => setLoginEmail(e.target.value)}
           required
+          autoComplete="email"
         />
       </div>
       
@@ -60,6 +61,7 @@ const LoginForm = ({ setAuthError }: LoginFormProps) => {
           value={loginPassword}
           onChange={(e) => setLoginPassword(e.target.value)}
           required
+          autoComplete="current-password"
         />
       </div>
 

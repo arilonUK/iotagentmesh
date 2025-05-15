@@ -65,7 +65,8 @@ export const authServices = {
       if (data.session) {
         console.log('Sign in successful');
         toastService.success("Success", "Signed in successfully!");
-        // Redirect happens in the component based on session state
+        // Store a flag to ensure redirect happens consistently
+        sessionStorage.setItem('auth_redirect_needed', 'true');
       }
     } catch (error: any) {
       console.error('Error signing in:', error);
@@ -81,12 +82,15 @@ export const authServices = {
       
       if (!sessionData.session) {
         console.log('No active session found, considering user already signed out');
-        // Still redirect to auth page even if no active session
         window.location.href = "/auth";
         return;
       }
       
-      const { error } = await supabase.auth.signOut();
+      // Clear any stored tokens or session info first
+      sessionStorage.removeItem('auth_redirect_needed');
+      localStorage.removeItem('supabase.auth.token');
+      
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
       
       if (error) {
         console.error('Error during sign out:', error);
@@ -97,8 +101,11 @@ export const authServices = {
       console.log('User signed out successfully');
       toastService.success('Signed out', 'You have been successfully signed out');
       
-      // Make sure we redirect to the auth page after signing out
-      window.location.href = "/auth";
+      // Use a small timeout to ensure state is cleared
+      setTimeout(() => {
+        // Make sure we redirect to the auth page after signing out
+        window.location.href = "/auth";
+      }, 100);
     } catch (error: any) {
       console.error('Error during sign out process:', error);
       // Don't rethrow the error here - let the app continue even if signout had issues

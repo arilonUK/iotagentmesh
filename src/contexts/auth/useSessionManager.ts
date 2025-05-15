@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { Profile } from './types';
 import { useProfileManager } from '@/hooks/auth/useProfileManager';
@@ -16,15 +16,23 @@ export type SessionManagerReturn = {
 export const useSessionManager = (): SessionManagerReturn => {
   const { session, user, loading } = useAuthSession();
   const { profile, fetchProfile } = useProfileManager();
+  const [lastUserId, setLastUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) {
+    // Only refetch profile when user ID changes (not on every render)
+    if (user?.id && user.id !== lastUserId) {
+      setLastUserId(user.id);
+      console.log("User ID changed, fetching updated profile for:", user.id);
+      
       // Use setTimeout to prevent supabase deadlock
       setTimeout(() => {
         fetchProfile(user.id);
       }, 0);
+    } else if (!user && lastUserId) {
+      // Reset lastUserId when user logs out
+      setLastUserId(null);
     }
-  }, [user?.id]); // Add user?.id as dependency to prevent unnecessary refetches
+  }, [user?.id, lastUserId, fetchProfile]);
 
   return {
     session,

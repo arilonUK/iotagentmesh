@@ -19,18 +19,34 @@ export const useAuthSession = (): AuthSessionReturn => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
         console.log("Auth state changed:", event, newSession?.user?.email);
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
+        
+        if (event === 'SIGNED_OUT') {
+          // Clear session state completely
+          setSession(null);
+          setUser(null);
+        } else {
+          // Update session state
+          setSession(newSession);
+          setUser(newSession?.user ?? null);
+        }
       }
     );
     
     // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      console.log("Got existing session:", currentSession?.user?.email);
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      setLoading(false);
-    });
+    const loadInitialSession = async () => {
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        console.log("Got existing session:", currentSession?.user?.email);
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+      } catch (error) {
+        console.error("Error loading initial session:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadInitialSession();
 
     return () => {
       subscription.unsubscribe();
