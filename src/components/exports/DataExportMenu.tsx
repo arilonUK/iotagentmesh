@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Download, FileJson, FileCsv, CalendarClock } from 'lucide-react';
+import { Download, FileJson, FileSpreadsheet, CalendarClock } from 'lucide-react';
 import { downloadCSV, downloadJSON } from '@/utils/export';
 import { toast } from 'sonner';
 
@@ -66,7 +66,7 @@ export function DataExportMenu<T extends Record<string, any>>({
         <DropdownMenuLabel>Export Options</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleExportCSV}>
-          <FileCsv className="mr-2 h-4 w-4" />
+          <FileSpreadsheet className="mr-2 h-4 w-4" />
           Export as CSV
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleExportJSON}>
