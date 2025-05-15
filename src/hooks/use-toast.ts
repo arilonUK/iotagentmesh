@@ -13,13 +13,12 @@ export interface ToastProps {
 
 export const useToast = () => {
   const context = useContext(ToastContext);
+  
   if (context === null) {
     throw new Error('useToast must be used within a ToastProvider');
   }
+  
   return context;
 };
-
-// Don't export a standalone toast function that uses hooks directly
-// Instead export the hook itself which should be used within components
 
 export default useToast;

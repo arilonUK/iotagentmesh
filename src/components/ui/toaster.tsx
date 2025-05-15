@@ -11,7 +11,7 @@ import {
 import { useState, useEffect } from "react"
 
 export function Toaster() {
-  const { toasts = [] } = useToast() || {};
+  const { toasts } = useToast();
   const [idToasts, setIdToasts] = useState([]);
 
   // Add unique ids to toasts if they don't have one

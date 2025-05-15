@@ -30,6 +30,7 @@ import ApiKeyManagement from './pages/ApiKeyManagement.tsx';
 import OAuthConnections from './pages/OAuthConnections.tsx';
 import IntegrationsAndConnectivity from './pages/IntegrationsAndConnectivity.tsx';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import AppProvider from './AppProvider.tsx';
 
 const router = createBrowserRouter([
   {
@@ -72,7 +73,9 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ThemeProvider>
-      <RouterProvider router={router} />
+      <AppProvider>
+        <RouterProvider router={router} />
+      </AppProvider>
     </ThemeProvider>
   </React.StrictMode>,
 );

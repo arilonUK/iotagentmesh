@@ -1,6 +1,5 @@
 
 import React, { createContext, useState, useCallback, useEffect } from 'react';
-import { Toaster } from '@/components/ui/toaster';
 import { v4 as uuidv4 } from 'uuid';
 import { toastEventEmitter, ToastEvent } from '@/services/toastService';
 
@@ -59,9 +58,6 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast, toasts, dismissToast }}>
       {children}
-      <Toaster />
     </ToastContext.Provider>
   );
 }
-
-// Remove the standalone toast function that was causing the hook rules violation
