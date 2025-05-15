@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { Button } from '@/components/ui/button';
@@ -423,7 +422,7 @@ export default function OAuthConnections() {
                               size="sm"
                               className="text-destructive border-destructive hover:bg-destructive/10"
                             >
-                              <LinkOff className="h-3.5 w-3.5 mr-1" />
+                              <Link2Off className="h-3.5 w-3.5 mr-1" />
                               Revoke
                             </Button>
                           </AlertDialogTrigger>
