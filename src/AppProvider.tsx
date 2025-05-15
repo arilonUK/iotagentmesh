@@ -4,6 +4,10 @@ import { ToastProvider } from '@/contexts/toast';
 import { AuthProvider } from '@/contexts/auth';
 import { OrganizationProvider } from '@/contexts/organization';
 import { Toaster } from '@/components/ui/toaster';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+// Create a client
+const queryClient = new QueryClient();
 
 interface AppProviderProps {
   children: React.ReactNode;
@@ -11,13 +15,15 @@ interface AppProviderProps {
 
 export default function AppProvider({ children }: AppProviderProps) {
   return (
-    <ToastProvider>
-      <AuthProvider>
-        <OrganizationProvider>
-          {children}
-          <Toaster />
-        </OrganizationProvider>
-      </AuthProvider>
-    </ToastProvider>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>
+        <AuthProvider>
+          <OrganizationProvider>
+            {children}
+            <Toaster />
+          </OrganizationProvider>
+        </AuthProvider>
+      </ToastProvider>
+    </QueryClientProvider>
   );
 }

@@ -22,7 +22,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   if (!session) {
     console.log("No active session, redirecting to auth page");
     
-    // Redirect to auth page with a reason parameter
+    // Redirect to auth page with a reason parameter and save the current location
     return <Navigate to="/auth?reason=protected" state={{ from: location }} replace />;
   }
 
