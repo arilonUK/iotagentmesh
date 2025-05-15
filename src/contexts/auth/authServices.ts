@@ -63,7 +63,7 @@ export const authServices = {
       }
 
       if (data.session) {
-        console.log('Sign in successful, redirecting to dashboard');
+        console.log('Sign in successful');
         toastService.success("Success", "Signed in successfully!");
         // Redirect happens in the component based on session state
       }
