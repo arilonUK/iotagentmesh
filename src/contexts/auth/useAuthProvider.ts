@@ -1,5 +1,4 @@
 
-import { useNavigate } from 'react-router-dom';
 import { AuthContextType } from './types';
 import { authServices } from './authServices';
 import { profileServices } from '@/services/profileServices';
@@ -8,7 +7,7 @@ import { useOrganizationManager } from '@/hooks/useOrganizationManager';
 import { useOrganizationLoader } from '@/hooks/useOrganizationLoader';
 
 export const useAuthProvider = (): AuthContextType => {
-  const navigate = useNavigate();
+  // Remove useNavigate hook from here
   
   const {
     session,

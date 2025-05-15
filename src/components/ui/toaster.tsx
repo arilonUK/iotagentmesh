@@ -11,13 +11,21 @@ import {
 import { useState, useEffect } from "react"
 
 export function Toaster() {
-  const { toasts } = useToast();
+  // Safely access the toast context
+  let toastList = [];
+  try {
+    const { toasts } = useToast();
+    toastList = toasts || [];
+  } catch (error) {
+    console.warn('Toast context not available yet');
+  }
+
   const [idToasts, setIdToasts] = useState([]);
 
   // Add unique ids to toasts if they don't have one
   useEffect(() => {
-    if (toasts && toasts.length > 0) {
-      const updatedToasts = toasts.map(toast => {
+    if (toastList && toastList.length > 0) {
+      const updatedToasts = toastList.map(toast => {
         if (!toast.id) {
           return { ...toast, id: crypto.randomUUID() }
         }
@@ -27,7 +35,7 @@ export function Toaster() {
     } else {
       setIdToasts([])
     }
-  }, [toasts])
+  }, [toastList])
 
   return (
     <ToastProvider>

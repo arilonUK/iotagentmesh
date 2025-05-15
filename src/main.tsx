@@ -45,26 +45,173 @@ const router = createBrowserRouter([
       { path: 'accept-invitation', element: <AcceptInvitation /> },
       {
         path: 'dashboard',
-        element: <ProtectedRoute><DashboardLayout /></ProtectedRoute>,
-        children: [
-          { index: true, element: <Dashboard /> },
-          { path: 'devices', element: <Devices /> },
-          { path: 'devices/:id', element: <DeviceDetail /> },
-          { path: 'products', element: <Products /> },
-          { path: 'products/:id', element: <ProductDetail /> },
-          { path: 'alarms', element: <Alarms /> },
-          { path: 'data-buckets', element: <DataBuckets /> },
-          { path: 'endpoints', element: <Endpoints /> },
-          { path: 'integrations', element: <IntegrationsAndConnectivity /> },
-          { path: 'api-keys', element: <ApiKeyManagement /> },
-          { path: 'oauth', element: <OAuthConnections /> },
-          { path: 'file-storage', element: <FileStorage /> },
-          { path: 'file-storage/:profileId', element: <FileExplorerPage /> },
-          { path: 'notifications/settings', element: <NotificationSettings /> },
-          { path: 'team', element: <TeamSettings /> },
-          { path: 'profile', element: <ProfileSettings /> },
-          { path: 'settings', element: <OrganizationSettings /> },
-        ],
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Dashboard />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard/devices',
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Devices />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard/devices/:id',
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <DeviceDetail />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard/products',
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Products />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard/products/:id',
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ProductDetail />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard/alarms',
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Alarms />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard/data-buckets',
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <DataBuckets />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard/endpoints',
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Endpoints />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard/integrations',
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <IntegrationsAndConnectivity />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard/api-keys',
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ApiKeyManagement />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard/oauth',
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <OAuthConnections />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard/file-storage',
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <FileStorage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard/file-storage/:profileId',
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <FileExplorerPage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard/notifications/settings',
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <NotificationSettings />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard/team',
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <TeamSettings />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard/profile',
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ProfileSettings />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard/settings',
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <OrganizationSettings />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
       },
     ],
   },

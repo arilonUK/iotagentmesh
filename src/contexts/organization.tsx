@@ -18,7 +18,15 @@ const OrganizationContext = createContext<OrganizationContextType | undefined>(u
 
 export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
   const [organization, setOrganization] = useState<Organization | null>(null);
-  const { organization: authOrganization } = useAuth();
+  
+  // Try to get the auth context, but don't fail if it's not available yet
+  let authOrganization;
+  try {
+    const auth = useAuth();
+    authOrganization = auth?.organization;
+  } catch (error) {
+    console.log('Auth context not available yet, using fallback organization');
+  }
   
   // Initialize organization from auth context if available
   useEffect(() => {
