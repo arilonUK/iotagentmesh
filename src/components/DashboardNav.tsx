@@ -7,7 +7,7 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
-import { DashboardMenuItems } from "@/components/navigation/DashboardMenuItems";
+import DashboardMenuItems from "@/components/navigation/DashboardMenuItems";
 import { SettingsMenuItems } from "@/components/navigation/SettingsMenuItems";
 import { OrganizationFooter } from "@/components/navigation/OrganizationFooter";
 

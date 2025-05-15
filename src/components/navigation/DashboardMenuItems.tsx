@@ -1,72 +1,84 @@
 
-import { Home, Settings, Devices, BarChart2, AlertTriangle, Package, LifeBuoy, Upload, Bell, Layers, Link, Calendar } from 'lucide-react';
+import { Home, Settings, Laptop, BarChart2, AlertTriangle, Package, LifeBuoy, Upload, Bell, Layers, Link, Calendar } from 'lucide-react';
 import { NavMenuItem } from '@/components/navigation/NavMenuItem';
 
 export default function DashboardMenuItems() {
   return (
     <>
-      <NavMenuItem href="/dashboard" icon={<Home className="h-5 w-5" />} title="Dashboard" />
+      <NavMenuItem to="/dashboard" icon={Home} end>
+        Dashboard
+      </NavMenuItem>
       
       <NavMenuItem 
-        href="/dashboard/devices" 
-        icon={<Devices className="h-5 w-5" />} 
-        title="Devices"
-      />
+        to="/dashboard/devices" 
+        icon={Laptop}
+      >
+        Devices
+      </NavMenuItem>
       
       <NavMenuItem 
-        href="/dashboard/products" 
-        icon={<Package className="h-5 w-5" />} 
-        title="Products"
-      />
+        to="/dashboard/products" 
+        icon={Package}
+      >
+        Products
+      </NavMenuItem>
       
       <NavMenuItem 
-        href="/dashboard/alarms" 
-        icon={<AlertTriangle className="h-5 w-5" />} 
-        title="Alarms"
-      />
+        to="/dashboard/alarms" 
+        icon={AlertTriangle}
+      >
+        Alarms
+      </NavMenuItem>
 
       <NavMenuItem 
-        href="/dashboard/data-buckets" 
-        icon={<Layers className="h-5 w-5" />} 
-        title="Data Management"
-      />
+        to="/dashboard/data-buckets" 
+        icon={Layers}
+      >
+        Data Management
+      </NavMenuItem>
       
       <NavMenuItem 
-        href="/dashboard/integrations" 
-        icon={<Link className="h-5 w-5" />} 
-        title="Integrations"
-      />
+        to="/dashboard/integrations" 
+        icon={Link}
+      >
+        Integrations
+      </NavMenuItem>
       
       <NavMenuItem 
-        href="/dashboard/endpoints" 
-        icon={<Link className="h-5 w-5" />} 
-        title="Endpoints"
-      />
+        to="/dashboard/endpoints" 
+        icon={Link}
+      >
+        Endpoints
+      </NavMenuItem>
       
       <NavMenuItem 
-        href="/dashboard/file-storage" 
-        icon={<Upload className="h-5 w-5" />} 
-        title="File Storage"
-      />
+        to="/dashboard/file-storage" 
+        icon={Upload}
+      >
+        File Storage
+      </NavMenuItem>
       
       <NavMenuItem 
-        href="/dashboard/notifications/settings" 
-        icon={<Bell className="h-5 w-5" />} 
-        title="Notifications"
-      />
+        to="/dashboard/notifications/settings" 
+        icon={Bell}
+      >
+        Notifications
+      </NavMenuItem>
       
       <NavMenuItem 
-        href="/dashboard/settings" 
-        icon={<Settings className="h-5 w-5" />} 
-        title="Settings"
-      />
+        to="/dashboard/settings" 
+        icon={Settings}
+      >
+        Settings
+      </NavMenuItem>
       
       <NavMenuItem 
-        href="https://docs.example.com" 
-        icon={<LifeBuoy className="h-5 w-5" />} 
-        title="Documentation"
+        to="https://docs.example.com" 
+        icon={LifeBuoy}
         external
-      />
+      >
+        Documentation
+      </NavMenuItem>
     </>
   );
 }

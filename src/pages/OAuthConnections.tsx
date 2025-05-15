@@ -38,7 +38,7 @@ import {
   CircleCheckBig, 
   History, 
   Link2, 
-  LinkOff, 
+  Link2Off, 
   Plus,
   RefreshCw, 
   Trash2 

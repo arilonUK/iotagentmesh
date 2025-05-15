@@ -43,7 +43,7 @@ const router = createBrowserRouter([
       { path: 'accept-invitation', element: <AcceptInvitation /> },
       {
         path: 'dashboard',
-        element: <ProtectedRoute><DashboardLayout /></ProtectedRoute>,
+        element: <ProtectedRoute><DashboardLayout>Dashboard Content</DashboardLayout></ProtectedRoute>,
         children: [
           { index: true, element: <Dashboard /> },
           { path: 'devices', element: <Devices /> },
