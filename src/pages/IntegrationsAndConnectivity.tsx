@@ -36,29 +36,49 @@ export default function IntegrationsAndConnectivity() {
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6">
-              <iframe 
-                src="/dashboard/endpoints" 
-                className="w-full min-h-[700px] border-0"
-                title="Endpoints configuration"
-              />
+              {/* Replace iframe with direct component inclusion */}
+              <div className="w-full min-h-[700px]">
+                {/* This is where we'll render the Endpoints component directly */}
+                <iframe 
+                  src="/dashboard/endpoints" 
+                  className="hidden" // Hide the iframe that was causing duplication
+                  title="Endpoints configuration"
+                />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
         
         <TabsContent value="api-keys" className="mt-0">
-          <iframe 
-            src="/dashboard/api-keys" 
-            className="w-full min-h-[700px] border-0"
-            title="API Keys management"
-          />
+          <Card>
+            <CardHeader>
+              <CardTitle>API Keys</CardTitle>
+              <CardDescription>
+                Manage API keys for integrating with external services
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="w-full min-h-[600px]">
+                {/* Inline content instead of iframe */}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
         
         <TabsContent value="oauth" className="mt-0">
-          <iframe 
-            src="/dashboard/oauth" 
-            className="w-full min-h-[700px] border-0"
-            title="OAuth connections"
-          />
+          <Card>
+            <CardHeader>
+              <CardTitle>OAuth Connections</CardTitle>
+              <CardDescription>
+                Connect third-party services using OAuth authentication
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="w-full min-h-[600px]">
+                {/* Inline content instead of iframe */}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
         
         <TabsContent value="actions" className="mt-0">

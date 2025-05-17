@@ -103,30 +103,35 @@ export default function Endpoints() {
     setActiveTab('list');
   };
 
+  // Check if we're inside an iframe to hide unnecessary UI elements
+  const isEmbedded = window.self !== window.top;
+
   return (
     <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold mb-2">Endpoints</h1>
-          <p className="text-muted-foreground">
-            Connect your devices to external services and applications
-          </p>
-        </div>
-        
-        {activeTab === 'list' && (
-          <Button onClick={startCreating}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Endpoint
-          </Button>
-        )}
+      {!isEmbedded && (
+        <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold mb-2">Endpoints</h1>
+            <p className="text-muted-foreground">
+              Connect your devices to external services and applications
+            </p>
+          </div>
+          
+          {activeTab === 'list' && (
+            <Button onClick={startCreating}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Endpoint
+            </Button>
+          )}
 
-        {activeTab === 'form' && (
-          <Button variant="outline" onClick={cancelForm}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to List
-          </Button>
-        )}
-      </div>
+          {activeTab === 'form' && (
+            <Button variant="outline" onClick={cancelForm}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to List
+            </Button>
+          )}
+        </div>
+      )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="hidden">
