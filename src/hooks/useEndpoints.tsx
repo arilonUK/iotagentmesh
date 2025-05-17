@@ -8,6 +8,7 @@ import {
   deleteEndpoint,
   triggerEndpoint
 } from '@/services/endpoints';
+import { toast } from 'sonner';
 
 export const useEndpoints = (organizationId?: string) => {
   const queryClient = useQueryClient();
@@ -30,50 +31,68 @@ export const useEndpoints = (organizationId?: string) => {
   const createEndpointMutation = useMutation({
     mutationFn: async (endpointData: EndpointFormData) => {
       if (!organizationId) throw new Error('Organization ID is required');
-      console.log('Creating endpoint with org:', organizationId);
-      return await createEndpoint(organizationId, endpointData);
+      console.log('Creating endpoint with org:', organizationId, 'data:', endpointData);
+      const result = await createEndpoint(organizationId, endpointData);
+      if (!result) throw new Error('Failed to create endpoint');
+      return result;
     },
     onSuccess: (data) => {
       console.log('Endpoint created successfully, invalidating queries');
+      toast.success('Endpoint created successfully');
       queryClient.invalidateQueries({ queryKey: ['endpoints', organizationId] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error in createEndpointMutation:', error);
+      toast.error(`Error creating endpoint: ${error?.message || 'Unknown error'}`);
     }
   });
 
   const updateEndpointMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<EndpointFormData> }) => {
-      console.log('Updating endpoint:', id);
-      return await updateEndpoint(id, data);
+      console.log('Updating endpoint:', id, 'with data:', data);
+      const success = await updateEndpoint(id, data);
+      if (!success) throw new Error('Failed to update endpoint');
+      return success;
     },
     onSuccess: () => {
       console.log('Endpoint updated successfully, invalidating queries');
+      toast.success('Endpoint updated successfully');
       queryClient.invalidateQueries({ queryKey: ['endpoints', organizationId] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error in updateEndpointMutation:', error);
+      toast.error(`Error updating endpoint: ${error?.message || 'Unknown error'}`);
     }
   });
 
   const deleteEndpointMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await deleteEndpoint(id);
+      const success = await deleteEndpoint(id);
+      if (!success) throw new Error('Failed to delete endpoint');
+      return success;
     },
     onSuccess: () => {
+      toast.success('Endpoint deleted successfully');
       queryClient.invalidateQueries({ queryKey: ['endpoints', organizationId] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error in deleteEndpointMutation:', error);
+      toast.error(`Error deleting endpoint: ${error?.message || 'Unknown error'}`);
     }
   });
 
   const triggerEndpointMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data?: any }) => {
-      return await triggerEndpoint(id, data);
+      const result = await triggerEndpoint(id, data);
+      if (!result) throw new Error('Failed to trigger endpoint');
+      return result;
     },
-    onError: (error) => {
+    onSuccess: () => {
+      toast.success('Endpoint triggered successfully');
+    },
+    onError: (error: any) => {
       console.error('Error in triggerEndpointMutation:', error);
+      toast.error(`Error triggering endpoint: ${error?.message || 'Unknown error'}`);
     }
   });
 

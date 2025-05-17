@@ -32,46 +32,57 @@ export default function Endpoints() {
     refetch
   } = useEndpoints(organizationId);
 
-  const handleCreateSubmit = (data: EndpointFormData) => {
+  // Check if we're inside an iframe to hide unnecessary UI elements
+  const isEmbedded = window.self !== window.top;
+
+  const handleCreateSubmit = async (data: EndpointFormData) => {
     console.log('Creating endpoint with data:', data);
     if (!organizationId) {
       toast.error('No organization selected');
       return;
     }
     
-    createEndpoint(data, {
-      onSuccess: () => {
-        setIsCreating(false);
-        setActiveTab('list');
-        toast.success('Endpoint created successfully');
-        refetch();  // Force refresh data after creation
-      },
-      onError: (error) => {
-        toast.error('Failed to create endpoint');
-        console.error('Create endpoint error:', error);
-      }
-    });
+    try {
+      createEndpoint(data, {
+        onSuccess: () => {
+          setIsCreating(false);
+          setActiveTab('list');
+          // Force refresh data after creation
+          setTimeout(() => refetch(), 500);
+        },
+        onError: (error) => {
+          console.error('Create endpoint error:', error);
+        }
+      });
+    } catch (error) {
+      console.error('Error in handleCreateSubmit:', error);
+      toast.error('An unexpected error occurred while creating endpoint');
+    }
   };
 
-  const handleUpdateSubmit = (data: EndpointFormData) => {
+  const handleUpdateSubmit = async (data: EndpointFormData) => {
     console.log('Updating endpoint with data:', data);
     if (!editEndpoint) {
       toast.error('No endpoint selected for update');
       return;
     }
 
-    updateEndpoint({ id: editEndpoint.id, data }, {
-      onSuccess: () => {
-        setEditEndpoint(null);
-        setActiveTab('list');
-        toast.success('Endpoint updated successfully');
-        refetch();  // Force refresh data after update
-      },
-      onError: (error) => {
-        toast.error('Failed to update endpoint');
-        console.error('Update endpoint error:', error);
-      }
-    });
+    try {
+      updateEndpoint({ id: editEndpoint.id, data }, {
+        onSuccess: () => {
+          setEditEndpoint(null);
+          setActiveTab('list');
+          // Force refresh data after update
+          setTimeout(() => refetch(), 500);
+        },
+        onError: (error) => {
+          console.error('Update endpoint error:', error);
+        }
+      });
+    } catch (error) {
+      console.error('Error in handleUpdateSubmit:', error);
+      toast.error('An unexpected error occurred while updating endpoint');
+    }
   };
 
   const handleToggleEndpoint = (id: string, enabled: boolean) => {
@@ -79,10 +90,10 @@ export default function Endpoints() {
     updateEndpoint({ id, data: { enabled } }, {
       onSuccess: () => {
         toast.success(`Endpoint ${enabled ? 'enabled' : 'disabled'}`);
-        refetch();  // Force refresh data after toggle
+        // Force refresh data after toggle
+        setTimeout(() => refetch(), 500);
       },
       onError: (error) => {
-        toast.error('Failed to update endpoint status');
         console.error('Toggle endpoint error:', error);
       }
     });
@@ -95,7 +106,6 @@ export default function Endpoints() {
         toast.success('Endpoint triggered successfully');
       },
       onError: (error) => {
-        toast.error('Failed to trigger endpoint');
         console.error('Trigger endpoint error:', error);
       }
     });
@@ -119,9 +129,6 @@ export default function Endpoints() {
     setEditEndpoint(null);
     setActiveTab('list');
   };
-
-  // Check if we're inside an iframe to hide unnecessary UI elements
-  const isEmbedded = window.self !== window.top;
 
   return (
     <div className="space-y-8">

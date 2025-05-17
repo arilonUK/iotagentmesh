@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { EndpointConfig, EndpointFormData } from '@/types/endpoint';
 import { SupabaseEndpoint, handleServiceError } from './baseEndpointService';
+import { toast } from 'sonner';
 
 /**
  * Create a new endpoint
@@ -26,8 +27,9 @@ export async function createEndpoint(
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
-      .select('*') as {
-        data: SupabaseEndpoint[] | null;
+      .select('*')
+      .single() as {
+        data: SupabaseEndpoint | null;
         error: any;
       };
 
@@ -37,24 +39,24 @@ export async function createEndpoint(
       return null;
     }
 
-    if (!data || data.length === 0) {
+    if (!data) {
       console.error('No endpoint data returned after creation');
+      toast.error('Failed to create endpoint: No data returned from database');
       return null;
     }
 
-    const endpoint = data[0];
-    console.log('Created endpoint successfully:', endpoint);
+    console.log('Created endpoint successfully:', data);
     
     return {
-      id: endpoint.id,
-      name: endpoint.name,
-      description: endpoint.description || undefined,
-      type: endpoint.type as any,
-      organization_id: endpoint.organization_id,
-      enabled: endpoint.enabled,
-      configuration: endpoint.configuration,
-      created_at: endpoint.created_at,
-      updated_at: endpoint.updated_at
+      id: data.id,
+      name: data.name,
+      description: data.description || undefined,
+      type: data.type as any,
+      organization_id: data.organization_id,
+      enabled: data.enabled,
+      configuration: data.configuration,
+      created_at: data.created_at,
+      updated_at: data.updated_at
     };
   } catch (error) {
     console.error('Unexpected error in createEndpoint:', error);

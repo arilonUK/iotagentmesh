@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { EndpointFormData } from '@/types/endpoint';
 import { handleServiceError } from './baseEndpointService';
+import { toast } from 'sonner';
 
 /**
  * Update an existing endpoint
@@ -29,14 +30,21 @@ export async function updateEndpoint(
       .from('endpoints')
       .update(updateData)
       .eq('id', endpointId)
-      .select('*') as { 
-        data: any[] | null;
+      .select('*')
+      .single() as { 
+        data: any | null;
         error: any; 
       };
 
     if (error) {
       console.error('Error updating endpoint:', error);
       handleServiceError(error, 'updating endpoint');
+      return false;
+    }
+
+    if (!data) {
+      console.error('No endpoint data returned after update');
+      toast.error('Failed to update endpoint: No data returned from database');
       return false;
     }
 
