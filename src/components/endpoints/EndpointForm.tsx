@@ -8,6 +8,7 @@ import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { BasicInfoSection, ConfigurationSection } from './FormSections';
+import { toast } from 'sonner';
 
 // Form schema with validation
 const endpointFormSchema = z.object({
@@ -43,11 +44,18 @@ export default function EndpointForm({ initialData, onSubmit, isSubmitting = fal
 
   // Handle form submission
   const handleSubmit = (data: EndpointFormData) => {
-    onSubmit(data);
+    console.log('Form data submitted:', data);
+    try {
+      onSubmit(data);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Failed to save endpoint');
+    }
   };
 
   // Handle endpoint type change
   const handleTypeChange = (type: EndpointType) => {
+    console.log('Type changed to:', type);
     setSelectedType(type);
     form.setValue('type', type);
     
@@ -70,7 +78,7 @@ export default function EndpointForm({ initialData, onSubmit, isSubmitting = fal
             <ConfigurationSection type={selectedType} form={form} />
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button type="button" variant="outline">Cancel</Button>
+            <Button type="button" variant="outline" onClick={() => form.reset()}>Cancel</Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'Saving...' : 'Save Endpoint'}
             </Button>

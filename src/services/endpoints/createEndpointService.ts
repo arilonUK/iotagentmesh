@@ -2,7 +2,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { EndpointConfig, EndpointFormData } from '@/types/endpoint';
 import { SupabaseEndpoint, handleServiceError } from './baseEndpointService';
-import { toast } from 'sonner';
 
 /**
  * Create a new endpoint
@@ -12,6 +11,8 @@ export async function createEndpoint(
   endpointData: EndpointFormData
 ): Promise<EndpointConfig | null> {
   try {
+    console.log('Creating endpoint with data:', JSON.stringify(endpointData));
+    
     // Using generic query to avoid TypeScript issues
     const { error, data } = await supabase
       .from('endpoints')
@@ -25,23 +26,24 @@ export async function createEndpoint(
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
-      .select() as {
+      .select('*') as {
         data: SupabaseEndpoint[] | null;
         error: any;
       };
 
     if (error) {
+      console.error('Error creating endpoint:', error);
       handleServiceError(error, 'creating endpoint');
       return null;
     }
 
     if (!data || data.length === 0) {
-      toast.error('No endpoint data returned after creation');
+      console.error('No endpoint data returned after creation');
       return null;
     }
 
     const endpoint = data[0];
-    toast.success('Endpoint created successfully');
+    console.log('Created endpoint successfully:', endpoint);
     
     return {
       id: endpoint.id,
@@ -55,6 +57,7 @@ export async function createEndpoint(
       updated_at: endpoint.updated_at
     };
   } catch (error) {
+    console.error('Unexpected error in createEndpoint:', error);
     handleServiceError(error, 'createEndpoint');
     return null;
   }

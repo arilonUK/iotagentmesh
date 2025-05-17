@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { EndpointConfig, EndpointFormData } from '@/types/endpoint';
 import { 
@@ -20,6 +21,7 @@ export const useEndpoints = (organizationId?: string) => {
     queryKey: ['endpoints', organizationId],
     queryFn: async () => {
       if (!organizationId) return [];
+      console.log('Fetching endpoints for org:', organizationId);
       return await fetchEndpoints(organizationId);
     },
     enabled: !!organizationId,
@@ -28,19 +30,29 @@ export const useEndpoints = (organizationId?: string) => {
   const createEndpointMutation = useMutation({
     mutationFn: async (endpointData: EndpointFormData) => {
       if (!organizationId) throw new Error('Organization ID is required');
+      console.log('Creating endpoint with org:', organizationId);
       return await createEndpoint(organizationId, endpointData);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Endpoint created successfully, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['endpoints', organizationId] });
+    },
+    onError: (error) => {
+      console.error('Error in createEndpointMutation:', error);
     }
   });
 
   const updateEndpointMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<EndpointFormData> }) => {
+      console.log('Updating endpoint:', id);
       return await updateEndpoint(id, data);
     },
     onSuccess: () => {
+      console.log('Endpoint updated successfully, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['endpoints', organizationId] });
+    },
+    onError: (error) => {
+      console.error('Error in updateEndpointMutation:', error);
     }
   });
 
@@ -50,12 +62,18 @@ export const useEndpoints = (organizationId?: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['endpoints', organizationId] });
+    },
+    onError: (error) => {
+      console.error('Error in deleteEndpointMutation:', error);
     }
   });
 
   const triggerEndpointMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data?: any }) => {
       return await triggerEndpoint(id, data);
+    },
+    onError: (error) => {
+      console.error('Error in triggerEndpointMutation:', error);
     }
   });
 

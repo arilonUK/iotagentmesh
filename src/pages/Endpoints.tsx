@@ -28,15 +28,23 @@ export default function Endpoints() {
     isCreating: isSubmittingCreate,
     isUpdating: isSubmittingUpdate,
     isDeleting,
-    isTriggering
+    isTriggering,
+    refetch
   } = useEndpoints(organizationId);
 
   const handleCreateSubmit = (data: EndpointFormData) => {
+    console.log('Creating endpoint with data:', data);
+    if (!organizationId) {
+      toast.error('No organization selected');
+      return;
+    }
+    
     createEndpoint(data, {
       onSuccess: () => {
         setIsCreating(false);
         setActiveTab('list');
         toast.success('Endpoint created successfully');
+        refetch();  // Force refresh data after creation
       },
       onError: (error) => {
         toast.error('Failed to create endpoint');
@@ -46,13 +54,18 @@ export default function Endpoints() {
   };
 
   const handleUpdateSubmit = (data: EndpointFormData) => {
-    if (!editEndpoint) return;
+    console.log('Updating endpoint with data:', data);
+    if (!editEndpoint) {
+      toast.error('No endpoint selected for update');
+      return;
+    }
 
     updateEndpoint({ id: editEndpoint.id, data }, {
       onSuccess: () => {
         setEditEndpoint(null);
         setActiveTab('list');
         toast.success('Endpoint updated successfully');
+        refetch();  // Force refresh data after update
       },
       onError: (error) => {
         toast.error('Failed to update endpoint');
@@ -62,9 +75,11 @@ export default function Endpoints() {
   };
 
   const handleToggleEndpoint = (id: string, enabled: boolean) => {
+    console.log('Toggling endpoint:', id, 'to', enabled);
     updateEndpoint({ id, data: { enabled } }, {
       onSuccess: () => {
         toast.success(`Endpoint ${enabled ? 'enabled' : 'disabled'}`);
+        refetch();  // Force refresh data after toggle
       },
       onError: (error) => {
         toast.error('Failed to update endpoint status');
@@ -74,6 +89,7 @@ export default function Endpoints() {
   };
 
   const handleTriggerEndpoint = (id: string) => {
+    console.log('Triggering endpoint:', id);
     triggerEndpoint({ id }, {
       onSuccess: () => {
         toast.success('Endpoint triggered successfully');
@@ -92,6 +108,7 @@ export default function Endpoints() {
   };
 
   const startEditing = (endpoint: EndpointConfig) => {
+    console.log('Editing endpoint:', endpoint);
     setEditEndpoint(endpoint);
     setIsCreating(false);
     setActiveTab('form');
@@ -160,6 +177,12 @@ export default function Endpoints() {
           )}
         </TabsContent>
       </Tabs>
+
+      {!organizationId && (
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-md mt-4">
+          <p className="text-amber-800">No organization selected. Please select an organization to manage endpoints.</p>
+        </div>
+      )}
     </div>
   );
 }
