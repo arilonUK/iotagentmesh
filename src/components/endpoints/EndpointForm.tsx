@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { BasicInfoSection, ConfigurationSection } from './FormSections';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 // Form schema with validation
 const endpointFormSchema = z.object({
@@ -63,12 +64,16 @@ export default function EndpointForm({ initialData, onSubmit, isSubmitting = fal
     form.setValue('configuration', {});
   };
 
+  const isEditing = !!initialData?.id;
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Endpoint Configuration</CardTitle>
+            <CardTitle>
+              {isEditing ? 'Edit Endpoint' : 'New Endpoint'}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Basic Information */}
@@ -78,9 +83,18 @@ export default function EndpointForm({ initialData, onSubmit, isSubmitting = fal
             <ConfigurationSection type={selectedType} form={form} />
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button type="button" variant="outline" onClick={() => form.reset()}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={() => form.reset()}>
+              Cancel
+            </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : 'Save Endpoint'}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {isEditing ? 'Updating...' : 'Creating...'}
+                </>
+              ) : (
+                isEditing ? 'Update Endpoint' : 'Save Endpoint'
+              )}
             </Button>
           </CardFooter>
         </Card>

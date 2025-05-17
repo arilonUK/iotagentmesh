@@ -38,7 +38,6 @@ export const useEndpoints = (organizationId?: string) => {
     },
     onSuccess: (data) => {
       console.log('Endpoint created successfully, invalidating queries');
-      toast.success('Endpoint created successfully');
       queryClient.invalidateQueries({ queryKey: ['endpoints', organizationId] });
     },
     onError: (error: any) => {
@@ -56,7 +55,6 @@ export const useEndpoints = (organizationId?: string) => {
     },
     onSuccess: () => {
       console.log('Endpoint updated successfully, invalidating queries');
-      toast.success('Endpoint updated successfully');
       queryClient.invalidateQueries({ queryKey: ['endpoints', organizationId] });
     },
     onError: (error: any) => {

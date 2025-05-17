@@ -14,24 +14,27 @@ export async function createEndpoint(
   try {
     console.log('Creating endpoint with data:', JSON.stringify(endpointData));
     
+    if (!organizationId) {
+      console.error('Error creating endpoint: No organization ID provided');
+      toast.error('Failed to create endpoint: No organization ID provided');
+      return null;
+    }
+    
     // Using generic query to avoid TypeScript issues
     const { error, data } = await supabase
       .from('endpoints')
       .insert({
         name: endpointData.name,
-        description: endpointData.description,
+        description: endpointData.description || null,
         type: endpointData.type,
         organization_id: organizationId,
         enabled: endpointData.enabled,
-        configuration: endpointData.configuration,
+        configuration: endpointData.configuration || {},
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
       .select('*')
-      .single() as {
-        data: SupabaseEndpoint | null;
-        error: any;
-      };
+      .single();
 
     if (error) {
       console.error('Error creating endpoint:', error);
@@ -46,6 +49,7 @@ export async function createEndpoint(
     }
 
     console.log('Created endpoint successfully:', data);
+    toast.success('Endpoint created successfully');
     
     return {
       id: data.id,

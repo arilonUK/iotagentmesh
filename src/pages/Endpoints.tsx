@@ -42,22 +42,19 @@ export default function Endpoints() {
       return;
     }
     
-    try {
-      createEndpoint(data, {
-        onSuccess: () => {
-          setIsCreating(false);
-          setActiveTab('list');
-          // Force refresh data after creation
-          setTimeout(() => refetch(), 500);
-        },
-        onError: (error) => {
-          console.error('Create endpoint error:', error);
-        }
-      });
-    } catch (error) {
-      console.error('Error in handleCreateSubmit:', error);
-      toast.error('An unexpected error occurred while creating endpoint');
-    }
+    createEndpoint(data, {
+      onSuccess: () => {
+        toast.success('Endpoint created successfully');
+        setIsCreating(false);
+        setActiveTab('list');
+        // Force refresh data after creation
+        setTimeout(() => refetch(), 500);
+      },
+      onError: (error) => {
+        console.error('Create endpoint error:', error);
+        toast.error(`Failed to create endpoint: ${error.message || 'Unknown error'}`);
+      }
+    });
   };
 
   const handleUpdateSubmit = async (data: EndpointFormData) => {
@@ -67,22 +64,19 @@ export default function Endpoints() {
       return;
     }
 
-    try {
-      updateEndpoint({ id: editEndpoint.id, data }, {
-        onSuccess: () => {
-          setEditEndpoint(null);
-          setActiveTab('list');
-          // Force refresh data after update
-          setTimeout(() => refetch(), 500);
-        },
-        onError: (error) => {
-          console.error('Update endpoint error:', error);
-        }
-      });
-    } catch (error) {
-      console.error('Error in handleUpdateSubmit:', error);
-      toast.error('An unexpected error occurred while updating endpoint');
-    }
+    updateEndpoint({ id: editEndpoint.id, data }, {
+      onSuccess: () => {
+        toast.success('Endpoint updated successfully');
+        setEditEndpoint(null);
+        setActiveTab('list');
+        // Force refresh data after update
+        setTimeout(() => refetch(), 500);
+      },
+      onError: (error) => {
+        console.error('Update endpoint error:', error);
+        toast.error(`Failed to update endpoint: ${error.message || 'Unknown error'}`);
+      }
+    });
   };
 
   const handleToggleEndpoint = (id: string, enabled: boolean) => {
@@ -95,6 +89,7 @@ export default function Endpoints() {
       },
       onError: (error) => {
         console.error('Toggle endpoint error:', error);
+        toast.error(`Failed to toggle endpoint: ${error.message || 'Unknown error'}`);
       }
     });
   };
@@ -107,6 +102,7 @@ export default function Endpoints() {
       },
       onError: (error) => {
         console.error('Trigger endpoint error:', error);
+        toast.error(`Failed to trigger endpoint: ${error.message || 'Unknown error'}`);
       }
     });
   };
@@ -179,7 +175,7 @@ export default function Endpoints() {
             <EndpointForm
               initialData={editEndpoint || undefined}
               onSubmit={editEndpoint ? handleUpdateSubmit : handleCreateSubmit}
-              isSubmitting={isCreating ? isSubmittingCreate : isSubmittingUpdate}
+              isSubmitting={editEndpoint ? isSubmittingUpdate : isSubmittingCreate}
             />
           )}
         </TabsContent>
