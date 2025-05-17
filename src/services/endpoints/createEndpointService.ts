@@ -51,8 +51,9 @@ export async function createEndpoint(
     console.log('Created endpoint successfully:', data);
     toast.success('Endpoint created successfully');
     
-    // Cast configuration appropriately based on type to satisfy TypeScript
-    const typedConfiguration = data.configuration as EndpointConfig['configuration'];
+    // First convert to unknown, then to the expected type to satisfy TypeScript
+    // This is safe because we know the shape of the configuration matches our endpoint types
+    const typedConfiguration = (data.configuration as unknown) as EndpointConfig['configuration'];
     
     return {
       id: data.id,
