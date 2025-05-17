@@ -8,6 +8,7 @@ import { Plus, ArrowLeft } from 'lucide-react';
 import EndpointList from '@/components/endpoints/EndpointList';
 import EndpointForm from '@/components/endpoints/EndpointForm';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 
 export default function Endpoints() {
@@ -126,6 +127,17 @@ export default function Endpoints() {
     setActiveTab('list');
   };
 
+  const renderEmptyState = () => (
+    <div className="text-center py-10 border border-dashed rounded-lg">
+      <h3 className="text-lg font-medium mb-2">No endpoints configured yet</h3>
+      <p className="text-muted-foreground mb-6">Add your first endpoint to connect with external services</p>
+      <Button onClick={startCreating}>
+        <Plus className="mr-2 h-4 w-4" />
+        Create Your First Endpoint
+      </Button>
+    </div>
+  );
+
   return (
     <div className="space-y-8">
       {!isEmbedded && (
@@ -153,33 +165,41 @@ export default function Endpoints() {
         </div>
       )}
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="hidden">
-          <TabsTrigger value="list">Endpoint List</TabsTrigger>
-          <TabsTrigger value="form">Create/Edit Endpoint</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="list" className="mt-0">
-          <EndpointList
-            endpoints={endpoints}
-            isLoading={isLoading}
-            onEdit={startEditing}
-            onDelete={deleteEndpoint}
-            onToggle={handleToggleEndpoint}
-            onTrigger={handleTriggerEndpoint}
-          />
-        </TabsContent>
-        
-        <TabsContent value="form" className="mt-0">
-          {(isCreating || editEndpoint) && (
-            <EndpointForm
-              initialData={editEndpoint || undefined}
-              onSubmit={editEndpoint ? handleUpdateSubmit : handleCreateSubmit}
-              isSubmitting={editEndpoint ? isSubmittingUpdate : isSubmittingCreate}
-            />
-          )}
-        </TabsContent>
-      </Tabs>
+      <Card>
+        <CardContent className="p-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="hidden">
+              <TabsTrigger value="list">Endpoint List</TabsTrigger>
+              <TabsTrigger value="form">Create/Edit Endpoint</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="list" className="mt-0">
+              {endpoints.length === 0 && !isLoading ? (
+                renderEmptyState()
+              ) : (
+                <EndpointList
+                  endpoints={endpoints}
+                  isLoading={isLoading}
+                  onEdit={startEditing}
+                  onDelete={deleteEndpoint}
+                  onToggle={handleToggleEndpoint}
+                  onTrigger={handleTriggerEndpoint}
+                />
+              )}
+            </TabsContent>
+            
+            <TabsContent value="form" className="mt-0">
+              {(isCreating || editEndpoint) && (
+                <EndpointForm
+                  initialData={editEndpoint || undefined}
+                  onSubmit={editEndpoint ? handleUpdateSubmit : handleCreateSubmit}
+                  isSubmitting={editEndpoint ? isSubmittingUpdate : isSubmittingCreate}
+                />
+              )}
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
 
       {!organizationId && (
         <div className="p-4 bg-amber-50 border border-amber-200 rounded-md mt-4">

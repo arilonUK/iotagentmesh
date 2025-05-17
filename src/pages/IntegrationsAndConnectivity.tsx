@@ -5,9 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ActionScheduler } from '@/components/actions/ActionScheduler';
 import { ConditionalTriggers } from '@/components/actions/ConditionalTriggers';
 import { ActionTemplates } from '@/components/actions/ActionTemplates';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import ApiKeyManagement from './ApiKeyManagement';
+import Endpoints from './Endpoints';
 
 export default function IntegrationsAndConnectivity() {
   const [activeTab, setActiveTab] = useState('endpoints');
+  const navigate = useNavigate();
   
   return (
     <div className="space-y-6">
@@ -28,41 +34,11 @@ export default function IntegrationsAndConnectivity() {
         </TabsList>
         
         <TabsContent value="endpoints" className="mt-0">
-          <Card>
-            <CardHeader>
-              <CardTitle>Webhooks & External Endpoints</CardTitle>
-              <CardDescription>
-                Configure external services to receive data from your devices
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-6">
-              {/* Replace iframe with direct component inclusion */}
-              <div className="w-full min-h-[700px]">
-                {/* This is where we'll render the Endpoints component directly */}
-                <iframe 
-                  src="/dashboard/endpoints" 
-                  className="hidden" // Hide the iframe that was causing duplication
-                  title="Endpoints configuration"
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <Endpoints />
         </TabsContent>
         
         <TabsContent value="api-keys" className="mt-0">
-          <Card>
-            <CardHeader>
-              <CardTitle>API Keys</CardTitle>
-              <CardDescription>
-                Manage API keys for integrating with external services
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="w-full min-h-[600px]">
-                {/* Inline content instead of iframe */}
-              </div>
-            </CardContent>
-          </Card>
+          <ApiKeyManagement />
         </TabsContent>
         
         <TabsContent value="oauth" className="mt-0">
@@ -74,8 +50,17 @@ export default function IntegrationsAndConnectivity() {
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="w-full min-h-[600px]">
-                {/* Inline content instead of iframe */}
+              <div className="flex justify-between items-center mb-6">
+                <p className="text-muted-foreground">Manage your OAuth connections to external services</p>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" /> Add OAuth Connection
+                </Button>
+              </div>
+              <div className="text-center py-10 border border-dashed rounded-lg">
+                <p className="text-muted-foreground">No OAuth connections configured yet</p>
+                <Button variant="outline" className="mt-4">
+                  <Plus className="mr-2 h-4 w-4" /> Add Your First Connection
+                </Button>
               </div>
             </CardContent>
           </Card>
