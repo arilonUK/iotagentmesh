@@ -20,11 +20,12 @@ const endpointFormSchema = z.object({
   configuration: z.record(z.any())
 });
 
-type EndpointFormProps = {
-  initialData?: Partial<EndpointFormData>;
+// Extended interface that includes the id field when editing
+interface EndpointFormProps {
+  initialData?: Partial<EndpointFormData> & { id?: string };
   onSubmit: (data: EndpointFormData) => void;
   isSubmitting?: boolean;
-};
+}
 
 export default function EndpointForm({ initialData, onSubmit, isSubmitting = false }: EndpointFormProps) {
   const [selectedType, setSelectedType] = useState<EndpointType>(
@@ -64,6 +65,7 @@ export default function EndpointForm({ initialData, onSubmit, isSubmitting = fal
     form.setValue('configuration', {});
   };
 
+  // Check if we're editing an existing endpoint
   const isEditing = !!initialData?.id;
 
   return (

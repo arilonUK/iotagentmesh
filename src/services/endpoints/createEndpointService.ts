@@ -51,6 +51,9 @@ export async function createEndpoint(
     console.log('Created endpoint successfully:', data);
     toast.success('Endpoint created successfully');
     
+    // Cast configuration appropriately based on type to satisfy TypeScript
+    const typedConfiguration = data.configuration as EndpointConfig['configuration'];
+    
     return {
       id: data.id,
       name: data.name,
@@ -58,7 +61,7 @@ export async function createEndpoint(
       type: data.type as any,
       organization_id: data.organization_id,
       enabled: data.enabled,
-      configuration: data.configuration,
+      configuration: typedConfiguration,
       created_at: data.created_at,
       updated_at: data.updated_at
     };
