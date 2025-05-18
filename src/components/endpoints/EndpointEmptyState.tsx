@@ -1,14 +1,22 @@
 
-import { AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
-export const EndpointEmptyState = () => {
+interface EndpointEmptyStateProps {
+  onCreateClick: () => void;
+}
+
+export const EndpointEmptyState = ({ onCreateClick }: EndpointEmptyStateProps) => {
   return (
-    <div className="text-center py-12 border rounded-lg bg-muted/10">
-      <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground" />
-      <h3 className="mt-4 text-lg font-medium">No endpoints found</h3>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Get started by creating your first endpoint.
+    <div className="text-center py-12 border border-dashed rounded-lg">
+      <h3 className="text-lg font-medium mb-2">No endpoints configured yet</h3>
+      <p className="text-muted-foreground mb-6">
+        Add your first endpoint to connect with external services
       </p>
+      <Button onClick={onCreateClick}>
+        <Plus className="mr-2 h-4 w-4" />
+        Create Your First Endpoint
+      </Button>
     </div>
   );
 };

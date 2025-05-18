@@ -13,6 +13,7 @@ interface EndpointListProps {
   onDelete: (id: string) => void;
   onToggle: (id: string, enabled: boolean) => void;
   onTrigger: (id: string) => void;
+  onCreateClick: () => void;
 }
 
 export default function EndpointList({
@@ -21,7 +22,8 @@ export default function EndpointList({
   onEdit,
   onDelete,
   onToggle,
-  onTrigger
+  onTrigger,
+  onCreateClick
 }: EndpointListProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -43,7 +45,7 @@ export default function EndpointList({
   }
 
   if (!endpoints.length) {
-    return <EndpointEmptyState />;
+    return <EndpointEmptyState onCreateClick={onCreateClick} />;
   }
 
   return (

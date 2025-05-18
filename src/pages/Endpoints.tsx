@@ -127,17 +127,6 @@ export default function Endpoints() {
     setActiveTab('list');
   };
 
-  const renderEmptyState = () => (
-    <div className="text-center py-10 border border-dashed rounded-lg">
-      <h3 className="text-lg font-medium mb-2">No endpoints configured yet</h3>
-      <p className="text-muted-foreground mb-6">Add your first endpoint to connect with external services</p>
-      <Button onClick={startCreating}>
-        <Plus className="mr-2 h-4 w-4" />
-        Create Your First Endpoint
-      </Button>
-    </div>
-  );
-
   return (
     <div className="space-y-8">
       {!isEmbedded && (
@@ -174,18 +163,15 @@ export default function Endpoints() {
             </TabsList>
             
             <TabsContent value="list" className="mt-0">
-              {endpoints.length === 0 && !isLoading ? (
-                renderEmptyState()
-              ) : (
-                <EndpointList
-                  endpoints={endpoints}
-                  isLoading={isLoading}
-                  onEdit={startEditing}
-                  onDelete={deleteEndpoint}
-                  onToggle={handleToggleEndpoint}
-                  onTrigger={handleTriggerEndpoint}
-                />
-              )}
+              <EndpointList
+                endpoints={endpoints}
+                isLoading={isLoading}
+                onEdit={startEditing}
+                onDelete={deleteEndpoint}
+                onToggle={handleToggleEndpoint}
+                onTrigger={handleTriggerEndpoint}
+                onCreateClick={startCreating}
+              />
             </TabsContent>
             
             <TabsContent value="form" className="mt-0">
