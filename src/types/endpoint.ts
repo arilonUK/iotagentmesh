@@ -54,6 +54,7 @@ export interface WhatsappEndpointConfig {
 }
 
 export interface EndpointFormData {
+  id?: string; // Added for editing
   name: string;
   description?: string;
   type: EndpointType;
