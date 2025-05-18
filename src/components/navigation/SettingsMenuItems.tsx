@@ -1,106 +1,52 @@
 
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import { cn } from "@/lib/utils";
-import { Icons } from "@/components/icons";
-import {
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-} from "@/components/ui/sidebar";
-import { hasPermission, PERMISSIONS } from "@/lib/permissions";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import { Users, Settings, User, Shield } from 'lucide-react';
 
-interface SettingsMenuItemsProps {
-  userRole: string | null;
-}
-
-export function SettingsMenuItems({ userRole }: SettingsMenuItemsProps) {
-  const { pathname } = useLocation();
-  
-  // Check permissions
-  const canManageTeam = hasPermission(userRole, PERMISSIONS.MANAGE_TEAM);
-  const canManageOrganization = hasPermission(userRole, PERMISSIONS.MANAGE_ORGANIZATION);
-  
+const SettingsMenuItems = () => {
   return (
-    <SidebarMenu className="list-none p-0 m-0">
-      <SidebarMenuItem className="list-none">
-        <SidebarMenuButton 
-          asChild 
-          isActive={pathname === "/dashboard/profile"} 
-          tooltip="Profile"
-        >
-          <Link to="/dashboard/profile" className={cn(
-            "flex items-center gap-3 w-full",
-            pathname === "/dashboard/profile" && "font-medium"
-          )}>
-            <Icons.user className="h-4 w-4" />
-            <span>Profile Settings</span>
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      
-      <SidebarMenuItem className="list-none">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div>
-                <SidebarMenuButton 
-                  asChild 
-                  isActive={pathname === "/dashboard/team"} 
-                  tooltip="Team"
-                  disabled={!canManageTeam && userRole !== null}
-                >
-                  <Link to="/dashboard/team" className={cn(
-                    "flex items-center gap-3 w-full",
-                    pathname === "/dashboard/team" && "font-medium",
-                    (!canManageTeam && userRole !== null) && "opacity-50 cursor-not-allowed pointer-events-none"
-                  )}>
-                    <Icons.users className="h-4 w-4" />
-                    <span>Team Management</span>
-                  </Link>
-                </SidebarMenuButton>
-              </div>
-            </TooltipTrigger>
-            {!canManageTeam && userRole !== null && (
-              <TooltipContent>
-                <p>You need admin or owner permissions to manage team</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </TooltipProvider>
-      </SidebarMenuItem>
-
-      <SidebarMenuItem className="list-none">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div>
-                <SidebarMenuButton 
-                  asChild 
-                  isActive={pathname === "/dashboard/organization"} 
-                  tooltip="Organization"
-                  disabled={!canManageOrganization && userRole !== null}
-                >
-                  <Link to="/dashboard/organization" className={cn(
-                    "flex items-center gap-3 w-full",
-                    pathname === "/dashboard/organization" && "font-medium",
-                    (!canManageOrganization && userRole !== null) && "opacity-50 cursor-not-allowed pointer-events-none"
-                  )}>
-                    <Icons.building className="h-4 w-4" />
-                    <span>Organization Settings</span>
-                  </Link>
-                </SidebarMenuButton>
-              </div>
-            </TooltipTrigger>
-            {!canManageOrganization && userRole !== null && (
-              <TooltipContent>
-                <p>Only organization owners can access organization settings</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </TooltipProvider>
-      </SidebarMenuItem>
-    </SidebarMenu>
+    <div className="space-y-1">
+      <NavLink
+        to="/dashboard/profile"
+        className={({ isActive }) =>
+          `flex items-center px-3 py-2 text-sm rounded-md transition-colors ${
+            isActive
+              ? 'bg-accent text-accent-foreground'
+              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+          }`
+        }
+      >
+        <User className="mr-2 h-4 w-4" />
+        <span>Profile</span>
+      </NavLink>
+      <NavLink
+        to="/dashboard/team"
+        className={({ isActive }) =>
+          `flex items-center px-3 py-2 text-sm rounded-md transition-colors ${
+            isActive
+              ? 'bg-accent text-accent-foreground'
+              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+          }`
+        }
+      >
+        <Users className="mr-2 h-4 w-4" />
+        <span>Team</span>
+      </NavLink>
+      <NavLink
+        to="/dashboard/settings"
+        className={({ isActive }) =>
+          `flex items-center px-3 py-2 text-sm rounded-md transition-colors ${
+            isActive
+              ? 'bg-accent text-accent-foreground'
+              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+          }`
+        }
+      >
+        <Settings className="mr-2 h-4 w-4" />
+        <span>Organization</span>
+      </NavLink>
+    </div>
   );
-}
+};
+
+export default SettingsMenuItems;

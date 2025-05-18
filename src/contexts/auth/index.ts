@@ -1,3 +1,3 @@
 
-export { useAuth, AuthProvider } from './AuthContext';
-export type { AuthContextType, Profile, Organization, OrganizationMember } from './types';
+// This file just re-exports from AuthContext.tsx
+export * from './AuthContext';
