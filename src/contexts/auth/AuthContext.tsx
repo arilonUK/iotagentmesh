@@ -1,9 +1,11 @@
+
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { organizationService } from '@/services/profile/organizationService';
 import { AuthContextType, UserOrganization, Profile, Organization } from './types';
 import { User, Session } from '@supabase/supabase-js';
+import { profileServices } from '@/services/profileServices';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -269,8 +271,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       if (!user) return null;
       
-      // Update profile logic would go here
-      await profileServices.updateProfile(profileData);
+      // Update profile using the profileServices
+      const updatedProfile = await profileServices.updateProfile(profileData);
       
       // Update the local state
       setProfile((currentProfile) => {
@@ -278,7 +280,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { ...currentProfile, ...profileData };
       });
       
-      return profile;
+      return updatedProfile;
     } catch (error) {
       console.error("Error updating profile:", error);
       return null;

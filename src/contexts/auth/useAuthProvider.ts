@@ -48,7 +48,7 @@ export const useAuthProvider = (): AuthContextType => {
     return authServices.signUp(email, password, metadata);
   };
 
-  const wrapUpdateProfile = async (profileData: Partial<Profile>) => {
+  const updateProfile = async (profileData: Partial<Profile>) => {
     if (!user?.id) return null;
     return profileServices.updateProfile(profileData);
   };
@@ -76,6 +76,6 @@ export const useAuthProvider = (): AuthContextType => {
     signIn: login,
     signUp: signup,
     signOut: authServices.signOut,
-    updateProfile: wrapUpdateProfile
+    updateProfile
   };
 };
