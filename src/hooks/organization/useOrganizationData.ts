@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Organization } from '@/contexts/auth/types';
+import { Database } from '@/integrations/supabase/types';
 
 // Define a role_type type to replace the Database reference
 type RoleType = 'owner' | 'admin' | 'member' | 'viewer';

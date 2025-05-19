@@ -22,7 +22,7 @@ export const authServices = {
       }
 
       toast.success('Signed in successfully!');
-      return undefined;
+      return { data };
     } catch (error: any) {
       console.error('Error signing in:', error);
       return { error };
@@ -48,7 +48,7 @@ export const authServices = {
       }
 
       toast.success('Account created! Check your email to verify your account.');
-      return undefined;
+      return { data };
     } catch (error: any) {
       console.error('Error signing up:', error);
       return { error };

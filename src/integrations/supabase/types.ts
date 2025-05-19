@@ -1359,6 +1359,10 @@ export type Database = {
         Args: { p_org_id: string; p_user_id: string }
         Returns: boolean
       }
+      is_org_member: {
+        Args: { org_id: string }
+        Returns: boolean
+      }
       is_org_member_bypass_rls: {
         Args: { p_org_id: string; p_user_id: string }
         Returns: boolean
