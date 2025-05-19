@@ -3,7 +3,11 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Users, Settings, User, Shield } from 'lucide-react';
 
-const SettingsMenuItems = () => {
+interface SettingsMenuItemsProps {
+  userRole?: string;
+}
+
+const SettingsMenuItems: React.FC<SettingsMenuItemsProps> = ({ userRole }) => {
   return (
     <div className="space-y-1">
       <NavLink
