@@ -1,6 +1,6 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useAuth } from "@/contexts/auth";
+import { Organization } from "@/contexts/auth/types";
 
 interface Organization {
   id: string;
@@ -23,7 +23,7 @@ export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
   let authOrganization;
   try {
     const auth = useAuth();
-    authOrganization = auth?.organization;
+    authOrganization = auth?.currentOrganization;
   } catch (error) {
     console.log('Auth context not available yet, using fallback organization');
   }

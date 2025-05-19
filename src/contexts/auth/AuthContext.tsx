@@ -3,21 +3,8 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { organizationService } from '@/services/profile/organizationService';
-import { UserOrganization } from './types';
-
-interface AuthContextType {
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  userId: string | null;
-  userEmail: string | null;
-  userRole: string | null;
-  organizations: UserOrganization[];
-  currentOrganization: UserOrganization | null;
-  login: (email: string, password: string) => Promise<{ error: any } | undefined>;
-  signup: (email: string, password: string, metadata?: any) => Promise<{ error: any } | undefined>;
-  logout: () => Promise<void>;
-  switchOrganization: (organizationId: string) => Promise<boolean>;
-}
+import { AuthContextType, UserOrganization, Profile, Organization } from './types';
+import { User, Session } from '@supabase/supabase-js';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -29,6 +16,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [organizations, setOrganizations] = useState<UserOrganization[]>([]);
   const [currentOrganization, setCurrentOrganization] = useState<UserOrganization | null>(null);
+  
+  // Additional states for extended AuthContextType
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [userOrganizations, setUserOrganizations] = useState<UserOrganization[]>([]);
+  
   const { toast } = useToast();
 
   useEffect(() => {
@@ -40,29 +36,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (error || !data?.user) {
           setIsAuthenticated(false);
           setIsLoading(false);
+          setLoading(false);
           return;
         }
 
         setIsAuthenticated(true);
         setUserId(data.user.id);
         setUserEmail(data.user.email);
+        setUser(data.user);
+        
+        // Get session
+        const { data: sessionData } = await supabase.auth.getSession();
+        setSession(sessionData.session);
         
         // Fetch user organizations
         const userOrgs = await organizationService.getUserOrganizations(data.user.id);
         setOrganizations(userOrgs);
+        setUserOrganizations(userOrgs);
         
         // Set current organization based on default
         const defaultOrg = userOrgs.find(org => org.is_default) || userOrgs[0];
         if (defaultOrg) {
           setCurrentOrganization(defaultOrg);
           setUserRole(defaultOrg.role);
+          
+          // Set organization for extended context
+          setOrganization({
+            id: defaultOrg.id,
+            name: defaultOrg.name,
+            slug: defaultOrg.slug
+          });
         }
 
         setIsLoading(false);
+        setLoading(false);
       } catch (error) {
         console.error("Error checking authentication:", error);
         setIsAuthenticated(false);
         setIsLoading(false);
+        setLoading(false);
       }
     };
 
@@ -73,16 +85,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setIsAuthenticated(true);
           setUserId(session.user.id);
           setUserEmail(session.user.email);
+          setUser(session.user);
+          setSession(session);
           
           // Fetch user organizations
           const userOrgs = await organizationService.getUserOrganizations(session.user.id);
           setOrganizations(userOrgs);
+          setUserOrganizations(userOrgs);
           
           // Set current organization based on default
           const defaultOrg = userOrgs.find(org => org.is_default) || userOrgs[0];
           if (defaultOrg) {
             setCurrentOrganization(defaultOrg);
             setUserRole(defaultOrg.role);
+            
+            // Set organization for extended context
+            setOrganization({
+              id: defaultOrg.id,
+              name: defaultOrg.name,
+              slug: defaultOrg.slug
+            });
           }
         } else if (event === 'SIGNED_OUT') {
           setIsAuthenticated(false);
@@ -91,6 +113,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUserRole(null);
           setOrganizations([]);
           setCurrentOrganization(null);
+          setUser(null);
+          setSession(null);
+          setProfile(null);
+          setOrganization(null);
+          setUserOrganizations([]);
         }
       }
     );
@@ -134,6 +161,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const signIn = login; // Alias for login
+
   const signup = async (email: string, password: string, metadata?: any) => {
     try {
       const { error } = await supabase.auth.signUp({
@@ -168,6 +197,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return { error };
     }
   };
+  
+  const signUp = signup; // Alias for signup
 
   const logout = async () => {
     try {
@@ -186,6 +217,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
     }
   };
+  
+  const signOut = logout; // Alias for logout
 
   const switchOrganization = async (organizationId: string) => {
     try {
@@ -205,6 +238,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               is_default: o.id === organizationId
             }))
           );
+          
+          // Update organization for extended context
+          setOrganization({
+            id: org.id,
+            name: org.name,
+            slug: org.slug
+          });
+          
+          // Also update userOrganizations to stay in sync
+          setUserOrganizations(prevOrgs => 
+            prevOrgs.map(o => ({
+              ...o,
+              is_default: o.id === organizationId
+            }))
+          );
         }
       }
       
@@ -214,8 +262,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return false;
     }
   };
+  
+  // Mock implementation of updateProfile
+  const updateProfile = async (userId: string, profileData: Partial<Profile>): Promise<Profile | null> => {
+    try {
+      // Update profile logic would go here
+      // For now, just update the local state
+      setProfile((currentProfile) => {
+        if (!currentProfile) return null;
+        return { ...currentProfile, ...profileData };
+      });
+      
+      return profile;
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      return null;
+    }
+  };
 
-  const value = {
+  const value: AuthContextType = {
     isAuthenticated,
     isLoading,
     userId,
@@ -226,7 +291,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     login,
     signup,
     logout,
-    switchOrganization
+    switchOrganization,
+    
+    // Extended context properties
+    session,
+    user,
+    profile,
+    organization,
+    userOrganizations,
+    loading,
+    signIn,
+    signUp,
+    signOut,
+    updateProfile
   };
 
   return (

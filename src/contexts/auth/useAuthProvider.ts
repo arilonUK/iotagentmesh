@@ -1,14 +1,23 @@
 
-import { AuthContextType } from './types';
+import { useState } from 'react';
+import { AuthContextType, UserOrganization, Profile, Organization } from './types';
 import { authServices } from './authServices';
 import { profileServices } from '@/services/profileServices';
 import { useSessionManager } from './useSessionManager';
 import { useOrganizationManager } from '@/hooks/useOrganizationManager';
 import { useOrganizationLoader } from '@/hooks/useOrganizationLoader';
+import { User, Session } from '@supabase/supabase-js';
 
 export const useAuthProvider = (): AuthContextType => {
-  // Remove useNavigate hook from here
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [organizations, setOrganizations] = useState<UserOrganization[]>([]);
+  const [currentOrganization, setCurrentOrganization] = useState<UserOrganization | null>(null);
   
+  // Extended state
   const {
     session,
     user,
@@ -19,7 +28,7 @@ export const useAuthProvider = (): AuthContextType => {
 
   const {
     organization,
-    userRole,
+    userRole: orgUserRole,
     switchOrganization,
     fetchOrganizationData,
   } = useOrganizationManager(user?.id);
@@ -31,17 +40,28 @@ export const useAuthProvider = (): AuthContextType => {
   });
 
   return {
+    isAuthenticated,
+    isLoading,
+    userId,
+    userEmail,
+    userRole: userRole || orgUserRole,
+    organizations,
+    currentOrganization,
+    login: authServices.signIn,
+    signup: authServices.signUp,
+    logout: authServices.signOut,
+    switchOrganization,
+    
+    // Extended context properties
     session,
     user,
     profile,
     organization,
-    userRole,
     userOrganizations,
     loading,
-    signUp: authServices.signUp,
     signIn: authServices.signIn,
+    signUp: authServices.signUp,
     signOut: authServices.signOut,
-    updateProfile: profileServices.updateProfile,
-    switchOrganization
+    updateProfile: profileServices.updateProfile
   };
 };

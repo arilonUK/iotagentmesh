@@ -1,9 +1,6 @@
-
-import { useState, useEffect } from 'react';
-import { toast } from 'sonner';
-import { Organization } from '@/contexts/auth/types';
+import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Database } from '@/integrations/supabase/types';
+import { Organization, UserOrganization } from '@/contexts/auth/types';
 
 export type OrganizationDataReturn = {
   organization: Organization | null;

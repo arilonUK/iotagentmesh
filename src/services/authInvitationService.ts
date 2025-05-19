@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
-import { createAuditLog } from '@/services/audit/createAuditLog';
 import { UserData } from '@/contexts/auth/types';
 
 /**

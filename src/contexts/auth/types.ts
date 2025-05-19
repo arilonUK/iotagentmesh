@@ -1,4 +1,6 @@
 
+import { User, Session } from '@supabase/supabase-js';
+
 export interface UserOrganization {
   id: string;
   name: string;
@@ -7,4 +9,53 @@ export interface UserOrganization {
   is_default: boolean;
 }
 
-export type RoleType = 'owner' | 'admin' | 'member';
+export interface Organization {
+  id: string;
+  name: string;
+  slug?: string;
+  logo?: string;
+}
+
+export interface Profile {
+  id: string;
+  username?: string;
+  full_name?: string;
+  avatar_url?: string;
+  default_organization_id?: string;
+  updated_at?: string;
+}
+
+export interface UserData {
+  username?: string;
+  full_name?: string;
+  organization_name?: string;
+  avatar_url?: string;
+}
+
+export type RoleType = 'owner' | 'admin' | 'member' | 'viewer';
+
+export interface AuthContextType {
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  userId: string | null;
+  userEmail: string | null;
+  userRole: string | null;
+  organizations: UserOrganization[];
+  currentOrganization: UserOrganization | null;
+  login: (email: string, password: string) => Promise<{ error: any } | undefined>;
+  signup: (email: string, password: string, metadata?: any) => Promise<{ error: any } | undefined>;
+  logout: () => Promise<void>;
+  switchOrganization: (organizationId: string) => Promise<boolean>;
+  
+  // Additional properties needed based on errors
+  session: Session | null;
+  user: User | null;
+  profile: Profile | null;
+  organization: Organization | null;
+  userOrganizations: UserOrganization[];
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, metadata?: any) => Promise<void>;
+  signOut: () => Promise<void>;
+  updateProfile: (userId: string, profileData: Partial<Profile>) => Promise<Profile | null>;
+}
