@@ -24,6 +24,9 @@ export const profileUpdateService = {
       toast('Profile updated successfully', {
         style: { backgroundColor: 'green', color: 'white' }
       });
+      
+      // Return the updated profile with the new data
+      return { ...profileData, id: user.id } as Profile;
     } catch (error: any) {
       console.error('Error updating profile:', error);
       throw error;

@@ -1,6 +1,10 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Organization, UserOrganization } from '@/contexts/auth/types';
+import { Organization } from '@/contexts/auth/types';
+
+// Define a role_type type to replace the Database reference
+type RoleType = 'owner' | 'admin' | 'member' | 'viewer';
 
 export type OrganizationDataReturn = {
   organization: Organization | null;
@@ -37,8 +41,6 @@ export const useOrganizationData = (): OrganizationDataReturn => {
             name: orgData.name,
             slug: orgData.slug,
             logo: null, // Set default null since it's not in the RPC return
-            created_at: orgData.created_at,
-            updated_at: orgData.updated_at
           });
           
           setUserRole(orgData.role);
@@ -66,7 +68,7 @@ export const useOrganizationData = (): OrganizationDataReturn => {
     try {
       const { data: orgData, error: orgError } = await supabase
         .from('organizations')
-        .select('id, name, slug, created_at, updated_at')
+        .select('id, name, slug')
         .eq('id', orgId)
         .single();
 
@@ -79,8 +81,6 @@ export const useOrganizationData = (): OrganizationDataReturn => {
           name: orgData.name,
           slug: orgData.slug,
           logo: null, // Set default null since it's not in the database query
-          created_at: orgData.created_at,
-          updated_at: orgData.updated_at
         });
         console.log('Organization data fetched successfully:', orgData.name);
       }
@@ -114,7 +114,7 @@ export const useOrganizationData = (): OrganizationDataReturn => {
               .insert({
                 organization_id: orgId,
                 user_id: userId,
-                role: 'member' as Database['public']['Enums']['role_type']  // Default role
+                role: 'member' as RoleType // Use our own type definition
               });
               
             if (createRoleError) {

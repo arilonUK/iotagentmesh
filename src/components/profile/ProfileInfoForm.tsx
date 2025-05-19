@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { Button } from '@/components/ui/button';
@@ -58,6 +59,7 @@ const ProfileInfoForm = () => {
     setError(null);
 
     try {
+      // Pass only the form data to updateProfile as it now expects only one parameter
       await updateProfile(formData);
       toast('Profile updated successfully', {
         style: { backgroundColor: 'green', color: 'white' }

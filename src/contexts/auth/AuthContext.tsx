@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -150,6 +149,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         description: "Welcome back!",
         variant: "default"
       });
+      return undefined;
 
     } catch (error) {
       toast({
@@ -187,6 +187,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         description: "Please check your email for verification",
         variant: "default"
       });
+      return undefined;
 
     } catch (error) {
       toast({
@@ -263,11 +264,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
   
-  // Mock implementation of updateProfile
-  const updateProfile = async (userId: string, profileData: Partial<Profile>): Promise<Profile | null> => {
+  // Update the updateProfile function signature to match the one in types.ts
+  const updateProfile = async (profileData: Partial<Profile>): Promise<Profile | null> => {
     try {
+      if (!user) return null;
+      
       // Update profile logic would go here
-      // For now, just update the local state
+      await profileServices.updateProfile(profileData);
+      
+      // Update the local state
       setProfile((currentProfile) => {
         if (!currentProfile) return null;
         return { ...currentProfile, ...profileData };

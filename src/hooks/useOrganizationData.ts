@@ -1,9 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Organization } from '@/contexts/auth/types';
 import { supabase } from '@/integrations/supabase/client';
-import { Database } from '@/integrations/supabase/types';
 
 export type OrganizationDataReturn = {
   organization: Organization | null;
@@ -103,7 +101,7 @@ export const useOrganizationData = (): OrganizationDataReturn => {
               .insert({
                 organization_id: orgId,
                 user_id: userId,
-                role: 'member' as Database['public']['Enums']['role_type']  // Default role
+                role: 'member' as any  // Default role
               });
               
             if (createRoleError) {

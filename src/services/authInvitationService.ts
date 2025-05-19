@@ -4,6 +4,26 @@ import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import { UserData } from '@/contexts/auth/types';
 
+// Create a simplified audit log function to replace the missing createAuditLog function
+const createAuditLog = async (
+  organizationId: string,
+  action: string,
+  details: Record<string, any>
+) => {
+  try {
+    await supabase.rpc('create_audit_log_entry', {
+      p_organization_id: organizationId,
+      p_user_id: (await supabase.auth.getUser()).data.user?.id,
+      p_action: action,
+      p_details: details
+    });
+    return true;
+  } catch (error) {
+    console.error('Error creating audit log:', error);
+    return false;
+  }
+};
+
 /**
  * Services related to authentication and invitation handling
  */

@@ -14,6 +14,8 @@ export interface Organization {
   name: string;
   slug?: string;
   logo?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Profile {
@@ -54,8 +56,8 @@ export interface AuthContextType {
   organization: Organization | null;
   userOrganizations: UserOrganization[];
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, metadata?: any) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<{ error: any } | undefined>;
+  signUp: (email: string, password: string, metadata?: any) => Promise<{ error: any } | undefined>;
   signOut: () => Promise<void>;
-  updateProfile: (userId: string, profileData: Partial<Profile>) => Promise<Profile | null>;
+  updateProfile: (profileData: Partial<Profile>) => Promise<Profile | null>;
 }

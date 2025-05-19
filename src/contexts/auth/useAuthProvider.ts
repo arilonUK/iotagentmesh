@@ -39,6 +39,20 @@ export const useAuthProvider = (): AuthContextType => {
     fetchOrganizationData
   });
 
+  // Wrapper functions to match the expected return types
+  const login = async (email: string, password: string) => {
+    return authServices.signIn(email, password);
+  };
+
+  const signup = async (email: string, password: string, metadata?: any) => {
+    return authServices.signUp(email, password, metadata);
+  };
+
+  const wrapUpdateProfile = async (profileData: Partial<Profile>) => {
+    if (!user?.id) return null;
+    return profileServices.updateProfile(profileData);
+  };
+
   return {
     isAuthenticated,
     isLoading,
@@ -47,8 +61,8 @@ export const useAuthProvider = (): AuthContextType => {
     userRole: userRole || orgUserRole,
     organizations,
     currentOrganization,
-    login: authServices.signIn,
-    signup: authServices.signUp,
+    login,
+    signup,
     logout: authServices.signOut,
     switchOrganization,
     
@@ -59,9 +73,9 @@ export const useAuthProvider = (): AuthContextType => {
     organization,
     userOrganizations,
     loading,
-    signIn: authServices.signIn,
-    signUp: authServices.signUp,
+    signIn: login,
+    signUp: signup,
     signOut: authServices.signOut,
-    updateProfile: profileServices.updateProfile
+    updateProfile: wrapUpdateProfile
   };
 };

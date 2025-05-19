@@ -1,7 +1,9 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useAuth } from "@/contexts/auth";
-import { Organization } from "@/contexts/auth/types";
+import { Organization as OrgType } from "@/contexts/auth/types";
 
+// Define a local interface for the organization context
 interface Organization {
   id: string;
   name: string;
