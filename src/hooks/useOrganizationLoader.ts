@@ -1,147 +1,59 @@
 
-import { useState, useEffect, useRef } from 'react';
-import { profileServices } from '@/services/profileServices';
-import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
-import { organizationSetupService } from '@/services/organizationSetupService';
-import { UserOrganization } from '@/contexts/auth/types';
+import { useState, useEffect } from 'react';
+import { UserOrganization, Profile } from '@/contexts/auth/types';
+import { organizationService } from '@/services/profile/organizationService';
 
 type OrganizationLoaderProps = {
-  userId?: string;
-  profile: any | null;
+  userId: string | undefined;
+  profile: Profile | null;
   fetchOrganizationData: (orgId: string, userId: string) => Promise<void>;
 };
 
 export const useOrganizationLoader = ({ userId, profile, fetchOrganizationData }: OrganizationLoaderProps) => {
   const [userOrganizations, setUserOrganizations] = useState<UserOrganization[]>([]);
-  const orgsLoaded = useRef(false);
 
+  // Load initial organizations when userId or profile changes
   useEffect(() => {
-    const loadUserOrganizations = async () => {
-      if (userId && !orgsLoaded.current) {
-        console.log('Loading user organizations for', userId);
-        try {
-          const orgs = await profileServices.getUserOrganizations(userId);
-          console.log('User organizations loaded:', orgs);
-          
-          if (orgs && orgs.length > 0) {
-            setUserOrganizations(orgs);
-            orgsLoaded.current = true;
+    const loadOrganizations = async () => {
+      if (!userId) return;
+      
+      try {
+        console.log('Loading organizations for user:', userId);
+        const orgs = await organizationService.getUserOrganizations(userId);
+        
+        if (orgs && orgs.length > 0) {
+          console.log('Loaded user organizations:', orgs.length);
+          setUserOrganizations(orgs);
+
+          // If we have a profile with a default org, select it
+          if (profile?.default_organization_id) {
+            const defaultOrg = orgs.find(org => org.id === profile.default_organization_id);
             
-            if (profile?.default_organization_id) {
-              console.log('Loading default organization:', profile.default_organization_id);
-              await fetchOrganizationData(profile.default_organization_id, userId);
-            } else {
-              const defaultOrg = orgs.find(org => org.is_default) || orgs[0];
-              console.log('Using organization as default:', defaultOrg.id);
+            if (defaultOrg) {
+              console.log('Loading data for default organization:', defaultOrg.name);
               await fetchOrganizationData(defaultOrg.id, userId);
-              
-              if (!profile?.default_organization_id) {
-                try {
-                  await supabase
-                    .from('profiles')
-                    .update({ default_organization_id: defaultOrg.id })
-                    .eq('id', userId);
-                  
-                  console.log('Updated default organization to:', defaultOrg.id);
-                } catch (updateError) {
-                  console.error('Error updating default organization:', updateError);
-                }
-              }
+            } else if (orgs[0]) {
+              // Fallback to the first org if default not found
+              console.log('Default organization not found, using first organization:', orgs[0].name);
+              await fetchOrganizationData(orgs[0].id, userId);
             }
-          } else {
-            console.log('No organizations found for user, creating default organization');
-            await createDefaultOrganization(userId);
+          } else if (orgs[0]) {
+            // No default org set in profile, use the first one
+            console.log('No default organization set, using first organization:', orgs[0].name);
+            await fetchOrganizationData(orgs[0].id, userId);
           }
-        } catch (error) {
-          console.error('Error loading user organizations:', error);
-          toast('Error loading your organizations', {
-            style: { backgroundColor: 'red', color: 'white' }
-          });
+        } else {
+          console.log('No organizations found for user');
         }
+      } catch (error) {
+        console.error('Error loading organizations:', error);
       }
     };
 
-    loadUserOrganizations();
-  }, [userId, profile]);
-
-  useEffect(() => {
-    if (!userId) {
-      orgsLoaded.current = false;
+    if (userId) {
+      loadOrganizations();
     }
-  }, [userId]);
-
-  const createDefaultOrganization = async (userId: string) => {
-    try {
-      const { data: userData } = await supabase.auth.getUser();
-      
-      if (!userData.user) {
-        console.error('No user found');
-        return;
-      }
-      
-      const orgName = userData.user.email?.split('@')[0] + "'s Organization";
-      const orgSlug = 'org-' + Math.random().toString(36).substring(2, 10);
-      
-      const { data: newOrg, error: orgError } = await supabase
-        .from('organizations')
-        .insert({
-          name: orgName,
-          slug: orgSlug
-        })
-        .select()
-        .single();
-        
-      if (orgError) {
-        console.error('Error creating default organization:', orgError);
-        throw orgError;
-      }
-      
-      console.log('Created default organization:', newOrg.id);
-      
-      const { error: memberError } = await supabase
-        .from('organization_members')
-        .insert({
-          organization_id: newOrg.id,
-          user_id: userId,
-          role: 'owner'
-        });
-        
-      if (memberError) {
-        console.error('Error adding user to organization:', memberError);
-        throw memberError;
-      }
-      
-      console.log('User added as owner to organization:', newOrg.id);
-      
-      await organizationSetupService.setupDefaultPermissions(newOrg.id);
-      
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ default_organization_id: newOrg.id })
-        .eq('id', userId);
-        
-      if (updateError) {
-        console.error('Error updating default organization:', updateError);
-      }
-      
-      const updatedOrgs = await profileServices.getUserOrganizations(userId);
-      if (updatedOrgs && updatedOrgs.length > 0) {
-        setUserOrganizations(updatedOrgs);
-        orgsLoaded.current = true;
-        await fetchOrganizationData(newOrg.id, userId);
-        
-        toast('Default organization created', {
-          style: { backgroundColor: 'green', color: 'white' }
-        });
-      }
-    } catch (createError) {
-      console.error('Error in organization creation flow:', createError);
-      toast('Error setting up your organization', {
-        style: { backgroundColor: 'red', color: 'white' }
-      });
-    }
-  };
+  }, [userId, profile, fetchOrganizationData]);
 
   return { userOrganizations, setUserOrganizations };
 };

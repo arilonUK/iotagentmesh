@@ -7,6 +7,7 @@ import { profileServices } from '@/services/profileServices';
 export type ProfileManagerReturn = {
   profile: Profile | null;
   fetchProfile: (userId: string) => Promise<void>;
+  setProfile: React.Dispatch<React.SetStateAction<Profile | null>>;
 };
 
 export const useProfileManager = (): ProfileManagerReturn => {
@@ -80,5 +81,6 @@ export const useProfileManager = (): ProfileManagerReturn => {
   return {
     profile,
     fetchProfile,
+    setProfile
   };
 };

@@ -7,8 +7,23 @@ import { useSessionManager } from './useSessionManager';
 import { useOrganizationManager } from '@/hooks/useOrganizationManager';
 import { useOrganizationLoader } from '@/hooks/useOrganizationLoader';
 import { User, Session } from '@supabase/supabase-js';
+import { useToast } from '@/hooks/use-toast';
 
-export const useAuthProvider = (): AuthContextType => {
+export const useAuthProvider = (): AuthContextType & {
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setUserId: React.Dispatch<React.SetStateAction<string | null>>;
+  setUserEmail: React.Dispatch<React.SetStateAction<string | null>>;
+  setUserRole: React.Dispatch<React.SetStateAction<string | null>>;
+  setOrganizations: React.Dispatch<React.SetStateAction<UserOrganization[]>>;
+  setCurrentOrganization: React.Dispatch<React.SetStateAction<UserOrganization | null>>;
+  setSession: React.Dispatch<React.SetStateAction<Session | null>>;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  setProfile: React.Dispatch<React.SetStateAction<Profile | null>>;
+  setOrganization: React.Dispatch<React.SetStateAction<Organization | null>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setUserOrganizations: React.Dispatch<React.SetStateAction<UserOrganization[]>>;
+} => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userId, setUserId] = useState<string | null>(null);
@@ -23,7 +38,11 @@ export const useAuthProvider = (): AuthContextType => {
     user,
     profile,
     loading,
-    fetchProfile
+    fetchProfile,
+    setSession,
+    setUser,
+    setProfile,
+    setLoading
   } = useSessionManager();
 
   const {
@@ -31,13 +50,19 @@ export const useAuthProvider = (): AuthContextType => {
     userRole: orgUserRole,
     switchOrganization,
     fetchOrganizationData,
+    setOrganization,
   } = useOrganizationManager(user?.id);
 
-  const { userOrganizations, setUserOrganizations } = useOrganizationLoader({
+  const { 
+    userOrganizations, 
+    setUserOrganizations 
+  } = useOrganizationLoader({
     userId: user?.id,
     profile,
     fetchOrganizationData
   });
+
+  const { toast } = useToast();
 
   // Wrapper functions to match the expected return types
   const login = async (email: string, password: string) => {
@@ -76,6 +101,21 @@ export const useAuthProvider = (): AuthContextType => {
     signIn: login,
     signUp: signup,
     signOut: authServices.signOut,
-    updateProfile
+    updateProfile,
+
+    // State setters for AuthProvider
+    setIsAuthenticated,
+    setIsLoading,
+    setUserId,
+    setUserEmail,
+    setUserRole,
+    setOrganizations,
+    setCurrentOrganization,
+    setSession,
+    setUser,
+    setProfile,
+    setOrganization,
+    setLoading,
+    setUserOrganizations,
   };
 };

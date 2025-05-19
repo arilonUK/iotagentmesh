@@ -11,11 +11,28 @@ export type SessionManagerReturn = {
   profile: Profile | null;
   loading: boolean;
   fetchProfile: (userId: string) => Promise<void>;
+  setSession: React.Dispatch<React.SetStateAction<Session | null>>;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  setProfile: React.Dispatch<React.SetStateAction<Profile | null>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export const useSessionManager = (): SessionManagerReturn => {
-  const { session, user, loading } = useAuthSession();
-  const { profile, fetchProfile } = useProfileManager();
+  const { 
+    session, 
+    user, 
+    loading, 
+    setSession,
+    setUser,
+    setLoading
+  } = useAuthSession();
+  
+  const { 
+    profile, 
+    fetchProfile,
+    setProfile
+  } = useProfileManager();
+  
   const [lastUserId, setLastUserId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -40,5 +57,9 @@ export const useSessionManager = (): SessionManagerReturn => {
     profile,
     loading,
     fetchProfile,
+    setSession,
+    setUser,
+    setProfile,
+    setLoading,
   };
 };
