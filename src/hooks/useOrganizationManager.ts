@@ -12,10 +12,11 @@ export type OrganizationManagerReturn = {
   switchOrganization: (organizationId: string) => Promise<boolean>;
   fetchOrganizationData: (orgId: string, userId: string) => Promise<void>;
   setUserOrganizations: (orgs: UserOrganization[]) => void;
+  setOrganization: React.Dispatch<React.SetStateAction<Organization | null>>;
 };
 
 export const useOrganizationManager = (userId: string | undefined): OrganizationManagerReturn => {
-  const { organization, userRole, fetchOrganizationData } = useOrganizationData();
+  const { organization, userRole, fetchOrganizationData, setOrganization } = useOrganizationData();
   const { switchOrganization: switchOrg, isProcessingSwitch } = useOrganizationSwitcher();
   const { userOrganizations, setUserOrganizations } = useOrganizationList();
 
@@ -48,5 +49,6 @@ export const useOrganizationManager = (userId: string | undefined): Organization
     switchOrganization,
     fetchOrganizationData,
     setUserOrganizations,
+    setOrganization,
   };
 };

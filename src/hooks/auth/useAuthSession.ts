@@ -7,6 +7,9 @@ export type AuthSessionReturn = {
   session: Session | null;
   user: User | null;
   loading: boolean;
+  setSession: React.Dispatch<React.SetStateAction<Session | null>>;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export const useAuthSession = (): AuthSessionReturn => {
@@ -56,6 +59,9 @@ export const useAuthSession = (): AuthSessionReturn => {
   return {
     session,
     user,
-    loading
+    loading,
+    setSession,
+    setUser,
+    setLoading
   };
 };

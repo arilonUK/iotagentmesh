@@ -1,16 +1,13 @@
-
-import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { Organization } from '@/contexts/auth/types';
-import { Database } from '@/integrations/supabase/types';
-
-// Define a role_type type to replace the Database reference
-type RoleType = 'owner' | 'admin' | 'member' | 'viewer';
+import { supabase } from '@/integrations/supabase/client';
 
 export type OrganizationDataReturn = {
   organization: Organization | null;
   userRole: string | null;
   fetchOrganizationData: (orgId: string, userId: string) => Promise<void>;
+  setOrganization: React.Dispatch<React.SetStateAction<Organization | null>>;
 };
 
 export const useOrganizationData = (): OrganizationDataReturn => {
@@ -26,70 +23,60 @@ export const useOrganizationData = (): OrganizationDataReturn => {
 
       console.log(`Fetching organization data for org: ${orgId}, user: ${userId}`);
       
-      // Use RPC function to avoid RLS policy recursion issues
+      // Get the user's role directly using the bypass RLS function
       try {
-        const { data, error } = await supabase.rpc('get_organization_with_role', {
-          p_org_id: orgId,
-          p_user_id: userId
-        });
+        const { data: userRoleData, error: userRoleError } = await supabase.rpc(
+          'get_user_organization_role_bypass_rls',
+          { p_org_id: orgId, p_user_id: userId }
+        );
         
-        if (error) {
-          console.error('Error fetching organization with role:', error);
-        } else if (data && data.length > 0) {
-          const orgData = data[0];
+        if (userRoleError) {
+          console.error('Error fetching user role with bypass function:', userRoleError);
+        } else if (userRoleData !== null) {
+          setUserRole(userRoleData);
+          console.log('User role fetched successfully using bypass function:', userRoleData);
+        }
+      } catch (roleError) {
+        console.error('Exception fetching user role with bypass function:', roleError);
+      }
+      
+      // Fetch organization details
+      try {
+        const { data: orgData, error: orgError } = await supabase
+          .from('organizations')
+          .select('id, name, slug, created_at, updated_at')
+          .eq('id', orgId)
+          .single();
+
+        if (orgError) {
+          console.error('Error fetching organization:', orgError);
+        } else if (orgData) {
+          // Set organization data immediately so UI can update
           setOrganization({
             id: orgData.id,
             name: orgData.name,
             slug: orgData.slug,
-            logo: null, // Set default null since it's not in the RPC return
+            logo: null, // Set default null since it's not in the database query
+            created_at: orgData.created_at,
+            updated_at: orgData.updated_at
           });
-          
-          setUserRole(orgData.role);
-          console.log('Organization and role data fetched successfully:', orgData.name, orgData.role);
-        } else {
-          console.log('No organization data found');
-          
-          // Fallback to separate queries if RPC fails to return data
-          await fetchOrganizationSeparately(orgId, userId);
+          console.log('Organization data fetched successfully:', orgData.name);
         }
-      } catch (rpcError) {
-        console.error('Error with RPC call:', rpcError);
-        
-        // Fallback to separate queries
-        await fetchOrganizationSeparately(orgId, userId);
+      } catch (orgFetchError) {
+        console.error('Exception fetching organization:', orgFetchError);
+      }
+      
+      // If we couldn't get the user's role using the bypass function, try other methods
+      if (!userRole) {
+        await fetchUserRoleFallback(orgId, userId);
       }
     } catch (error) {
       console.error('Error fetching organization data:', error);
     }
   };
   
-  // Separate function to fetch organization and role data using direct queries
-  const fetchOrganizationSeparately = async (orgId: string, userId: string) => {
-    // 1. First try to fetch the organization details
-    try {
-      const { data: orgData, error: orgError } = await supabase
-        .from('organizations')
-        .select('id, name, slug')
-        .eq('id', orgId)
-        .single();
-
-      if (orgError) {
-        console.error('Error fetching organization:', orgError);
-      } else if (orgData) {
-        // Set organization data immediately so UI can update
-        setOrganization({
-          id: orgData.id,
-          name: orgData.name,
-          slug: orgData.slug,
-          logo: null, // Set default null since it's not in the database query
-        });
-        console.log('Organization data fetched successfully:', orgData.name);
-      }
-    } catch (orgFetchError) {
-      console.error('Exception fetching organization:', orgFetchError);
-    }
-    
-    // 2. In a separate try/catch block, fetch the user's role directly
+  // Fallback method to fetch user role
+  const fetchUserRoleFallback = async (orgId: string, userId: string) => {
     try {
       const { data: memberData, error: memberError } = await supabase
         .from('organization_members')
@@ -115,7 +102,7 @@ export const useOrganizationData = (): OrganizationDataReturn => {
               .insert({
                 organization_id: orgId,
                 user_id: userId,
-                role: 'member' as RoleType // Use our own type definition
+                role: 'member' as any  // Default role
               });
               
             if (createRoleError) {
@@ -138,5 +125,6 @@ export const useOrganizationData = (): OrganizationDataReturn => {
     organization,
     userRole,
     fetchOrganizationData,
+    setOrganization
   };
 };
