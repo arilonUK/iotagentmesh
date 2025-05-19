@@ -44,8 +44,8 @@ export interface AuthContextType {
   userRole: string | null;
   organizations: UserOrganization[];
   currentOrganization: UserOrganization | null;
-  login: (email: string, password: string) => Promise<{ error: any } | undefined>;
-  signup: (email: string, password: string, metadata?: any) => Promise<{ error: any } | undefined>;
+  login: (email: string, password: string) => Promise<{ error?: any; data?: any } | undefined>;
+  signup: (email: string, password: string, metadata?: any) => Promise<{ error?: any; data?: any } | undefined>;
   logout: () => Promise<void>;
   switchOrganization: (organizationId: string) => Promise<boolean>;
   
@@ -56,8 +56,8 @@ export interface AuthContextType {
   organization: Organization | null;
   userOrganizations: UserOrganization[];
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any } | undefined>;
-  signUp: (email: string, password: string, metadata?: any) => Promise<{ error: any } | undefined>;
+  signIn: (email: string, password: string) => Promise<{ error?: any; data?: any } | undefined>;
+  signUp: (email: string, password: string, metadata?: any) => Promise<{ error?: any; data?: any } | undefined>;
   signOut: () => Promise<void>;
   updateProfile: (profileData: Partial<Profile>) => Promise<Profile | null>;
 }
