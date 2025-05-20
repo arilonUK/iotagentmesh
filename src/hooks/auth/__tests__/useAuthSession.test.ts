@@ -1,4 +1,3 @@
-
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useAuthSession } from '../useAuthSession';
@@ -23,15 +22,17 @@ describe('useAuthSession', () => {
       data: {
         subscription: {
           unsubscribe: vi.fn(),
+          id: 'mock-id',
+          callback: vi.fn(),
         },
       },
-    });
+    } as any);
     
     // Mock implementation for getSession
     vi.mocked(supabase.auth.getSession).mockResolvedValue({
       data: { session: null },
       error: null,
-    });
+    } as any);
   });
 
   it('should initialize with loading state', () => {
