@@ -3,6 +3,15 @@
 
 This project uses Vitest for testing React components and hooks.
 
+## Test Structure
+
+Our test suite is organized to mirror the main application structure, with tests categorized by functionality:
+
+1. **Agent Tests** - Validate IoT agent behavior and device interactions
+2. **Core Module Tests** - Test shared functionality like logging and configuration
+3. **Plugin Tests** - Ensure plugins integrate properly with agents
+4. **Utility Tests** - Verify helper functions work correctly
+
 ## Running Tests
 
 You can run tests using the following commands:
@@ -18,17 +27,16 @@ npm run test:watch
 npm run test:coverage
 ```
 
-## Test Structure
+## Writing Tests
 
-Tests are organized alongside the code they test, in `__tests__` directories.
-
-For example:
-- `src/components/MyComponent.tsx` would have a test in `src/components/__tests__/MyComponent.test.tsx`
-- `src/hooks/useMyHook.ts` would have a test in `src/hooks/__tests__/useMyHook.test.ts`
+When writing new tests:
+1. Place the test in the appropriate category directory
+2. Name tests descriptively with a `.test.ts` or `.test.tsx` extension
+3. Use the utilities from `src/test/utils.tsx` for component testing
 
 ## Test Utilities
 
-We provide a custom `render` function in `src/test/utils.tsx` that includes common providers.
+We provide custom test utilities in `src/test/utils.tsx` that include common providers.
 Always import from this file rather than directly from `@testing-library/react`.
 
 ```typescript
