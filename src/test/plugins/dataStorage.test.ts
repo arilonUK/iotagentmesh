@@ -38,7 +38,13 @@ describe('Data Storage Plugin', () => {
     // Implement placeholder for storing data
     const storeReading = async (deviceId: string, reading: number): Promise<string | null> => {
       const { data, error } = await supabase.from('device_readings')
-        .insert({ device_id: deviceId, reading, timestamp: new Date().toISOString() })
+        .insert({ 
+          device_id: deviceId, 
+          value: reading, // Changed from 'reading' to 'value' to match expected type
+          reading_type: 'temperature', // Added required field
+          organization_id: 'org-123', // Added required field
+          timestamp: new Date().toISOString() 
+        })
         .select()
         .single();
         
