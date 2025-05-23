@@ -73,3 +73,35 @@ To connect a domain, navigate to Project > Settings > Domains and click Connect 
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
 
+
+# IoT Agent Mesh
+
+A modern web-based platform for managing IoT device agents, built using React, Supabase, Tailwind CSS, and TypeScript.
+
+## 🌐 Project Overview
+This project provides a UI and backend system for users to:
+- Register and manage organisations and users
+- Add and configure IoT agents
+- View telemetry and device status
+- Configure alerts, automations, and integrations
+
+## ⚙️ Tech Stack
+- **Frontend**: React + Vite + TypeScript + Tailwind CSS + Shadcn/UI
+- **Backend**: Supabase (PostgreSQL, Auth, RLS, Edge Functions)
+- **Tooling**: ESLint, Vitest, Prettier
+
+## 🚀 Quickstart
+```bash
+# 1. Clone the repo
+$ git clone https://github.com/arilonUK/iotagentmesh.git
+$ cd iotagentmesh
+
+# 2. Install dependencies
+$ npm install
+
+# 3. Copy and configure environment variables
+$ cp .env.example .env
+# Fill in SUPABASE_URL and SUPABASE_ANON_KEY
+
+# 4. Start development server
+$ npm run dev
