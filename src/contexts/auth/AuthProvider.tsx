@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { organizationService } from '@/services/profile/organizationService';
 import { AuthContext } from './AuthContext';
 import { useAuthProvider } from './useAuthProvider';
+import { UserOrganization } from './types';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const authState = useAuthProvider();
