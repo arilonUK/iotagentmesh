@@ -44,18 +44,15 @@ const LoginForm = ({ setAuthError }: LoginFormProps) => {
         }
         
         setAuthError(errorMessage);
+        setIsLoading(false);
       } else {
         console.log("LoginForm: Login successful, auth state will be handled by AuthProvider");
-        // The AuthProvider will handle the redirect via session state change
+        // Don't set loading to false here - let AuthProvider handle it
       }
     } catch (error: any) {
       console.error("LoginForm: Login error:", error);
       setAuthError(error.message || 'An unexpected error occurred during sign in');
-    } finally {
-      // Small delay to prevent rapid re-submission and allow auth state to settle
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 1000);
+      setIsLoading(false);
     }
   };
 

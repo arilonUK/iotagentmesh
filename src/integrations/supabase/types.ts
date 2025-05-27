@@ -1412,6 +1412,14 @@ export type Database = {
         Args: { p_org_id: string; p_user_id: string }
         Returns: boolean
       }
+      is_organization_admin_bypass_rls: {
+        Args: { p_org_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      is_organization_member_bypass_rls: {
+        Args: { p_org_id: string; p_user_id: string }
+        Returns: boolean
+      }
       mark_all_notifications_as_read: {
         Args: { p_user_id: string }
         Returns: number

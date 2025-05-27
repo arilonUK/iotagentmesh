@@ -5,7 +5,6 @@ import { useToast } from '@/hooks/use-toast';
 import { organizationService } from '@/services/profile/organizationService';
 import { AuthContext } from './AuthContext';
 import { useAuthProvider } from './useAuthProvider';
-import { profileServices } from '@/services/profileServices';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const authState = useAuthProvider();
@@ -56,7 +55,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const { data: sessionData } = await supabase.auth.getSession();
         setSession(sessionData.session);
         
-        // Try to fetch user organizations with comprehensive error handling
+        // Try to fetch user organizations
         try {
           console.log("AuthProvider: Fetching user organizations");
           const userOrgs = await organizationService.getUserOrganizations(data.user.id);
@@ -91,12 +90,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
         } catch (orgError: any) {
           console.error("AuthProvider: Error fetching organizations, continuing with basic auth:", orgError);
-          
-          // Show a warning toast if it's the infinite recursion error
-          if (orgError.code === '42P17' || orgError.message?.includes('infinite recursion')) {
-            console.warn("AuthProvider: Database policy issue detected - infinite recursion in organization_members table");
-          }
-          
           // Continue with basic authentication even if org fetch fails
           setOrganizations([]);
           setUserOrganizations([]);
@@ -130,7 +123,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(session.user);
           setSession(session);
           
-          // Try to fetch user organizations with error handling
+          // Try to fetch user organizations
           try {
             const userOrgs = await organizationService.getUserOrganizations(session.user.id);
             
