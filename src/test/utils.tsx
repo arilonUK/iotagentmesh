@@ -26,7 +26,3 @@ const customRender = (
 // Re-export everything from testing-library
 export * from '@testing-library/react';
 export { customRender as render };
-
-// Import and re-export screen and waitFor from the correct locations
-export { screen } from '@testing-library/react';
-export { waitFor } from '@testing-library/react';
