@@ -64,29 +64,29 @@ export const useAuthProvider = (): AuthContextType & {
 
   const { toast } = useToast();
 
-  // Wrapper functions to match the expected return types (void)
-  const login = async (email: string, password: string): Promise<void> => {
-    await authServices.signIn(email, password);
+  // Wrapper functions to match the expected return types
+  const login = async (email: string, password: string) => {
+    return authServices.signIn(email, password);
   };
 
-  const signup = async (email: string, password: string, metadata?: any): Promise<void> => {
-    await authServices.signUp(email, password, metadata);
+  const signup = async (email: string, password: string, metadata?: any) => {
+    return authServices.signUp(email, password, metadata);
   };
 
-  const logout = async (): Promise<void> => {
-    await authServices.signOut();
+  const logout = async () => {
+    return authServices.signOut();
   };
 
-  const signIn = async (email: string, password: string): Promise<void> => {
-    await authServices.signIn(email, password);
+  const signIn = async (email: string, password: string) => {
+    return authServices.signIn(email, password);
   };
 
-  const signUp = async (email: string, password: string, metadata?: any): Promise<void> => {
-    await authServices.signUp(email, password, metadata);
+  const signUp = async (email: string, password: string, metadata?: any) => {
+    return authServices.signUp(email, password, metadata);
   };
 
-  const signOut = async (): Promise<void> => {
-    await authServices.signOut();
+  const signOut = async () => {
+    return authServices.signOut();
   };
 
   const updateProfile = async (profileData: Partial<Profile>) => {

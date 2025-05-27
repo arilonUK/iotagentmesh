@@ -1,7 +1,8 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { useOrganizationData } from '@/hooks/organization/useOrganizationData';
+import { waitFor } from '@/test/utils';
 
 // Mock the dependent hooks
 vi.mock('@/hooks/organization/useUserOrganizationRole', () => ({
