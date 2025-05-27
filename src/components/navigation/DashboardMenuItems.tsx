@@ -74,9 +74,8 @@ export default function DashboardMenuItems() {
       </NavMenuItem>
       
       <NavMenuItem 
-        to="https://docs.example.com" 
+        to="/dashboard/documentation" 
         icon={LifeBuoy}
-        external
       >
         Documentation
       </NavMenuItem>

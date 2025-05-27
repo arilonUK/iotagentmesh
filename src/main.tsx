@@ -28,6 +28,7 @@ import BlogPost from './pages/BlogPost.tsx';
 import ApiKeyManagement from './pages/ApiKeyManagement.tsx';
 import OAuthConnections from './pages/OAuthConnections.tsx';
 import IntegrationsAndConnectivity from './pages/IntegrationsAndConnectivity.tsx';
+import Documentation from './pages/Documentation.tsx';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import AppProvider from './AppProvider.tsx';
 
@@ -208,6 +209,16 @@ const router = createBrowserRouter([
           <ProtectedRoute>
             <DashboardLayout>
               <OrganizationSettings />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard/documentation',
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Documentation />
             </DashboardLayout>
           </ProtectedRoute>
         ),
