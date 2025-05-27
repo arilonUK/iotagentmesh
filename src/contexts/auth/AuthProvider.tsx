@@ -1,5 +1,5 @@
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { organizationService } from '@/services/profile/organizationService';
@@ -10,6 +10,7 @@ import { UserOrganization } from './types';
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const authState = useAuthProvider();
   const { toast } = useToast();
+  const initializingRef = useRef(false);
   
   const { 
     setIsAuthenticated,
@@ -28,11 +29,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   } = authState;
 
   useEffect(() => {
-    let isInitialized = false;
+    // Prevent multiple initialization attempts
+    if (initializingRef.current) {
+      console.log("AuthProvider: Already initializing, skipping");
+      return;
+    }
     
     // Check if user is already authenticated
     const checkAuth = async () => {
-      if (isInitialized) return;
+      if (initializingRef.current) return;
+      initializingRef.current = true;
       
       try {
         console.log("AuthProvider: Checking initial auth state");
@@ -56,17 +62,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const { data: sessionData } = await supabase.auth.getSession();
         setSession(sessionData.session);
         
-        // Try to fetch user organizations with timeout and better error handling
+        // Complete basic auth first, then try organizations
+        setIsLoading(false);
+        setLoading(false);
+        
+        // Try to fetch user organizations with proper error handling
         try {
           console.log("AuthProvider: Fetching user organizations");
           
-          // Set a timeout for organization fetching to prevent hanging
-          const organizationPromise = organizationService.getUserOrganizations(data.user.id);
-          const timeoutPromise = new Promise<UserOrganization[]>((_, reject) => {
-            setTimeout(() => reject(new Error('Organization fetch timeout')), 10000);
-          });
-          
-          const userOrgs = await Promise.race([organizationPromise, timeoutPromise]);
+          const userOrgs = await organizationService.getUserOrganizations(data.user.id);
           console.log("AuthProvider: Organizations fetch result:", userOrgs);
           
           if (userOrgs && userOrgs.length > 0) {
@@ -105,25 +109,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUserRole(null);
           setOrganization(null);
           
-          // Show a user-friendly message but don't block auth
-          if (orgError.message !== 'Organization fetch timeout') {
+          // Only show error for non-RLS issues
+          if (!orgError.message?.includes('infinite recursion') && orgError.code !== '42P17') {
             toast({
               title: "Organization data unavailable",
-              description: "You're signed in, but we couldn't load your organization data. Some features may be limited.",
-              variant: "destructive"
+              description: "You're signed in, but organization features may be limited.",
+              variant: "default"
             });
           }
         }
 
-        // Always complete the auth process regardless of organization fetch status
-        setIsLoading(false);
-        setLoading(false);
         console.log("AuthProvider: Auth initialization completed");
       } catch (error) {
         console.error("AuthProvider: Error checking authentication:", error);
         setIsAuthenticated(false);
         setIsLoading(false);
         setLoading(false);
+      } finally {
+        initializingRef.current = false;
       }
     };
 
@@ -140,7 +143,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(session.user);
           setSession(session);
           
-          // Set basic auth first, then try organizations with timeout
+          // Set basic auth first
           setIsLoading(false);
           setLoading(false);
           
@@ -185,6 +188,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUserOrganizations([]);
           setIsLoading(false);
           setLoading(false);
+          initializingRef.current = false;
         } else if (event === 'TOKEN_REFRESHED' && session) {
           console.log("AuthProvider: Token refreshed");
           setSession(session);
@@ -194,12 +198,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
 
     // Initialize auth check
-    checkAuth().then(() => {
-      isInitialized = true;
-    });
+    checkAuth();
 
     return () => {
       authListener.subscription.unsubscribe();
+      initializingRef.current = false;
     };
   }, [
     setIsAuthenticated,

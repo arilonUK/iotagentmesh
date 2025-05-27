@@ -11,29 +11,32 @@ const Auth = () => {
   const location = useLocation();
   const { toast } = useToast();
   const [timeoutReached, setTimeoutReached] = useState(false);
+  const [hasShownMessage, setHasShownMessage] = useState(false);
   
   useEffect(() => {
     // Only show toast once when first landing on auth page
     const redirectReason = new URLSearchParams(window.location.search).get('reason');
-    if (redirectReason === 'protected' && !session) {
+    if (redirectReason === 'protected' && !session && !hasShownMessage) {
       toast({
         title: "Authentication required",
         description: "Please log in to access this page"
       });
+      setHasShownMessage(true);
       
       // Clear the reason parameter to prevent showing toast again
       const newUrl = new URL(window.location.href);
       newUrl.searchParams.delete('reason');
       window.history.replaceState({}, '', newUrl.toString());
     }
-  }, [toast, session]);
+  }, [toast, session, hasShownMessage]);
 
   // Set a timeout to prevent infinite loading
   useEffect(() => {
     if (loading) {
       const timer = setTimeout(() => {
+        console.log("Auth page: Loading timeout reached, proceeding anyway");
         setTimeoutReached(true);
-      }, 15000); // 15 seconds timeout
+      }, 10000); // 10 seconds timeout
 
       return () => clearTimeout(timer);
     } else {
