@@ -5,7 +5,6 @@ import { authServices } from './authServices';
 import { profileServices } from '@/services/profileServices';
 import { useSessionManager } from './useSessionManager';
 import { useOrganizationManager } from '@/hooks/useOrganizationManager';
-import { useOrganizationLoader } from '@/hooks/useOrganizationLoader';
 import { User, Session } from '@supabase/supabase-js';
 import { useToast } from '@/hooks/use-toast';
 
@@ -51,16 +50,9 @@ export const useAuthProvider = (): AuthContextType & {
     switchOrganization,
     fetchOrganizationData,
     setOrganization,
+    userOrganizations,
+    setUserOrganizations
   } = useOrganizationManager(user?.id);
-
-  const { 
-    userOrganizations, 
-    setUserOrganizations 
-  } = useOrganizationLoader({
-    userId: user?.id,
-    profile,
-    fetchOrganizationData
-  });
 
   const { toast } = useToast();
 

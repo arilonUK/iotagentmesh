@@ -2,12 +2,35 @@
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { organizationService } from '@/services/profile/organizationService';
-import { AuthContextType } from './types';
+import { AuthContextType, UserOrganization, Profile, Organization } from './types';
 import { useOrganizationLoader } from './useOrganizationLoader';
+import { User, Session } from '@supabase/supabase-js';
 
-export const useAuthInitializer = (authState: AuthContextType) => {
+type SetterFunctions = {
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+  setUserId: React.Dispatch<React.SetStateAction<string | null>>;
+  setUserEmail: React.Dispatch<React.SetStateAction<string | null>>;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  setSession: React.Dispatch<React.SetStateAction<Session | null>>;
+  setProfile: React.Dispatch<React.SetStateAction<Profile | null>>;
+  setOrganizations: React.Dispatch<React.SetStateAction<UserOrganization[]>>;
+  setUserOrganizations: React.Dispatch<React.SetStateAction<UserOrganization[]>>;
+  setCurrentOrganization: React.Dispatch<React.SetStateAction<UserOrganization | null>>;
+  setUserRole: React.Dispatch<React.SetStateAction<string | null>>;
+  setOrganization: React.Dispatch<React.SetStateAction<Organization | null>>;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+export const useAuthInitializer = (setters: SetterFunctions) => {
   const initializingRef = useRef(false);
-  const { loadUserOrganizationsAsync } = useOrganizationLoader(authState);
+  const { loadUserOrganizationsAsync } = useOrganizationLoader({
+    setOrganizations: setters.setOrganizations,
+    setUserOrganizations: setters.setUserOrganizations,
+    setCurrentOrganization: setters.setCurrentOrganization,
+    setUserRole: setters.setUserRole,
+    setOrganization: setters.setOrganization,
+  });
   
   const {
     setIsAuthenticated,
@@ -23,7 +46,7 @@ export const useAuthInitializer = (authState: AuthContextType) => {
     setOrganization,
     setIsLoading,
     setLoading
-  } = authState;
+  } = setters;
 
   useEffect(() => {
     // Prevent multiple initialization attempts

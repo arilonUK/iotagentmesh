@@ -1,16 +1,23 @@
 
-import { useRef } from 'react';
 import { organizationService } from '@/services/profile/organizationService';
-import { AuthContextType } from './types';
+import { AuthContextType, UserOrganization } from './types';
 
-export const useOrganizationLoader = (authState: AuthContextType) => {
+type SetterFunctions = {
+  setOrganizations: React.Dispatch<React.SetStateAction<UserOrganization[]>>;
+  setUserOrganizations: React.Dispatch<React.SetStateAction<UserOrganization[]>>;
+  setCurrentOrganization: React.Dispatch<React.SetStateAction<UserOrganization | null>>;
+  setUserRole: React.Dispatch<React.SetStateAction<string | null>>;
+  setOrganization: React.Dispatch<React.SetStateAction<{ id: string; name: string; slug?: string } | null>>;
+};
+
+export const useOrganizationLoader = (setters: SetterFunctions) => {
   const {
     setOrganizations,
     setUserOrganizations,
     setCurrentOrganization,
     setUserRole,
     setOrganization,
-  } = authState;
+  } = setters;
 
   // Separate function for loading organizations that doesn't block auth
   const loadUserOrganizationsAsync = async (userId: string): Promise<void> => {
