@@ -36,7 +36,7 @@ const Auth = () => {
       const timer = setTimeout(() => {
         console.log("Auth page: Loading timeout reached, proceeding anyway");
         setTimeoutReached(true);
-      }, 3000); // Reduced to 3 seconds
+      }, 2000); // Reduced to 2 seconds
 
       return () => clearTimeout(timer);
     } else {

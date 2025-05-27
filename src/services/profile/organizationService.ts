@@ -22,7 +22,7 @@ export const organizationService = {
       
       // Use the RLS bypass function with timeout
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Organization fetch timeout')), 5000);
+        setTimeout(() => reject(new Error('Organization fetch timeout')), 3000); // Reduced timeout
       });
       
       const fetchPromise = supabase.rpc('get_user_organizations', { p_user_id: userId });
@@ -58,7 +58,8 @@ export const organizationService = {
         return [];
       }
       
-      toast.error('Unable to load organizations');
+      // Only show error for unexpected errors
+      console.error('Unexpected organization fetch error:', error);
       return [];
     }
   },
