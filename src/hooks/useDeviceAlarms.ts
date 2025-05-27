@@ -44,7 +44,7 @@ export function useDeviceAlarms(deviceId: string) {
           throw eventsError;
         }
         
-        if (!eventsData || eventsData.length === 0) {
+        if (!eventsData || !Array.isArray(eventsData) || eventsData.length === 0) {
           console.log('No alarm events found for device:', deviceId);
           setAlarmEvents([]);
           setIsLoading(false);
@@ -53,8 +53,8 @@ export function useDeviceAlarms(deviceId: string) {
         
         console.log(`Found ${eventsData.length} alarm events for device ${deviceId}`);
         
-        // The bypass function should return all the data we need
-        const formattedEvents = eventsData.map(event => ({
+        // The bypass function returns structured data
+        const formattedEvents: AlarmEvent[] = eventsData.map((event: any) => ({
           id: event.id,
           alarm_id: event.alarm_id,
           device_id: event.device_id,

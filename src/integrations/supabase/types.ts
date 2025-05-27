@@ -1066,6 +1066,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      acknowledge_alarm_event_bypass_rls: {
+        Args: { p_event_id: string }
+        Returns: undefined
+      }
       can_access_device: {
         Args: { p_user_id: string; p_device_id: string }
         Returns: boolean
@@ -1185,6 +1189,26 @@ export type Database = {
           user_agent: string
         }[]
       }
+      get_device_alarm_events_bypass_rls: {
+        Args: { p_device_id: string }
+        Returns: {
+          id: string
+          alarm_id: string
+          device_id: string
+          status: string
+          triggered_at: string
+          acknowledged_at: string
+          resolved_at: string
+          acknowledged_by: string
+          trigger_value: number
+          message: string
+          alarm_name: string
+          alarm_description: string
+          alarm_severity: string
+          device_name: string
+          device_type: string
+        }[]
+      }
       get_device_by_id_bypass_rls: {
         Args: { p_device_id: string }
         Returns: {
@@ -1253,6 +1277,27 @@ export type Database = {
           tags: string | null
           updated_at: string
           version: string
+        }[]
+      }
+      get_organization_alarms_bypass_rls: {
+        Args: { p_org_id: string }
+        Returns: {
+          id: string
+          name: string
+          description: string
+          organization_id: string
+          device_id: string
+          enabled: boolean
+          reading_type: string
+          condition_operator: string
+          condition_value: Json
+          severity: string
+          cooldown_minutes: number
+          created_at: string
+          updated_at: string
+          device_name: string
+          device_type: string
+          endpoints: string[]
         }[]
       }
       get_organization_members: {
@@ -1374,6 +1419,10 @@ export type Database = {
       mark_notification_as_read: {
         Args: { p_notification_id: string; p_user_id: string }
         Returns: boolean
+      }
+      resolve_alarm_event_bypass_rls: {
+        Args: { p_event_id: string }
+        Returns: undefined
       }
       switch_user_organization: {
         Args: { p_user_id: string; p_org_id: string }

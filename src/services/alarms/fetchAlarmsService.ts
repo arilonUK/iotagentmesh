@@ -36,7 +36,7 @@ export async function fetchAlarms(organizationId: string): Promise<AlarmConfig[]
     console.log(`Successfully fetched ${data.length} alarms`);
     
     // Transform the data to match the AlarmConfig interface
-    const alarms = data.map(alarm => ({
+    const alarms: AlarmConfig[] = data.map((alarm: any) => ({
       id: alarm.id,
       name: alarm.name,
       description: alarm.description || undefined,
