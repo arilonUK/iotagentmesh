@@ -18,18 +18,35 @@ const LoginForm = ({ setAuthError }: LoginFormProps) => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isLoading) {
+      console.log("LoginForm: Already processing login, ignoring");
+      return;
+    }
+    
     setIsLoading(true);
     setAuthError(null);
 
     try {
-      console.log("Login form submitted with email:", loginEmail);
-      await signIn(loginEmail, loginPassword);
-      // No need to redirect here - the Auth component will handle redirect once session changes
+      console.log("LoginForm: Starting login process for:", loginEmail);
+      
+      const result = await signIn(loginEmail, loginPassword);
+      
+      if (result?.error) {
+        console.error("LoginForm: Login failed:", result.error.message);
+        setAuthError(result.error.message || 'Failed to sign in');
+      } else {
+        console.log("LoginForm: Login successful");
+        // The AuthProvider will handle the redirect via session state change
+      }
     } catch (error: any) {
-      console.error("Login error:", error.message);
-      setAuthError(error.message || 'Failed to sign in');
+      console.error("LoginForm: Login error:", error);
+      setAuthError(error.message || 'An unexpected error occurred during sign in');
     } finally {
-      setIsLoading(false);
+      // Small delay to prevent rapid re-submission
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
     }
   };
 
@@ -45,6 +62,7 @@ const LoginForm = ({ setAuthError }: LoginFormProps) => {
           onChange={(e) => setLoginEmail(e.target.value)}
           required
           autoComplete="email"
+          disabled={isLoading}
         />
       </div>
       
@@ -62,13 +80,14 @@ const LoginForm = ({ setAuthError }: LoginFormProps) => {
           onChange={(e) => setLoginPassword(e.target.value)}
           required
           autoComplete="current-password"
+          disabled={isLoading}
         />
       </div>
 
       <Button 
         type="submit" 
         className="w-full" 
-        disabled={isLoading}
+        disabled={isLoading || !loginEmail || !loginPassword}
       >
         {isLoading ? 'Signing in...' : 'Sign In'}
       </Button>

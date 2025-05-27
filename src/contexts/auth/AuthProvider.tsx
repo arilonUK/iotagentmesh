@@ -28,18 +28,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   } = authState;
 
   useEffect(() => {
+    let isInitialized = false;
+    
     // Check if user is already authenticated
     const checkAuth = async () => {
+      if (isInitialized) return;
+      
       try {
+        console.log("AuthProvider: Checking initial auth state");
         const { data, error } = await supabase.auth.getUser();
         
         if (error || !data?.user) {
+          console.log("AuthProvider: No authenticated user found");
           setIsAuthenticated(false);
           setIsLoading(false);
           setLoading(false);
           return;
         }
 
+        console.log("AuthProvider: User found, setting auth state");
         setIsAuthenticated(true);
         setUserId(data.user.id);
         setUserEmail(data.user.email);
@@ -49,47 +56,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const { data: sessionData } = await supabase.auth.getSession();
         setSession(sessionData.session);
         
-        // Fetch user organizations
-        const userOrgs = await organizationService.getUserOrganizations(data.user.id);
-        setOrganizations(userOrgs);
-        setUserOrganizations(userOrgs);
-        
-        // Set current organization based on default
-        const defaultOrg = userOrgs.find(org => org.is_default) || userOrgs[0];
-        if (defaultOrg) {
-          setCurrentOrganization(defaultOrg);
-          setUserRole(defaultOrg.role);
+        // Try to fetch user organizations with error handling
+        try {
+          console.log("AuthProvider: Fetching user organizations");
+          const userOrgs = await organizationService.getUserOrganizations(data.user.id);
+          console.log("AuthProvider: Successfully fetched organizations:", userOrgs.length);
           
-          // Set organization for extended context
-          setOrganization({
-            id: defaultOrg.id,
-            name: defaultOrg.name,
-            slug: defaultOrg.slug
-          });
-        }
-
-        setIsLoading(false);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error checking authentication:", error);
-        setIsAuthenticated(false);
-        setIsLoading(false);
-        setLoading(false);
-      }
-    };
-
-    // Listen for auth state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
-          setIsAuthenticated(true);
-          setUserId(session.user.id);
-          setUserEmail(session.user.email);
-          setUser(session.user);
-          setSession(session);
-          
-          // Fetch user organizations
-          const userOrgs = await organizationService.getUserOrganizations(session.user.id);
           setOrganizations(userOrgs);
           setUserOrganizations(userOrgs);
           
@@ -106,7 +78,72 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               slug: defaultOrg.slug
             });
           }
+        } catch (orgError) {
+          console.error("AuthProvider: Error fetching organizations, continuing with basic auth:", orgError);
+          // Continue with basic authentication even if org fetch fails
+          setOrganizations([]);
+          setUserOrganizations([]);
+          setCurrentOrganization(null);
+          setUserRole(null);
+          setOrganization(null);
+        }
+
+        setIsLoading(false);
+        setLoading(false);
+      } catch (error) {
+        console.error("AuthProvider: Error checking authentication:", error);
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        setLoading(false);
+      }
+    };
+
+    // Listen for auth state changes
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log("AuthProvider: Auth state change:", event);
+        
+        if (event === 'SIGNED_IN' && session?.user) {
+          console.log("AuthProvider: User signed in");
+          setIsAuthenticated(true);
+          setUserId(session.user.id);
+          setUserEmail(session.user.email);
+          setUser(session.user);
+          setSession(session);
+          
+          // Try to fetch user organizations with error handling
+          try {
+            const userOrgs = await organizationService.getUserOrganizations(session.user.id);
+            setOrganizations(userOrgs);
+            setUserOrganizations(userOrgs);
+            
+            // Set current organization based on default
+            const defaultOrg = userOrgs.find(org => org.is_default) || userOrgs[0];
+            if (defaultOrg) {
+              setCurrentOrganization(defaultOrg);
+              setUserRole(defaultOrg.role);
+              
+              // Set organization for extended context
+              setOrganization({
+                id: defaultOrg.id,
+                name: defaultOrg.name,
+                slug: defaultOrg.slug
+              });
+            }
+          } catch (orgError) {
+            console.error("AuthProvider: Error fetching organizations during sign in, continuing with basic auth:", orgError);
+            // Continue with basic authentication even if org fetch fails
+            setOrganizations([]);
+            setUserOrganizations([]);
+            setCurrentOrganization(null);
+            setUserRole(null);
+            setOrganization(null);
+          }
+          
+          setIsLoading(false);
+          setLoading(false);
         } else if (event === 'SIGNED_OUT') {
+          console.log("AuthProvider: User signed out");
           setIsAuthenticated(false);
           setUserId(null);
           setUserEmail(null);
@@ -118,11 +155,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setProfile(null);
           setOrganization(null);
           setUserOrganizations([]);
+          setIsLoading(false);
+          setLoading(false);
+        } else if (event === 'TOKEN_REFRESHED' && session) {
+          console.log("AuthProvider: Token refreshed");
+          setSession(session);
+          setUser(session.user);
         }
       }
     );
 
-    checkAuth();
+    // Initialize auth check
+    checkAuth().then(() => {
+      isInitialized = true;
+    });
 
     return () => {
       authListener.subscription.unsubscribe();

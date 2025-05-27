@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -17,24 +17,63 @@ export const useAuthSession = (): AuthSessionReturn => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
+  const authListenerRef = useRef<any>(null);
 
   useEffect(() => {
     let isMounted = true;
     
-    // Load initial session first
-    const loadInitialSession = async () => {
+    const initializeAuth = async () => {
+      if (initialized) return;
+      
       try {
-        console.log("Loading initial session...");
+        console.log("useAuthSession: Loading initial session...");
+        
+        // Set up auth state listener first
+        if (!authListenerRef.current) {
+          const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            (event, newSession) => {
+              if (!isMounted) return;
+              
+              console.log("useAuthSession: Auth state changed:", event, newSession?.user?.email || 'no user');
+              
+              // Prevent rapid successive updates
+              if (event === 'TOKEN_REFRESHED' && newSession?.user?.id === session?.user?.id) {
+                console.log("useAuthSession: Token refreshed, updating session");
+                setSession(newSession);
+                return;
+              }
+              
+              if (event === 'SIGNED_OUT' || !newSession) {
+                console.log("useAuthSession: User signed out, clearing session");
+                setSession(null);
+                setUser(null);
+              } else if (event === 'SIGNED_IN' && newSession) {
+                console.log("useAuthSession: User signed in, setting new session");
+                setSession(newSession);
+                setUser(newSession.user);
+              } else if (newSession && newSession.user?.id !== session?.user?.id) {
+                // Only update if it's actually a different user/session
+                console.log("useAuthSession: Different user session detected, updating");
+                setSession(newSession);
+                setUser(newSession.user);
+              }
+            }
+          );
+          
+          authListenerRef.current = subscription;
+        }
+        
+        // Then check for existing session
         const { data: { session: currentSession }, error } = await supabase.auth.getSession();
         
         if (!isMounted) return;
         
         if (error) {
-          console.error("Error loading initial session:", error);
+          console.error("useAuthSession: Error loading initial session:", error);
           setSession(null);
           setUser(null);
         } else {
-          console.log("Initial session loaded:", currentSession?.user?.email || 'no session');
+          console.log("useAuthSession: Initial session loaded:", currentSession?.user?.email || 'no session');
           setSession(currentSession);
           setUser(currentSession?.user ?? null);
         }
@@ -42,7 +81,7 @@ export const useAuthSession = (): AuthSessionReturn => {
         setInitialized(true);
         setLoading(false);
       } catch (error) {
-        console.error("Error loading initial session:", error);
+        console.error("useAuthSession: Error during initialization:", error);
         if (isMounted) {
           setSession(null);
           setUser(null);
@@ -52,51 +91,17 @@ export const useAuthSession = (): AuthSessionReturn => {
       }
     };
 
-    loadInitialSession();
+    initializeAuth();
 
     return () => {
       isMounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!initialized) return;
-
-    console.log("Setting up auth state listener...");
-    
-    // Set up auth state listener after initial load
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, newSession) => {
-        console.log("Auth state changed:", event, newSession?.user?.email || 'no user');
-        
-        // Prevent unnecessary updates if session hasn't actually changed
-        if (event === 'TOKEN_REFRESHED' && newSession?.user?.id === session?.user?.id) {
-          console.log("Token refreshed, updating session");
-          setSession(newSession);
-          return;
-        }
-        
-        if (event === 'SIGNED_OUT' || !newSession) {
-          console.log("User signed out, clearing session");
-          setSession(null);
-          setUser(null);
-        } else if (event === 'SIGNED_IN' && newSession) {
-          console.log("User signed in, setting new session");
-          setSession(newSession);
-          setUser(newSession.user);
-        } else if (newSession) {
-          // Handle other events like token refresh
-          setSession(newSession);
-          setUser(newSession.user);
-        }
+      if (authListenerRef.current) {
+        console.log("useAuthSession: Cleaning up auth state listener");
+        authListenerRef.current.unsubscribe();
+        authListenerRef.current = null;
       }
-    );
-
-    return () => {
-      console.log("Cleaning up auth state listener");
-      subscription.unsubscribe();
     };
-  }, [initialized, session?.user?.id]);
+  }, []); // Empty dependency array to run only once
 
   return {
     session,
