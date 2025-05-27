@@ -19,14 +19,16 @@ interface OrganizationSwitcherProps {
 }
 
 const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: OrganizationSwitcherProps) => {
-  const { organization, userOrganizations, switchOrganization } = useAuth();
+  const { currentOrganization, userOrganizations, switchOrganization } = useAuth();
   
-  if (!organization || userOrganizations.length <= 1) {
+  if (!currentOrganization || userOrganizations.length <= 1) {
     return null;
   }
 
   const handleSwitchOrg = async (orgId: string) => {
-    await switchOrganization(orgId);
+    if (switchOrganization) {
+      await switchOrganization(orgId);
+    }
   };
 
   return (
@@ -38,7 +40,7 @@ const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: Organizat
           className={cn("flex items-center gap-2 px-3", triggerClassName)}
         >
           <Building className="h-4 w-4" />
-          <span className="truncate max-w-[150px]">{organization.name}</span>
+          <span className="truncate max-w-[150px]">{currentOrganization.name}</span>
           <ChevronDown className="h-4 w-4 opacity-50" />
         </Button>
       </DropdownMenuTrigger>

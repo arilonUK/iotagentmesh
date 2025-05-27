@@ -1,5 +1,5 @@
 
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useContext } from 'react';
 import { useAuth } from './auth';
 
 export interface Organization {
@@ -20,28 +20,17 @@ interface OrganizationContextType {
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
 
 export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [organization, setOrganization] = useState<Organization | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const { currentOrganization, switchOrganization: authSwitchOrganization } = useAuth();
+  const { currentOrganization, switchOrganization: authSwitchOrganization, loading } = useAuth();
 
-  // Use organization data from auth context
-  useEffect(() => {
-    if (currentOrganization) {
-      const formattedOrg: Organization = {
-        id: currentOrganization.id,
-        name: currentOrganization.name,
-        slug: currentOrganization.slug,
-        role: currentOrganization.role as any,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-      
-      setOrganization(formattedOrg);
-      console.log('Organization context updated from auth:', formattedOrg);
-    } else {
-      setOrganization(null);
-    }
-  }, [currentOrganization]);
+  // Transform the auth organization data to match the expected interface
+  const organization: Organization | null = currentOrganization ? {
+    id: currentOrganization.id,
+    name: currentOrganization.name,
+    slug: currentOrganization.slug,
+    role: currentOrganization.role as any,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  } : null;
 
   const switchOrganization = async (organizationId: string): Promise<boolean> => {
     if (!authSwitchOrganization) {
@@ -49,22 +38,18 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       return false;
     }
     
-    setIsLoading(true);
-    
     try {
       const success = await authSwitchOrganization(organizationId);
       return success;
     } catch (error) {
       console.error('Error in organization context switchOrganization:', error);
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const value = {
     organization,
-    isLoading,
+    isLoading: loading,
     switchOrganization,
   };
 

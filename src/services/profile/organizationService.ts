@@ -3,88 +3,55 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { UserOrganization } from '@/contexts/auth/types';
 
-// Cache to prevent duplicate requests
-const fetchCache = new Map<string, Promise<UserOrganization[]>>();
+// Simple cache to prevent duplicate requests
+const organizationCache = new Map<string, { data: UserOrganization[]; timestamp: number }>();
+const CACHE_DURATION = 30000; // 30 seconds
 
 export const organizationService = {
   getUserOrganizations: async (userId: string): Promise<UserOrganization[]> => {
     try {
       console.log('Getting user organizations for user ID:', userId);
       
-      // Check cache first to prevent duplicate requests
+      // Check cache first
       const cacheKey = `user-orgs-${userId}`;
-      if (fetchCache.has(cacheKey)) {
-        console.log('Returning cached organization request');
-        return await fetchCache.get(cacheKey)!;
+      const cached = organizationCache.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+        console.log('Returning cached organizations');
+        return cached.data;
       }
       
-      // Create the promise and cache it
-      const fetchPromise = (async () => {
-        try {
-          // Set a timeout for the RPC call
-          const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error('Organization fetch timeout')), 3000); // Reduced to 3 seconds
-          });
+      // Use the new RLS bypass function
+      const { data, error } = await supabase
+        .rpc('get_user_organizations', { p_user_id: userId });
 
-          const rpcPromise = supabase
-            .rpc('get_user_organizations', { p_user_id: userId });
+      if (error) {
+        console.error('Error fetching user organizations:', error);
+        throw error;
+      }
 
-          const { data, error } = await Promise.race([rpcPromise, timeoutPromise]);
-
-          if (error) {
-            console.error('Error fetching user organizations with RPC:', error);
-            
-            // If it's an RLS infinite recursion error, return empty array to allow auth to continue
-            if (error.message?.includes('infinite recursion') || error.code === '42P17') {
-              console.log('RLS infinite recursion detected, returning empty organizations array');
-              return [];
-            }
-            
-            throw error;
-          }
-
-          if (data && data.length > 0) {
-            console.log('Successfully fetched user organizations with RPC:', data);
-            return data as UserOrganization[];
-          } else {
-            console.log('No organizations found for user with RPC method');
-            return [];
-          }
-        } finally {
-          // Clear cache after request completes
-          setTimeout(() => {
-            fetchCache.delete(cacheKey);
-          }, 1000);
-        }
-      })();
+      const organizations = data as UserOrganization[] || [];
+      console.log('Successfully fetched user organizations:', organizations);
       
-      // Cache the promise
-      fetchCache.set(cacheKey, fetchPromise);
+      // Cache the result
+      organizationCache.set(cacheKey, {
+        data: organizations,
+        timestamp: Date.now()
+      });
       
-      return await fetchPromise;
+      return organizations;
     } catch (error: any) {
       console.error('Error fetching user organizations:', error);
-      
-      // Clear cache on error
-      fetchCache.delete(`user-orgs-${userId}`);
-      
-      // Don't show error toast for RLS issues or timeouts, just log and continue
-      if (!error.message?.includes('infinite recursion') && 
-          !error.message?.includes('timeout') && 
-          error.code !== '42P17') {
-        toast.error('Unable to load organizations. Using basic authentication.');
-      }
-      
+      toast.error('Unable to load organizations');
       return [];
     }
   },
 
   switchOrganization: async (userId: string, organizationId: string): Promise<boolean> => {
     try {
-      console.log(`Switching organization to ${organizationId} for user ${userId} using RPC`);
+      console.log(`Switching organization to ${organizationId} for user ${userId}`);
       
-      // Clear any cached data when switching
-      fetchCache.delete(`user-orgs-${userId}`);
+      // Clear cache when switching
+      organizationCache.delete(`user-orgs-${userId}`);
       
       const { data, error } = await supabase
         .rpc('switch_user_organization', {
@@ -93,7 +60,7 @@ export const organizationService = {
         });
 
       if (error) {
-        console.error('Error switching organization with RPC:', error);
+        console.error('Error switching organization:', error);
         toast.error('Error switching organization');
         return false;
       }
@@ -108,6 +75,14 @@ export const organizationService = {
       console.error('Error switching organization:', error);
       toast.error('Error switching organization');
       return false;
+    }
+  },
+
+  clearCache: (userId?: string) => {
+    if (userId) {
+      organizationCache.delete(`user-orgs-${userId}`);
+    } else {
+      organizationCache.clear();
     }
   }
 };

@@ -11,7 +11,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const authState = useAuthProvider();
   const { toast } = useToast();
   const initializingRef = useRef(false);
-  const organizationFetchRef = useRef(false);
   
   const { 
     setIsAuthenticated,
@@ -36,7 +35,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     
-    // Check if user is already authenticated
     const checkAuth = async () => {
       if (initializingRef.current) return;
       initializingRef.current = true;
@@ -53,7 +51,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
 
-        console.log("AuthProvider: User found, setting basic auth state");
+        console.log("AuthProvider: User found, setting auth state");
         setIsAuthenticated(true);
         setUserId(data.user.id);
         setUserEmail(data.user.email);
@@ -63,80 +61,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const { data: sessionData } = await supabase.auth.getSession();
         setSession(sessionData.session);
         
-        // Complete basic auth first, then try organizations with timeout
+        // Load organizations using the improved service
+        await loadUserOrganizations(data.user.id);
+        
         setIsLoading(false);
         setLoading(false);
-        
-        // Try to fetch user organizations with aggressive timeout and error handling
-        if (!organizationFetchRef.current) {
-          organizationFetchRef.current = true;
-          
-          // Use shorter timeout for organization fetch to prevent hanging
-          setTimeout(async () => {
-            try {
-              console.log("AuthProvider: Fetching user organizations with timeout");
-              
-              const timeoutPromise = new Promise<UserOrganization[]>((_, reject) => {
-                setTimeout(() => reject(new Error('Organization fetch timeout')), 5000); // 5 second timeout
-              });
-              
-              const orgPromise = organizationService.getUserOrganizations(data.user.id);
-              
-              const userOrgs = await Promise.race([orgPromise, timeoutPromise]);
-              console.log("AuthProvider: Organizations fetch result:", userOrgs);
-              
-              if (userOrgs && userOrgs.length > 0) {
-                console.log("AuthProvider: Successfully fetched organizations:", userOrgs.length);
-                
-                setOrganizations(userOrgs);
-                setUserOrganizations(userOrgs);
-                
-                // Set current organization based on default
-                const defaultOrg = userOrgs.find(org => org.is_default) || userOrgs[0];
-                if (defaultOrg) {
-                  setCurrentOrganization(defaultOrg);
-                  setUserRole(defaultOrg.role);
-                  
-                  // Set organization for extended context
-                  setOrganization({
-                    id: defaultOrg.id,
-                    name: defaultOrg.name,
-                    slug: defaultOrg.slug
-                  });
-                }
-              } else {
-                console.log("AuthProvider: No organizations found, proceeding with basic auth");
-                setOrganizations([]);
-                setUserOrganizations([]);
-                setCurrentOrganization(null);
-                setUserRole(null);
-                setOrganization(null);
-              }
-            } catch (orgError: any) {
-              console.error("AuthProvider: Error fetching organizations, continuing with basic auth:", orgError);
-              // Continue with basic authentication even if org fetch fails
-              setOrganizations([]);
-              setUserOrganizations([]);
-              setCurrentOrganization(null);
-              setUserRole(null);
-              setOrganization(null);
-              
-              // Only show error for non-RLS/timeout issues
-              if (!orgError.message?.includes('infinite recursion') && 
-                  !orgError.message?.includes('timeout') && 
-                  orgError.code !== '42P17') {
-                toast({
-                  title: "Organization data unavailable",
-                  description: "You're signed in, but organization features may be limited.",
-                  variant: "default"
-                });
-              }
-            } finally {
-              organizationFetchRef.current = false;
-            }
-          }, 100);
-        }
-
         console.log("AuthProvider: Auth initialization completed");
       } catch (error) {
         console.error("AuthProvider: Error checking authentication:", error);
@@ -145,6 +74,55 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
       } finally {
         initializingRef.current = false;
+      }
+    };
+
+    const loadUserOrganizations = async (userId: string) => {
+      try {
+        console.log("AuthProvider: Loading user organizations");
+        const userOrgs = await organizationService.getUserOrganizations(userId);
+        
+        if (userOrgs && userOrgs.length > 0) {
+          console.log("AuthProvider: Successfully loaded organizations:", userOrgs.length);
+          
+          setOrganizations(userOrgs);
+          setUserOrganizations(userOrgs);
+          
+          // Set current organization based on default
+          const defaultOrg = userOrgs.find(org => org.is_default) || userOrgs[0];
+          if (defaultOrg) {
+            setCurrentOrganization(defaultOrg);
+            setUserRole(defaultOrg.role);
+            
+            // Set organization for extended context
+            setOrganization({
+              id: defaultOrg.id,
+              name: defaultOrg.name,
+              slug: defaultOrg.slug
+            });
+          }
+        } else {
+          console.log("AuthProvider: No organizations found");
+          setOrganizations([]);
+          setUserOrganizations([]);
+          setCurrentOrganization(null);
+          setUserRole(null);
+          setOrganization(null);
+        }
+      } catch (error) {
+        console.error("AuthProvider: Error loading organizations:", error);
+        // Continue with basic authentication even if org fetch fails
+        setOrganizations([]);
+        setUserOrganizations([]);
+        setCurrentOrganization(null);
+        setUserRole(null);
+        setOrganization(null);
+        
+        toast({
+          title: "Organization data unavailable",
+          description: "You're signed in, but organization features may be limited.",
+          variant: "default"
+        });
       }
     };
 
@@ -161,12 +139,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(session.user);
           setSession(session);
           
-          // Set basic auth first, no organization fetch here to prevent hanging
+          // Load organizations for the signed-in user
+          await loadUserOrganizations(session.user.id);
+          
           setIsLoading(false);
           setLoading(false);
           
         } else if (event === 'SIGNED_OUT') {
           console.log("AuthProvider: User signed out");
+          
+          // Clear all state
           setIsAuthenticated(false);
           setUserId(null);
           setUserEmail(null);
@@ -180,8 +162,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUserOrganizations([]);
           setIsLoading(false);
           setLoading(false);
+          
+          // Clear organization cache
+          organizationService.clearCache();
           initializingRef.current = false;
-          organizationFetchRef.current = false;
+          
         } else if (event === 'TOKEN_REFRESHED' && session) {
           console.log("AuthProvider: Token refreshed");
           setSession(session);
@@ -196,7 +181,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       authListener.subscription.unsubscribe();
       initializingRef.current = false;
-      organizationFetchRef.current = false;
     };
   }, [
     setIsAuthenticated,
