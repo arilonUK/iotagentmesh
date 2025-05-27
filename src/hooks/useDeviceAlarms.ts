@@ -19,19 +19,23 @@ export function useDeviceAlarms(deviceId: string) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('useDeviceAlarms: Starting with deviceId:', deviceId);
+    
     // Validate device ID
     if (!deviceId || !isValidUUID(deviceId)) {
+      console.error('useDeviceAlarms: Invalid device ID format:', deviceId);
       setError('Invalid device ID format');
       setIsLoading(false);
       return;
     }
     
     const fetchAlarmEvents = async () => {
+      console.log('useDeviceAlarms: Setting loading to true');
       setIsLoading(true);
       setError(null);
       
       try {
-        console.log('Fetching alarm events for device:', deviceId);
+        console.log('useDeviceAlarms: Calling RPC function for device:', deviceId);
         
         // Use bypass function to get alarm events to avoid RLS recursion
         const { data: eventsData, error: eventsError } = await supabase
@@ -39,19 +43,21 @@ export function useDeviceAlarms(deviceId: string) {
             p_device_id: deviceId
           });
 
+        console.log('useDeviceAlarms: RPC response:', { eventsData, eventsError });
+
         if (eventsError) {
-          console.error('Error fetching alarm events:', eventsError);
+          console.error('useDeviceAlarms: RPC error:', eventsError);
           throw eventsError;
         }
         
         if (!eventsData || !Array.isArray(eventsData) || eventsData.length === 0) {
-          console.log('No alarm events found for device:', deviceId);
+          console.log('useDeviceAlarms: No alarm events found for device:', deviceId);
           setAlarmEvents([]);
           setIsLoading(false);
           return;
         }
         
-        console.log(`Found ${eventsData.length} alarm events for device ${deviceId}`);
+        console.log(`useDeviceAlarms: Found ${eventsData.length} alarm events for device ${deviceId}`);
         
         // The bypass function returns structured data
         const formattedEvents: AlarmEvent[] = eventsData.map((event: any) => ({
@@ -76,11 +82,13 @@ export function useDeviceAlarms(deviceId: string) {
           } : undefined
         }));
         
+        console.log('useDeviceAlarms: Formatted events:', formattedEvents);
         setAlarmEvents(formattedEvents);
       } catch (err: any) {
-        console.error('Error fetching alarm events:', err);
-        setError(err.message);
+        console.error('useDeviceAlarms: Error fetching alarm events:', err);
+        setError(err.message || 'Failed to fetch alarm events');
       } finally {
+        console.log('useDeviceAlarms: Setting loading to false');
         setIsLoading(false);
       }
     };
@@ -90,53 +98,71 @@ export function useDeviceAlarms(deviceId: string) {
 
   const acknowledgeAlarm = async (eventId: string) => {
     if (!isValidUUID(eventId)) {
-      console.error('Invalid alarm event ID format:', eventId);
+      console.error('useDeviceAlarms: Invalid alarm event ID format:', eventId);
       return;
     }
     
     try {
+      console.log('useDeviceAlarms: Acknowledging alarm event:', eventId);
+      
       // Use bypass function to update alarm event
       const { error } = await supabase
         .rpc('acknowledge_alarm_event_bypass_rls', {
           p_event_id: eventId
         });
         
-      if (error) throw error;
+      if (error) {
+        console.error('useDeviceAlarms: Error acknowledging alarm:', error);
+        throw error;
+      }
 
+      console.log('useDeviceAlarms: Successfully acknowledged alarm:', eventId);
       setAlarmEvents(prev => prev.map(event => 
         event.id === eventId 
           ? { ...event, status: 'acknowledged', acknowledged_at: new Date().toISOString() } 
           : event
       ));
     } catch (err: any) {
-      console.error('Error acknowledging alarm:', err);
+      console.error('useDeviceAlarms: Error acknowledging alarm:', err);
     }
   };
 
   const resolveAlarm = async (eventId: string) => {
     if (!isValidUUID(eventId)) {
-      console.error('Invalid alarm event ID format:', eventId);
+      console.error('useDeviceAlarms: Invalid alarm event ID format:', eventId);
       return;
     }
     
     try {
+      console.log('useDeviceAlarms: Resolving alarm event:', eventId);
+      
       // Use bypass function to resolve alarm event
       const { error } = await supabase
         .rpc('resolve_alarm_event_bypass_rls', {
           p_event_id: eventId
         });
         
-      if (error) throw error;
+      if (error) {
+        console.error('useDeviceAlarms: Error resolving alarm:', error);
+        throw error;
+      }
 
+      console.log('useDeviceAlarms: Successfully resolved alarm:', eventId);
       setAlarmEvents(prev => prev.map(event => 
         event.id === eventId 
           ? { ...event, status: 'resolved', resolved_at: new Date().toISOString() } 
           : event
       ));
     } catch (err: any) {
-      console.error('Error resolving alarm:', err);
+      console.error('useDeviceAlarms: Error resolving alarm:', err);
     }
   };
+
+  console.log('useDeviceAlarms: Returning state:', { 
+    alarmEventsCount: alarmEvents.length, 
+    isLoading, 
+    error 
+  });
 
   return { alarmEvents, isLoading, error, acknowledgeAlarm, resolveAlarm };
 }

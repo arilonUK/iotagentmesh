@@ -17,6 +17,13 @@ export default function DeviceAlarms({ deviceId }: DeviceAlarmsProps) {
   const [showAll, setShowAll] = useState(false);
   const { alarmEvents, isLoading, error, acknowledgeAlarm, resolveAlarm } = useDeviceAlarms(deviceId);
 
+  console.log('DeviceAlarms: Rendering with state:', { 
+    deviceId, 
+    alarmEventsCount: alarmEvents.length, 
+    isLoading, 
+    error 
+  });
+
   if (isLoading) {
     return (
       <Card>
@@ -26,6 +33,7 @@ export default function DeviceAlarms({ deviceId }: DeviceAlarmsProps) {
         <CardContent>
           <div className="flex justify-center py-4">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+            <span className="ml-2 text-sm text-muted-foreground">Loading alarm data...</span>
           </div>
         </CardContent>
       </Card>
@@ -33,6 +41,7 @@ export default function DeviceAlarms({ deviceId }: DeviceAlarmsProps) {
   }
 
   if (error) {
+    console.error('DeviceAlarms: Displaying error:', error);
     return (
       <Card>
         <CardHeader>
@@ -40,7 +49,11 @@ export default function DeviceAlarms({ deviceId }: DeviceAlarmsProps) {
         </CardHeader>
         <CardContent>
           <div className="bg-red-50 p-4 rounded-md text-red-800">
-            Error loading alarm data: {error}
+            <p className="font-medium">Error loading alarm data</p>
+            <p className="text-sm mt-1">{error}</p>
+            <p className="text-xs mt-2 text-red-600">
+              Device ID: {deviceId}
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -48,6 +61,7 @@ export default function DeviceAlarms({ deviceId }: DeviceAlarmsProps) {
   }
 
   if (alarmEvents.length === 0) {
+    console.log('DeviceAlarms: No alarm events found, showing empty state');
     return (
       <Card>
         <CardHeader>
@@ -66,6 +80,12 @@ export default function DeviceAlarms({ deviceId }: DeviceAlarmsProps) {
   const displayEvents = showAll 
     ? alarmEvents 
     : alarmEvents.filter(e => e.status === 'active' || new Date(e.triggered_at) > new Date(Date.now() - 24 * 60 * 60 * 1000));
+
+  console.log('DeviceAlarms: Displaying events:', { 
+    totalEvents: alarmEvents.length, 
+    displayedEvents: displayEvents.length, 
+    showAll 
+  });
 
   return (
     <Card>
@@ -103,7 +123,7 @@ export default function DeviceAlarms({ deviceId }: DeviceAlarmsProps) {
                     <AlarmSeverityIcon severity={event.alarm?.severity || 'info'} />
                   </TableCell>
                   <TableCell className="font-medium">
-                    <div className="font-medium">{event.alarm?.name}</div>
+                    <div className="font-medium">{event.alarm?.name || 'Unknown Alarm'}</div>
                     <div className="text-sm text-muted-foreground">{event.message}</div>
                   </TableCell>
                   <TableCell>
