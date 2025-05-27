@@ -1,6 +1,7 @@
 
 import React, { ReactElement } from 'react';
-import { render, RenderOptions, screen, waitFor } from '@testing-library/react';
+import { render, RenderOptions } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { ToastProvider } from '@/contexts/toast';
