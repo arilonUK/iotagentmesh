@@ -30,13 +30,13 @@ const Auth = () => {
     }
   }, [toast, session, hasShownMessage]);
 
-  // Set a timeout to prevent infinite loading
+  // Set a very short timeout to prevent infinite loading
   useEffect(() => {
     if (loading) {
       const timer = setTimeout(() => {
         console.log("Auth page: Loading timeout reached, proceeding anyway");
         setTimeoutReached(true);
-      }, 2000); // Reduced to 2 seconds
+      }, 1000); // Very short timeout - 1 second
 
       return () => clearTimeout(timer);
     } else {
@@ -44,7 +44,7 @@ const Auth = () => {
     }
   }, [loading]);
 
-  // Show loading state while checking authentication, but with timeout
+  // Show loading state very briefly
   if (loading && !timeoutReached) {
     console.log("Auth page: Still loading session...");
     return (
@@ -57,7 +57,7 @@ const Auth = () => {
     );
   }
 
-  // If timeout reached but still loading, show auth form anyway
+  // If timeout reached, show auth form regardless of loading state
   if (timeoutReached && loading) {
     console.log("Auth page: Loading timeout reached, showing auth form");
   }
