@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import Header from '@/components/Header';
 import AuthContainer from '@/components/auth/AuthContainer';
@@ -10,6 +10,7 @@ const Auth = () => {
   const { session, loading } = useAuth();
   const location = useLocation();
   const { toast } = useToast();
+  const [timeoutReached, setTimeoutReached] = useState(false);
   
   useEffect(() => {
     // Only show toast once when first landing on auth page
@@ -27,8 +28,21 @@ const Auth = () => {
     }
   }, [toast, session]);
 
-  // Show loading state while checking authentication
-  if (loading) {
+  // Set a timeout to prevent infinite loading
+  useEffect(() => {
+    if (loading) {
+      const timer = setTimeout(() => {
+        setTimeoutReached(true);
+      }, 15000); // 15 seconds timeout
+
+      return () => clearTimeout(timer);
+    } else {
+      setTimeoutReached(false);
+    }
+  }, [loading]);
+
+  // Show loading state while checking authentication, but with timeout
+  if (loading && !timeoutReached) {
     console.log("Auth page: Still loading session...");
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -41,8 +55,13 @@ const Auth = () => {
     );
   }
 
+  // If timeout reached but still loading, show auth form anyway
+  if (timeoutReached && loading) {
+    console.log("Auth page: Loading timeout reached, showing auth form");
+  }
+
   // If already logged in, redirect to dashboard
-  if (session) {
+  if (session && !loading) {
     console.log("Auth page: User is authenticated, redirecting to dashboard");
     const from = location.state?.from?.pathname || '/dashboard';
     return <Navigate to={from} replace />;

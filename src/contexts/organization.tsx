@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './auth';
@@ -39,7 +40,7 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       try {
         console.log(`Loading organizations for user: ${session.user.id}`);
         
-        // Get user organizations using the RPC function that works
+        // Get user organizations using the RPC function
         const { data: userOrganizations, error: orgsError } = await supabase
           .rpc('get_user_organizations', { p_user_id: session.user.id });
 
@@ -57,35 +58,26 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           return;
         }
 
-        console.log(`Successfully fetched user organizations with RPC:`, userOrganizations);
-        console.log(`Loaded user organizations: ${userOrganizations.length}`);
+        console.log(`Successfully fetched user organizations:`, userOrganizations);
 
         // Find default organization or use first one
         const defaultOrg = userOrganizations.find(org => org.is_default) || userOrganizations[0];
         
         if (defaultOrg) {
-          console.log(`Loading data for default organization: ${defaultOrg.name}`);
+          console.log(`Using organization: ${defaultOrg.name}`);
           
-          // Use the new bypass service to get organization data
-          const { fetchOrganizationData } = await import('@/services/organizationEntityService');
-          const orgData = await fetchOrganizationData(defaultOrg.id, session.user.id);
+          // Use the organization data we already have instead of fetching again
+          const formattedOrg: Organization = {
+            id: defaultOrg.id,
+            name: defaultOrg.name,
+            slug: defaultOrg.slug,
+            role: defaultOrg.role as any,
+            created_at: new Date().toISOString(), // We don't have these from the RPC
+            updated_at: new Date().toISOString()
+          };
           
-          if (orgData) {
-            const formattedOrg: Organization = {
-              id: orgData.id,
-              name: orgData.name,
-              slug: orgData.slug,
-              role: orgData.role as any,
-              created_at: orgData.created_at,
-              updated_at: orgData.updated_at
-            };
-            
-            console.log('Successfully loaded organization data:', formattedOrg);
-            setOrganization(formattedOrg);
-          } else {
-            console.error('Failed to load organization data');
-            setOrganization(null);
-          }
+          console.log('Successfully loaded organization data:', formattedOrg);
+          setOrganization(formattedOrg);
         }
       } catch (error) {
         console.error('Error loading organization data:', error);
@@ -115,22 +107,25 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         return false;
       }
 
-      // Reload organization data after switch
-      const { fetchOrganizationData } = await import('@/services/organizationEntityService');
-      const orgData = await fetchOrganizationData(organizationId, session.user.id);
+      // Get updated organization list and find the switched org
+      const { data: userOrganizations } = await supabase
+        .rpc('get_user_organizations', { p_user_id: session.user.id });
       
-      if (orgData) {
-        const formattedOrg: Organization = {
-          id: orgData.id,
-          name: orgData.name,
-          slug: orgData.slug,
-          role: orgData.role as any,
-          created_at: orgData.created_at,
-          updated_at: orgData.updated_at
-        };
-        
-        setOrganization(formattedOrg);
-        return true;
+      if (userOrganizations) {
+        const newOrg = userOrganizations.find(org => org.id === organizationId);
+        if (newOrg) {
+          const formattedOrg: Organization = {
+            id: newOrg.id,
+            name: newOrg.name,
+            slug: newOrg.slug,
+            role: newOrg.role as any,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          
+          setOrganization(formattedOrg);
+          return true;
+        }
       }
       
       return false;

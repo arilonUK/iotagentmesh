@@ -55,10 +55,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const { data: sessionData } = await supabase.auth.getSession();
         setSession(sessionData.session);
         
-        // Try to fetch user organizations
+        // Try to fetch user organizations with timeout and better error handling
         try {
           console.log("AuthProvider: Fetching user organizations");
-          const userOrgs = await organizationService.getUserOrganizations(data.user.id);
+          
+          // Set a timeout for organization fetching to prevent hanging
+          const organizationPromise = organizationService.getUserOrganizations(data.user.id);
+          const timeoutPromise = new Promise<UserOrganization[]>((_, reject) => {
+            setTimeout(() => reject(new Error('Organization fetch timeout')), 10000);
+          });
+          
+          const userOrgs = await Promise.race([organizationPromise, timeoutPromise]);
           console.log("AuthProvider: Organizations fetch result:", userOrgs);
           
           if (userOrgs && userOrgs.length > 0) {
@@ -96,12 +103,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setCurrentOrganization(null);
           setUserRole(null);
           setOrganization(null);
+          
+          // Show a user-friendly message but don't block auth
+          if (orgError.message !== 'Organization fetch timeout') {
+            toast({
+              title: "Organization data unavailable",
+              description: "You're signed in, but we couldn't load your organization data. Some features may be limited.",
+              variant: "destructive"
+            });
+          }
         }
 
-        // Always complete the auth process
+        // Always complete the auth process regardless of organization fetch status
         setIsLoading(false);
         setLoading(false);
-        console.log("AuthProvider: Auth initialization completed successfully");
+        console.log("AuthProvider: Auth initialization completed");
       } catch (error) {
         console.error("AuthProvider: Error checking authentication:", error);
         setIsAuthenticated(false);
@@ -123,47 +139,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(session.user);
           setSession(session);
           
-          // Try to fetch user organizations
-          try {
-            const userOrgs = await organizationService.getUserOrganizations(session.user.id);
-            
-            if (userOrgs && userOrgs.length > 0) {
-              setOrganizations(userOrgs);
-              setUserOrganizations(userOrgs);
-              
-              // Set current organization based on default
-              const defaultOrg = userOrgs.find(org => org.is_default) || userOrgs[0];
-              if (defaultOrg) {
-                setCurrentOrganization(defaultOrg);
-                setUserRole(defaultOrg.role);
-                
-                // Set organization for extended context
-                setOrganization({
-                  id: defaultOrg.id,
-                  name: defaultOrg.name,
-                  slug: defaultOrg.slug
-                });
-              }
-            } else {
-              console.log("AuthProvider: No organizations found during sign in");
-              setOrganizations([]);
-              setUserOrganizations([]);
-              setCurrentOrganization(null);
-              setUserRole(null);
-              setOrganization(null);
-            }
-          } catch (orgError: any) {
-            console.error("AuthProvider: Error fetching organizations during sign in, continuing with basic auth:", orgError);
-            // Continue with basic authentication even if org fetch fails
-            setOrganizations([]);
-            setUserOrganizations([]);
-            setCurrentOrganization(null);
-            setUserRole(null);
-            setOrganization(null);
-          }
-          
+          // Set basic auth first, then try organizations with timeout
           setIsLoading(false);
           setLoading(false);
+          
+          // Try to fetch organizations in background without blocking
+          setTimeout(async () => {
+            try {
+              const userOrgs = await organizationService.getUserOrganizations(session.user.id);
+              
+              if (userOrgs && userOrgs.length > 0) {
+                setOrganizations(userOrgs);
+                setUserOrganizations(userOrgs);
+                
+                const defaultOrg = userOrgs.find(org => org.is_default) || userOrgs[0];
+                if (defaultOrg) {
+                  setCurrentOrganization(defaultOrg);
+                  setUserRole(defaultOrg.role);
+                  setOrganization({
+                    id: defaultOrg.id,
+                    name: defaultOrg.name,
+                    slug: defaultOrg.slug
+                  });
+                }
+              }
+            } catch (error) {
+              console.error("Background organization fetch failed:", error);
+              // Silently fail - user is already authenticated
+            }
+          }, 100);
+          
         } else if (event === 'SIGNED_OUT') {
           console.log("AuthProvider: User signed out");
           setIsAuthenticated(false);
@@ -208,7 +213,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUserRole,
     setOrganization,
     setIsLoading,
-    setLoading
+    setLoading,
+    toast
   ]);
 
   return (
