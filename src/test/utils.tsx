@@ -1,6 +1,6 @@
 
 import React, { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
+import { render, RenderOptions, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { ToastProvider } from '@/contexts/toast';
@@ -23,6 +23,6 @@ const customRender = (
   options?: Omit<RenderOptions, 'wrapper'>,
 ) => render(ui, { wrapper: AllTheProviders, ...options });
 
-// Re-export everything from testing-library
+// Re-export everything from testing-library including screen and waitFor
 export * from '@testing-library/react';
-export { customRender as render };
+export { customRender as render, screen, waitFor };
