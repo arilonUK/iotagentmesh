@@ -60,16 +60,34 @@ export const authServices = {
    */
   signOut: async () => {
     try {
+      console.log('Starting sign out process...');
+      
+      // Clear the session from Supabase
       const { error } = await supabase.auth.signOut();
       
       if (error) {
+        console.error('Supabase sign out error:', error);
         toast.error(`Error signing out: ${error.message}`);
-      } else {
-        toast.success('Signed out successfully');
+        return { error };
       }
+
+      console.log('Supabase sign out successful');
+      
+      // Clear any local storage items
+      localStorage.removeItem('supabase.auth.token');
+      
+      // Force redirect to auth page
+      window.location.href = '/auth';
+      
+      toast.success('Signed out successfully');
+      return { data: { success: true } };
     } catch (error: any) {
-      console.error('Error signing out:', error);
+      console.error('Error during sign out:', error);
       toast.error(`Error signing out: ${error.message}`);
+      
+      // Force redirect even if there's an error
+      window.location.href = '/auth';
+      return { error };
     }
   }
 };

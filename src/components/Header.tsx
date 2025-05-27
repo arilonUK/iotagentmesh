@@ -25,14 +25,19 @@ export const Header = () => {
   const { session, user, signOut } = useAuth()
   
   const handleSignOut = async () => {
+    if (isSigningOut) return; // Prevent multiple calls
+    
     setIsSigningOut(true);
+    console.log("Header: Starting sign out process");
+    
     try {
-      await signOut()
-      // Redirect happens inside the signOut function
+      await signOut();
+      console.log("Header: Sign out completed");
+      // Navigation is handled in the signOut function
     } catch (error) {
-      console.error("Error signing out:", error)
+      console.error("Header: Error during sign out:", error);
       setIsSigningOut(false);
-      // Fallback navigation in case the redirection in signOut fails
+      // Force navigation as fallback
       navigate('/auth');
     }
   }

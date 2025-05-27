@@ -21,14 +21,19 @@ export function OrganizationFooter() {
   if (!organization) return null;
   
   const handleSignOut = async () => {
+    if (isSigningOut) return; // Prevent multiple calls
+    
     setIsSigningOut(true);
+    console.log("OrganizationFooter: Starting sign out process");
+    
     try {
       await signOut();
-      // Redirection is handled in the signOut function
+      console.log("OrganizationFooter: Sign out completed");
+      // Navigation is handled in the signOut function
     } catch (error) {
-      console.error("Error signing out:", error);
+      console.error("OrganizationFooter: Error during sign out:", error);
       setIsSigningOut(false);
-      // Fallback navigation in case the redirection in signOut fails
+      // Force navigation as fallback
       navigate('/auth');
     }
   };
