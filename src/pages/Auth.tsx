@@ -12,18 +12,24 @@ const Auth = () => {
   const { toast } = useToast();
   
   useEffect(() => {
-    // If user just landed on this page after being redirected from a protected route
+    // Only show toast once when first landing on auth page
     const redirectReason = new URLSearchParams(window.location.search).get('reason');
-    if (redirectReason === 'protected') {
+    if (redirectReason === 'protected' && !session) {
       toast({
         title: "Authentication required",
         description: "Please log in to access this page"
       });
+      
+      // Clear the reason parameter to prevent showing toast again
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('reason');
+      window.history.replaceState({}, '', newUrl.toString());
     }
-  }, [toast]);
+  }, [toast, session]);
 
   // Show loading state while checking authentication
   if (loading) {
+    console.log("Auth page: Still loading session...");
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
@@ -33,12 +39,12 @@ const Auth = () => {
 
   // If already logged in, redirect to dashboard
   if (session) {
-    console.log("User is already authenticated, redirecting to dashboard");
-    // Get the redirect path from location state, or default to dashboard
+    console.log("Auth page: User is authenticated, redirecting to dashboard");
     const from = location.state?.from?.pathname || '/dashboard';
     return <Navigate to={from} replace />;
   }
 
+  console.log("Auth page: Showing auth container");
   return (
     <div className="min-h-screen flex flex-col">
       <Header />

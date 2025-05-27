@@ -34,28 +34,40 @@ export const useSessionManager = (): SessionManagerReturn => {
   } = useProfileManager();
   
   const [lastUserId, setLastUserId] = useState<string | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
 
   useEffect(() => {
-    // Only refetch profile when user ID changes (not on every render)
-    if (user?.id && user.id !== lastUserId) {
+    // Only fetch profile when user ID changes and we have a user
+    if (user?.id && user.id !== lastUserId && !profileLoading) {
       setLastUserId(user.id);
-      console.log("User ID changed, fetching updated profile for:", user.id);
+      setProfileLoading(true);
       
-      // Use setTimeout to prevent supabase deadlock
-      setTimeout(() => {
-        fetchProfile(user.id);
-      }, 0);
+      console.log("User ID changed, fetching profile for:", user.id);
+      
+      // Use a small delay to prevent rapid consecutive calls
+      const timeoutId = setTimeout(async () => {
+        try {
+          await fetchProfile(user.id);
+        } catch (error) {
+          console.error("Error fetching profile:", error);
+        } finally {
+          setProfileLoading(false);
+        }
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
     } else if (!user && lastUserId) {
-      // Reset lastUserId when user logs out
+      // Reset when user logs out
       setLastUserId(null);
+      setProfileLoading(false);
     }
-  }, [user?.id, lastUserId, fetchProfile]);
+  }, [user?.id, lastUserId, fetchProfile, profileLoading]);
 
   return {
     session,
     user,
     profile,
-    loading,
+    loading: loading || profileLoading,
     fetchProfile,
     setSession,
     setUser,
