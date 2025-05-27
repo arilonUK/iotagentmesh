@@ -5,8 +5,10 @@ import { EndpointFormData } from '@/types/endpoint';
 import { toast } from 'sonner';
 
 export const useEndpointManager = () => {
-  const { profile } = useAuth();
-  const organizationId = profile?.default_organization_id;
+  const { currentOrganization, organization } = useAuth();
+  
+  // Get organization ID from currentOrganization or fallback to organization
+  const organizationId = currentOrganization?.id || organization?.id;
   
   // Check if we're inside an iframe to hide unnecessary UI elements
   const isEmbedded = window.self !== window.top;

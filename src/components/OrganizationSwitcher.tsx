@@ -21,6 +21,10 @@ interface OrganizationSwitcherProps {
 const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: OrganizationSwitcherProps) => {
   const { currentOrganization, userOrganizations, switchOrganization, loading } = useAuth();
   
+  console.log('OrganizationSwitcher - currentOrganization:', currentOrganization);
+  console.log('OrganizationSwitcher - userOrganizations:', userOrganizations);
+  console.log('OrganizationSwitcher - loading:', loading);
+  
   // Show loading state while organizations are being fetched
   if (loading) {
     return (
@@ -70,6 +74,7 @@ const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: Organizat
 
   const handleSwitchOrg = async (orgId: string) => {
     if (switchOrganization) {
+      console.log('Switching to organization:', orgId);
       await switchOrganization(orgId);
     }
   };
