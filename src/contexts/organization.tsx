@@ -1,59 +1,155 @@
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './auth';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { useAuth } from "@/contexts/auth";
-import { Organization as OrgType } from "@/contexts/auth/types";
-
-// Define a local interface for the organization context
-interface Organization {
+export interface Organization {
   id: string;
   name: string;
-  slug?: string;
-  logo?: string;
+  slug: string;
+  role: 'owner' | 'admin' | 'member';
+  created_at: string;
+  updated_at: string;
 }
 
 interface OrganizationContextType {
   organization: Organization | null;
-  setOrganization: (org: Organization | null) => void;
+  isLoading: boolean;
+  switchOrganization: (organizationId: string) => Promise<boolean>;
 }
 
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
 
-export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
+export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [organization, setOrganization] = useState<Organization | null>(null);
-  
-  // Try to get the auth context, but don't fail if it's not available yet
-  let authOrganization;
-  try {
-    const auth = useAuth();
-    authOrganization = auth?.currentOrganization;
-  } catch (error) {
-    console.log('Auth context not available yet, using fallback organization');
-  }
-  
-  // Initialize organization from auth context if available
+  const [isLoading, setIsLoading] = useState(true);
+  const { session, user } = useAuth();
+
+  // Load organization data when session changes
   useEffect(() => {
-    if (authOrganization) {
-      console.log('Setting organization from auth context:', authOrganization);
-      setOrganization({
-        id: authOrganization.id,
-        name: authOrganization.name,
-        slug: authOrganization.slug,
-        logo: authOrganization.logo
-      });
-    } else {
-      // Fallback to hardcoded organization ID for demo purposes
-      // This ensures devices will load even without auth
-      console.log('No organization in auth context, using fallback');
-      setOrganization({
-        id: '7dcfb1a6-d855-4ed7-9a45-2e9f54590c18', // The organization ID from the device data
-        name: 'Demo Organization',
-        slug: 'demo-org'
-      });
+    const loadOrganizationData = async () => {
+      if (!session?.user?.id) {
+        console.log('No session, clearing organization data');
+        setOrganization(null);
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      
+      try {
+        console.log(`Loading organizations for user: ${session.user.id}`);
+        
+        // Get user organizations using the RPC function that works
+        const { data: userOrganizations, error: orgsError } = await supabase
+          .rpc('get_user_organizations', { p_user_id: session.user.id });
+
+        if (orgsError) {
+          console.error('Error fetching user organizations:', orgsError);
+          setOrganization(null);
+          setIsLoading(false);
+          return;
+        }
+
+        if (!userOrganizations || userOrganizations.length === 0) {
+          console.log('No organizations found for user');
+          setOrganization(null);
+          setIsLoading(false);
+          return;
+        }
+
+        console.log(`Successfully fetched user organizations with RPC:`, userOrganizations);
+        console.log(`Loaded user organizations: ${userOrganizations.length}`);
+
+        // Find default organization or use first one
+        const defaultOrg = userOrganizations.find(org => org.is_default) || userOrganizations[0];
+        
+        if (defaultOrg) {
+          console.log(`Loading data for default organization: ${defaultOrg.name}`);
+          
+          // Use the new bypass service to get organization data
+          const { fetchOrganizationData } = await import('@/services/organizationEntityService');
+          const orgData = await fetchOrganizationData(defaultOrg.id, session.user.id);
+          
+          if (orgData) {
+            const formattedOrg: Organization = {
+              id: orgData.id,
+              name: orgData.name,
+              slug: orgData.slug,
+              role: orgData.role as any,
+              created_at: orgData.created_at,
+              updated_at: orgData.updated_at
+            };
+            
+            console.log('Successfully loaded organization data:', formattedOrg);
+            setOrganization(formattedOrg);
+          } else {
+            console.error('Failed to load organization data');
+            setOrganization(null);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading organization data:', error);
+        setOrganization(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadOrganizationData();
+  }, [session?.user?.id]);
+
+  const switchOrganization = async (organizationId: string) => {
+    if (!session?.user?.id) return false;
+    
+    setIsLoading(true);
+    
+    try {
+      const { data: success, error } = await supabase
+        .rpc('switch_user_organization', {
+          p_user_id: session.user.id,
+          p_org_id: organizationId
+        });
+
+      if (error || !success) {
+        console.error('Error switching organization:', error);
+        return false;
+      }
+
+      // Reload organization data after switch
+      const { fetchOrganizationData } = await import('@/services/organizationEntityService');
+      const orgData = await fetchOrganizationData(organizationId, session.user.id);
+      
+      if (orgData) {
+        const formattedOrg: Organization = {
+          id: orgData.id,
+          name: orgData.name,
+          slug: orgData.slug,
+          role: orgData.role as any,
+          created_at: orgData.created_at,
+          updated_at: orgData.updated_at
+        };
+        
+        setOrganization(formattedOrg);
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error in switchOrganization:', error);
+      return false;
+    } finally {
+      setIsLoading(false);
     }
-  }, [authOrganization]);
+  };
+
+  const value = {
+    organization,
+    isLoading,
+    switchOrganization,
+  };
 
   return (
-    <OrganizationContext.Provider value={{ organization, setOrganization }}>
+    <OrganizationContext.Provider value={value}>
       {children}
     </OrganizationContext.Provider>
   );
