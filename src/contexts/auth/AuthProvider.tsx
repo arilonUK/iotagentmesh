@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
 
-        console.log("AuthProvider: User found, setting auth state");
+        console.log("AuthProvider: User found, setting basic auth state");
         setIsAuthenticated(true);
         setUserId(data.user.id);
         setUserEmail(data.user.email);
@@ -56,30 +56,47 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const { data: sessionData } = await supabase.auth.getSession();
         setSession(sessionData.session);
         
-        // Try to fetch user organizations with error handling
+        // Try to fetch user organizations with comprehensive error handling
         try {
           console.log("AuthProvider: Fetching user organizations");
           const userOrgs = await organizationService.getUserOrganizations(data.user.id);
-          console.log("AuthProvider: Successfully fetched organizations:", userOrgs.length);
+          console.log("AuthProvider: Organizations fetch result:", userOrgs);
           
-          setOrganizations(userOrgs);
-          setUserOrganizations(userOrgs);
-          
-          // Set current organization based on default
-          const defaultOrg = userOrgs.find(org => org.is_default) || userOrgs[0];
-          if (defaultOrg) {
-            setCurrentOrganization(defaultOrg);
-            setUserRole(defaultOrg.role);
+          if (userOrgs && userOrgs.length > 0) {
+            console.log("AuthProvider: Successfully fetched organizations:", userOrgs.length);
             
-            // Set organization for extended context
-            setOrganization({
-              id: defaultOrg.id,
-              name: defaultOrg.name,
-              slug: defaultOrg.slug
-            });
+            setOrganizations(userOrgs);
+            setUserOrganizations(userOrgs);
+            
+            // Set current organization based on default
+            const defaultOrg = userOrgs.find(org => org.is_default) || userOrgs[0];
+            if (defaultOrg) {
+              setCurrentOrganization(defaultOrg);
+              setUserRole(defaultOrg.role);
+              
+              // Set organization for extended context
+              setOrganization({
+                id: defaultOrg.id,
+                name: defaultOrg.name,
+                slug: defaultOrg.slug
+              });
+            }
+          } else {
+            console.log("AuthProvider: No organizations found, proceeding with basic auth");
+            setOrganizations([]);
+            setUserOrganizations([]);
+            setCurrentOrganization(null);
+            setUserRole(null);
+            setOrganization(null);
           }
-        } catch (orgError) {
+        } catch (orgError: any) {
           console.error("AuthProvider: Error fetching organizations, continuing with basic auth:", orgError);
+          
+          // Show a warning toast if it's the infinite recursion error
+          if (orgError.code === '42P17' || orgError.message?.includes('infinite recursion')) {
+            console.warn("AuthProvider: Database policy issue detected - infinite recursion in organization_members table");
+          }
+          
           // Continue with basic authentication even if org fetch fails
           setOrganizations([]);
           setUserOrganizations([]);
@@ -88,8 +105,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setOrganization(null);
         }
 
+        // Always complete the auth process
         setIsLoading(false);
         setLoading(false);
+        console.log("AuthProvider: Auth initialization completed successfully");
       } catch (error) {
         console.error("AuthProvider: Error checking authentication:", error);
         setIsAuthenticated(false);
@@ -114,23 +133,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Try to fetch user organizations with error handling
           try {
             const userOrgs = await organizationService.getUserOrganizations(session.user.id);
-            setOrganizations(userOrgs);
-            setUserOrganizations(userOrgs);
             
-            // Set current organization based on default
-            const defaultOrg = userOrgs.find(org => org.is_default) || userOrgs[0];
-            if (defaultOrg) {
-              setCurrentOrganization(defaultOrg);
-              setUserRole(defaultOrg.role);
+            if (userOrgs && userOrgs.length > 0) {
+              setOrganizations(userOrgs);
+              setUserOrganizations(userOrgs);
               
-              // Set organization for extended context
-              setOrganization({
-                id: defaultOrg.id,
-                name: defaultOrg.name,
-                slug: defaultOrg.slug
-              });
+              // Set current organization based on default
+              const defaultOrg = userOrgs.find(org => org.is_default) || userOrgs[0];
+              if (defaultOrg) {
+                setCurrentOrganization(defaultOrg);
+                setUserRole(defaultOrg.role);
+                
+                // Set organization for extended context
+                setOrganization({
+                  id: defaultOrg.id,
+                  name: defaultOrg.name,
+                  slug: defaultOrg.slug
+                });
+              }
+            } else {
+              console.log("AuthProvider: No organizations found during sign in");
+              setOrganizations([]);
+              setUserOrganizations([]);
+              setCurrentOrganization(null);
+              setUserRole(null);
+              setOrganization(null);
             }
-          } catch (orgError) {
+          } catch (orgError: any) {
             console.error("AuthProvider: Error fetching organizations during sign in, continuing with basic auth:", orgError);
             // Continue with basic authentication even if org fetch fails
             setOrganizations([]);

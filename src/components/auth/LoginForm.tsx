@@ -34,16 +34,25 @@ const LoginForm = ({ setAuthError }: LoginFormProps) => {
       
       if (result?.error) {
         console.error("LoginForm: Login failed:", result.error.message);
-        setAuthError(result.error.message || 'Failed to sign in');
+        
+        // Provide user-friendly error messages
+        let errorMessage = result.error.message;
+        if (errorMessage.includes('Invalid login credentials')) {
+          errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+        } else if (errorMessage.includes('Email not confirmed')) {
+          errorMessage = 'Please check your email and click the confirmation link before signing in.';
+        }
+        
+        setAuthError(errorMessage);
       } else {
-        console.log("LoginForm: Login successful");
+        console.log("LoginForm: Login successful, auth state will be handled by AuthProvider");
         // The AuthProvider will handle the redirect via session state change
       }
     } catch (error: any) {
       console.error("LoginForm: Login error:", error);
       setAuthError(error.message || 'An unexpected error occurred during sign in');
     } finally {
-      // Small delay to prevent rapid re-submission
+      // Small delay to prevent rapid re-submission and allow auth state to settle
       setTimeout(() => {
         setIsLoading(false);
       }, 1000);
@@ -91,6 +100,12 @@ const LoginForm = ({ setAuthError }: LoginFormProps) => {
       >
         {isLoading ? 'Signing in...' : 'Sign In'}
       </Button>
+      
+      {isLoading && (
+        <div className="text-sm text-center text-muted-foreground">
+          Please wait while we sign you in...
+        </div>
+      )}
     </form>
   );
 };
