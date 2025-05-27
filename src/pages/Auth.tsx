@@ -36,7 +36,7 @@ const Auth = () => {
       const timer = setTimeout(() => {
         console.log("Auth page: Loading timeout reached, proceeding anyway");
         setTimeoutReached(true);
-      }, 10000); // 10 second timeout
+      }, 3000); // Reduced to 3 seconds
 
       return () => clearTimeout(timer);
     } else {
@@ -52,7 +52,6 @@ const Auth = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900 mx-auto mb-4"></div>
           <p className="text-muted-foreground">Checking authentication...</p>
-          <p className="text-sm text-muted-foreground mt-2">This should only take a moment</p>
         </div>
       </div>
     );

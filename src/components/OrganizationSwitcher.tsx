@@ -21,8 +21,26 @@ interface OrganizationSwitcherProps {
 const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: OrganizationSwitcherProps) => {
   const { currentOrganization, userOrganizations, switchOrganization } = useAuth();
   
-  if (!currentOrganization || userOrganizations.length <= 1) {
+  // Show nothing if no organizations are available
+  if (!userOrganizations || userOrganizations.length === 0) {
     return null;
+  }
+
+  // Show current org name but no dropdown if only one organization
+  if (userOrganizations.length === 1) {
+    return (
+      <Button 
+        variant="outline" 
+        size="sm" 
+        className={cn("flex items-center gap-2 px-3 cursor-default", triggerClassName)}
+        disabled
+      >
+        <Building className="h-4 w-4" />
+        <span className="truncate max-w-[150px]">
+          {currentOrganization?.name || userOrganizations[0].name}
+        </span>
+      </Button>
+    );
   }
 
   const handleSwitchOrg = async (orgId: string) => {
@@ -40,7 +58,9 @@ const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: Organizat
           className={cn("flex items-center gap-2 px-3", triggerClassName)}
         >
           <Building className="h-4 w-4" />
-          <span className="truncate max-w-[150px]">{currentOrganization.name}</span>
+          <span className="truncate max-w-[150px]">
+            {currentOrganization?.name || userOrganizations[0].name}
+          </span>
           <ChevronDown className="h-4 w-4 opacity-50" />
         </Button>
       </DropdownMenuTrigger>

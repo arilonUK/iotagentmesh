@@ -11,6 +11,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const authState = useAuthProvider();
   const { toast } = useToast();
   const initializingRef = useRef(false);
+  const organizationFetchRef = useRef(false);
   
   const { 
     setIsAuthenticated,
@@ -61,9 +62,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const { data: sessionData } = await supabase.auth.getSession();
         setSession(sessionData.session);
         
-        // Load organizations using the improved service
-        await loadUserOrganizations(data.user.id);
+        // Load organizations with timeout - don't block auth
+        setTimeout(() => {
+          loadUserOrganizations(data.user.id);
+        }, 100);
         
+        // Set loading to false immediately after auth is confirmed
         setIsLoading(false);
         setLoading(false);
         console.log("AuthProvider: Auth initialization completed");
@@ -78,6 +82,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const loadUserOrganizations = async (userId: string) => {
+      // Prevent multiple simultaneous organization fetches
+      if (organizationFetchRef.current) {
+        console.log("AuthProvider: Organization fetch already in progress");
+        return;
+      }
+      
+      organizationFetchRef.current = true;
+      
       try {
         console.log("AuthProvider: Loading user organizations");
         const userOrgs = await organizationService.getUserOrganizations(userId);
@@ -102,7 +114,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             });
           }
         } else {
-          console.log("AuthProvider: No organizations found");
+          console.log("AuthProvider: No organizations found or failed to load");
           setOrganizations([]);
           setUserOrganizations([]);
           setCurrentOrganization(null);
@@ -118,11 +130,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUserRole(null);
         setOrganization(null);
         
-        toast({
-          title: "Organization data unavailable",
-          description: "You're signed in, but organization features may be limited.",
-          variant: "default"
-        });
+        // Only show toast for non-timeout errors
+        if (!error?.message?.includes('timeout') && error?.code !== '42P17') {
+          toast({
+            title: "Organization data unavailable",
+            description: "You're signed in, but organization features may be limited.",
+            variant: "default"
+          });
+        }
+      } finally {
+        organizationFetchRef.current = false;
       }
     };
 
@@ -139,8 +156,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(session.user);
           setSession(session);
           
-          // Load organizations for the signed-in user
-          await loadUserOrganizations(session.user.id);
+          // Load organizations for the signed-in user with delay
+          setTimeout(() => {
+            loadUserOrganizations(session.user.id);
+          }, 100);
           
           setIsLoading(false);
           setLoading(false);
@@ -166,6 +185,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Clear organization cache
           organizationService.clearCache();
           initializingRef.current = false;
+          organizationFetchRef.current = false;
           
         } else if (event === 'TOKEN_REFRESHED' && session) {
           console.log("AuthProvider: Token refreshed");
@@ -181,6 +201,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       authListener.subscription.unsubscribe();
       initializingRef.current = false;
+      organizationFetchRef.current = false;
     };
   }, [
     setIsAuthenticated,

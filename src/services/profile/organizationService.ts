@@ -20,12 +20,22 @@ export const organizationService = {
         return cached.data;
       }
       
-      // Use the new RLS bypass function
-      const { data, error } = await supabase
-        .rpc('get_user_organizations', { p_user_id: userId });
+      // Use the RLS bypass function with timeout
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Organization fetch timeout')), 5000);
+      });
+      
+      const fetchPromise = supabase.rpc('get_user_organizations', { p_user_id: userId });
+      
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
 
       if (error) {
         console.error('Error fetching user organizations:', error);
+        // Don't throw on RLS errors, return empty array instead
+        if (error.code === '42P17') {
+          console.log('RLS recursion detected, returning empty organizations array');
+          return [];
+        }
         throw error;
       }
 
@@ -41,6 +51,13 @@ export const organizationService = {
       return organizations;
     } catch (error: any) {
       console.error('Error fetching user organizations:', error);
+      
+      // For timeout or RLS errors, don't show toast and return empty array
+      if (error.message === 'Organization fetch timeout' || error.code === '42P17') {
+        console.log('Gracefully handling organization fetch failure');
+        return [];
+      }
+      
       toast.error('Unable to load organizations');
       return [];
     }
