@@ -63,20 +63,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const { data: sessionData } = await supabase.auth.getSession();
         setSession(sessionData.session);
         
-        // Complete basic auth first, then try organizations
+        // Complete basic auth first, then try organizations with timeout
         setIsLoading(false);
         setLoading(false);
         
-        // Try to fetch user organizations with timeout and error handling
+        // Try to fetch user organizations with aggressive timeout and error handling
         if (!organizationFetchRef.current) {
           organizationFetchRef.current = true;
           
+          // Use shorter timeout for organization fetch to prevent hanging
           setTimeout(async () => {
             try {
               console.log("AuthProvider: Fetching user organizations with timeout");
               
               const timeoutPromise = new Promise<UserOrganization[]>((_, reject) => {
-                setTimeout(() => reject(new Error('Organization fetch timeout')), 8000);
+                setTimeout(() => reject(new Error('Organization fetch timeout')), 5000); // 5 second timeout
               });
               
               const orgPromise = organizationService.getUserOrganizations(data.user.id);
@@ -160,40 +161,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(session.user);
           setSession(session);
           
-          // Set basic auth first
+          // Set basic auth first, no organization fetch here to prevent hanging
           setIsLoading(false);
           setLoading(false);
-          
-          // Try to fetch organizations in background without blocking
-          if (!organizationFetchRef.current) {
-            organizationFetchRef.current = true;
-            setTimeout(async () => {
-              try {
-                const userOrgs = await organizationService.getUserOrganizations(session.user.id);
-                
-                if (userOrgs && userOrgs.length > 0) {
-                  setOrganizations(userOrgs);
-                  setUserOrganizations(userOrgs);
-                  
-                  const defaultOrg = userOrgs.find(org => org.is_default) || userOrgs[0];
-                  if (defaultOrg) {
-                    setCurrentOrganization(defaultOrg);
-                    setUserRole(defaultOrg.role);
-                    setOrganization({
-                      id: defaultOrg.id,
-                      name: defaultOrg.name,
-                      slug: defaultOrg.slug
-                    });
-                  }
-                }
-              } catch (error) {
-                console.error("Background organization fetch failed:", error);
-                // Silently fail - user is already authenticated
-              } finally {
-                organizationFetchRef.current = false;
-              }
-            }, 100);
-          }
           
         } else if (event === 'SIGNED_OUT') {
           console.log("AuthProvider: User signed out");

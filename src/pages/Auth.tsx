@@ -30,13 +30,13 @@ const Auth = () => {
     }
   }, [toast, session, hasShownMessage]);
 
-  // Set a timeout to prevent infinite loading
+  // Set a timeout to prevent infinite loading - reduced to 5 seconds
   useEffect(() => {
     if (loading) {
       const timer = setTimeout(() => {
         console.log("Auth page: Loading timeout reached, proceeding anyway");
         setTimeoutReached(true);
-      }, 8000); // 8 seconds timeout to match organization service
+      }, 5000); // Reduced timeout to 5 seconds
 
       return () => clearTimeout(timer);
     } else {

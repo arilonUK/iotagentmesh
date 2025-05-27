@@ -23,7 +23,7 @@ export const organizationService = {
         try {
           // Set a timeout for the RPC call
           const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error('Organization fetch timeout')), 5000);
+            setTimeout(() => reject(new Error('Organization fetch timeout')), 3000); // Reduced to 3 seconds
           });
 
           const rpcPromise = supabase
@@ -68,8 +68,10 @@ export const organizationService = {
       // Clear cache on error
       fetchCache.delete(`user-orgs-${userId}`);
       
-      // Don't show error toast for RLS issues, just log and continue
-      if (!error.message?.includes('infinite recursion') && error.code !== '42P17') {
+      // Don't show error toast for RLS issues or timeouts, just log and continue
+      if (!error.message?.includes('infinite recursion') && 
+          !error.message?.includes('timeout') && 
+          error.code !== '42P17') {
         toast.error('Unable to load organizations. Using basic authentication.');
       }
       

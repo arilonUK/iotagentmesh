@@ -22,7 +22,7 @@ const OrganizationContext = createContext<OrganizationContextType | undefined>(u
 export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { userOrganizations, currentOrganization, switchOrganization: authSwitchOrganization } = useAuth();
+  const { currentOrganization, switchOrganization: authSwitchOrganization } = useAuth();
 
   // Use organization data from auth context
   useEffect(() => {
@@ -44,6 +44,11 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, [currentOrganization]);
 
   const switchOrganization = async (organizationId: string): Promise<boolean> => {
+    if (!authSwitchOrganization) {
+      console.error('Auth switchOrganization function not available');
+      return false;
+    }
+    
     setIsLoading(true);
     
     try {
