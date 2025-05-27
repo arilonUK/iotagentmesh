@@ -1,13 +1,12 @@
 
 import React from 'react';
 import { NotificationSettings as NotificationSettingsComponent } from '@/components/notifications/NotificationSettings';
-import DashboardLayout from '@/layouts/DashboardLayout';
 
 const NotificationSettingsPage: React.FC = () => {
   return (
-    <DashboardLayout>
+    <div className="container mx-auto py-6">
       <NotificationSettingsComponent />
-    </DashboardLayout>
+    </div>
   );
 };
 
