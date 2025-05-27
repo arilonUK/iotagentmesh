@@ -10,6 +10,61 @@ const CACHE_DURATION = 30000; // 30 seconds
 // Prevent duplicate concurrent requests
 const ongoingRequests = new Map<string, Promise<UserOrganization[]>>();
 
+const fetchUserOrganizationsInternal = async (userId: string): Promise<UserOrganization[]> => {
+  // Use timeout to prevent hanging
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => reject(new Error('Organization fetch timeout')), 2000); // Reduced to 2 seconds
+  });
+  
+  try {
+    const fetchPromise = supabase.rpc('get_user_organizations', { p_user_id: userId });
+    
+    const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
+
+    if (error) {
+      console.error('RPC error fetching user organizations:', error);
+      
+      // For RLS errors, don't throw, just return empty array
+      if (error.code === '42P17' || error.message?.includes('infinite recursion')) {
+        console.log('RLS recursion detected, returning empty organizations array');
+        return [];
+      }
+      
+      throw error;
+    }
+
+    const organizations = data as UserOrganization[] || [];
+    console.log('Successfully fetched user organizations:', organizations);
+    
+    return organizations;
+  } catch (error: any) {
+    console.error('Error in fetchUserOrganizationsInternal:', error);
+    
+    // For timeout or RLS errors, return empty array
+    if (error.message === 'Organization fetch timeout' || 
+        error.code === '42P17' || 
+        error.message?.includes('infinite recursion')) {
+      console.log('Gracefully handling organization fetch failure');
+      return [];
+    }
+    
+    // For other errors, still return empty array to prevent blocking auth
+    console.error('Unexpected organization fetch error, returning empty array:', error);
+    return [];
+  }
+};
+
+const clearCache = (userId?: string) => {
+  if (userId) {
+    const cacheKey = `user-orgs-${userId}`;
+    organizationCache.delete(cacheKey);
+    ongoingRequests.delete(`fetch-${userId}`);
+  } else {
+    organizationCache.clear();
+    ongoingRequests.clear();
+  }
+};
+
 export const organizationService = {
   getUserOrganizations: async (userId: string): Promise<UserOrganization[]> => {
     if (!userId) {
@@ -37,7 +92,7 @@ export const organizationService = {
       }
 
       // Create new request promise
-      const requestPromise = this.fetchUserOrganizationsInternal(userId);
+      const requestPromise = fetchUserOrganizationsInternal(userId);
       ongoingRequests.set(ongoingKey, requestPromise);
 
       try {
@@ -60,50 +115,6 @@ export const organizationService = {
     }
   },
 
-  fetchUserOrganizationsInternal: async (userId: string): Promise<UserOrganization[]> => {
-    // Use timeout to prevent hanging
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Organization fetch timeout')), 2000); // Reduced to 2 seconds
-    });
-    
-    try {
-      const fetchPromise = supabase.rpc('get_user_organizations', { p_user_id: userId });
-      
-      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
-
-      if (error) {
-        console.error('RPC error fetching user organizations:', error);
-        
-        // For RLS errors, don't throw, just return empty array
-        if (error.code === '42P17' || error.message?.includes('infinite recursion')) {
-          console.log('RLS recursion detected, returning empty organizations array');
-          return [];
-        }
-        
-        throw error;
-      }
-
-      const organizations = data as UserOrganization[] || [];
-      console.log('Successfully fetched user organizations:', organizations);
-      
-      return organizations;
-    } catch (error: any) {
-      console.error('Error in fetchUserOrganizationsInternal:', error);
-      
-      // For timeout or RLS errors, return empty array
-      if (error.message === 'Organization fetch timeout' || 
-          error.code === '42P17' || 
-          error.message?.includes('infinite recursion')) {
-        console.log('Gracefully handling organization fetch failure');
-        return [];
-      }
-      
-      // For other errors, still return empty array to prevent blocking auth
-      console.error('Unexpected organization fetch error, returning empty array:', error);
-      return [];
-    }
-  },
-
   switchOrganization: async (userId: string, organizationId: string): Promise<boolean> => {
     if (!userId || !organizationId) {
       console.error('Missing userId or organizationId for switch');
@@ -114,7 +125,7 @@ export const organizationService = {
       console.log(`Switching organization to ${organizationId} for user ${userId}`);
       
       // Clear cache when switching
-      this.clearCache(userId);
+      clearCache(userId);
       
       // Use timeout for switch operation
       const timeoutPromise = new Promise<never>((_, reject) => {
@@ -149,14 +160,5 @@ export const organizationService = {
     }
   },
 
-  clearCache: (userId?: string) => {
-    if (userId) {
-      const cacheKey = `user-orgs-${userId}`;
-      organizationCache.delete(cacheKey);
-      ongoingRequests.delete(`fetch-${userId}`);
-    } else {
-      organizationCache.clear();
-      ongoingRequests.clear();
-    }
-  }
+  clearCache
 };
