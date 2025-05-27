@@ -25,20 +25,32 @@ export const Header = () => {
   const { session, user, signOut } = useAuth()
   
   const handleSignOut = async () => {
-    if (isSigningOut) return; // Prevent multiple calls
+    if (isSigningOut) {
+      console.log("Header: Sign out already in progress, ignoring");
+      return;
+    }
     
     setIsSigningOut(true);
     console.log("Header: Starting sign out process");
     
+    // Set a safety timeout to reset the spinner
+    const safetyTimeout = setTimeout(() => {
+      console.log("Header: Safety timeout triggered, resetting spinner");
+      setIsSigningOut(false);
+      window.location.href = '/auth';
+    }, 15000); // 15 second safety net
+    
     try {
       await signOut();
-      console.log("Header: Sign out completed");
-      // Navigation is handled in the signOut function
+      console.log("Header: Sign out completed successfully");
+      clearTimeout(safetyTimeout);
+      // Navigation is handled in the signOut function via window.location.href
     } catch (error) {
       console.error("Header: Error during sign out:", error);
+      clearTimeout(safetyTimeout);
       setIsSigningOut(false);
       // Force navigation as fallback
-      navigate('/auth');
+      window.location.href = '/auth';
     }
   }
 
@@ -49,7 +61,6 @@ export const Header = () => {
           <OrganizationSwitcher />
         </div>
         <div className="ml-auto flex items-center space-x-2">
-          {/* Add NotificationBell before the other items */}
           <NotificationBell />
           
           <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>

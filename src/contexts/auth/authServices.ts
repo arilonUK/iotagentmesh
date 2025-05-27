@@ -56,25 +56,38 @@ export const authServices = {
   },
 
   /**
-   * Sign out current user
+   * Sign out current user with improved error handling
    */
   signOut: async () => {
+    console.log('AuthServices: Starting sign out process...');
+    
     try {
-      console.log('Starting sign out process...');
+      // Set a timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Sign out timeout')), 10000); // 10 second timeout
+      });
+
+      // Race between signOut and timeout
+      const signOutPromise = supabase.auth.signOut();
       
-      // Clear the session from Supabase
-      const { error } = await supabase.auth.signOut();
+      const { error } = await Promise.race([signOutPromise, timeoutPromise]) as any;
       
       if (error) {
-        console.error('Supabase sign out error:', error);
-        toast.error(`Error signing out: ${error.message}`);
-        return { error };
+        console.error('AuthServices: Supabase sign out error:', error);
+        // Don't throw error, just log it and continue with cleanup
       }
 
-      console.log('Supabase sign out successful');
+      console.log('AuthServices: Supabase sign out completed');
       
       // Clear any local storage items
-      localStorage.removeItem('supabase.auth.token');
+      try {
+        localStorage.removeItem('supabase.auth.token');
+        sessionStorage.clear();
+      } catch (storageError) {
+        console.warn('AuthServices: Error clearing storage:', storageError);
+      }
+      
+      console.log('AuthServices: Storage cleared, redirecting...');
       
       // Force redirect to auth page
       window.location.href = '/auth';
@@ -82,11 +95,21 @@ export const authServices = {
       toast.success('Signed out successfully');
       return { data: { success: true } };
     } catch (error: any) {
-      console.error('Error during sign out:', error);
-      toast.error(`Error signing out: ${error.message}`);
+      console.error('AuthServices: Error during sign out:', error);
+      
+      // Even if there's an error, clear storage and redirect
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+      } catch (storageError) {
+        console.warn('AuthServices: Error clearing storage during error recovery:', storageError);
+      }
       
       // Force redirect even if there's an error
+      console.log('AuthServices: Forcing redirect due to error');
       window.location.href = '/auth';
+      
+      toast.error('Signed out (with errors)');
       return { error };
     }
   }
