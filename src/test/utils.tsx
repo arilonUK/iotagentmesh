@@ -1,9 +1,6 @@
 
-
 import React, { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
-import { screen } from '@testing-library/dom';
-import { waitFor } from '@testing-library/react';
+import { render, RenderOptions, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { ToastProvider } from '@/contexts/toast';
@@ -32,4 +29,3 @@ export { customRender as render };
 
 // Explicitly export screen and waitFor
 export { screen, waitFor };
-
