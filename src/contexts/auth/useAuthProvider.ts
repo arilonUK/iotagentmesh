@@ -73,8 +73,8 @@ export const useAuthProvider = (): AuthContextType & {
     return authServices.signUp(email, password, metadata);
   };
 
-  const logout = async () => {
-    return authServices.signOut();
+  const logout = async (): Promise<void> => {
+    await authServices.signOut();
   };
 
   const signIn = async (email: string, password: string) => {
@@ -85,8 +85,8 @@ export const useAuthProvider = (): AuthContextType & {
     return authServices.signUp(email, password, metadata);
   };
 
-  const signOut = async () => {
-    return authServices.signOut();
+  const signOut = async (): Promise<void> => {
+    await authServices.signOut();
   };
 
   const updateProfile = async (profileData: Partial<Profile>) => {
