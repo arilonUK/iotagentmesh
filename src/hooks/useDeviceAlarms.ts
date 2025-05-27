@@ -33,15 +33,16 @@ export function useDeviceAlarms(deviceId: string) {
       try {
         console.log('Fetching alarm events for device:', deviceId);
         
-        // Step 1: Get the alarm events for the device without any joins
-        // This avoids potential recursion in RLS policies
+        // Use bypass function to get alarm events to avoid RLS recursion
         const { data: eventsData, error: eventsError } = await supabase
-          .from('alarm_events')
-          .select('id, alarm_id, device_id, status, triggered_at, acknowledged_at, resolved_at, acknowledged_by, trigger_value, message')
-          .eq('device_id', deviceId)
-          .order('triggered_at', { ascending: false });
+          .rpc('get_device_alarm_events_bypass_rls', {
+            p_device_id: deviceId
+          });
 
-        if (eventsError) throw eventsError;
+        if (eventsError) {
+          console.error('Error fetching alarm events:', eventsError);
+          throw eventsError;
+        }
         
         if (!eventsData || eventsData.length === 0) {
           console.log('No alarm events found for device:', deviceId);
@@ -52,42 +53,30 @@ export function useDeviceAlarms(deviceId: string) {
         
         console.log(`Found ${eventsData.length} alarm events for device ${deviceId}`);
         
-        // Step 2: Get the alarm details separately
-        const alarmIds = eventsData.map(event => event.alarm_id);
-        const { data: alarmsData, error: alarmsError } = await supabase
-          .from('alarms')
-          .select('id, name, description, severity')
-          .in('id', alarmIds);
-          
-        if (alarmsError) throw alarmsError;
+        // The bypass function should return all the data we need
+        const formattedEvents = eventsData.map(event => ({
+          id: event.id,
+          alarm_id: event.alarm_id,
+          device_id: event.device_id,
+          status: event.status,
+          triggered_at: event.triggered_at,
+          acknowledged_at: event.acknowledged_at,
+          resolved_at: event.resolved_at,
+          acknowledged_by: event.acknowledged_by,
+          trigger_value: event.trigger_value,
+          message: event.message,
+          alarm: event.alarm_name ? {
+            name: event.alarm_name,
+            description: event.alarm_description,
+            severity: event.alarm_severity
+          } : undefined,
+          device: event.device_name ? {
+            name: event.device_name,
+            type: event.device_type
+          } : undefined
+        }));
         
-        // Step 3: Get the device details separately
-        const { data: deviceData, error: deviceError } = await supabase
-          .from('devices')
-          .select('id, name, type')
-          .eq('id', deviceId)
-          .maybeSingle(); // Using maybeSingle() instead of single()
-          
-        if (deviceError) throw deviceError;
-        
-        // Step 4: Combine the data
-        const combinedData = eventsData.map(event => {
-          const alarm = alarmsData?.find(a => a.id === event.alarm_id);
-          return {
-            ...event,
-            alarm: alarm ? {
-              name: alarm.name,
-              description: alarm.description,
-              severity: alarm.severity
-            } : undefined,
-            device: deviceData ? {
-              name: deviceData.name,
-              type: deviceData.type
-            } : undefined
-          };
-        });
-        
-        setAlarmEvents(combinedData);
+        setAlarmEvents(formattedEvents);
       } catch (err: any) {
         console.error('Error fetching alarm events:', err);
         setError(err.message);
@@ -106,22 +95,11 @@ export function useDeviceAlarms(deviceId: string) {
     }
     
     try {
-      // First get the current user
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-      
-      if (userError) throw userError;
-      
-      const userId = userData?.user?.id || null;
-      
-      // Then update the alarm event
+      // Use bypass function to update alarm event
       const { error } = await supabase
-        .from('alarm_events')
-        .update({ 
-          status: 'acknowledged',
-          acknowledged_at: new Date().toISOString(),
-          acknowledged_by: userId
-        })
-        .eq('id', eventId);
+        .rpc('acknowledge_alarm_event_bypass_rls', {
+          p_event_id: eventId
+        });
         
       if (error) throw error;
 
@@ -142,13 +120,11 @@ export function useDeviceAlarms(deviceId: string) {
     }
     
     try {
+      // Use bypass function to resolve alarm event
       const { error } = await supabase
-        .from('alarm_events')
-        .update({ 
-          status: 'resolved',
-          resolved_at: new Date().toISOString()
-        })
-        .eq('id', eventId);
+        .rpc('resolve_alarm_event_bypass_rls', {
+          p_event_id: eventId
+        });
         
       if (error) throw error;
 
