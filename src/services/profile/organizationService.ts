@@ -23,7 +23,7 @@ export const organizationService = {
         try {
           // Set a timeout for the RPC call
           const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error('Organization fetch timeout')), 8000);
+            setTimeout(() => reject(new Error('Organization fetch timeout')), 5000);
           });
 
           const rpcPromise = supabase
