@@ -21,11 +21,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Database, Cloud } from 'lucide-react';
 
-// Define the schema for validation
+// Define the schema for validation with proper deviceId handling
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   description: z.string().optional(),
-  deviceId: z.string().uuid('Must be a valid device ID'),
+  deviceId: z.string().min(1, 'Please select a device'),
   storageBackend: z.enum(['postgres', 's3']),
   readingType: z.string().min(1, 'Reading type is required'),
   retentionDays: z.number().min(1, 'Retention must be at least 1 day'),
@@ -73,10 +73,18 @@ const DataBucketForm: React.FC<DataBucketFormProps> = ({
   const storageBackend = form.watch('storageBackend');
   
   const handleSubmit = (data: DataBucketFormData) => {
+    console.log('Form data being submitted:', data);
+    
     // Remove S3 config if postgres is selected
     if (data.storageBackend === 'postgres') {
       data.s3Config = undefined;
     }
+    
+    // Ensure samplingInterval is undefined if empty
+    if (data.samplingInterval === 0 || !data.samplingInterval) {
+      data.samplingInterval = undefined;
+    }
+    
     onSubmit(data);
   };
 
@@ -128,6 +136,7 @@ const DataBucketForm: React.FC<DataBucketFormProps> = ({
                 <select
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                   {...field}
+                  value={field.value || ''}
                 >
                   <option value="">Select a device</option>
                   {deviceOptions.map(device => (
