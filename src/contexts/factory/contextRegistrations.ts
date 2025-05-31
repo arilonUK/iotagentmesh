@@ -1,6 +1,7 @@
 
 import { ContextRegistration, ContextType, InitializationState } from './types';
 import { createQueryClient } from './queryClientFactory';
+import { ServiceRegistry } from '@/services/ServiceRegistry';
 
 export const createContextRegistrations = (): ContextRegistration[] => [
   {
@@ -44,7 +45,15 @@ export const createContextRegistrations = (): ContextRegistration[] => [
     type: ContextType.ORGANIZATION,
     factory: async () => {
       console.log('Creating Organization context...');
-      return { initialized: true };
+      
+      // Initialize the modernized service registry
+      await ServiceRegistry.initialize();
+      console.log('Service Registry initialized in Organization context');
+      
+      return { 
+        initialized: true,
+        serviceRegistry: ServiceRegistry 
+      };
     },
     dependencies: [ContextType.AUTH],
     lazy: true,

@@ -7,6 +7,12 @@ export interface QueryParams {
   filters?: Record<string, any>;
 }
 
+export interface ServiceResponse<T> {
+  data?: T;
+  error?: string;
+  status?: number;
+}
+
 export interface DomainService<T, CreateDTO, UpdateDTO> {
   fetchAll(params?: QueryParams): Promise<T[]>;
   fetchById(id: string): Promise<T | null>;
@@ -15,15 +21,12 @@ export interface DomainService<T, CreateDTO, UpdateDTO> {
   delete(id: string): Promise<boolean>;
 }
 
-export interface ServiceResponse<T> {
-  data?: T;
-  error?: string;
-  success: boolean;
+export interface ServiceLifecycle {
+  initialize(): Promise<void>;
+  destroy(): Promise<void>;
+  isInitialized(): boolean;
 }
 
-export interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
+export interface ServiceDependencies {
+  [key: string]: any;
 }
