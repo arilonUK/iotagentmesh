@@ -27,8 +27,11 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
     try {
       console.log(`Making request: ${options.method} ${options.endpoint}`);
       
+      // Extract the function name from the endpoint (remove 'api-' prefix for function invoke)
+      const functionName = options.endpoint.replace(/^api-/, '');
+      
       // Use Supabase functions.invoke instead of direct fetch
-      const { data, error } = await supabase.functions.invoke(options.endpoint.replace('/', ''), {
+      const { data, error } = await supabase.functions.invoke(functionName, {
         method: options.method,
         body: options.data,
         headers: options.headers
