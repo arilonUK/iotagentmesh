@@ -57,14 +57,26 @@ export class Router {
     console.log('Routing request to path:', pathname);
     console.log('Available routes:', Array.from(this.routes.keys()));
 
+    // Get auth header
+    const authHeader = request.headers.get('Authorization');
+
     // Check for exact matches first - prioritize documentation routes
     const exactMatch = this.routes.get(pathname);
     if (exactMatch) {
       console.log('Exact match found for:', pathname);
-      const response = await exactMatch(request, {});
-      console.log('Router response status:', response.status);
-      console.log('=== ROUTER END ===');
-      return response;
+      // For documentation routes, call directly without auth header
+      if (pathname === '/api/openapi.json' || pathname === '/api/docs') {
+        const response = await exactMatch(request, {});
+        console.log('Router response status:', response.status);
+        console.log('=== ROUTER END ===');
+        return response;
+      } else {
+        // For other handlers, pass request and auth header
+        const response = await exactMatch(request, {}, authHeader);
+        console.log('Router response status:', response.status);
+        console.log('=== ROUTER END ===');
+        return response;
+      }
     }
 
     // Handle wildcard patterns
@@ -89,7 +101,7 @@ export class Router {
             }
           }
           
-          const response = await handler(request, pathParams);
+          const response = await handler(request, pathParams, authHeader);
           console.log('Router response status:', response.status);
           console.log('=== ROUTER END ===');
           return response;
@@ -117,4 +129,3 @@ export class Router {
     });
   }
 }
-
