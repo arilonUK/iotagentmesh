@@ -9,6 +9,8 @@ interface AlarmListProps {
   onEdit: (alarm: AlarmConfig) => void;
   onDelete: (id: string) => void;
   onToggle: (id: string, enabled: boolean) => void;
+  onTest: (id: string) => void;
+  isTesting: boolean;
 }
 
 export default function AlarmList({
@@ -16,7 +18,9 @@ export default function AlarmList({
   isLoading,
   onEdit,
   onDelete,
-  onToggle
+  onToggle,
+  onTest,
+  isTesting
 }: AlarmListProps) {
   if (isLoading) {
     return (
@@ -47,6 +51,8 @@ export default function AlarmList({
           onEdit={onEdit}
           onDelete={onDelete}
           onToggle={onToggle}
+          onTest={onTest}
+          isTesting={isTesting}
         />
       ))}
     </div>

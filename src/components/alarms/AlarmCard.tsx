@@ -1,6 +1,6 @@
 
 import { AlarmConfig } from "@/types/alarm";
-import { AlertCircle, Bell, BellOff, Edit, Trash2 } from "lucide-react";
+import { AlertCircle, Bell, BellOff, Edit, Trash2, TestTube } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,8 @@ interface AlarmCardProps {
   onEdit: (alarm: AlarmConfig) => void;
   onDelete: (id: string) => void;
   onToggle: (id: string, enabled: boolean) => void;
+  onTest: (id: string) => void;
+  isTesting: boolean;
 }
 
 const severityColors = {
@@ -30,7 +32,7 @@ const operatorLabels: Record<string, string> = {
   outside: "outside",
 };
 
-export function AlarmCard({ alarm, onEdit, onDelete, onToggle }: AlarmCardProps) {
+export function AlarmCard({ alarm, onEdit, onDelete, onToggle, onTest, isTesting }: AlarmCardProps) {
   // Format the condition value for display
   const getConditionDisplay = () => {
     if (alarm.condition_operator === 'between' || alarm.condition_operator === 'outside') {
@@ -101,6 +103,15 @@ export function AlarmCard({ alarm, onEdit, onDelete, onToggle }: AlarmCardProps)
           </div>
           
           <div className="pt-4 flex justify-end space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => onTest(alarm.id)}
+              disabled={isTesting}
+            >
+              <TestTube className="h-3.5 w-3.5 mr-1" />
+              {isTesting ? 'Testing...' : 'Test'}
+            </Button>
             <Button variant="outline" size="sm" onClick={() => onEdit(alarm)}>
               <Edit className="h-3.5 w-3.5 mr-1" />
               Edit
