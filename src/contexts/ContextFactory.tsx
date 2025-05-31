@@ -147,7 +147,7 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
     }));
   }, []);
 
-  const getContext = useCallback(<T>(type: ContextType): T | null => {
+  const getContext = useCallback(function<T>(type: ContextType): T | null {
     const registration = state.contexts.get(type);
     return registration?.instance || null;
   }, [state.contexts]);
