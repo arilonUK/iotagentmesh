@@ -32,6 +32,7 @@ import BlogPost from "./pages/BlogPost";
 import IntegrationsAndConnectivity from "./pages/IntegrationsAndConnectivity";
 import OAuthConnections from "./pages/OAuthConnections";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { Outlet } from "react-router-dom";
 
 const router = createBrowserRouter([
   {
@@ -60,7 +61,11 @@ const router = createBrowserRouter([
       },
       {
         path: "/dashboard",
-        element: <ProtectedRoute />,
+        element: (
+          <ProtectedRoute>
+            <Outlet />
+          </ProtectedRoute>
+        ),
         children: [
           {
             path: "",
