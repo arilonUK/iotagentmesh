@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -29,9 +28,15 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url)
-    const path = url.pathname
+    let path = url.pathname
 
     console.log(`API Gateway: ${req.method} ${path}`)
+
+    // Strip the /api-gateway prefix if it exists
+    if (path.startsWith('/api-gateway')) {
+      path = path.replace('/api-gateway', '')
+      console.log(`Stripped prefix, new path: ${path}`)
+    }
 
     // Handle OpenAPI documentation
     if (path === '/api/openapi.json') {
@@ -46,6 +51,7 @@ serve(async (req) => {
     const route = routes.find(r => r.pattern.test(path))
     
     if (!route) {
+      console.log(`No route found for path: ${path}`)
       return new Response(
         JSON.stringify({ 
           error: 'Not Found',
@@ -79,8 +85,12 @@ serve(async (req) => {
       body = await req.text()
     }
 
+    // Create the target URL for the specific function
+    const targetUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/${route.handler}${path}`
+    console.log(`Forwarding to: ${targetUrl}`)
+
     // Create a new request object for the target function
-    const targetRequest = new Request(`${Deno.env.get('SUPABASE_URL')}/functions/v1/${route.handler}${path}`, {
+    const targetRequest = new Request(targetUrl, {
       method: req.method,
       headers: {
         'Authorization': req.headers.get('Authorization') || '',
@@ -93,6 +103,8 @@ serve(async (req) => {
     // Forward the request directly
     const response = await fetch(targetRequest)
     const responseData = await response.text()
+    
+    console.log(`Response from ${route.handler}: ${response.status}`)
     
     // Log the request for monitoring
     try {
