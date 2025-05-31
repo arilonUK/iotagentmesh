@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
-import { StorageFile } from '@/services/storage';
-import { fileService } from '@/services/storage';
+import { StorageFile } from '@/services/storage/interfaces/IFileStorageService';
+import { fileStorageService } from '@/services/storage/FileStorageService';
 import { toast } from 'sonner';
 
 interface UseFileOperationsProps {
@@ -25,6 +25,8 @@ export const useFileOperations = ({
   setFilePreviewUrl,
   setFilePreviewOpen
 }: UseFileOperationsProps) => {
+  const [showOperationStatus, setShowOperationStatus] = useState(false);
+
   const handleFileClick = (file: StorageFile) => {
     if (file.mimetype && file.mimetype.includes('folder')) {
       return { action: 'navigate', folderName: file.name };
@@ -40,8 +42,19 @@ export const useFileOperations = ({
     if (!files?.length) return;
     
     const file = files[0];
+    
+    // Show operation status for large files
+    if (file.size > 10 * 1024 * 1024) { // 10MB
+      setShowOperationStatus(true);
+    }
+    
     uploadFile.mutate(
-      { file }, 
+      { 
+        file,
+        onProgress: (progress: number) => {
+          console.log(`Upload progress: ${progress}%`);
+        }
+      }, 
       {
         onSuccess: () => {
           return { success: true };
@@ -83,22 +96,31 @@ export const useFileOperations = ({
   };
 
   const downloadFile = async (file: StorageFile) => {
-    const url = await fileService.getFileUrl(organizationId, currentPath, file.name);
-    if (!url) return;
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = file.name;
-    link.click();
+    try {
+      const blob = await fileStorageService.downloadFile(organizationId, currentPath, file.name);
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = file.name;
+      link.click();
+      
+      URL.revokeObjectURL(url);
+      toast.success('File download started');
+    } catch (error) {
+      toast.error('Failed to download file');
+    }
   };
 
   const previewFile = async (file: StorageFile) => {
     if (
       file.mimetype?.startsWith('image/') || 
       file.mimetype?.startsWith('text/') || 
-      file.mimetype?.includes('pdf')
+      file.mimetype?.includes('pdf') ||
+      file.mimetype?.startsWith('video/') ||
+      file.mimetype?.startsWith('audio/')
     ) {
-      const url = await fileService.getFileUrl(organizationId, currentPath, file.name);
+      const url = await fileStorageService.getPreviewUrl(organizationId, currentPath, file.name);
       if (url) {
         setFilePreviewUrl(url);
         setFilePreviewOpen(true);
@@ -108,12 +130,34 @@ export const useFileOperations = ({
     }
   };
 
+  const markForOffline = async (file: StorageFile) => {
+    try {
+      await fileStorageService.markForOfflineAccess(organizationId, currentPath, file.name);
+      toast.success('File marked for offline access');
+    } catch (error) {
+      toast.error('Failed to mark file for offline access');
+    }
+  };
+
+  const removeOfflineAccess = async (file: StorageFile) => {
+    try {
+      await fileStorageService.removeOfflineAccess(organizationId, currentPath, file.name);
+      toast.success('Offline access removed');
+    } catch (error) {
+      toast.error('Failed to remove offline access');
+    }
+  };
+
   return {
     handleFileClick,
     handleUpload,
     handleCreateFolder,
     handleDeleteFile,
     downloadFile,
-    previewFile
+    previewFile,
+    markForOffline,
+    removeOfflineAccess,
+    showOperationStatus,
+    setShowOperationStatus
   };
 };

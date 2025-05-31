@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { StorageFile } from '@/services/storage';
+import { StorageFile } from '@/services/storage/interfaces/IFileStorageService';
 import { FileList } from './FileList';
 import { EmptyState } from './EmptyState';
 
@@ -12,6 +12,8 @@ interface FileContentAreaProps {
   onPreview: (file: StorageFile) => void;
   onDownload: (file: StorageFile) => void;
   onDelete: (file: StorageFile) => void;
+  onMarkOffline?: (file: StorageFile) => void;
+  onRemoveOffline?: (file: StorageFile) => void;
 }
 
 export const FileContentArea: React.FC<FileContentAreaProps> = ({
@@ -21,7 +23,9 @@ export const FileContentArea: React.FC<FileContentAreaProps> = ({
   onFileClick,
   onPreview,
   onDownload,
-  onDelete
+  onDelete,
+  onMarkOffline,
+  onRemoveOffline
 }) => {
   if (isLoading) {
     return <div className="text-center py-8">Loading files...</div>;
@@ -38,6 +42,8 @@ export const FileContentArea: React.FC<FileContentAreaProps> = ({
       onPreview={onPreview}
       onDownload={onDownload}
       onDelete={onDelete}
+      onMarkOffline={onMarkOffline}
+      onRemoveOffline={onRemoveOffline}
     />
   );
 };

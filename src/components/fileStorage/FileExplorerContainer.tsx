@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useStorageFiles } from '@/hooks/useFileStorage';
 import { useFileNavigation } from '@/hooks/useFileNavigation';
 import { useFileDialogs } from '@/hooks/useFileDialogs';
@@ -7,7 +7,10 @@ import { useFileOperations } from '@/hooks/useFileOperations';
 import { NavigationToolbar } from './NavigationToolbar';
 import { FileOperationsToolbar } from './FileOperationsToolbar';
 import { FileContentArea } from './FileContentArea';
-import { FilePreview } from './FilePreview';
+import { FilePreviewSystem } from './FilePreviewSystem';
+import { FileOperationStatus } from './FileOperationStatus';
+import { Button } from '@/components/ui/button';
+import { Activity, Wifi, WifiOff } from 'lucide-react';
 
 interface FileExplorerContainerProps {
   organizationId: string;
@@ -20,6 +23,7 @@ export const FileExplorerContainer: React.FC<FileExplorerContainerProps> = ({
 }) => {
   const navigation = useFileNavigation(initialPath);
   const dialogs = useFileDialogs();
+  const [showOperationStatus, setShowOperationStatus] = useState(false);
   
   const { 
     files, 
@@ -27,6 +31,11 @@ export const FileExplorerContainer: React.FC<FileExplorerContainerProps> = ({
     uploadFile, 
     deleteFile, 
     createDirectory,
+    operations,
+    markForOffline,
+    removeOfflineAccess,
+    syncOfflineChanges,
+    isOffline
   } = useStorageFiles(undefined, organizationId, navigation.currentPath);
 
   const fileOps = useFileOperations({
@@ -65,14 +74,59 @@ export const FileExplorerContainer: React.FC<FileExplorerContainerProps> = ({
     ? files.filter(file => file.name.toLowerCase().includes(navigation.searchQuery.toLowerCase()))
     : files;
 
+  const hasActiveOperations = operations.some(op => 
+    op.status === 'pending' || op.status === 'in-progress' || op.status === 'offline-queued'
+  );
+
   return (
     <div className="space-y-4">
-      <NavigationToolbar
-        currentPath={navigation.currentPath}
-        searchQuery={navigation.searchQuery}
-        onNavigateUp={navigation.navigateUp}
-        onSearchChange={navigation.setSearchQuery}
-      />
+      <div className="flex items-center justify-between">
+        <NavigationToolbar
+          currentPath={navigation.currentPath}
+          searchQuery={navigation.searchQuery}
+          onNavigateUp={navigation.navigateUp}
+          onSearchChange={navigation.setSearchQuery}
+        />
+        
+        <div className="flex items-center gap-2">
+          {isOffline && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={syncOfflineChanges}
+                className="text-orange-600"
+              >
+                <WifiOff className="h-4 w-4 mr-2" />
+                Sync Offline Changes
+              </Button>
+            </>
+          )}
+          
+          {hasActiveOperations && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowOperationStatus(!showOperationStatus)}
+              className="relative"
+            >
+              <Activity className="h-4 w-4 mr-2" />
+              Operations
+              {operations.filter(op => op.status === 'in-progress').length > 0 && (
+                <div className="absolute -top-1 -right-1 h-3 w-3 bg-blue-500 rounded-full animate-pulse"></div>
+              )}
+            </Button>
+          )}
+          
+          <div className="flex items-center text-sm text-muted-foreground">
+            {isOffline ? (
+              <WifiOff className="h-4 w-4 text-orange-500" />
+            ) : (
+              <Wifi className="h-4 w-4 text-green-500" />
+            )}
+          </div>
+        </div>
+      </div>
       
       <FileOperationsToolbar
         fileCount={filteredFiles.length}
@@ -97,14 +151,20 @@ export const FileExplorerContainer: React.FC<FileExplorerContainerProps> = ({
         onPreview={fileOps.previewFile}
         onDownload={fileOps.downloadFile}
         onDelete={handleDeleteFile}
+        onMarkOffline={markForOffline}
+        onRemoveOffline={removeOfflineAccess}
       />
       
-      <FilePreview 
-        open={dialogs.filePreviewOpen}
-        onOpenChange={dialogs.setFilePreviewOpen}
+      <FilePreviewSystem
         file={dialogs.selectedFile}
-        previewUrl={dialogs.filePreviewUrl}
-        onDownload={fileOps.downloadFile}
+        organizationId={organizationId}
+        isOpen={dialogs.filePreviewOpen}
+        onClose={() => dialogs.setFilePreviewOpen(false)}
+      />
+      
+      <FileOperationStatus
+        isOpen={showOperationStatus}
+        onClose={() => setShowOperationStatus(false)}
       />
     </div>
   );
