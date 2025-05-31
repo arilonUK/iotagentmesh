@@ -3,6 +3,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { APIRouter } from './router.ts';
 import { forwardToDevicesHandler } from './handlers/devices.ts';
 import { forwardToAlarmsHandler } from './handlers/alarms.ts';
+import { forwardToEndpointsHandler } from './handlers/endpoints.ts';
+import { forwardToProfilesHandler } from './handlers/profiles.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -20,6 +22,14 @@ router.addRoute('/api/devices/*', forwardToDevicesHandler);
 // Add alarm routes  
 router.addRoute('/api/alarms', forwardToAlarmsHandler);
 router.addRoute('/api/alarms/*', forwardToAlarmsHandler);
+
+// Add endpoint routes
+router.addRoute('/api/endpoints', forwardToEndpointsHandler);
+router.addRoute('/api/endpoints/*', forwardToEndpointsHandler);
+
+// Add profile routes
+router.addRoute('/api/profiles', forwardToProfilesHandler);
+router.addRoute('/api/profiles/*', forwardToProfilesHandler);
 
 serve(async (req) => {
   console.log(`=== API GATEWAY START ===`);
