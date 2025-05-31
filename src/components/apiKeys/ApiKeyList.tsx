@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { Key, Trash2 } from 'lucide-react';
+import { Key, Trash2, Edit3 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ApiKey } from '@/types/apiKey';
 import { Button } from '@/components/ui/button';
@@ -14,14 +14,54 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 
 interface ApiKeyListProps {
   apiKeys: ApiKey[];
   onDeleteKey: (id: string) => void;
   onToggleKey: (id: string, active: boolean) => void;
+  onEditKey?: (key: ApiKey) => void;
 }
 
-export const ApiKeyList = ({ apiKeys, onDeleteKey, onToggleKey }: ApiKeyListProps) => {
+export const ApiKeyList = ({ apiKeys, onDeleteKey, onToggleKey, onEditKey }: ApiKeyListProps) => {
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handleToggle = async (id: string, active: boolean) => {
+    setLoading(id);
+    try {
+      await onToggleKey(id, active);
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    setLoading(id);
+    try {
+      await onDeleteKey(id);
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const getExpirationBadge = (expiresAt: string | null) => {
+    if (!expiresAt) return <Badge variant="secondary">Never expires</Badge>;
+    
+    const expDate = new Date(expiresAt);
+    const now = new Date();
+    const daysUntilExpiry = Math.ceil((expDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (daysUntilExpiry < 0) {
+      return <Badge variant="destructive">Expired</Badge>;
+    } else if (daysUntilExpiry <= 7) {
+      return <Badge variant="destructive">Expires in {daysUntilExpiry} days</Badge>;
+    } else if (daysUntilExpiry <= 30) {
+      return <Badge variant="secondary">Expires in {daysUntilExpiry} days</Badge>;
+    } else {
+      return <Badge variant="outline">Expires {format(expDate, 'MMM d, yyyy')}</Badge>;
+    }
+  };
+
   return (
     <Table>
       <TableHeader>
@@ -30,7 +70,7 @@ export const ApiKeyList = ({ apiKeys, onDeleteKey, onToggleKey }: ApiKeyListProp
           <TableHead>Key</TableHead>
           <TableHead>Scopes</TableHead>
           <TableHead>Created</TableHead>
-          <TableHead>Expires</TableHead>
+          <TableHead>Expiration</TableHead>
           <TableHead>Last Used</TableHead>
           <TableHead>Status</TableHead>
           <TableHead className="text-right">Actions</TableHead>
@@ -50,9 +90,9 @@ export const ApiKeyList = ({ apiKeys, onDeleteKey, onToggleKey }: ApiKeyListProp
               <TableCell>
                 <div className="flex flex-wrap gap-1">
                   {key.scopes.map(scope => (
-                    <span key={scope} className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">
+                    <Badge key={scope} variant="outline" className="text-xs">
                       {scope}
-                    </span>
+                    </Badge>
                   ))}
                 </div>
               </TableCell>
@@ -60,10 +100,7 @@ export const ApiKeyList = ({ apiKeys, onDeleteKey, onToggleKey }: ApiKeyListProp
                 {format(new Date(key.created_at), 'MMM d, yyyy')}
               </TableCell>
               <TableCell>
-                {key.expires_at 
-                  ? format(new Date(key.expires_at), 'MMM d, yyyy')
-                  : 'Never'
-                }
+                {getExpirationBadge(key.expires_at)}
               </TableCell>
               <TableCell>
                 {key.last_used
@@ -74,17 +111,31 @@ export const ApiKeyList = ({ apiKeys, onDeleteKey, onToggleKey }: ApiKeyListProp
               <TableCell>
                 <Switch
                   checked={key.is_active}
-                  onCheckedChange={(checked) => onToggleKey(key.id, checked)}
+                  onCheckedChange={(checked) => handleToggle(key.id, checked)}
+                  disabled={loading === key.id}
                 />
               </TableCell>
               <TableCell className="text-right">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onDeleteKey(key.id)}
-                >
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
+                <div className="flex items-center gap-1 justify-end">
+                  {onEditKey && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onEditKey(key)}
+                      disabled={loading === key.id}
+                    >
+                      <Edit3 className="h-4 w-4" />
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDelete(key.id)}
+                    disabled={loading === key.id}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))

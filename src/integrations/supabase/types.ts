@@ -162,6 +162,188 @@ export type Database = {
           },
         ]
       }
+      api_keys: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          key_hash: string
+          last_used: string | null
+          name: string
+          organization_id: string | null
+          prefix: string
+          scopes: string[]
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          key_hash: string
+          last_used?: string | null
+          name: string
+          organization_id?: string | null
+          prefix: string
+          scopes?: string[]
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          key_hash?: string
+          last_used?: string | null
+          name?: string
+          organization_id?: string | null
+          prefix?: string
+          scopes?: string[]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_requests_log: {
+        Row: {
+          api_key_id: string | null
+          created_at: string | null
+          endpoint: string
+          error_message: string | null
+          id: string
+          ip_address: string | null
+          method: string
+          organization_id: string | null
+          processing_time_ms: number | null
+          request_body: Json | null
+          request_headers: Json | null
+          request_id: string
+          response_body: Json | null
+          response_headers: Json | null
+          response_status: number | null
+          user_agent: string | null
+        }
+        Insert: {
+          api_key_id?: string | null
+          created_at?: string | null
+          endpoint: string
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          method: string
+          organization_id?: string | null
+          processing_time_ms?: number | null
+          request_body?: Json | null
+          request_headers?: Json | null
+          request_id: string
+          response_body?: Json | null
+          response_headers?: Json | null
+          response_status?: number | null
+          user_agent?: string | null
+        }
+        Update: {
+          api_key_id?: string | null
+          created_at?: string | null
+          endpoint?: string
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          method?: string
+          organization_id?: string | null
+          processing_time_ms?: number | null
+          request_body?: Json | null
+          request_headers?: Json | null
+          request_id?: string
+          response_body?: Json | null
+          response_headers?: Json | null
+          response_status?: number | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_requests_log_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_requests_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_usage: {
+        Row: {
+          api_key_id: string | null
+          created_at: string | null
+          endpoint: string
+          id: string
+          ip_address: string | null
+          method: string
+          organization_id: string | null
+          request_size_bytes: number | null
+          response_size_bytes: number | null
+          response_time_ms: number | null
+          status_code: number | null
+          user_agent: string | null
+        }
+        Insert: {
+          api_key_id?: string | null
+          created_at?: string | null
+          endpoint: string
+          id?: string
+          ip_address?: string | null
+          method: string
+          organization_id?: string | null
+          request_size_bytes?: number | null
+          response_size_bytes?: number | null
+          response_time_ms?: number | null
+          status_code?: number | null
+          user_agent?: string | null
+        }
+        Update: {
+          api_key_id?: string | null
+          created_at?: string | null
+          endpoint?: string
+          id?: string
+          ip_address?: string | null
+          method?: string
+          organization_id?: string | null
+          request_size_bytes?: number | null
+          response_size_bytes?: number | null
+          response_time_ms?: number | null
+          status_code?: number | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_usage_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_usage_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -673,6 +855,7 @@ export type Database = {
           id: string
           name: string
           slug: string
+          subscription_plan_id: string | null
           updated_at: string
         }
         Insert: {
@@ -680,6 +863,7 @@ export type Database = {
           id?: string
           name: string
           slug: string
+          subscription_plan_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -687,9 +871,18 @@ export type Database = {
           id?: string
           name?: string
           slug?: string
+          subscription_plan_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "organizations_subscription_plan_id_fkey"
+            columns: ["subscription_plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       permissions: {
         Row: {
@@ -1022,6 +1215,47 @@ export type Database = {
           },
         ]
       }
+      rate_limit_buckets: {
+        Row: {
+          api_key_id: string | null
+          bucket_type: string
+          created_at: string | null
+          current_count: number | null
+          id: string
+          limit_value: number
+          reset_time: string
+          updated_at: string | null
+        }
+        Insert: {
+          api_key_id?: string | null
+          bucket_type: string
+          created_at?: string | null
+          current_count?: number | null
+          id?: string
+          limit_value: number
+          reset_time: string
+          updated_at?: string | null
+        }
+        Update: {
+          api_key_id?: string | null
+          bucket_type?: string
+          created_at?: string | null
+          current_count?: number | null
+          id?: string
+          limit_value?: number
+          reset_time?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rate_limit_buckets_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_permissions: {
         Row: {
           created_at: string
@@ -1061,6 +1295,48 @@ export type Database = {
           },
         ]
       }
+      subscription_plans: {
+        Row: {
+          concurrent_connections: number | null
+          created_at: string | null
+          display_name: string
+          features: string[] | null
+          id: string
+          is_active: boolean | null
+          max_api_keys: number | null
+          name: string
+          requests_per_hour: number | null
+          requests_per_month: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          concurrent_connections?: number | null
+          created_at?: string | null
+          display_name: string
+          features?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          max_api_keys?: number | null
+          name: string
+          requests_per_hour?: number | null
+          requests_per_month?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          concurrent_connections?: number | null
+          created_at?: string | null
+          display_name?: string
+          features?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          max_api_keys?: number | null
+          name?: string
+          requests_per_hour?: number | null
+          requests_per_month?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1081,6 +1357,10 @@ export type Database = {
           p_reading_value: number
         }
         Returns: boolean
+      }
+      cleanup_old_api_logs: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       create_audit_log_entry: {
         Args: {
@@ -1167,6 +1447,10 @@ export type Database = {
       function_exists: {
         Args: { function_name: string }
         Returns: boolean
+      }
+      generate_api_key_prefix: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       get_audit_logs: {
         Args: {
@@ -1427,6 +1711,10 @@ export type Database = {
       mark_notification_as_read: {
         Args: { p_notification_id: string; p_user_id: string }
         Returns: boolean
+      }
+      reset_expired_rate_limits: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       resolve_alarm_event_bypass_rls: {
         Args: { p_event_id: string }
