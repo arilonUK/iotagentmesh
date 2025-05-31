@@ -1,10 +1,17 @@
-
 import { apiGatewayService, ApiGatewayRequest, ApiGatewayResponse } from '@/services/apiGatewayService';
 import { DomainService, QueryParams, ServiceResponse } from './types';
 import { toast } from 'sonner';
 
 export abstract class BaseApiService<T, CreateDTO, UpdateDTO> implements DomainService<T, CreateDTO, UpdateDTO> {
   protected abstract readonly endpoint: string;
+  
+  protected abstract getDataKey(): string;
+  protected abstract getSingleDataKey(): string;
+  protected abstract getEntityName(): string;
+
+  protected getBaseUrl(): string {
+    return `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-gateway`;
+  }
 
   protected handleError(error: any, operation: string): never {
     console.error(`Error in ${operation}:`, error);
@@ -148,8 +155,4 @@ export abstract class BaseApiService<T, CreateDTO, UpdateDTO> implements DomainS
     
     return searchParams.toString();
   }
-
-  protected abstract getDataKey(): string;
-  protected abstract getSingleDataKey(): string;
-  protected abstract getEntityName(): string;
 }
