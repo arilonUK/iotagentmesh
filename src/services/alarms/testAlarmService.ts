@@ -1,7 +1,6 @@
 
-import { alarmApiService } from '@/services/alarmApiService';
+import { alarmsApiService } from '@/services/api/alarmsApiService';
 import { handleServiceError } from './baseAlarmService';
-import { toast } from 'sonner';
 
 /**
  * Test an alarm through API Gateway
@@ -9,14 +8,8 @@ import { toast } from 'sonner';
 export async function testAlarm(alarmId: string): Promise<boolean> {
   try {
     console.log('Testing alarm through API Gateway:', alarmId);
-    const result = await alarmApiService.testAlarm(alarmId);
-    if (result.success) {
-      toast.success(result.message || 'Alarm test completed successfully');
-      return true;
-    } else {
-      toast.error('Alarm test failed');
-      return false;
-    }
+    const result = await alarmsApiService.testAlarm(alarmId);
+    return result.success;
   } catch (error) {
     handleServiceError(error, 'testing alarm');
     return false;

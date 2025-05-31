@@ -1,6 +1,6 @@
 
 import { AlarmConfig } from '@/types/alarm';
-import { alarmApiService } from '@/services/alarmApiService';
+import { alarmsApiService } from '@/services/api/alarmsApiService';
 import { handleServiceError } from './baseAlarmService';
 
 /**
@@ -9,7 +9,7 @@ import { handleServiceError } from './baseAlarmService';
 export async function fetchAlarms(organizationId: string): Promise<AlarmConfig[]> {
   try {
     console.log('Fetching alarms through API Gateway for organization:', organizationId);
-    return await alarmApiService.getAlarms();
+    return await alarmsApiService.fetchAll();
   } catch (error) {
     handleServiceError(error, 'fetching alarms');
     return [];

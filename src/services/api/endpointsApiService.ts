@@ -1,78 +1,35 @@
 
-import { apiGatewayService } from '@/services/apiGatewayService';
+import { BaseApiService } from '../base/BaseApiService';
 import { EndpointConfig, EndpointFormData } from '@/types/endpoint';
 
-export const endpointsApiService = {
-  async fetchEndpoints(): Promise<EndpointConfig[]> {
-    const response = await apiGatewayService.request({
-      method: 'GET',
-      endpoint: '/api/endpoints'
-    });
+export class EndpointsApiService extends BaseApiService<EndpointConfig, EndpointFormData, Partial<EndpointFormData>> {
+  protected readonly endpoint = '/api/endpoints';
 
-    if (response.error) {
-      console.error('Error fetching endpoints:', response.error);
-      return [];
-    }
+  protected getDataKey(): string {
+    return 'endpoints';
+  }
 
-    return response.data?.endpoints || [];
-  },
+  protected getSingleDataKey(): string {
+    return 'endpoint';
+  }
 
-  async createEndpoint(data: EndpointFormData): Promise<EndpointConfig | null> {
-    const response = await apiGatewayService.request({
-      method: 'POST',
-      endpoint: '/api/endpoints',
-      data
-    });
-
-    if (response.error) {
-      console.error('Error creating endpoint:', response.error);
-      return null;
-    }
-
-    return response.data?.endpoint || null;
-  },
-
-  async updateEndpoint(id: string, data: Partial<EndpointFormData>): Promise<boolean> {
-    const response = await apiGatewayService.request({
-      method: 'PUT',
-      endpoint: `/api/endpoints/${id}`,
-      data
-    });
-
-    if (response.error) {
-      console.error('Error updating endpoint:', response.error);
-      return false;
-    }
-
-    return true;
-  },
-
-  async deleteEndpoint(id: string): Promise<boolean> {
-    const response = await apiGatewayService.request({
-      method: 'DELETE',
-      endpoint: `/api/endpoints/${id}`
-    });
-
-    if (response.error) {
-      console.error('Error deleting endpoint:', response.error);
-      return false;
-    }
-
-    return true;
-  },
+  protected getEntityName(): string {
+    return 'Endpoint';
+  }
 
   async triggerEndpoint(id: string, payload: any = {}): Promise<boolean> {
-    const response = await apiGatewayService.request({
-      method: 'POST',
-      endpoint: `/api/endpoints/${id}/trigger`,
-      data: payload
-    });
+    try {
+      await this.makeRequest<{ success: boolean; message: string }>({
+        method: 'POST',
+        endpoint: `/api/endpoints/${id}/trigger`,
+        data: payload
+      });
 
-    if (response.error) {
-      console.error('Error triggering endpoint:', response.error);
-      return false;
+      return true;
+    } catch (error) {
+      this.handleError(error, 'trigger endpoint');
     }
-
-    return true;
   }
-};
+}
+
+export const endpointsApiService = new EndpointsApiService();
