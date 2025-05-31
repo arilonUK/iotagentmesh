@@ -7,9 +7,26 @@ export interface ApiDocumentation {
     title: string;
     description: string;
     version: string;
+    contact?: {
+      name?: string;
+      email?: string;
+    };
   };
+  servers?: Array<{
+    url: string;
+    description: string;
+  }>;
   paths: Record<string, any>;
-  components: Record<string, any>;
+  components: {
+    schemas?: Record<string, any>;
+    securitySchemes?: Record<string, any>;
+    responses?: Record<string, any>;
+  };
+  tags?: Array<{
+    name: string;
+    description: string;
+  }>;
+  security?: Array<Record<string, any>>;
 }
 
 export class OpenApiDocumentationService {
