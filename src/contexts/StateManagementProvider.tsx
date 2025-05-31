@@ -1,15 +1,15 @@
 
 import React from 'react';
-import { useAppContext } from '@/contexts/AppContextFactory';
+import { useAppContext } from '@/hooks/useAppContext';
 
 interface StateManagementProviderProps {
   children: React.ReactNode;
 }
 
 export const StateManagementProvider: React.FC<StateManagementProviderProps> = ({ children }) => {
-  const { queryClient, isReady } = useAppContext();
+  const { isInitialized, queryClient } = useAppContext();
 
-  if (!isReady || !queryClient) {
+  if (!isInitialized || !queryClient) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -23,6 +23,6 @@ export const StateManagementProvider: React.FC<StateManagementProviderProps> = (
   return <>{children}</>;
 };
 
-// Export hooks for easy access - these now work with the centralized query client
+// Export hooks for easy access - these now work with the centralized context factory
 export { useEnhancedOrganization } from '@/contexts/organization/EnhancedOrganizationContext';
 export { useStandardQuery, useStandardMutation } from '@/hooks/query/useStandardQuery';

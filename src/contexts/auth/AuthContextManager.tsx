@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { AuthProvider } from './AuthProvider';
-import { useAppContext, InitializationPhase } from '@/contexts/AppContextFactory';
+import { useContextFactory, ContextType } from '@/contexts/ContextFactory';
 import { supabase } from '@/integrations/supabase/client';
 
 interface AuthContextManagerProps {
@@ -9,7 +9,7 @@ interface AuthContextManagerProps {
 }
 
 export const AuthContextManager: React.FC<AuthContextManagerProps> = ({ children }) => {
-  const { setPhase, setSession, setError } = useAppContext();
+  const { setSession } = useContextFactory();
 
   useEffect(() => {
     let mounted = true;
@@ -23,11 +23,6 @@ export const AuthContextManager: React.FC<AuthContextManagerProps> = ({ children
             
             console.log('Auth state change:', event, session?.user?.id);
             setSession(session);
-            
-            // Update phase based on auth state
-            if (session) {
-              setPhase(InitializationPhase.AUTH_READY);
-            }
           }
         );
 
@@ -38,12 +33,10 @@ export const AuthContextManager: React.FC<AuthContextManagerProps> = ({ children
         
         if (error) {
           console.error('Error getting initial session:', error);
-          setError(error);
-          return;
+          throw error;
         }
 
         setSession(session);
-        setPhase(session ? InitializationPhase.AUTH_READY : InitializationPhase.SERVICES_READY);
 
         return () => {
           subscription.unsubscribe();
@@ -51,7 +44,7 @@ export const AuthContextManager: React.FC<AuthContextManagerProps> = ({ children
       } catch (error) {
         if (!mounted) return;
         console.error('Auth initialization error:', error);
-        setError(error as Error);
+        throw error;
       }
     };
 
@@ -60,7 +53,7 @@ export const AuthContextManager: React.FC<AuthContextManagerProps> = ({ children
     return () => {
       mounted = false;
     };
-  }, [setPhase, setSession, setError]);
+  }, [setSession]);
 
   return (
     <AuthProvider>
