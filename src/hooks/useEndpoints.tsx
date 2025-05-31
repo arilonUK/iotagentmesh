@@ -1,13 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { EndpointConfig, EndpointFormData } from '@/types/endpoint';
-import { 
-  fetchEndpoints, 
-  createEndpoint, 
-  updateEndpoint, 
-  deleteEndpoint,
-  triggerEndpoint
-} from '@/services/endpoints';
+import { endpointsApiService } from '@/services/api/endpointsApiService';
 import { toast } from 'sonner';
 
 export const useEndpoints = (organizationId?: string) => {
@@ -23,7 +17,7 @@ export const useEndpoints = (organizationId?: string) => {
     queryFn: async () => {
       if (!organizationId) return [];
       console.log('Fetching endpoints for org:', organizationId);
-      return await fetchEndpoints(organizationId);
+      return await endpointsApiService.fetchEndpoints();
     },
     enabled: !!organizationId,
   });
@@ -32,7 +26,7 @@ export const useEndpoints = (organizationId?: string) => {
     mutationFn: async (endpointData: EndpointFormData) => {
       if (!organizationId) throw new Error('Organization ID is required');
       console.log('Creating endpoint with org:', organizationId, 'data:', endpointData);
-      const result = await createEndpoint(organizationId, endpointData);
+      const result = await endpointsApiService.createEndpoint(endpointData);
       if (!result) throw new Error('Failed to create endpoint');
       return result;
     },
@@ -49,7 +43,7 @@ export const useEndpoints = (organizationId?: string) => {
   const updateEndpointMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<EndpointFormData> }) => {
       console.log('Updating endpoint:', id, 'with data:', data);
-      const success = await updateEndpoint(id, data);
+      const success = await endpointsApiService.updateEndpoint(id, data);
       if (!success) throw new Error('Failed to update endpoint');
       return success;
     },
@@ -65,7 +59,7 @@ export const useEndpoints = (organizationId?: string) => {
 
   const deleteEndpointMutation = useMutation({
     mutationFn: async (id: string) => {
-      const success = await deleteEndpoint(id);
+      const success = await endpointsApiService.deleteEndpoint(id);
       if (!success) throw new Error('Failed to delete endpoint');
       return success;
     },
@@ -81,7 +75,7 @@ export const useEndpoints = (organizationId?: string) => {
 
   const triggerEndpointMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data?: any }) => {
-      const result = await triggerEndpoint(id, data);
+      const result = await endpointsApiService.triggerEndpoint(id, data);
       if (!result) throw new Error('Failed to trigger endpoint');
       return result;
     },

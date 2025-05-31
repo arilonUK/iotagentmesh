@@ -68,5 +68,67 @@ export const filesApiService = {
     }
 
     return response.data?.files || [];
+  },
+
+  async getFileUrl(organizationId: string, path: string, fileName: string): Promise<string | null> {
+    const response = await apiGatewayService.request({
+      method: 'GET',
+      endpoint: `/api/files/url?path=${encodeURIComponent(path)}&fileName=${encodeURIComponent(fileName)}`
+    });
+
+    if (response.error) {
+      console.error('Error getting file URL:', response.error);
+      return null;
+    }
+
+    return response.data?.url || null;
+  },
+
+  async uploadFile(organizationId: string, path: string, file: File): Promise<boolean> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('path', path);
+
+    const response = await apiGatewayService.request({
+      method: 'POST',
+      endpoint: '/api/files/upload',
+      data: formData
+    });
+
+    if (response.error) {
+      console.error('Error uploading file:', response.error);
+      return false;
+    }
+
+    return true;
+  },
+
+  async deleteFile(organizationId: string, path: string, fileName: string): Promise<boolean> {
+    const response = await apiGatewayService.request({
+      method: 'DELETE',
+      endpoint: `/api/files/delete?path=${encodeURIComponent(path)}&fileName=${encodeURIComponent(fileName)}`
+    });
+
+    if (response.error) {
+      console.error('Error deleting file:', response.error);
+      return false;
+    }
+
+    return true;
+  },
+
+  async createDirectory(organizationId: string, path: string, dirName: string): Promise<boolean> {
+    const response = await apiGatewayService.request({
+      method: 'POST',
+      endpoint: '/api/files/directory',
+      data: { path, dirName }
+    });
+
+    if (response.error) {
+      console.error('Error creating directory:', response.error);
+      return false;
+    }
+
+    return true;
   }
 };

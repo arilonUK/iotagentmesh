@@ -5,16 +5,16 @@ import { profileServices } from '@/services/profileServices';
 
 export type ProfileManagerReturn = {
   profile: Profile | null;
-  fetchProfile: (userId: string) => Promise<void>;
+  fetchProfile: () => Promise<void>;
   setProfile: React.Dispatch<React.SetStateAction<Profile | null>>;
 };
 
 export const useProfileManager = (): ProfileManagerReturn => {
   const [profile, setProfile] = useState<Profile | null>(null);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async () => {
     try {
-      const profileData = await profileServices.getProfile(userId);
+      const profileData = await profileServices.getProfile();
       if (profileData) {
         setProfile(profileData);
       }

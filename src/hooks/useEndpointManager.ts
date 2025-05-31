@@ -58,7 +58,7 @@ export const useEndpointManager = () => {
         setEndpoints(prev => 
           prev.map(endpoint => 
             endpoint.id === endpointId 
-              ? { ...endpoint, ...data, updated_at: new Date().toISOString() }
+              ? { ...endpoint, ...data, updated_at: new Date().toISOString() } as EndpointConfig
               : endpoint
           )
         );

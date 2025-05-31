@@ -5,16 +5,16 @@ import { UserOrganization } from '@/contexts/auth/types';
 import { profileServices } from '@/services/profileServices';
 
 export type OrganizationSwitcherReturn = {
-  switchOrganization: (organizationId: string, userId: string) => Promise<boolean>;
+  switchOrganization: (organizationId: string) => Promise<boolean>;
   isProcessingSwitch: boolean;
 };
 
 export const useOrganizationSwitcher = (): OrganizationSwitcherReturn => {
   const [isProcessingSwitch, setIsProcessingSwitch] = useState<boolean>(false);
 
-  const switchOrganization = async (organizationId: string, userId: string): Promise<boolean> => {
-    if (!userId) {
-      toast('You must be logged in to switch organizations', {
+  const switchOrganization = async (organizationId: string): Promise<boolean> => {
+    if (!organizationId) {
+      toast('Invalid organization ID', {
         style: { backgroundColor: 'red', color: 'white' }
       });
       return false;
@@ -28,9 +28,9 @@ export const useOrganizationSwitcher = (): OrganizationSwitcherReturn => {
 
     try {
       setIsProcessingSwitch(true);
-      console.log(`Switching organization to: ${organizationId} for user: ${userId}`);
+      console.log(`Switching organization to: ${organizationId}`);
       
-      const success = await profileServices.switchOrganization(userId, organizationId);
+      const success = await profileServices.switchOrganization(organizationId);
       return success;
     } catch (error) {
       console.error('Error switching organization:', error);
