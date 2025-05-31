@@ -30,8 +30,8 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       console.log(`Path suffix: ${options.pathSuffix || 'none'}`);
       console.log(`Data:`, options.data);
       
-      // Extract the function name from the endpoint (remove 'api-' prefix for function invoke)
-      const functionName = options.endpoint.replace(/^api-/, '');
+      // Use the endpoint directly as the function name (don't remove any prefix)
+      const functionName = options.endpoint;
       console.log(`Function name: ${functionName}`);
       
       // Prepare the request payload for the edge function
