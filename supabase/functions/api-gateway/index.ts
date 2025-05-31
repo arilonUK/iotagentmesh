@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -17,6 +16,7 @@ const routes: RouteHandler[] = [
   { pattern: /^\/api\/products/, handler: 'api-products' },
   { pattern: /^\/api\/data/, handler: 'api-data' },
   { pattern: /^\/api\/keys/, handler: 'api-key-management' },
+  { pattern: /^\/api\/alarms/, handler: 'api-alarms' },
   { pattern: /^\/api\/openapi\.json$/, handler: 'openapi-docs' },
   { pattern: /^\/api\/docs/, handler: 'api-docs' }
 ]
@@ -54,6 +54,7 @@ serve(async (req) => {
             '/api/products', 
             '/api/data',
             '/api/keys',
+            '/api/alarms',
             '/api/openapi.json',
             '/api/docs'
           ]
@@ -201,6 +202,45 @@ async function handleOpenApiDocs() {
           responses: {
             "201": {
               description: "Device created successfully"
+            }
+          }
+        }
+      },
+      "/api/alarms": {
+        get: {
+          summary: "Get all alarms",
+          responses: {
+            "200": {
+              description: "List of alarms",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      alarms: {
+                        type: "array",
+                        items: { $ref: "#/components/schemas/Alarm" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        post: {
+          summary: "Create a new alarm",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/CreateAlarmRequest" }
+              }
+            }
+          },
+          responses: {
+            "201": {
+              description: "Alarm created successfully"
             }
           }
         }

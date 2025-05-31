@@ -85,6 +85,12 @@ verify_jwt = false
 [functions.api-products]
 verify_jwt = false
 
+[functions.api-key-management]
+verify_jwt = true
+
+[functions.api-alarms]
+verify_jwt = true
+
 [functions.webhook-manager]
 verify_jwt = false
 
@@ -93,9 +99,6 @@ verify_jwt = false
 
 [functions.api-gateway]
 verify_jwt = false
-
-[functions.api-key-management]
-verify_jwt = true
 
 [edge_runtime]
 enabled = true

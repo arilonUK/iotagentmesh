@@ -28,8 +28,10 @@ export default function Alarms() {
     updateAlarm, 
     deleteAlarm,
     toggleAlarm,
+    testAlarm,
     isCreating: isSubmittingCreate,
-    isUpdating: isSubmittingUpdate
+    isUpdating: isSubmittingUpdate,
+    isTesting
   } = useAlarms(organizationId);
 
   const handleCreateSubmit = (data) => {
@@ -94,6 +96,18 @@ export default function Alarms() {
     });
   };
 
+  const handleTest = (id: string) => {
+    testAlarm(id, {
+      onSuccess: () => {
+        toast.success('Alarm test completed successfully');
+      },
+      onError: (error) => {
+        toast.error('Failed to test alarm');
+        console.error('Test alarm error:', error);
+      }
+    });
+  };
+
   const startCreating = () => {
     setIsCreating(true);
     setEditAlarm(null);
@@ -150,6 +164,8 @@ export default function Alarms() {
             onEdit={startEditing}
             onDelete={handleDelete}
             onToggle={handleToggle}
+            onTest={handleTest}
+            isTesting={isTesting}
           />
         </TabsContent>
         

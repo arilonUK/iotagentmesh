@@ -1,28 +1,21 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { alarmApiService } from '@/services/alarmApiService';
 import { handleServiceError } from './baseAlarmService';
 import { toast } from 'sonner';
 
 /**
- * Delete an alarm
+ * Delete an alarm through API Gateway
  */
 export async function deleteAlarm(alarmId: string): Promise<boolean> {
   try {
-    // Using generic query to avoid TypeScript issues
-    const { error } = await supabase
-      .from('alarms')
-      .delete()
-      .eq('id', alarmId);
-
-    if (error) {
-      handleServiceError(error, 'deleting alarm');
-      return false;
+    console.log('Deleting alarm through API Gateway:', alarmId);
+    const success = await alarmApiService.deleteAlarm(alarmId);
+    if (success) {
+      toast.success('Alarm deleted successfully');
     }
-
-    toast.success('Alarm deleted successfully');
-    return true;
+    return success;
   } catch (error) {
-    handleServiceError(error, 'deleteAlarm');
+    handleServiceError(error, 'deleting alarm');
     return false;
   }
 }

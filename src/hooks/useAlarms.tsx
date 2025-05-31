@@ -5,7 +5,8 @@ import {
   fetchAlarms, 
   createAlarm, 
   updateAlarm, 
-  deleteAlarm 
+  deleteAlarm,
+  testAlarm
 } from '@/services/alarms';
 
 export const useAlarms = (organizationId?: string) => {
@@ -62,6 +63,12 @@ export const useAlarms = (organizationId?: string) => {
     }
   });
 
+  const testAlarmMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await testAlarm(id);
+    }
+  });
+
   return {
     alarms,
     isLoading,
@@ -71,8 +78,10 @@ export const useAlarms = (organizationId?: string) => {
     updateAlarm: updateAlarmMutation.mutate,
     deleteAlarm: deleteAlarmMutation.mutate,
     toggleAlarm: toggleAlarmMutation.mutate,
+    testAlarm: testAlarmMutation.mutate,
     isCreating: createAlarmMutation.isPending,
     isUpdating: updateAlarmMutation.isPending,
-    isDeleting: deleteAlarmMutation.isPending
+    isDeleting: deleteAlarmMutation.isPending,
+    isTesting: testAlarmMutation.isPending
   };
 };

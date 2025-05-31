@@ -6,5 +6,6 @@ export {
   fetchAlarms,
   createAlarm,
   updateAlarm,
-  deleteAlarm
+  deleteAlarm,
+  testAlarm
 } from './alarms';
