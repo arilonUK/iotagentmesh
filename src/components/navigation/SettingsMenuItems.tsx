@@ -11,15 +11,15 @@ interface SettingsMenuItemsProps {
 const SettingsMenuItems: React.FC<SettingsMenuItemsProps> = ({ userRole }) => {
   return (
     <SidebarMenu className="list-none p-0 m-0">
-      <NavMenuItem to="/dashboard/profile" icon={User}>
+      <NavMenuItem to="/dashboard/settings" icon={User}>
         Profile
       </NavMenuItem>
       
-      <NavMenuItem to="/dashboard/team" icon={Users}>
+      <NavMenuItem to="/dashboard/settings/team" icon={Users}>
         Team
       </NavMenuItem>
       
-      <NavMenuItem to="/dashboard/settings" icon={Settings}>
+      <NavMenuItem to="/dashboard/settings/organization" icon={Settings}>
         Organization
       </NavMenuItem>
     </SidebarMenu>
