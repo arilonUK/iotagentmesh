@@ -19,7 +19,7 @@ export interface UpdateDeviceRequest {
 }
 
 export class DevicesApiService extends ApiService<Device, CreateDeviceRequest, UpdateDeviceRequest> {
-  protected readonly endpoint = '/api-devices';
+  protected readonly endpoint = 'api-devices';
   protected readonly entityName = 'Device';
   protected readonly dataKey = 'devices';
   protected readonly singleDataKey = 'device';

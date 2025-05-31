@@ -3,7 +3,7 @@ import { ApiService } from '../base/ApiService';
 import { EndpointConfig, EndpointFormData } from '@/types/endpoint';
 
 export class EndpointsApiService extends ApiService<EndpointConfig, EndpointFormData, Partial<EndpointFormData>> {
-  protected readonly endpoint = '/api-endpoints';
+  protected readonly endpoint = 'api-endpoints';
   protected readonly entityName = 'Endpoint';
   protected readonly dataKey = 'endpoints';
   protected readonly singleDataKey = 'endpoint';
@@ -27,6 +27,8 @@ export class EndpointsApiService extends ApiService<EndpointConfig, EndpointForm
 
   async triggerEndpoint(id: string, payload: any = {}): Promise<boolean> {
     try {
+      console.log(`Triggering endpoint ${id} with payload:`, payload);
+      
       await this.makeRequest<{ success: boolean; message: string }>({
         method: 'POST',
         endpoint: `${this.endpoint}/${id}/trigger`,
@@ -35,6 +37,7 @@ export class EndpointsApiService extends ApiService<EndpointConfig, EndpointForm
 
       return true;
     } catch (error) {
+      console.error(`Error triggering endpoint ${id}:`, error);
       this.handleError(error, 'trigger endpoint');
     }
   }

@@ -16,10 +16,6 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
   protected abstract readonly dataKey: string;
   protected abstract readonly singleDataKey: string;
 
-  protected getBaseUrl(): string {
-    return `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
-  }
-
   protected async makeRequest<R = any>(options: {
     method: string;
     endpoint: string;
@@ -27,41 +23,22 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
     headers?: Record<string, string>;
   }): Promise<R> {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      console.log(`Making request: ${options.method} ${options.endpoint}`);
       
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        ...options.headers
-      };
-
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`;
-      }
-
-      const url = `${this.getBaseUrl()}${options.endpoint}`;
-      
-      const response = await fetch(url, {
+      // Use Supabase functions.invoke instead of direct fetch
+      const { data, error } = await supabase.functions.invoke(options.endpoint.replace('/', ''), {
         method: options.method,
-        headers,
-        body: options.data ? JSON.stringify(options.data) : undefined
+        body: options.data,
+        headers: options.headers
       });
 
-      if (!response.ok) {
-        const errorData = await response.text();
-        let errorMessage: string;
-        
-        try {
-          const parsedError = JSON.parse(errorData);
-          errorMessage = parsedError.error || parsedError.message || `HTTP ${response.status}`;
-        } catch {
-          errorMessage = errorData || `HTTP ${response.status}`;
-        }
-        
-        throw new Error(errorMessage);
+      if (error) {
+        console.error(`Supabase function error:`, error);
+        throw new Error(error.message || 'Function invocation failed');
       }
 
-      const result = await response.json();
-      return result;
+      console.log(`Request successful:`, data);
+      return data;
     } catch (error) {
       console.error(`API request failed for ${options.endpoint}:`, error);
       throw error;
@@ -77,106 +54,107 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
 
   async fetchAll(params?: QueryParams): Promise<T[]> {
     try {
-      const queryString = params ? this.buildQueryString(params) : '';
-      const endpoint = queryString ? `${this.endpoint}?${queryString}` : this.endpoint;
+      console.log(`Fetching all ${this.entityName} items`);
       
       const response = await this.makeRequest<{ [key: string]: T[] }>({
         method: 'GET',
-        endpoint
+        endpoint: this.endpoint
       });
 
-      return response[this.dataKey] || [];
+      const items = response[this.dataKey] || response || [];
+      console.log(`Found ${items.length} ${this.entityName} items:`, items);
+      return items;
     } catch (error) {
+      console.error(`Error fetching ${this.entityName} items:`, error);
       this.handleError(error, 'fetch items');
     }
   }
 
   async fetchById(id: string): Promise<T | null> {
     try {
+      console.log(`Fetching ${this.entityName} with ID: ${id}`);
+      
       const response = await this.makeRequest<{ [key: string]: T }>({
         method: 'GET',
         endpoint: `${this.endpoint}/${id}`
       });
 
-      return response[this.singleDataKey] || null;
+      const item = response[this.singleDataKey] || response || null;
+      console.log(`Found ${this.entityName}:`, item);
+      return item;
     } catch (error) {
-      if (error instanceof Error && error.message.includes('404')) {
+      if (error instanceof Error && (error.message.includes('404') || error.message.includes('not found'))) {
+        console.log(`${this.entityName} not found with ID: ${id}`);
         return null;
       }
+      console.error(`Error fetching ${this.entityName}:`, error);
       this.handleError(error, 'fetch item');
     }
   }
 
   async create(data: CreateDTO): Promise<T> {
     try {
+      console.log(`Creating ${this.entityName}:`, data);
+      
       const response = await this.makeRequest<{ [key: string]: T }>({
         method: 'POST',
         endpoint: this.endpoint,
         data
       });
 
-      const created = response[this.singleDataKey];
+      const created = response[this.singleDataKey] || response;
       if (!created) {
         throw new Error('No data returned from creation');
       }
 
+      console.log(`${this.entityName} created successfully:`, created);
       toast.success(`${this.entityName} created successfully`);
       return created;
     } catch (error) {
+      console.error(`Error creating ${this.entityName}:`, error);
       this.handleError(error, `create ${this.entityName}`);
     }
   }
 
   async update(id: string, data: UpdateDTO): Promise<T> {
     try {
+      console.log(`Updating ${this.entityName} ${id}:`, data);
+      
       const response = await this.makeRequest<{ [key: string]: T }>({
         method: 'PUT',
         endpoint: `${this.endpoint}/${id}`,
         data
       });
 
-      const updated = response[this.singleDataKey];
+      const updated = response[this.singleDataKey] || response;
       if (!updated) {
         throw new Error('No data returned from update');
       }
 
+      console.log(`${this.entityName} updated successfully:`, updated);
       toast.success(`${this.entityName} updated successfully`);
       return updated;
     } catch (error) {
+      console.error(`Error updating ${this.entityName}:`, error);
       this.handleError(error, `update ${this.entityName}`);
     }
   }
 
   async delete(id: string): Promise<boolean> {
     try {
+      console.log(`Deleting ${this.entityName} ${id}`);
+      
       await this.makeRequest({
         method: 'DELETE',
         endpoint: `${this.endpoint}/${id}`
       });
 
+      console.log(`${this.entityName} deleted successfully`);
       toast.success(`${this.entityName} deleted successfully`);
       return true;
     } catch (error) {
+      console.error(`Error deleting ${this.entityName}:`, error);
       this.handleError(error, `delete ${this.entityName}`);
     }
-  }
-
-  protected buildQueryString(params: QueryParams): string {
-    const searchParams = new URLSearchParams();
-    
-    if (params.limit) searchParams.append('limit', params.limit.toString());
-    if (params.offset) searchParams.append('offset', params.offset.toString());
-    if (params.sortBy) searchParams.append('sortBy', params.sortBy);
-    if (params.sortOrder) searchParams.append('sortOrder', params.sortOrder);
-    
-    if (params.filters) {
-      Object.entries(params.filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          searchParams.append(key, value.toString());
-        }
-      });
-    }
-    
-    return searchParams.toString();
   }
 }

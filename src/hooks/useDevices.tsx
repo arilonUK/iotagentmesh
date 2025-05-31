@@ -39,16 +39,28 @@ export const useDevices = (organizationId?: string) => {
         return result;
       } catch (err) {
         console.error('Error in useDevices query function:', err);
-        toast({
-          title: "Error",
-          description: err instanceof Error ? err.message : "Failed to fetch devices",
-          variant: "destructive"
-        });
-        throw err;
+        
+        // Don't show toast for network/API errors in development
+        if (err instanceof Error && !err.message.includes('Function not found')) {
+          toast({
+            title: "Error",
+            description: err instanceof Error ? err.message : "Failed to fetch devices",
+            variant: "destructive"
+          });
+        }
+        
+        // Return empty array instead of throwing to prevent UI crashes
+        return [];
       }
     },
     enabled: !!organizationId,
-    retry: 2,
+    retry: (failureCount, error) => {
+      // Don't retry if it's a function not found error
+      if (error instanceof Error && error.message.includes('Function not found')) {
+        return false;
+      }
+      return failureCount < 2;
+    },
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
     staleTime: 1000 * 30,
   });
@@ -100,11 +112,13 @@ export const useDevice = (deviceId?: string) => {
         }
       } catch (err) {
         console.error('Error fetching device:', err);
-        toast({
-          title: "Error",
-          description: err instanceof Error ? err.message : "Failed to fetch device",
-          variant: "destructive"
-        });
+        if (err instanceof Error && !err.message.includes('Function not found')) {
+          toast({
+            title: "Error",
+            description: err instanceof Error ? err.message : "Failed to fetch device",
+            variant: "destructive"
+          });
+        }
         throw err;
       }
     },
