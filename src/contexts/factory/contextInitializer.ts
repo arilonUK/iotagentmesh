@@ -38,8 +38,12 @@ export const createContextInitializer = (
           throw new Error(`Context ${type} not found in state`);
         }
         const reg: ContextRegistration = {
-          ...existingReg,
+          type: existingReg.type,
+          factory: existingReg.factory,
+          dependencies: existingReg.dependencies,
+          lazy: existingReg.lazy,
           state: InitializationState.LOADING,
+          instance: existingReg.instance,
           error: undefined
         };
         newContexts.set(type, reg);
@@ -57,7 +61,10 @@ export const createContextInitializer = (
           throw new Error(`Context ${type} not found in state`);
         }
         const reg: ContextRegistration = {
-          ...existingReg,
+          type: existingReg.type,
+          factory: existingReg.factory,
+          dependencies: existingReg.dependencies,
+          lazy: existingReg.lazy,
           state: InitializationState.READY,
           instance: instance,
           error: undefined
@@ -79,8 +86,12 @@ export const createContextInitializer = (
           throw new Error(`Context ${type} not found in state`);
         }
         const reg: ContextRegistration = {
-          ...existingReg,
+          type: existingReg.type,
+          factory: existingReg.factory,
+          dependencies: existingReg.dependencies,
+          lazy: existingReg.lazy,
           state: InitializationState.ERROR,
+          instance: existingReg.instance,
           error: error as Error
         };
         newContexts.set(type, reg);
