@@ -103,7 +103,7 @@ export const apiGatewayService = {
    */
   async getDocumentation(): Promise<ApiDocumentation | null> {
     try {
-      const response = await this.request<ApiDocumentation>({
+      const response = await this.request({
         method: 'GET',
         endpoint: '/api/openapi.json'
       });
