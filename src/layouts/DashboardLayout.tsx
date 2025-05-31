@@ -24,6 +24,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     if (pathname.includes('/endpoints')) return 'Endpoints';
     if (pathname.includes('/alarms')) return 'Alarms';
     if (pathname.includes('/data-buckets')) return 'Data Buckets';
+    if (pathname.includes('/file-storage')) return 'File Storage';
     if (pathname.includes('/settings/profile')) return 'Profile Settings';
     if (pathname.includes('/settings/team')) return 'Team Management';
     if (pathname.includes('/organization')) return 'Organization Settings';
@@ -47,13 +48,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   };
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen bg-gray-50 w-full">
         <DashboardNav />
-        <SidebarInset>
+        <SidebarInset className="flex-1">
           <header className="h-16 border-b border-gray-100 bg-white flex items-center justify-between px-4 lg:px-8 sticky top-0 z-10 shadow-sm">
             <div className="flex items-center space-x-4">
-              <SidebarTrigger className="md:hidden" />
+              <SidebarTrigger />
               <h1 className="text-lg font-semibold text-gray-800">{getPageTitle()}</h1>
               <OrganizationSwitcher />
             </div>

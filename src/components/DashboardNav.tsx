@@ -6,6 +6,7 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupLabel,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 import DashboardMenuItems from "@/components/navigation/DashboardMenuItems";
 import SettingsMenuItems from "@/components/navigation/SettingsMenuItems";
@@ -26,9 +27,11 @@ export function DashboardNav() {
           <SidebarGroupLabel>Settings</SidebarGroupLabel>
           <SettingsMenuItems userRole={userRole} />
         </SidebarGroup>
-
-        <OrganizationFooter />
       </SidebarContent>
+      
+      <SidebarFooter>
+        <OrganizationFooter />
+      </SidebarFooter>
     </Sidebar>
   );
 }
