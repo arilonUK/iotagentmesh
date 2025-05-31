@@ -11,7 +11,7 @@ export const useFileStorageQueries = (organizationId?: string, currentPath?: str
   const useFiles = () => {
     return useStandardQuery(
       ['files', organizationId, currentPath],
-      () => fileService.listFiles(organizationId!, currentPath!),
+      () => fileService.listFiles(currentPath || ''),
       {
         enabled: !!organizationId && currentPath !== undefined,
         showErrorToast: true,

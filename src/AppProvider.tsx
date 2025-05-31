@@ -13,17 +13,17 @@ interface AppProviderProps {
 
 export default function AppProvider({ children }: AppProviderProps) {
   return (
-    <StateManagementProvider>
-      <TooltipProvider>
-        <ToastProvider>
+    <ToastProvider>
+      <StateManagementProvider>
+        <TooltipProvider>
           <AuthProvider>
             <OrganizationProvider>
               {children}
               <Toaster />
             </OrganizationProvider>
           </AuthProvider>
-        </ToastProvider>
-      </TooltipProvider>
-    </StateManagementProvider>
+        </TooltipProvider>
+      </StateManagementProvider>
+    </ToastProvider>
   );
 }
