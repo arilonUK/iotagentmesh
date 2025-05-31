@@ -1,5 +1,5 @@
 
-import { useNotificationContext } from '@/contexts/StateManagementProvider';
+import { useNotificationContext } from '@/contexts/notification/NotificationContext';
 
 export const useGlobalNotifications = () => {
   const {
