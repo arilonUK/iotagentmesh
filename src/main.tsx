@@ -1,3 +1,4 @@
+
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -32,7 +33,7 @@ import BlogPost from "./pages/BlogPost";
 import IntegrationsAndConnectivity from "./pages/IntegrationsAndConnectivity";
 import OAuthConnections from "./pages/OAuthConnections";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { Outlet } from "react-router-dom";
+import DashboardLayout from "./layouts/DashboardLayout";
 import AlarmConfigurationGuide from "./pages/AlarmConfigurationGuide";
 import ApiIntegrationGuide from "./pages/ApiIntegrationGuide";
 
@@ -65,99 +66,221 @@ const router = createBrowserRouter([
         path: "/dashboard",
         element: (
           <ProtectedRoute>
-            <Outlet />
+            <DashboardLayout>
+              <Dashboard />
+            </DashboardLayout>
           </ProtectedRoute>
         ),
-        children: [
-          {
-            path: "",
-            element: <Dashboard />,
-          },
-          {
-            path: "devices",
-            element: <Devices />,
-          },
-          {
-            path: "devices/:id",
-            element: <DeviceDetail />,
-          },
-          {
-            path: "products",
-            element: <Products />,
-          },
-          {
-            path: "products/:id",
-            element: <ProductDetail />,
-          },
-          {
-            path: "alarms",
-            element: <Alarms />,
-          },
-          {
-            path: "data-buckets",
-            element: <DataBuckets />,
-          },
-          {
-            path: "documentation",
-            element: <Documentation />,
-          },
-          {
-            path: "documentation/device-management",
-            element: <DeviceManagementGuide />,
-          },
-          {
-            path: "documentation/data-buckets-analytics",
-            element: <DataBucketsAnalyticsGuide />,
-          },
-          {
-            path: "documentation/alarm-configuration",
-            element: <AlarmConfigurationGuide />,
-          },
-          {
-            path: "documentation/api-integration",
-            element: <ApiIntegrationGuide />,
-          },
-          {
-            path: "endpoints",
-            element: <Endpoints />,
-          },
-          {
-            path: "integrations",
-            element: <IntegrationsAndConnectivity />,
-          },
-          {
-            path: "file-storage",
-            element: <FileStorage />,
-          },
-          {
-            path: "file-storage/:profileId",
-            element: <FileExplorerPage />,
-          },
-          {
-            path: "notifications/settings",
-            element: <NotificationSettings />,
-          },
-          {
-            path: "settings",
-            element: <ProfileSettings />,
-          },
-          {
-            path: "settings/organization",
-            element: <OrganizationSettings />,
-          },
-          {
-            path: "settings/team",
-            element: <TeamSettings />,
-          },
-          {
-            path: "settings/oauth",
-            element: <OAuthConnections />,
-          },
-          {
-            path: "settings/api-keys",
-            element: <ApiKeyManagement />,
-          },
-        ],
+      },
+      {
+        path: "/dashboard/devices",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Devices />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/devices/:id",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <DeviceDetail />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/products",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Products />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/products/:id",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ProductDetail />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/alarms",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Alarms />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/data-buckets",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <DataBuckets />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/documentation",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Documentation />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/documentation/device-management",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <DeviceManagementGuide />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/documentation/data-buckets-analytics",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <DataBucketsAnalyticsGuide />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/documentation/alarm-configuration",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <AlarmConfigurationGuide />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/documentation/api-integration",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ApiIntegrationGuide />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/endpoints",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Endpoints />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/integrations",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <IntegrationsAndConnectivity />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/file-storage",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <FileStorage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/file-storage/:profileId",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <FileExplorerPage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/notifications/settings",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <NotificationSettings />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/settings",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ProfileSettings />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/settings/organization",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <OrganizationSettings />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/settings/team",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <TeamSettings />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/settings/oauth",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <OAuthConnections />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard/settings/api-keys",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ApiKeyManagement />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
       },
     ],
   },
@@ -169,10 +292,6 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-      <AppProvider>
-        <RouterProvider router={router} />
-      </AppProvider>
-    </ThemeProvider>
+    <RouterProvider router={router} />
   </StrictMode>
 );
