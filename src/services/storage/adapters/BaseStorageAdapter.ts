@@ -74,9 +74,9 @@ export abstract class BaseStorageAdapter implements IFileStorageService {
             break;
         }
         
-        updatedOperation.status = 'completed';
-        this.updateOperation(updatedOperation);
-        syncResults.push(updatedOperation);
+        const completedOperation = { ...updatedOperation, status: 'completed' as const };
+        this.updateOperation(completedOperation);
+        syncResults.push(completedOperation);
       } catch (error) {
         const failedOperation = { 
           ...operation, 
