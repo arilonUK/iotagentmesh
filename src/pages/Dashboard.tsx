@@ -9,16 +9,80 @@ import { useOrganization } from '@/contexts/organization';
 
 const Dashboard = () => {
   const { organization } = useOrganization();
-  const { devices, isLoading } = useDevices(organization?.id);
+  const { devices, isLoading, error } = useDevices(organization?.id);
+
+  console.log('=== DASHBOARD COMPONENT DEBUG ===');
+  console.log('Organization:', organization);
+  console.log('Organization ID:', organization?.id);
+  console.log('Devices:', devices);
+  console.log('Devices length:', devices?.length);
+  console.log('Is loading:', isLoading);
+  console.log('Error:', error);
 
   // Get only the first 4 devices for the dashboard preview
   const recentDevices = devices.slice(0, 4);
+
+  // Show loading state
+  if (isLoading && devices.length === 0) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
+          <p className="text-muted-foreground">Loading your IoT control center...</p>
+        </div>
+        <div className="flex items-center justify-center h-48">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if there's an error
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
+          <p className="text-muted-foreground">Welcome back to your IoT control center.</p>
+        </div>
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="pt-6">
+            <p className="text-red-600">Error loading devices: {error}</p>
+            <p className="text-sm text-red-500 mt-2">
+              Organization ID: {organization?.id || 'No organization'}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show no organization state
+  if (!organization?.id) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
+          <p className="text-muted-foreground">Welcome back to your IoT control center.</p>
+        </div>
+        <Card className="border-yellow-200 bg-yellow-50">
+          <CardContent className="pt-6">
+            <p className="text-yellow-600">No organization selected. Please select an organization to view devices.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
         <p className="text-muted-foreground">Welcome back to your IoT control center.</p>
+        {/* Debug info - remove this later */}
+        <div className="text-xs text-gray-400 mt-2">
+          Org: {organization.name} | ID: {organization.id} | Devices: {devices.length}
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -101,6 +165,7 @@ const Dashboard = () => {
             <ArrowRight className="ml-1 h-4 w-4" />
           </Link>
         </div>
+        
         {isLoading ? (
           <div className="flex items-center justify-center h-48">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -118,8 +183,20 @@ const Dashboard = () => {
               />
             ))}
             {recentDevices.length === 0 && (
-              <div className="col-span-full text-center py-8 text-muted-foreground">
-                No devices found. Add your first device to get started.
+              <div className="col-span-full">
+                <Card className="border-dashed border-2 border-gray-300">
+                  <CardContent className="text-center py-12">
+                    <p className="text-muted-foreground mb-2">
+                      No devices found. Add your first device to get started.
+                    </p>
+                    <Link 
+                      to="/dashboard/devices" 
+                      className="text-primary hover:underline"
+                    >
+                      Go to Devices page to add a device
+                    </Link>
+                  </CardContent>
+                </Card>
               </div>
             )}
           </div>

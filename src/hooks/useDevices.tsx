@@ -10,7 +10,11 @@ function isValidUUID(uuid: string): boolean {
 }
 
 export const useDevices = (organizationId?: string) => {
+  console.log('=== USE DEVICES HOOK DEBUG ===');
   console.log('useDevices hook called with organization ID:', organizationId);
+  console.log('Organization ID type:', typeof organizationId);
+  console.log('Organization ID valid UUID:', organizationId ? isValidUUID(organizationId) : 'no ID provided');
+  
   const { toast } = useToast();
   
   const {
@@ -22,29 +26,51 @@ export const useDevices = (organizationId?: string) => {
   } = useQuery({
     queryKey: ['devices', organizationId],
     queryFn: async () => {
+      console.log('=== DEVICES QUERY FUNCTION START ===');
+      
       if (!organizationId) {
-        console.log('No organization ID provided, skipping fetch');
+        console.log('No organization ID provided, returning empty array');
         return [];
       }
       
       if (!isValidUUID(organizationId)) {
         console.error('Invalid organization ID format:', organizationId);
-        return [];
+        throw new Error(`Invalid organization ID format: ${organizationId}`);
       }
       
-      console.log('Fetching devices for organization:', organizationId);
+      console.log('Calling devicesApiService.fetchAll() for organization:', organizationId);
+      
       try {
         const result = await devicesApiService.fetchAll();
-        console.log(`Found ${result.length} devices for organization ${organizationId}:`, result);
+        console.log(`✅ SUCCESS: Found ${result.length} devices:`, result);
+        
+        // Additional debugging for each device
+        if (result.length > 0) {
+          result.forEach((device, index) => {
+            console.log(`Device ${index + 1}:`, {
+              id: device.id,
+              name: device.name,
+              type: device.type,
+              status: device.status,
+              organization_id: device.organization_id
+            });
+          });
+        } else {
+          console.log('⚠️ No devices returned from API');
+        }
+        
         return result;
       } catch (err) {
-        console.error('Error in useDevices query function:', err);
+        console.error('❌ ERROR in useDevices query function:', err);
+        console.error('Error type:', typeof err);
+        console.error('Error message:', err instanceof Error ? err.message : String(err));
+        console.error('Error stack:', err instanceof Error ? err.stack : 'No stack available');
         
-        // Don't show toast for network/API errors in development
+        // Don't show toast for network/API errors that might be temporary
         if (err instanceof Error && !err.message.includes('Function not found')) {
           toast({
-            title: "Error",
-            description: err instanceof Error ? err.message : "Failed to fetch devices",
+            title: "Error Loading Devices",
+            description: err.message || "Failed to fetch devices",
             variant: "destructive"
           });
         }
@@ -53,26 +79,39 @@ export const useDevices = (organizationId?: string) => {
         return [];
       }
     },
-    enabled: !!organizationId,
+    enabled: !!organizationId && isValidUUID(organizationId),
     retry: (failureCount, error) => {
+      console.log(`Query retry attempt ${failureCount}:`, error);
       // Don't retry if it's a function not found error
       if (error instanceof Error && error.message.includes('Function not found')) {
+        console.log('Function not found - not retrying');
         return false;
       }
       return failureCount < 2;
     },
-    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
-    staleTime: 1000 * 30,
+    retryDelay: attempt => {
+      const delay = Math.min(1000 * 2 ** attempt, 30000);
+      console.log(`Retry delay: ${delay}ms`);
+      return delay;
+    },
+    staleTime: 1000 * 30, // Consider data fresh for 30 seconds
   });
   
+  console.log('=== USE DEVICES HOOK RESULT ===');
+  console.log('Final devices array:', devices);
+  console.log('Final devices length:', devices?.length);
+  console.log('Is loading:', isLoading || isRefetching);
+  console.log('Has error:', !!error);
+  console.log('Error details:', error);
+  
   if (error) {
-    console.error('Error in useDevices hook:', error);
+    console.error('❌ Final error in useDevices hook:', error);
   }
   
   return {
     devices,
     isLoading: isLoading || isRefetching,
-    error,
+    error: error ? (error instanceof Error ? error.message : String(error)) : null,
     refetch
   };
 };
