@@ -102,35 +102,52 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
     const contextRegistrations: ContextRegistration[] = [
       {
         type: ContextType.QUERY_CLIENT,
-        factory: async () => createQueryClient(),
+        factory: async () => {
+          console.log('Creating QueryClient...');
+          const client = createQueryClient();
+          console.log('QueryClient created:', client);
+          return client;
+        },
         dependencies: [],
         lazy: false,
         state: InitializationState.PENDING,
       },
       {
         type: ContextType.TOAST,
-        factory: async () => ({}), // Toast context is lightweight
+        factory: async () => {
+          console.log('Creating Toast context...');
+          return { initialized: true }; // Toast context is lightweight
+        },
         dependencies: [],
         lazy: false,
         state: InitializationState.PENDING,
       },
       {
         type: ContextType.AUTH,
-        factory: async () => ({}), // Auth will be handled by AuthContextManager
+        factory: async () => {
+          console.log('Creating Auth context...');
+          return { initialized: true }; // Auth will be handled by AuthContextManager
+        },
         dependencies: [ContextType.QUERY_CLIENT],
         lazy: false,
         state: InitializationState.PENDING,
       },
       {
         type: ContextType.ORGANIZATION,
-        factory: async () => ({}), // Organization context
+        factory: async () => {
+          console.log('Creating Organization context...');
+          return { initialized: true }; // Organization context
+        },
         dependencies: [ContextType.AUTH],
         lazy: true,
         state: InitializationState.PENDING,
       },
       {
         type: ContextType.NOTIFICATION,
-        factory: async () => ({}), // Notification context
+        factory: async () => {
+          console.log('Creating Notification context...');
+          return { initialized: true }; // Notification context
+        },
         dependencies: [ContextType.AUTH],
         lazy: true,
         state: InitializationState.PENDING,
@@ -177,6 +194,8 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
     }
 
     try {
+      console.log(`Initializing context: ${type}`);
+      
       // Check dependencies first
       for (const dep of registration.dependencies) {
         const depRegistration = state.contexts.get(dep);
@@ -193,6 +212,7 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
       });
 
       const instance = await registration.factory();
+      console.log(`Context ${type} initialized:`, instance);
 
       setState(prev => {
         const newContexts = new Map(prev.contexts);
@@ -203,6 +223,7 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
         return { ...prev, contexts: newContexts };
       });
     } catch (error) {
+      console.error(`Failed to initialize context ${type}:`, error);
       setState(prev => {
         const newContexts = new Map(prev.contexts);
         const reg = newContexts.get(type)!;
@@ -231,6 +252,7 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
   useEffect(() => {
     const initializeNonLazyContexts = async () => {
       try {
+        console.log('Starting context initialization...');
         for (const type of state.initializationOrder) {
           const registration = state.contexts.get(type);
           if (registration && !registration.lazy) {
@@ -238,6 +260,7 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
           }
         }
         
+        console.log('All non-lazy contexts initialized successfully');
         setState(prev => ({ ...prev, globalState: InitializationState.READY }));
       } catch (error) {
         console.error('Context initialization failed:', error);
