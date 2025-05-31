@@ -6,7 +6,7 @@ import { QueryParams } from '@/services/base/ApiService';
 export const fetchDevices = async (organizationId?: string, params?: QueryParams): Promise<Device[]> => {
   try {
     console.log(`Starting fetchDevices with organization ID: ${organizationId}`);
-    return await devicesApiService.fetchAll(params);
+    return await devicesApiService.fetchAll();
   } catch (error) {
     console.error('Error in fetchDevices:', error);
     return [];
