@@ -1,44 +1,40 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ApiKey, CreateApiKeyResponse, NewApiKeyFormData, ApiUsage, SubscriptionPlan } from '@/types/apiKey';
-import { v4 as uuidv4 } from 'uuid';
 
 export const apiKeyService = {
   async createApiKey(organizationId: string, formData: NewApiKeyFormData): Promise<CreateApiKeyResponse> {
     try {
-      // Generate a secure API key
-      const keyId = uuidv4().replace(/-/g, '');
-      const fullKey = `iot_${keyId}`;
-      const prefix = `iot_${keyId.substring(0, 8)}...`;
+      // Get current session for authentication
+      const { data: { session } } = await supabase.auth.getSession();
       
-      // Hash the key for storage (in a real implementation, use proper hashing)
-      const keyHash = btoa(fullKey); // Simple base64 encoding for demo
-      
-      // Calculate expiration date
-      let expiresAt = null;
-      if (formData.expiration !== 'never') {
-        const months = parseInt(formData.expiration);
-        expiresAt = new Date(Date.now() + months * 30 * 24 * 60 * 60 * 1000).toISOString();
+      if (!session) {
+        throw new Error('Not authenticated');
       }
 
-      const { data, error } = await supabase
-        .from('api_keys')
-        .insert({
-          organization_id: organizationId,
+      // Call the edge function to generate the API key
+      const { data, error } = await supabase.functions.invoke('generate-api-key', {
+        body: {
           name: formData.name,
-          key_hash: keyHash,
-          prefix,
           scopes: formData.scopes,
-          expires_at: expiresAt,
-        })
-        .select()
-        .single();
+          expiration: formData.expiration
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Edge function error:', error);
+        throw error;
+      }
+
+      if (!data) {
+        throw new Error('No data returned from API key generation');
+      }
 
       return {
-        api_key: data,
-        full_key: fullKey
+        api_key: data.api_key,
+        full_key: data.full_key
       };
     } catch (error) {
       console.error('Error creating API key:', error);
