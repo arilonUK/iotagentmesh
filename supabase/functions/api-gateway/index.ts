@@ -13,7 +13,7 @@ const corsHeaders = {
 // Initialize router and add routes
 const router = new APIRouter();
 
-// Add device routes
+// Add device routes - these should match the actual paths being requested
 router.addRoute('/api/devices', forwardToDevicesHandler);
 router.addRoute('/api/devices/*', forwardToDevicesHandler);
 
@@ -31,15 +31,16 @@ serve(async (req) => {
     const url = new URL(req.url);
     console.log(`API Gateway: ${req.method} ${url.pathname}`);
     
-    // Strip the /api-gateway prefix if present
+    // Get the path - don't strip anything, use the full path
     let path = url.pathname;
+    
+    // Only strip /api-gateway if it's actually present at the start
     if (path.startsWith('/api-gateway')) {
       path = path.replace('/api-gateway', '');
-      console.log(`Stripped prefix, new path: ${path}`);
+      console.log(`Stripped /api-gateway prefix, new path: ${path}`);
     }
     
-    // API versioning (assume v1 for now)
-    console.log(`API Version: v1, Path: ${path}`);
+    console.log(`Final routing path: ${path}`);
     
     // Get auth header
     const authHeader = req.headers.get('Authorization');
@@ -72,4 +73,3 @@ serve(async (req) => {
     );
   }
 });
-

@@ -12,6 +12,7 @@ export class APIRouter {
 
   addRoute(pattern: string, handler: RouteHandler) {
     this.routes[pattern] = handler;
+    console.log(`Route added: ${pattern}`);
   }
 
   async route(req: Request, path: string, authHeader: string | null): Promise<Response> {
@@ -33,8 +34,16 @@ export class APIRouter {
     }
 
     console.log(`No route found for path: ${path}`);
+    console.log(`Available routes were:`, Object.keys(this.routes));
     return new Response(
-      JSON.stringify({ error: `Route not found: ${path}` }),
+      JSON.stringify({ 
+        error: `Route not found: ${path}`,
+        available_routes: Object.keys(this.routes),
+        debug_info: {
+          original_path: path,
+          method: req.method
+        }
+      }),
       { 
         status: 404, 
         headers: { 'Content-Type': 'application/json' } 
@@ -43,13 +52,20 @@ export class APIRouter {
   }
 
   private matchesPattern(path: string, pattern: string): boolean {
+    console.log(`Checking if path '${path}' matches pattern '${pattern}'`);
+    
     // Handle exact matches
-    if (path === pattern) return true;
+    if (path === pattern) {
+      console.log(`Exact match found`);
+      return true;
+    }
     
     // Handle wildcard patterns like /api/devices/*
     if (pattern.includes('*')) {
       const basePattern = pattern.replace('*', '');
-      return path.startsWith(basePattern);
+      const matches = path.startsWith(basePattern);
+      console.log(`Wildcard check: ${path} starts with ${basePattern}? ${matches}`);
+      return matches;
     }
     
     // Handle parameter patterns like /api/devices/:id
@@ -57,7 +73,10 @@ export class APIRouter {
       const pathParts = path.split('/');
       const patternParts = pattern.split('/');
       
-      if (pathParts.length !== patternParts.length) return false;
+      if (pathParts.length !== patternParts.length) {
+        console.log(`Parameter pattern length mismatch`);
+        return false;
+      }
       
       for (let i = 0; i < patternParts.length; i++) {
         const patternPart = patternParts[i];
@@ -66,13 +85,15 @@ export class APIRouter {
         if (patternPart.startsWith(':')) {
           continue; // Parameter match
         } else if (patternPart !== pathPart) {
+          console.log(`Parameter pattern part mismatch: ${patternPart} !== ${pathPart}`);
           return false;
         }
       }
+      console.log(`Parameter pattern matched`);
       return true;
     }
     
+    console.log(`No pattern match found`);
     return false;
   }
 }
-
