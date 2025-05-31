@@ -1,13 +1,9 @@
+
 import { useQuery } from '@tanstack/react-query';
-import { fetchDevices, fetchDevice } from '@/services/deviceService';
+import { deviceApiService } from '@/services/deviceApiService';
 import { useToast } from '@/hooks/use-toast';
 import { Device } from '@/types/device';
 
-/**
- * Validates a UUID string
- * @param uuid String to validate as UUID
- * @returns boolean indicating if the string is a valid UUID
- */
 function isValidUUID(uuid: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   return uuidRegex.test(uuid);
@@ -38,18 +34,23 @@ export const useDevices = (organizationId?: string) => {
       
       console.log('Fetching devices for organization:', organizationId);
       try {
-        const result = await fetchDevices(organizationId);
+        const result = await deviceApiService.fetchDevices();
         console.log(`Found ${result.length} devices for organization ${organizationId}:`, result);
         return result;
       } catch (err) {
         console.error('Error in useDevices query function:', err);
+        toast({
+          title: "Error",
+          description: err instanceof Error ? err.message : "Failed to fetch devices",
+          variant: "destructive"
+        });
         throw err;
       }
     },
     enabled: !!organizationId,
     retry: 2,
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
-    staleTime: 1000 * 30, // Cache for 30 seconds
+    staleTime: 1000 * 30,
   });
   
   if (error) {
@@ -88,8 +89,7 @@ export const useDevice = (deviceId?: string) => {
       
       console.log('Fetching device:', deviceId);
       try {
-        // Using the updated fetchDevice function that uses our RLS-bypassing database function
-        const result = await fetchDevice(deviceId);
+        const result = await deviceApiService.fetchDevice(deviceId);
         
         if (!result) {
           console.log('Device not found:', deviceId);
@@ -100,7 +100,12 @@ export const useDevice = (deviceId?: string) => {
         }
       } catch (err) {
         console.error('Error fetching device:', err);
-        throw err; // Throw other errors to trigger React Query's error handling
+        toast({
+          title: "Error",
+          description: err instanceof Error ? err.message : "Failed to fetch device",
+          variant: "destructive"
+        });
+        throw err;
       }
     },
     enabled: !!deviceId && isValidUUID(deviceId),

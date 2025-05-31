@@ -1,6 +1,7 @@
+
 import { useState } from 'react';
 import { Device } from '@/types/device';
-import { createDevice, updateDevice, deleteDevice } from '@/services/deviceService';
+import { deviceApiService, CreateDeviceRequest, UpdateDeviceRequest } from '@/services/deviceApiService';
 import { useDevices } from '@/hooks/useDevices';
 import { useToast } from '@/hooks/use-toast';
 
@@ -24,26 +25,26 @@ export const useDeviceManager = (organizationId?: string) => {
     try {
       setIsCreating(true);
       
-      const newDevice = await createDevice({
-        ...deviceData,
-        organization_id: organizationId
+      const createRequest: CreateDeviceRequest = {
+        name: deviceData.name,
+        type: deviceData.type,
+        status: deviceData.status,
+        description: deviceData.description
+      };
+      
+      const newDevice = await deviceApiService.createDevice(createRequest);
+      
+      toast({
+        title: "Success",
+        description: "Device created successfully",
       });
-      
-      if (newDevice) {
-        toast({
-          title: "Success",
-          description: "Device created successfully",
-        });
-        refetch();
-        return newDevice;
-      }
-      
-      return null;
+      refetch();
+      return newDevice;
     } catch (error) {
       console.error('Error in handleCreateDevice:', error);
       toast({
         title: "Error",
-        description: "Failed to create device",
+        description: error instanceof Error ? error.message : "Failed to create device",
         variant: "destructive",
       });
       return null;
@@ -56,23 +57,26 @@ export const useDeviceManager = (organizationId?: string) => {
     try {
       setIsUpdating(true);
       
-      const updated = await updateDevice(id, deviceData);
+      const updateRequest: UpdateDeviceRequest = {
+        name: deviceData.name,
+        type: deviceData.type,
+        status: deviceData.status,
+        description: deviceData.description
+      };
       
-      if (updated) {
-        toast({
-          title: "Success",
-          description: "Device updated successfully",
-        });
-        refetch();
-        return updated;
-      }
+      const updated = await deviceApiService.updateDevice(id, updateRequest);
       
-      return null;
+      toast({
+        title: "Success",
+        description: "Device updated successfully",
+      });
+      refetch();
+      return updated;
     } catch (error) {
       console.error('Error in handleUpdateDevice:', error);
       toast({
         title: "Error",
-        description: "Failed to update device",
+        description: error instanceof Error ? error.message : "Failed to update device",
         variant: "destructive",
       });
       return null;
@@ -85,7 +89,7 @@ export const useDeviceManager = (organizationId?: string) => {
     try {
       setIsDeleting(true);
       
-      const success = await deleteDevice(id);
+      const success = await deviceApiService.deleteDevice(id);
       
       if (success) {
         toast({
@@ -101,7 +105,7 @@ export const useDeviceManager = (organizationId?: string) => {
       console.error('Error in handleDeleteDevice:', error);
       toast({
         title: "Error",
-        description: "Failed to delete device",
+        description: error instanceof Error ? error.message : "Failed to delete device",
         variant: "destructive",
       });
       return false;
