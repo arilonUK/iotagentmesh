@@ -70,6 +70,15 @@ verify_jwt = true
 [functions.api-auth]
 verify_jwt = false
 
+[functions.api-key-validator]
+verify_jwt = false
+
+[functions.rate-limit-checker]
+verify_jwt = false
+
+[functions.api-auth-orchestrator]
+verify_jwt = false
+
 [functions.rate-limiter]
 verify_jwt = false
 
