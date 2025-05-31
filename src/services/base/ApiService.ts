@@ -10,8 +10,6 @@ export interface QueryParams {
   filters?: Record<string, any>;
 }
 
-type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-
 export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<T>> {
   protected abstract readonly endpoint: string;
   protected abstract readonly entityName: string;
@@ -19,21 +17,30 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
   protected abstract readonly singleDataKey: string;
 
   protected async makeRequest<R = any>(options: {
-    method: HttpMethod;
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
     endpoint: string;
     data?: any;
     headers?: Record<string, string>;
+    pathSuffix?: string;
   }): Promise<R> {
     try {
-      console.log(`Making request: ${options.method} ${options.endpoint}`);
+      console.log(`Making request: ${options.method} ${options.endpoint}${options.pathSuffix || ''}`);
       
       // Extract the function name from the endpoint (remove 'api-' prefix for function invoke)
       const functionName = options.endpoint.replace(/^api-/, '');
       
-      // Use Supabase functions.invoke instead of direct fetch
-      const { data, error } = await supabase.functions.invoke(functionName, {
+      // Prepare the request data for the edge function
+      const requestPayload = {
         method: options.method,
-        body: options.data,
+        path: options.pathSuffix || '',
+        ...(options.data && { body: options.data })
+      };
+      
+      console.log(`Invoking function: ${functionName} with payload:`, requestPayload);
+      
+      // Use Supabase functions.invoke
+      const { data, error } = await supabase.functions.invoke(functionName, {
+        body: requestPayload,
         headers: options.headers
       });
 
@@ -90,7 +97,8 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       
       const response = await this.makeRequest<any>({
         method: 'GET',
-        endpoint: `${this.endpoint}/${id}`
+        endpoint: this.endpoint,
+        pathSuffix: `/${id}`
       });
 
       // Handle both wrapped and direct object responses
@@ -156,7 +164,8 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       
       const response = await this.makeRequest<any>({
         method: 'PUT',
-        endpoint: `${this.endpoint}/${id}`,
+        endpoint: this.endpoint,
+        pathSuffix: `/${id}`,
         data
       });
 
@@ -188,7 +197,8 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       
       await this.makeRequest({
         method: 'DELETE',
-        endpoint: `${this.endpoint}/${id}`
+        endpoint: this.endpoint,
+        pathSuffix: `/${id}`
       });
 
       console.log(`${this.entityName} deleted successfully`);

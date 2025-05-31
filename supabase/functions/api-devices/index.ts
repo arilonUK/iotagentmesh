@@ -103,25 +103,33 @@ serve(async (req) => {
       }
     }
 
-    const url = new URL(req.url);
-    let pathname = url.pathname;
-    console.log('Request path:', pathname);
-    console.log('Method:', req.method);
+    // Parse the request body to get method and path
+    let requestData: any = {};
+    let method = req.method;
+    let path = '';
 
-    // Remove the /api-devices prefix if present (from edge function routing)
-    if (pathname.startsWith('/api-devices')) {
-      pathname = pathname.replace('/api-devices', '') || '/';
+    try {
+      const body = await req.text();
+      if (body) {
+        requestData = JSON.parse(body);
+        method = requestData.method || req.method;
+        path = requestData.path || '';
+        console.log('Parsed request data:', requestData);
+        console.log('Method:', method, 'Path:', path);
+      }
+    } catch (parseError) {
+      console.log('No JSON body or parsing failed, using defaults');
     }
     
     // Parse the path to determine the operation
-    const pathParts = pathname.split('/').filter(part => part);
+    const pathParts = path.split('/').filter(part => part);
     const deviceId = pathParts.length > 0 ? pathParts[0] : null;
     
     console.log('Parsed path parts:', pathParts);
     console.log('Device ID from path:', deviceId);
 
     // GET /api/devices - List devices (when no path parts or empty path)
-    if (req.method === 'GET' && (!deviceId || pathname === '/')) {
+    if (method === 'GET' && (!deviceId || path === '' || path === '/')) {
       console.log('Fetching devices for organization:', organization_id);
       
       const { data: devices, error } = await supabaseClient
@@ -144,7 +152,7 @@ serve(async (req) => {
     }
 
     // GET /api/devices/{id} - Get specific device
-    if (req.method === 'GET' && deviceId) {
+    if (method === 'GET' && deviceId) {
       console.log('Fetching specific device:', deviceId);
       
       // Validate that deviceId is a valid UUID format
@@ -190,8 +198,8 @@ serve(async (req) => {
     }
 
     // POST /api/devices - Create device
-    if (req.method === 'POST') {
-      const deviceData: DeviceData = await req.json();
+    if (method === 'POST') {
+      const deviceData: DeviceData = requestData.body || {};
 
       if (!deviceData.name || !deviceData.type) {
         return new Response(
@@ -225,8 +233,8 @@ serve(async (req) => {
     }
 
     // PUT /api/devices/{id} - Update device
-    if (req.method === 'PUT' && deviceId) {
-      const updateData: Partial<DeviceData> = await req.json();
+    if (method === 'PUT' && deviceId) {
+      const updateData: Partial<DeviceData> = requestData.body || {};
 
       const { data: device, error } = await supabaseClient
         .rpc('update_device_bypass_rls', {
@@ -249,7 +257,7 @@ serve(async (req) => {
     }
 
     // DELETE /api/devices/{id} - Delete device
-    if (req.method === 'DELETE' && deviceId) {
+    if (method === 'DELETE' && deviceId) {
       const { error } = await supabaseClient
         .rpc('delete_device_bypass_rls', { p_device_id: deviceId });
 
