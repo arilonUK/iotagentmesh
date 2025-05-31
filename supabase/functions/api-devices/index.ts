@@ -170,9 +170,10 @@ serve(async (req) => {
         }
 
         console.log(`Found ${devices?.length || 0} devices`);
+        console.log('Devices data:', devices);
 
         return new Response(
-          JSON.stringify({ devices: devices || [] }),
+          JSON.stringify(devices || []),
           { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       } catch (dbError) {
@@ -226,7 +227,7 @@ serve(async (req) => {
         }
 
         return new Response(
-          JSON.stringify({ device: device[0] }),
+          JSON.stringify(device[0]),
           { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       } catch (dbError) {
@@ -268,7 +269,7 @@ serve(async (req) => {
       }
 
       return new Response(
-        JSON.stringify({ device }),
+        JSON.stringify(device),
         { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -292,7 +293,7 @@ serve(async (req) => {
       }
 
       return new Response(
-        JSON.stringify({ device }),
+        JSON.stringify(device),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
