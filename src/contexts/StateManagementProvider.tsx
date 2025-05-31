@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { NotificationProvider } from '@/contexts/notification/NotificationContext';
 import { EnhancedOrganizationProvider } from '@/contexts/organization/EnhancedOrganizationContext';
 
 // Create a global query client with standardized configuration
@@ -47,16 +46,13 @@ export const StateManagementProvider: React.FC<StateManagementProviderProps> = (
 
   return (
     <QueryClientProvider client={client}>
-      <NotificationProvider>
-        <EnhancedOrganizationProvider>
-          {children}
-        </EnhancedOrganizationProvider>
-      </NotificationProvider>
+      <EnhancedOrganizationProvider>
+        {children}
+      </EnhancedOrganizationProvider>
     </QueryClientProvider>
   );
 };
 
 // Export hooks for easy access
-export { useNotificationContext } from '@/contexts/notification/NotificationContext';
 export { useEnhancedOrganization } from '@/contexts/organization/EnhancedOrganizationContext';
 export { useStandardQuery, useStandardMutation } from '@/hooks/query/useStandardQuery';

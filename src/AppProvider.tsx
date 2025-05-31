@@ -4,6 +4,7 @@ import { StateManagementProvider } from '@/contexts/StateManagementProvider';
 import { ToastProvider } from '@/contexts/toast';
 import { AuthProvider } from '@/contexts/auth';
 import { OrganizationProvider } from '@/contexts/organization';
+import { NotificationProvider } from '@/contexts/notification/NotificationContext';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
@@ -18,8 +19,10 @@ export default function AppProvider({ children }: AppProviderProps) {
         <TooltipProvider>
           <AuthProvider>
             <OrganizationProvider>
-              {children}
-              <Toaster />
+              <NotificationProvider>
+                {children}
+                <Toaster />
+              </NotificationProvider>
             </OrganizationProvider>
           </AuthProvider>
         </TooltipProvider>
