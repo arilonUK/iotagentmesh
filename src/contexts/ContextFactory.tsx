@@ -38,7 +38,7 @@ interface ContextFactoryState {
 }
 
 interface ContextFactoryValue extends ContextFactoryState {
-  getContext: <T>(type: ContextType) => T | null;
+  getContext: <T = any>(type: ContextType) => T | null;
   isReady: (type: ContextType) => boolean;
   getError: (type: ContextType) => Error | null;
   setSession: (session: Session | null) => void;
@@ -164,9 +164,12 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
     }));
   }, []);
 
-  const getContext = useCallback(function<T>(type: ContextType): T | null {
+  const getContext = useCallback(<T = any>(type: ContextType): T | null => {
     const registration = state.contexts.get(type);
-    return registration?.instance || null;
+    if (!registration || registration.state !== InitializationState.READY) {
+      return null;
+    }
+    return registration.instance as T;
   }, [state.contexts]);
 
   const isReady = useCallback((type: ContextType): boolean => {
