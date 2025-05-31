@@ -1,13 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlarmConfig, AlarmFormData } from '@/types/alarm';
-import { 
-  fetchAlarms, 
-  createAlarm, 
-  updateAlarm, 
-  deleteAlarm,
-  testAlarm
-} from '@/services/alarms';
+import { alarmsApiService } from '@/services/api/alarmsApiService';
 
 export const useAlarms = (organizationId?: string) => {
   const queryClient = useQueryClient();
@@ -21,7 +15,7 @@ export const useAlarms = (organizationId?: string) => {
     queryKey: ['alarms', organizationId],
     queryFn: async () => {
       if (!organizationId) return [];
-      return await fetchAlarms(organizationId);
+      return await alarmsApiService.fetchAll();
     },
     enabled: !!organizationId,
   });
@@ -29,7 +23,7 @@ export const useAlarms = (organizationId?: string) => {
   const createAlarmMutation = useMutation({
     mutationFn: async (alarmData: AlarmFormData) => {
       if (!organizationId) throw new Error('Organization ID is required');
-      return await createAlarm(organizationId, alarmData);
+      return await alarmsApiService.create(alarmData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['alarms', organizationId] });
@@ -38,7 +32,7 @@ export const useAlarms = (organizationId?: string) => {
 
   const updateAlarmMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<AlarmFormData> }) => {
-      return await updateAlarm(id, data);
+      return await alarmsApiService.update(id, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['alarms', organizationId] });
@@ -47,7 +41,7 @@ export const useAlarms = (organizationId?: string) => {
 
   const deleteAlarmMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await deleteAlarm(id);
+      return await alarmsApiService.delete(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['alarms', organizationId] });
@@ -56,7 +50,7 @@ export const useAlarms = (organizationId?: string) => {
 
   const toggleAlarmMutation = useMutation({
     mutationFn: async ({ id, enabled }: { id: string; enabled: boolean }) => {
-      return await updateAlarm(id, { enabled });
+      return await alarmsApiService.update(id, { enabled });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['alarms', organizationId] });
@@ -65,7 +59,7 @@ export const useAlarms = (organizationId?: string) => {
 
   const testAlarmMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await testAlarm(id);
+      return await alarmsApiService.testAlarm(id);
     }
   });
 
