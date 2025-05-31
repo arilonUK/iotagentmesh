@@ -1,103 +1,119 @@
 
-interface RouteHandler {
-  (req: Request, path: string, authHeader: string | null): Promise<Response>;
-}
+import { handleDeviceRoutes } from './handlers/devices.ts';
+import { handleAlarmRoutes } from './handlers/alarms.ts';
+import { handleEndpointRoutes } from './handlers/endpoints.ts';
+import { handleProductRoutes } from './handlers/products.ts';
+import { handleProfileRoutes } from './handlers/profiles.ts';
+import { handleOpenApiDocs, handleApiDocs } from './handlers/docs.ts';
 
-interface Routes {
-  [key: string]: RouteHandler;
-}
+export class Router {
+  private routes: Map<string, (request: Request, pathParams: Record<string, string>) => Promise<Response>> = new Map();
 
-export class APIRouter {
-  private routes: Routes = {};
-
-  addRoute(pattern: string, handler: RouteHandler) {
-    this.routes[pattern] = handler;
-    console.log(`Route registered: ${pattern}`);
+  constructor() {
+    this.registerRoutes();
   }
 
-  async route(req: Request, path: string, authHeader: string | null): Promise<Response> {
-    console.log(`=== ROUTER START ===`);
-    console.log(`Routing request to path: ${path}`);
-    console.log(`Available routes:`, Object.keys(this.routes));
-    
-    // Try exact match first
-    if (this.routes[path]) {
-      console.log(`Found exact route match: ${path}`);
-      return this.routes[path](req, path, authHeader);
-    }
+  private registerRoutes() {
+    // Device routes
+    this.routes.set('/api/devices', handleDeviceRoutes);
+    this.routes.set('/api/devices/*', handleDeviceRoutes);
+    console.log('Route registered: /api/devices');
+    console.log('Route registered: /api/devices/*');
 
-    // Try pattern matching for routes with wildcards
-    for (const [pattern, handler] of Object.entries(this.routes)) {
-      if (this.matchesPattern(path, pattern)) {
-        console.log(`Found pattern match: '${pattern}' for path: '${path}'`);
-        return handler(req, path, authHeader);
-      }
-    }
+    // Alarm routes
+    this.routes.set('/api/alarms', handleAlarmRoutes);
+    this.routes.set('/api/alarms/*', handleAlarmRoutes);
+    console.log('Route registered: /api/alarms');
+    console.log('Route registered: /api/alarms/*');
 
-    console.log(`No route found for path: ${path}`);
-    console.log(`Available routes:`, Object.keys(this.routes));
-    
-    return new Response(
-      JSON.stringify({ 
-        error: `Route not found: ${path}`,
-        available_routes: Object.keys(this.routes),
-        debug_info: {
-          original_path: path,
-          method: req.method,
-          timestamp: new Date().toISOString()
-        }
-      }),
-      { 
-        status: 404, 
-        headers: { 'Content-Type': 'application/json' } 
-      }
-    );
+    // Endpoint routes
+    this.routes.set('/api/endpoints', handleEndpointRoutes);
+    this.routes.set('/api/endpoints/*', handleEndpointRoutes);
+    console.log('Route registered: /api/endpoints');
+    console.log('Route registered: /api/endpoints/*');
+
+    // Product routes
+    this.routes.set('/api/products', handleProductRoutes);
+    this.routes.set('/api/products/*', handleProductRoutes);
+    console.log('Route registered: /api/products');
+    console.log('Route registered: /api/products/*');
+
+    // Profile routes
+    this.routes.set('/api/profiles', handleProfileRoutes);
+    this.routes.set('/api/profiles/*', handleProfileRoutes);
+    console.log('Route registered: /api/profiles');
+    console.log('Route registered: /api/profiles/*');
+
+    // Documentation routes
+    this.routes.set('/api/openapi.json', handleOpenApiDocs);
+    this.routes.set('/api/docs', handleApiDocs);
+    console.log('Route registered: /api/openapi.json');
+    console.log('Route registered: /api/docs');
   }
 
-  private matchesPattern(path: string, pattern: string): boolean {
-    console.log(`Checking pattern match: '${path}' against '${pattern}'`);
-    
-    // Handle exact matches
-    if (path === pattern) {
-      console.log(`Exact match found`);
-      return true;
-    }
-    
-    // Handle wildcard patterns (e.g., /api/devices/*)
-    if (pattern.endsWith('/*')) {
-      const basePattern = pattern.slice(0, -2); // Remove /*
-      const matches = path.startsWith(basePattern);
-      console.log(`Wildcard check: '${path}' starts with '${basePattern}'? ${matches}`);
-      return matches;
-    }
-    
-    // Handle parameter patterns (e.g., /api/devices/:id)
-    if (pattern.includes(':')) {
-      const pathParts = path.split('/').filter(Boolean);
-      const patternParts = pattern.split('/').filter(Boolean);
+  async route(request: Request, pathname: string): Promise<Response> {
+    console.log('=== ROUTER START ===');
+    console.log('Routing request to path:', pathname);
+    console.log('Available routes:', Array.from(this.routes.keys()));
+
+    // Check for exact matches first
+    for (const [pattern, handler] of this.routes.entries()) {
+      console.log(`Checking pattern match: '${pathname}' against '${pattern}'`);
       
-      if (pathParts.length !== patternParts.length) {
-        console.log(`Parameter pattern length mismatch: ${pathParts.length} vs ${patternParts.length}`);
-        return false;
+      if (pattern === pathname) {
+        console.log('Exact match found');
+        const response = await handler(request, {});
+        console.log('Router response status:', response.status);
+        console.log('=== ROUTER END ===');
+        return response;
       }
-      
-      for (let i = 0; i < patternParts.length; i++) {
-        const patternPart = patternParts[i];
-        const pathPart = pathParts[i];
+
+      // Handle wildcard patterns
+      if (pattern.endsWith('/*')) {
+        const basePattern = pattern.slice(0, -2);
+        console.log(`Wildcard check: '${pathname}' starts with '${basePattern}'?`, pathname.startsWith(basePattern));
         
-        if (patternPart.startsWith(':')) {
-          console.log(`Parameter match at position ${i}: '${pathPart}' matches parameter '${patternPart}'`);
-          continue; // Parameter match
-        } else if (patternPart !== pathPart) {
-          console.log(`Static part mismatch at position ${i}: '${patternPart}' !== '${pathPart}'`);
-          return false;
+        if (pathname.startsWith(basePattern)) {
+          console.log('Wildcard match found');
+          const pathSegments = pathname.split('/');
+          const patternSegments = basePattern.split('/');
+          
+          // Extract path parameters
+          const pathParams: Record<string, string> = {};
+          for (let i = patternSegments.length; i < pathSegments.length; i++) {
+            const segment = pathSegments[i];
+            if (segment) {
+              pathParams[`param${i - patternSegments.length}`] = segment;
+            }
+          }
+          
+          const response = await handler(request, pathParams);
+          console.log('Router response status:', response.status);
+          console.log('=== ROUTER END ===');
+          return response;
         }
       }
-      console.log(`Parameter pattern fully matched`);
-      return true;
+      
+      console.log('No pattern match found');
     }
-    
-    console.log(`No pattern match found`);
-    return false;
+
+    console.log('No route found for path:', pathname);
+    console.log('Available routes:', Array.from(this.routes.keys()));
+    console.log('Router response status: 404');
+    console.log('=== ROUTER END ===');
+
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: 'Route not found',
+      path: pathname,
+      available_routes: Array.from(this.routes.keys())
+    }), {
+      status: 404,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+      }
+    });
   }
 }
