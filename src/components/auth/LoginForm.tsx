@@ -4,60 +4,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/contexts/auth';
+import { useAuthFormLogic } from './AuthFormLogic';
 
 type LoginFormProps = {
   setAuthError: (error: string | null) => void;
 };
 
 const LoginForm = ({ setAuthError }: LoginFormProps) => {
-  const { signIn } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const { isLoading, handleLogin } = useAuthFormLogic();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (isLoading) {
-      console.log("LoginForm: Already processing login, ignoring");
-      return;
-    }
-    
-    setIsLoading(true);
     setAuthError(null);
 
-    try {
-      console.log("LoginForm: Starting login process for:", loginEmail);
-      
-      const result = await signIn(loginEmail, loginPassword);
-      
-      if (result?.error) {
-        console.error("LoginForm: Login failed:", result.error.message);
-        
-        // Provide user-friendly error messages
-        let errorMessage = result.error.message;
-        if (errorMessage.includes('Invalid login credentials')) {
-          errorMessage = 'Invalid email or password. Please check your credentials and try again.';
-        } else if (errorMessage.includes('Email not confirmed')) {
-          errorMessage = 'Please check your email and click the confirmation link before signing in.';
-        }
-        
-        setAuthError(errorMessage);
-        setIsLoading(false);
-      } else {
-        console.log("LoginForm: Login successful, auth state will be handled by AuthProvider");
-        // Don't set loading to false here - let AuthProvider handle it
-      }
-    } catch (error: any) {
-      console.error("LoginForm: Login error:", error);
-      setAuthError(error.message || 'An unexpected error occurred during sign in');
-      setIsLoading(false);
+    const result = await handleLogin(loginEmail, loginPassword);
+    
+    if (result?.error) {
+      setAuthError(result.error);
     }
   };
 
   return (
-    <form onSubmit={handleLogin} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="login-email">Email</Label>
         <Input 

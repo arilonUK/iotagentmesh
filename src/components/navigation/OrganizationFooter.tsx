@@ -14,39 +14,19 @@ import {
 import { Button } from "@/components/ui/button";
 
 export function OrganizationFooter() {
-  const { signOut, organization, userRole } = useAuth();
-  const [isSigningOut, setIsSigningOut] = useState(false);
+  const { signOut, organization, userRole, loading } = useAuth();
   const navigate = useNavigate();
   
   if (!organization) return null;
   
   const handleSignOut = async () => {
-    if (isSigningOut) {
-      console.log("OrganizationFooter: Sign out already in progress, ignoring");
-      return;
-    }
+    if (loading) return;
     
-    setIsSigningOut(true);
     console.log("OrganizationFooter: Starting sign out process");
-    
-    // Set a safety timeout to reset the spinner
-    const safetyTimeout = setTimeout(() => {
-      console.log("OrganizationFooter: Safety timeout triggered, resetting spinner");
-      setIsSigningOut(false);
-      window.location.href = '/auth';
-    }, 15000); // 15 second safety net
-    
     try {
       await signOut();
-      console.log("OrganizationFooter: Sign out completed successfully");
-      clearTimeout(safetyTimeout);
-      // Navigation is handled in the signOut function via window.location.href
     } catch (error) {
       console.error("OrganizationFooter: Error during sign out:", error);
-      clearTimeout(safetyTimeout);
-      setIsSigningOut(false);
-      // Force navigation as fallback
-      window.location.href = '/auth';
     }
   };
   
@@ -80,9 +60,9 @@ export function OrganizationFooter() {
           )}
           <DropdownMenuItem
             onClick={handleSignOut}
-            disabled={isSigningOut}
+            disabled={loading}
           >
-            {isSigningOut ? (
+            {loading ? (
               <div className="flex items-center justify-center gap-2">
                 <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                 <span>Signing Out...</span>

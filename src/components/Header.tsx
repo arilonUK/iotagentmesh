@@ -21,36 +21,16 @@ export const Header = () => {
   const navigate = useNavigate()
   const { setTheme } = useTheme()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const [isSigningOut, setIsSigningOut] = useState(false)
-  const { session, user, signOut } = useAuth()
+  const { session, user, signOut, loading } = useAuth()
   
   const handleSignOut = async () => {
-    if (isSigningOut) {
-      console.log("Header: Sign out already in progress, ignoring");
-      return;
-    }
+    if (loading) return;
     
-    setIsSigningOut(true);
     console.log("Header: Starting sign out process");
-    
-    // Set a safety timeout to reset the spinner
-    const safetyTimeout = setTimeout(() => {
-      console.log("Header: Safety timeout triggered, resetting spinner");
-      setIsSigningOut(false);
-      window.location.href = '/auth';
-    }, 15000); // 15 second safety net
-    
     try {
       await signOut();
-      console.log("Header: Sign out completed successfully");
-      clearTimeout(safetyTimeout);
-      // Navigation is handled in the signOut function via window.location.href
     } catch (error) {
       console.error("Header: Error during sign out:", error);
-      clearTimeout(safetyTimeout);
-      setIsSigningOut(false);
-      // Force navigation as fallback
-      window.location.href = '/auth';
     }
   }
 
@@ -90,13 +70,13 @@ export const Header = () => {
               ))}
               <DropdownMenuSeparator />
               <DropdownMenuItem 
-                disabled={isSigningOut}
+                disabled={loading}
                 onSelect={(e) => {
                   e.preventDefault();
                   handleSignOut();
                   setIsDropdownOpen(false);
                 }}>
-                {isSigningOut ? (
+                {loading ? (
                   <div className="flex items-center gap-2">
                     <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                     <span>Signing Out...</span>
