@@ -9,7 +9,7 @@ interface ServiceLayerManagerProps {
 }
 
 export const ServiceLayerManager: React.FC<ServiceLayerManagerProps> = ({ children }) => {
-  // No need to use any context here - just provide the service layer components
+  // Simplified service layer - services are now direct imports where needed
   return (
     <EnhancedOrganizationProvider>
       <OrganizationProvider>

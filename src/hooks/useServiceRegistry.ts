@@ -1,55 +1,42 @@
 
-import { useEffect, useState } from 'react';
-import { ServiceRegistry } from '@/services/ServiceRegistry';
-import { modernizedServiceRegistry } from '@/services/registry/ModernizedServiceRegistry';
-
-export interface UseServiceRegistryResult {
-  isInitialized: boolean;
-  services: typeof ServiceRegistry;
-  error: string | null;
-}
+import { devicesApiService } from '@/services/api/devicesApiService';
+import { alarmsApiService } from '@/services/api/alarmsApiService';
+import { endpointsApiService } from '@/services/api/endpointsApiService';
 
 /**
- * Hook to access the modernized service registry
+ * Simple hook to access services directly
+ * No complex registry or initialization needed
  */
-export const useServiceRegistry = (): UseServiceRegistryResult => {
-  const [isInitialized, setIsInitialized] = useState(ServiceRegistry.isInitialized());
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const initializeServices = async () => {
-      if (ServiceRegistry.isInitialized()) {
-        setIsInitialized(true);
-        return;
-      }
-
-      try {
-        console.log('Initializing Service Registry from hook...');
-        await ServiceRegistry.initialize();
-        setIsInitialized(true);
-        setError(null);
-        console.log('Service Registry initialized successfully from hook');
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to initialize services';
-        console.error('Failed to initialize Service Registry:', errorMessage);
-        setError(errorMessage);
-        setIsInitialized(false);
-      }
-    };
-
-    initializeServices();
-
-    // Cleanup on unmount
-    return () => {
-      // Only destroy if we're the last consumer
-      // In a real app, you might want more sophisticated lifecycle management
-    };
-  }, []);
-
+export const useServices = () => {
   return {
-    isInitialized,
-    services: ServiceRegistry,
-    error
+    devices: devicesApiService,
+    alarms: alarmsApiService,
+    endpoints: endpointsApiService
+  };
+};
+
+// Backward compatibility
+export const useServiceRegistry = () => {
+  const services = useServices();
+  
+  return {
+    isInitialized: true, // Always initialized since services are direct imports
+    services: {
+      getService: (name: string) => {
+        switch (name) {
+          case 'devices':
+            return services.devices;
+          case 'alarms':
+            return services.alarms;
+          case 'endpoints':
+            return services.endpoints;
+          default:
+            throw new Error(`Service '${name}' not found`);
+        }
+      },
+      ...services
+    },
+    error: null
   };
 };
 
@@ -57,14 +44,20 @@ export const useServiceRegistry = (): UseServiceRegistryResult => {
  * Hook to get specific service with type safety
  */
 export const useService = <T>(serviceName: string): T | null => {
-  const { isInitialized, services } = useServiceRegistry();
+  const services = useServices();
   
-  if (!isInitialized) {
-    return null;
-  }
-
   try {
-    return services.getService(serviceName) as T;
+    switch (serviceName) {
+      case 'devices':
+        return services.devices as T;
+      case 'alarms':
+        return services.alarms as T;
+      case 'endpoints':
+        return services.endpoints as T;
+      default:
+        console.error(`Service ${serviceName} not found`);
+        return null;
+    }
   } catch (error) {
     console.error(`Failed to get service ${serviceName}:`, error);
     return null;

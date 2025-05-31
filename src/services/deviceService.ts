@@ -1,7 +1,7 @@
 
 import { Device } from '@/types/device';
 import { devicesApiService, CreateDeviceRequest, UpdateDeviceRequest } from '@/services/api/devicesApiService';
-import { QueryParams } from '@/services/base/types';
+import { QueryParams } from '@/services/base/ApiService';
 
 export const fetchDevices = async (organizationId?: string, params?: QueryParams): Promise<Device[]> => {
   try {

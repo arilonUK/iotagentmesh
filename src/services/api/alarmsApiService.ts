@@ -1,30 +1,18 @@
 
-import { BaseApiService } from '../base/BaseApiService';
+import { ApiService } from '../base/ApiService';
 import { AlarmConfig, AlarmFormData } from '@/types/alarm';
 
-export class AlarmsApiService extends BaseApiService<AlarmConfig, AlarmFormData, Partial<AlarmFormData>> {
-  protected readonly endpoint = '/api/alarms';
-
-  protected getDataKey(): string {
-    return 'alarms';
-  }
-
-  protected getSingleDataKey(): string {
-    return 'alarm';
-  }
-
-  protected getEntityName(): string {
-    return 'Alarm';
-  }
+export class AlarmsApiService extends ApiService<AlarmConfig, AlarmFormData, Partial<AlarmFormData>> {
+  protected readonly endpoint = '/api-alarms';
+  protected readonly entityName = 'Alarm';
+  protected readonly dataKey = 'alarms';
+  protected readonly singleDataKey = 'alarm';
 
   async testAlarm(id: string): Promise<{ success: boolean; message: string; event?: any }> {
     try {
       const response = await this.makeRequest<{ success: boolean; message: string; event?: any }>({
         method: 'POST',
-        endpoint: `/api/alarms/${id}/test`,
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        endpoint: `${this.endpoint}/${id}/test`
       });
 
       return {

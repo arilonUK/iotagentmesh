@@ -1,21 +1,12 @@
 
-import { BaseApiService } from '../base/BaseApiService';
+import { ApiService } from '../base/ApiService';
 import { EndpointConfig, EndpointFormData } from '@/types/endpoint';
 
-export class EndpointsApiService extends BaseApiService<EndpointConfig, EndpointFormData, Partial<EndpointFormData>> {
-  protected readonly endpoint = '/api/endpoints';
-
-  protected getDataKey(): string {
-    return 'endpoints';
-  }
-
-  protected getSingleDataKey(): string {
-    return 'endpoint';
-  }
-
-  protected getEntityName(): string {
-    return 'Endpoint';
-  }
+export class EndpointsApiService extends ApiService<EndpointConfig, EndpointFormData, Partial<EndpointFormData>> {
+  protected readonly endpoint = '/api-endpoints';
+  protected readonly entityName = 'Endpoint';
+  protected readonly dataKey = 'endpoints';
+  protected readonly singleDataKey = 'endpoint';
 
   // Backward compatibility methods
   async fetchEndpoints(): Promise<EndpointConfig[]> {
@@ -38,7 +29,7 @@ export class EndpointsApiService extends BaseApiService<EndpointConfig, Endpoint
     try {
       await this.makeRequest<{ success: boolean; message: string }>({
         method: 'POST',
-        endpoint: `/api/endpoints/${id}/trigger`,
+        endpoint: `${this.endpoint}/${id}/trigger`,
         data: payload
       });
 

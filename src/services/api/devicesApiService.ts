@@ -1,5 +1,5 @@
 
-import { BaseApiService } from '../base/BaseApiService';
+import { ApiService } from '../base/ApiService';
 import { Device } from '@/types/device';
 
 export interface CreateDeviceRequest {
@@ -18,20 +18,11 @@ export interface UpdateDeviceRequest {
   product_template_id?: string;
 }
 
-export class DevicesApiService extends BaseApiService<Device, CreateDeviceRequest, UpdateDeviceRequest> {
-  protected readonly endpoint = '/api/devices';
-
-  protected getDataKey(): string {
-    return 'devices';
-  }
-
-  protected getSingleDataKey(): string {
-    return 'device';
-  }
-
-  protected getEntityName(): string {
-    return 'Device';
-  }
+export class DevicesApiService extends ApiService<Device, CreateDeviceRequest, UpdateDeviceRequest> {
+  protected readonly endpoint = '/api-devices';
+  protected readonly entityName = 'Device';
+  protected readonly dataKey = 'devices';
+  protected readonly singleDataKey = 'device';
 
   // Backward compatibility methods
   async fetchDevices(): Promise<Device[]> {
