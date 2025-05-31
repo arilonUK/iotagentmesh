@@ -37,16 +37,16 @@ describe('useProfileManager', () => {
 
     const { result } = renderHook(() => useProfileManager());
     
-    // Call the fetchProfile function with a userId
-    result.current.fetchProfile('123');
+    // Call the fetchProfile function
+    result.current.fetchProfile();
     
     // Wait for profile to be updated
     await waitFor(() => {
       expect(result.current.profile).toEqual(mockProfile);
     });
     
-    // Verify that getProfile was called with the correct userId
-    expect(profileServices.getProfile).toHaveBeenCalledWith('123');
+    // Verify that getProfile was called
+    expect(profileServices.getProfile).toHaveBeenCalled();
   });
 
   it('should handle errors when fetching profile', async () => {
@@ -60,7 +60,7 @@ describe('useProfileManager', () => {
     const { result } = renderHook(() => useProfileManager());
     
     // Call the fetchProfile function
-    result.current.fetchProfile('123');
+    result.current.fetchProfile();
     
     // Wait for the error to be logged
     await waitFor(() => {

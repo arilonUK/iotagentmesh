@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileStorageProfile, profileService, fileService } from '@/services/storage';
 import { useAuth } from '@/contexts/auth';
@@ -15,7 +16,7 @@ export const useStorageProfiles = (organizationId?: string) => {
     queryKey: ['storage-profiles', orgId],
     queryFn: async () => {
       if (!orgId) return [];
-      return profileService.getStorageProfiles(orgId);
+      return profileService.getStorageProfiles();
     },
     enabled: !!orgId,
   });
@@ -69,7 +70,7 @@ export const useStorageFiles = (profileId?: string, organizationId?: string, pat
     queryKey: ['storage-files', orgId, path, profileId],
     queryFn: async () => {
       if (!orgId) return [];
-      return fileService.listFiles(orgId, path);
+      return fileService.listFiles(path);
     },
     enabled: !!orgId,
   });

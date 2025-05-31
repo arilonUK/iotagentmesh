@@ -42,6 +42,35 @@ export const filesApiService = {
     return response.data?.profile || null;
   },
 
+  async updateStorageProfile(id: string, updates: Partial<Omit<FileStorageProfile, 'id' | 'created_at' | 'updated_at'>>): Promise<FileStorageProfile | null> {
+    const response = await apiGatewayService.request({
+      method: 'PUT',
+      endpoint: `/api/files/profiles/${id}`,
+      data: updates
+    });
+
+    if (response.error) {
+      console.error('Error updating storage profile:', response.error);
+      return null;
+    }
+
+    return response.data?.profile || null;
+  },
+
+  async deleteStorageProfile(id: string): Promise<boolean> {
+    const response = await apiGatewayService.request({
+      method: 'DELETE',
+      endpoint: `/api/files/profiles/${id}`
+    });
+
+    if (response.error) {
+      console.error('Error deleting storage profile:', response.error);
+      return false;
+    }
+
+    return true;
+  },
+
   async getStorageProfile(profileId: string): Promise<FileStorageProfile | null> {
     const response = await apiGatewayService.request({
       method: 'GET',
