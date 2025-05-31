@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/contexts/auth/AuthProvider";
 import { ToastProvider } from "@/contexts/toast";
+import { OrganizationProvider } from "@/contexts/organization";
 
 const queryClient = new QueryClient();
 
@@ -14,7 +15,9 @@ const AppProvider = ({ children }: { children: React.ReactNode }) => {
         <ToastProvider>
           <Toaster />
           <AuthProvider>
-            {children}
+            <OrganizationProvider>
+              {children}
+            </OrganizationProvider>
           </AuthProvider>
         </ToastProvider>
       </TooltipProvider>
