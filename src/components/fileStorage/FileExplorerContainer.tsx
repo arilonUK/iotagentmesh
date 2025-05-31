@@ -70,6 +70,14 @@ export const FileExplorerContainer: React.FC<FileExplorerContainerProps> = ({
     fileOps.handleDeleteFile(file, dialogs.selectedFile);
   };
 
+  const handleMarkOffline = (file: any) => {
+    markForOffline(file.name);
+  };
+
+  const handleRemoveOffline = (file: any) => {
+    removeOfflineAccess(file.name);
+  };
+
   const filteredFiles = navigation.searchQuery
     ? files.filter(file => file.name.toLowerCase().includes(navigation.searchQuery.toLowerCase()))
     : files;
@@ -151,8 +159,8 @@ export const FileExplorerContainer: React.FC<FileExplorerContainerProps> = ({
         onPreview={fileOps.previewFile}
         onDownload={fileOps.downloadFile}
         onDelete={handleDeleteFile}
-        onMarkOffline={markForOffline}
-        onRemoveOffline={removeOfflineAccess}
+        onMarkOffline={handleMarkOffline}
+        onRemoveOffline={handleRemoveOffline}
       />
       
       <FilePreviewSystem
