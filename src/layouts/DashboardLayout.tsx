@@ -49,10 +49,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex min-h-screen bg-gray-50 w-full">
+      <div className="flex min-h-screen w-full">
         <DashboardNav />
-        <SidebarInset className="flex-1">
-          <header className="h-16 border-b border-gray-100 bg-white flex items-center justify-between px-4 lg:px-8 sticky top-0 z-10 shadow-sm">
+        <SidebarInset className="flex-1 flex flex-col">
+          <header className="h-16 border-b border-gray-200 bg-white flex items-center justify-between px-4 lg:px-8 sticky top-0 z-10 shadow-sm">
             <div className="flex items-center space-x-4">
               <SidebarTrigger />
               <h1 className="text-lg font-semibold text-gray-800">{getPageTitle()}</h1>
@@ -61,15 +61,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="icon" className="relative">
                 <Bell size={20} />
-                <span className="absolute top-0 right-0 w-2 h-2 bg-iot-error rounded-full"></span>
+                <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
               </Button>
-              <Avatar className="cursor-pointer hover:ring-2 hover:ring-iot-purple-light transition-all">
+              <Avatar className="cursor-pointer hover:ring-2 hover:ring-blue-300 transition-all">
                 <AvatarImage src={profile?.avatar_url || ""} />
-                <AvatarFallback className="bg-iot-purple-light text-white">{getUserInitials()}</AvatarFallback>
+                <AvatarFallback className="bg-blue-500 text-white">{getUserInitials()}</AvatarFallback>
               </Avatar>
             </div>
           </header>
-          <main className="p-4 lg:p-8">
+          <main className="flex-1 p-4 lg:p-8 bg-gray-50">
             {children}
           </main>
         </SidebarInset>
