@@ -33,9 +33,15 @@ export const createContextInitializer = (
       // Update state to loading
       setState((prev: any) => {
         const newContexts = new Map(prev.contexts);
-        const reg = { ...newContexts.get(type)! };
-        reg.state = InitializationState.LOADING;
-        reg.error = undefined;
+        const existingReg = newContexts.get(type);
+        if (!existingReg) {
+          throw new Error(`Context ${type} not found in state`);
+        }
+        const reg: ContextRegistration = {
+          ...existingReg,
+          state: InitializationState.LOADING,
+          error: undefined
+        };
         newContexts.set(type, reg);
         return { ...prev, contexts: newContexts };
       });
@@ -46,10 +52,16 @@ export const createContextInitializer = (
       // Update state to ready
       setState((prev: any) => {
         const newContexts = new Map(prev.contexts);
-        const reg = { ...newContexts.get(type)! };
-        reg.state = InitializationState.READY;
-        reg.instance = instance;
-        reg.error = undefined;
+        const existingReg = newContexts.get(type);
+        if (!existingReg) {
+          throw new Error(`Context ${type} not found in state`);
+        }
+        const reg: ContextRegistration = {
+          ...existingReg,
+          state: InitializationState.READY,
+          instance: instance,
+          error: undefined
+        };
         newContexts.set(type, reg);
         return { ...prev, contexts: newContexts };
       });
@@ -62,9 +74,15 @@ export const createContextInitializer = (
       // Update state to error
       setState((prev: any) => {
         const newContexts = new Map(prev.contexts);
-        const reg = { ...newContexts.get(type)! };
-        reg.state = InitializationState.ERROR;
-        reg.error = error as Error;
+        const existingReg = newContexts.get(type);
+        if (!existingReg) {
+          throw new Error(`Context ${type} not found in state`);
+        }
+        const reg: ContextRegistration = {
+          ...existingReg,
+          state: InitializationState.ERROR,
+          error: error as Error
+        };
         newContexts.set(type, reg);
         return { ...prev, contexts: newContexts, error: error as Error };
       });
