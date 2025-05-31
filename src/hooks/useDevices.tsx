@@ -42,10 +42,13 @@ export const useDevices = (organizationId?: string) => {
       
       try {
         const result = await devicesApiService.fetchAll();
-        console.log(`✅ SUCCESS: Found ${result.length} devices:`, result);
+        console.log(`✅ SUCCESS: API returned:`, result);
+        console.log(`✅ SUCCESS: Result type:`, typeof result);
+        console.log(`✅ SUCCESS: Result is array:`, Array.isArray(result));
+        console.log(`✅ SUCCESS: Result length:`, result?.length);
         
         // Additional debugging for each device
-        if (result.length > 0) {
+        if (result && Array.isArray(result) && result.length > 0) {
           result.forEach((device, index) => {
             console.log(`Device ${index + 1}:`, {
               id: device.id,
@@ -56,10 +59,11 @@ export const useDevices = (organizationId?: string) => {
             });
           });
         } else {
-          console.log('⚠️ No devices returned from API');
+          console.log('⚠️ No devices returned from API or result is not an array');
+          console.log('Raw result:', result);
         }
         
-        return result;
+        return result || [];
       } catch (err) {
         console.error('❌ ERROR in useDevices query function:', err);
         console.error('Error type:', typeof err);
@@ -100,6 +104,8 @@ export const useDevices = (organizationId?: string) => {
   console.log('=== USE DEVICES HOOK RESULT ===');
   console.log('Final devices array:', devices);
   console.log('Final devices length:', devices?.length);
+  console.log('Final devices type:', typeof devices);
+  console.log('Final devices is array:', Array.isArray(devices));
   console.log('Is loading:', isLoading || isRefetching);
   console.log('Has error:', !!error);
   console.log('Error details:', error);

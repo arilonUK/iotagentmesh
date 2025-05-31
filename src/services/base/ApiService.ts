@@ -53,6 +53,8 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       });
 
       console.log(`Supabase function response:`, response);
+      console.log(`Response data:`, response.data);
+      console.log(`Response error:`, response.error);
 
       if (response.error) {
         console.error(`Supabase function error:`, response.error);
@@ -65,6 +67,7 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       }
 
       console.log(`=== API SERVICE REQUEST SUCCESS ===`);
+      console.log(`Final response data:`, response.data);
       return response.data;
     } catch (error) {
       console.error(`=== API SERVICE REQUEST FAILED ===`);
@@ -94,6 +97,7 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
 
   async fetchAll(params?: QueryParams): Promise<T[]> {
     try {
+      console.log(`=== FETCHALL START - ${this.entityName} ===`);
       console.log(`Fetching all ${this.entityName} items`);
       
       const response = await this.makeRequest<any>({
@@ -101,19 +105,36 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
         endpoint: this.endpoint
       });
 
+      console.log(`=== FETCHALL RESPONSE - ${this.entityName} ===`);
+      console.log(`Raw response:`, response);
+      console.log(`Response type:`, typeof response);
+
       // Handle both wrapped and direct array responses
       let items: T[];
       if (Array.isArray(response)) {
+        console.log(`Response is direct array with ${response.length} items`);
         items = response;
       } else if (response && typeof response === 'object' && response[this.dataKey]) {
+        console.log(`Response is wrapped object, extracting ${this.dataKey}`);
+        console.log(`${this.dataKey} value:`, response[this.dataKey]);
+        console.log(`${this.dataKey} is array:`, Array.isArray(response[this.dataKey]));
         items = response[this.dataKey];
       } else {
+        console.log(`Response format not recognized, defaulting to empty array`);
+        console.log(`Looking for dataKey: ${this.dataKey}`);
+        console.log(`Available keys:`, response ? Object.keys(response) : 'no keys');
         items = [];
       }
 
-      console.log(`Found ${items.length} ${this.entityName} items:`, items);
-      return items;
+      console.log(`=== FETCHALL FINAL - ${this.entityName} ===`);
+      console.log(`Final items:`, items);
+      console.log(`Final items type:`, typeof items);
+      console.log(`Final items is array:`, Array.isArray(items));
+      console.log(`Final items length:`, items?.length);
+      
+      return items || [];
     } catch (error) {
+      console.error(`=== FETCHALL ERROR - ${this.entityName} ===`);
       console.error(`Error fetching ${this.entityName} items:`, error);
       this.handleError(error, 'fetch items');
     }
