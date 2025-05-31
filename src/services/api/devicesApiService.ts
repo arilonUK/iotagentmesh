@@ -32,6 +32,27 @@ export class DevicesApiService extends BaseApiService<Device, CreateDeviceReques
   protected getEntityName(): string {
     return 'Device';
   }
+
+  // Backward compatibility methods
+  async fetchDevices(): Promise<Device[]> {
+    return this.fetchAll();
+  }
+
+  async fetchDevice(deviceId: string): Promise<Device | null> {
+    return this.fetchById(deviceId);
+  }
+
+  async createDevice(data: CreateDeviceRequest): Promise<Device> {
+    return this.create(data);
+  }
+
+  async updateDevice(id: string, data: UpdateDeviceRequest): Promise<Device> {
+    return this.update(id, data);
+  }
+
+  async deleteDevice(id: string): Promise<boolean> {
+    return this.delete(id);
+  }
 }
 
 export const devicesApiService = new DevicesApiService();

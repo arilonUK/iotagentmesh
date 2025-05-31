@@ -1,6 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { deviceApiService } from '@/services/deviceApiService';
+import { devicesApiService } from '@/services/api/devicesApiService';
 import { useToast } from '@/hooks/use-toast';
 import { Device } from '@/types/device';
 
@@ -34,7 +34,7 @@ export const useDevices = (organizationId?: string) => {
       
       console.log('Fetching devices for organization:', organizationId);
       try {
-        const result = await deviceApiService.fetchDevices();
+        const result = await devicesApiService.fetchAll();
         console.log(`Found ${result.length} devices for organization ${organizationId}:`, result);
         return result;
       } catch (err) {
@@ -89,7 +89,7 @@ export const useDevice = (deviceId?: string) => {
       
       console.log('Fetching device:', deviceId);
       try {
-        const result = await deviceApiService.fetchDevice(deviceId);
+        const result = await devicesApiService.fetchById(deviceId);
         
         if (!result) {
           console.log('Device not found:', deviceId);

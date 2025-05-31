@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Device } from '@/types/device';
-import { deviceApiService, CreateDeviceRequest, UpdateDeviceRequest } from '@/services/deviceApiService';
+import { devicesApiService, CreateDeviceRequest, UpdateDeviceRequest } from '@/services/api/devicesApiService';
 import { useDevices } from '@/hooks/useDevices';
 import { useToast } from '@/hooks/use-toast';
 
@@ -32,7 +32,7 @@ export const useDeviceManager = (organizationId?: string) => {
         description: deviceData.description
       };
       
-      const newDevice = await deviceApiService.createDevice(createRequest);
+      const newDevice = await devicesApiService.create(createRequest);
       
       toast({
         title: "Success",
@@ -64,7 +64,7 @@ export const useDeviceManager = (organizationId?: string) => {
         description: deviceData.description
       };
       
-      const updated = await deviceApiService.updateDevice(id, updateRequest);
+      const updated = await devicesApiService.update(id, updateRequest);
       
       toast({
         title: "Success",
@@ -89,7 +89,7 @@ export const useDeviceManager = (organizationId?: string) => {
     try {
       setIsDeleting(true);
       
-      const success = await deviceApiService.deleteDevice(id);
+      const success = await devicesApiService.delete(id);
       
       if (success) {
         toast({
