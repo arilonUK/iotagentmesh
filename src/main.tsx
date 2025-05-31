@@ -33,6 +33,7 @@ import IntegrationsAndConnectivity from "./pages/IntegrationsAndConnectivity";
 import OAuthConnections from "./pages/OAuthConnections";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Outlet } from "react-router-dom";
+import AlarmConfigurationGuide from "./pages/AlarmConfigurationGuide";
 
 const router = createBrowserRouter([
   {
@@ -106,6 +107,10 @@ const router = createBrowserRouter([
           {
             path: "documentation/data-buckets-analytics",
             element: <DataBucketsAnalyticsGuide />,
+          },
+          {
+            path: "documentation/alarm-configuration",
+            element: <AlarmConfigurationGuide />,
           },
           {
             path: "endpoints",

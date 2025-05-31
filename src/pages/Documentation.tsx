@@ -76,7 +76,8 @@ const Documentation = () => {
       title: "Alarm Configuration",
       description: "Set up alerts and notifications for your devices",
       category: "Monitoring",
-      readTime: "6 min"
+      readTime: "6 min",
+      link: "/dashboard/documentation/alarm-configuration"
     },
     {
       title: "API Integration",
