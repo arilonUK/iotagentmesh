@@ -4,56 +4,76 @@ export async function forwardToDevicesHandler(
   path: string,
   authHeader: string | null
 ): Promise<Response> {
-  console.log(`=== DEVICES HANDLER ===`);
-  console.log(`Forwarding to devices handler: ${path}`);
+  console.log(`=== DEVICES HANDLER START ===`);
+  console.log(`Incoming path: ${path}`);
   console.log(`Auth header: ${authHeader ? 'Present' : 'Missing'}`);
   console.log(`Request method: ${req.method}`);
 
   try {
-    // Build the target URL - forward the exact path to the devices service
-    const targetUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/api-devices${path}`;
+    // Build the target URL - forward to the api-devices function
+    const baseUrl = Deno.env.get('SUPABASE_URL');
+    if (!baseUrl) {
+      throw new Error('SUPABASE_URL environment variable not set');
+    }
+    
+    // Forward the path directly to api-devices
+    const targetUrl = `${baseUrl}/functions/v1/api-devices${path}`;
     console.log(`Target URL: ${targetUrl}`);
 
+    // Get request body if present
     let body = null;
     if (req.method !== 'GET' && req.method !== 'DELETE') {
       body = await req.text();
-      console.log(`Request body: ${body}`);
+      console.log(`Request body: ${body || 'empty'}`);
     }
 
+    // Prepare headers
     const headers: Record<string, string> = {
       'Content-Type': req.headers.get('Content-Type') || 'application/json',
-      'x-forwarded-path': path
+      'x-forwarded-path': path,
+      'x-forwarded-method': req.method
     };
 
+    // Add authorization header if present
     if (authHeader) {
       headers['Authorization'] = authHeader;
     }
 
     console.log(`Request headers:`, headers);
 
+    // Make the forwarded request
     const targetRequest = new Request(targetUrl, {
       method: req.method,
       headers,
       body: body
     });
 
-    console.log(`Making request to: ${targetUrl}`);
+    console.log(`Making forwarded request...`);
     const response = await fetch(targetRequest);
-    console.log(`Response status: ${response.status}`);
+    console.log(`Forwarded response status: ${response.status}`);
     
+    // Get response body
     const responseText = await response.text();
-    console.log(`Response body: ${responseText}`);
+    console.log(`Forwarded response body: ${responseText}`);
+    
+    // Return the response with original headers
+    const responseHeaders = new Headers(response.headers);
+    
+    console.log(`=== DEVICES HANDLER END ===`);
     
     return new Response(responseText, {
       status: response.status,
-      headers: response.headers
+      headers: responseHeaders
     });
+    
   } catch (error) {
     console.error('Error in forwardToDevicesHandler:', error);
     return new Response(
       JSON.stringify({ 
         error: 'Failed to forward request to devices service',
-        details: error.message 
+        details: error.message,
+        path: path,
+        method: req.method
       }),
       { 
         status: 500, 

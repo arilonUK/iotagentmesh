@@ -13,7 +13,7 @@ const corsHeaders = {
 // Initialize router and add routes
 const router = new APIRouter();
 
-// Add device routes - these should match the actual paths being requested
+// Add device routes
 router.addRoute('/api/devices', forwardToDevicesHandler);
 router.addRoute('/api/devices/*', forwardToDevicesHandler);
 
@@ -22,37 +22,51 @@ router.addRoute('/api/alarms', forwardToAlarmsHandler);
 router.addRoute('/api/alarms/*', forwardToAlarmsHandler);
 
 serve(async (req) => {
+  console.log(`=== API GATEWAY START ===`);
+  console.log(`Request: ${req.method} ${req.url}`);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const url = new URL(req.url);
-    console.log(`API Gateway: ${req.method} ${url.pathname}`);
+    console.log(`Parsed URL pathname: ${url.pathname}`);
     
-    // Get the path - don't strip anything, use the full path
+    // Get the path and normalize it
     let path = url.pathname;
+    console.log(`Original path: ${path}`);
     
-    // Only strip /api-gateway if it's actually present at the start
+    // If the path starts with /api-gateway, strip it
     if (path.startsWith('/api-gateway')) {
-      path = path.replace('/api-gateway', '');
+      path = path.substring('/api-gateway'.length);
       console.log(`Stripped /api-gateway prefix, new path: ${path}`);
+    }
+    
+    // Ensure path starts with /
+    if (!path.startsWith('/')) {
+      path = '/' + path;
     }
     
     console.log(`Final routing path: ${path}`);
     
     // Get auth header
     const authHeader = req.headers.get('Authorization');
+    console.log(`Auth header: ${authHeader ? 'Present' : 'Missing'}`);
     
     // Route the request
     const response = await router.route(req, path, authHeader);
+    console.log(`Router response status: ${response.status}`);
     
     // Add CORS headers to response
     const responseHeaders = new Headers(response.headers);
     Object.entries(corsHeaders).forEach(([key, value]) => {
       responseHeaders.set(key, value);
     });
+    
+    console.log(`=== API GATEWAY END ===`);
     
     return new Response(response.body, {
       status: response.status,
@@ -62,7 +76,11 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in API Gateway:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ 
+        error: 'Internal server error',
+        details: error.message,
+        stack: error.stack 
+      }),
       { 
         status: 500, 
         headers: { 
