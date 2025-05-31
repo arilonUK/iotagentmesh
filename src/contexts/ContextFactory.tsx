@@ -35,6 +35,7 @@ interface ContextFactoryState {
   globalState: InitializationState;
   session: Session | null;
   user: User | null;
+  error?: Error;
 }
 
 interface ContextFactoryValue extends ContextFactoryState {
@@ -104,9 +105,14 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
         type: ContextType.QUERY_CLIENT,
         factory: async () => {
           console.log('Creating QueryClient...');
-          const client = createQueryClient();
-          console.log('QueryClient created:', client);
-          return client;
+          try {
+            const client = createQueryClient();
+            console.log('QueryClient created successfully:', client);
+            return client;
+          } catch (error) {
+            console.error('Failed to create QueryClient:', error);
+            throw error;
+          }
         },
         dependencies: [],
         lazy: false,
@@ -160,7 +166,6 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
     setState(prev => ({
       ...prev,
       contexts: contextMap,
-      globalState: InitializationState.LOADING,
     }));
   }, []);
 
@@ -191,48 +196,61 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
   }, []);
 
   const initializeContext = useCallback(async (type: ContextType): Promise<void> => {
+    console.log(`Starting initialization for context: ${type}`);
+    
     const registration = state.contexts.get(type);
-    if (!registration || registration.state === InitializationState.READY) {
+    if (!registration) {
+      throw new Error(`Context ${type} not found`);
+    }
+
+    if (registration.state === InitializationState.READY) {
+      console.log(`Context ${type} already ready`);
       return;
     }
 
     try {
-      console.log(`Initializing context: ${type}`);
-      
       // Check dependencies first
       for (const dep of registration.dependencies) {
         const depRegistration = state.contexts.get(dep);
-        if (depRegistration?.state !== InitializationState.READY) {
+        if (!depRegistration || depRegistration.state !== InitializationState.READY) {
           throw new Error(`Dependency ${dep} not ready for ${type}`);
         }
       }
 
+      // Update state to loading
       setState(prev => {
         const newContexts = new Map(prev.contexts);
-        const reg = newContexts.get(type)!;
+        const reg = { ...newContexts.get(type)! };
         reg.state = InitializationState.LOADING;
+        reg.error = undefined;
+        newContexts.set(type, reg);
         return { ...prev, contexts: newContexts };
       });
 
       const instance = await registration.factory();
-      console.log(`Context ${type} initialized:`, instance);
+      console.log(`Context ${type} initialized successfully:`, instance);
 
+      // Update state to ready
       setState(prev => {
         const newContexts = new Map(prev.contexts);
-        const reg = newContexts.get(type)!;
+        const reg = { ...newContexts.get(type)! };
         reg.state = InitializationState.READY;
         reg.instance = instance;
         reg.error = undefined;
+        newContexts.set(type, reg);
         return { ...prev, contexts: newContexts };
       });
     } catch (error) {
       console.error(`Failed to initialize context ${type}:`, error);
+      
+      // Update state to error
       setState(prev => {
         const newContexts = new Map(prev.contexts);
-        const reg = newContexts.get(type)!;
+        const reg = { ...newContexts.get(type)! };
         reg.state = InitializationState.ERROR;
         reg.error = error as Error;
-        return { ...prev, contexts: newContexts };
+        newContexts.set(type, reg);
+        return { ...prev, contexts: newContexts, error: error as Error };
       });
       throw error;
     }
@@ -245,7 +263,11 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
       // Retry all failed contexts
       for (const [contextType, registration] of state.contexts) {
         if (registration.state === InitializationState.ERROR) {
-          await initializeContext(contextType);
+          try {
+            await initializeContext(contextType);
+          } catch (error) {
+            console.error(`Retry failed for ${contextType}:`, error);
+          }
         }
       }
     }
@@ -253,9 +275,15 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
 
   // Initialize non-lazy contexts in order
   useEffect(() => {
+    if (state.contexts.size === 0) {
+      return;
+    }
+
     const initializeNonLazyContexts = async () => {
       try {
         console.log('Starting context initialization...');
+        setState(prev => ({ ...prev, globalState: InitializationState.LOADING }));
+        
         for (const type of state.initializationOrder) {
           const registration = state.contexts.get(type);
           if (registration && !registration.lazy) {
@@ -267,14 +295,18 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
         setState(prev => ({ ...prev, globalState: InitializationState.READY }));
       } catch (error) {
         console.error('Context initialization failed:', error);
-        setState(prev => ({ ...prev, globalState: InitializationState.ERROR }));
+        setState(prev => ({ 
+          ...prev, 
+          globalState: InitializationState.ERROR,
+          error: error as Error
+        }));
       }
     };
 
-    if (state.globalState === InitializationState.LOADING && state.contexts.size > 0) {
+    if (state.globalState === InitializationState.PENDING) {
       initializeNonLazyContexts();
     }
-  }, [state.globalState, state.contexts, state.initializationOrder, initializeContext]);
+  }, [state.contexts, state.globalState, initializeContext, state.initializationOrder]);
 
   const value: ContextFactoryValue = {
     ...state,
