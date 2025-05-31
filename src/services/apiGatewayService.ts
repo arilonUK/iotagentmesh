@@ -152,7 +152,7 @@ export const apiGatewayService = {
       Object.entries(pathItem).forEach(([method, operation]: [string, any]) => {
         if (method === 'parameters') return; // Skip path-level parameters
 
-        const item = {
+        const item: any = {
           name: operation.summary || `${method.toUpperCase()} ${path}`,
           request: {
             method: method.toUpperCase(),
