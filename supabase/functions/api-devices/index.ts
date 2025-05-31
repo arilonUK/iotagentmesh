@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -130,21 +131,19 @@ serve(async (req) => {
           method = requestData.method || req.method;
           path = requestData.path || '';
           console.log('Parsed request data:', requestData);
-          console.log('Method:', method, 'Path:', path);
+          console.log('Final method:', method, 'Final path:', path);
         } catch (parseError) {
           console.error('JSON parsing error:', parseError);
-          return new Response(
-            JSON.stringify({ error: 'Invalid JSON in request body', details: parseError.message }),
-            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
+          // If JSON parsing fails, treat as direct request
+          method = req.method;
+          path = '';
         }
       }
     } catch (bodyError) {
       console.error('Error reading request body:', bodyError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to read request body', details: bodyError.message }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      // Continue with default values
+      method = req.method;
+      path = '';
     }
     
     // Parse the path to determine the operation
@@ -323,7 +322,9 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Error in api-devices function:', error)
+    console.error('=== API-DEVICES FUNCTION ERROR ===');
+    console.error('Error details:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     return new Response(
       JSON.stringify({ 
         error: 'Internal server error', 

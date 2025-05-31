@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -23,19 +24,24 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
     pathSuffix?: string;
   }): Promise<R> {
     try {
-      console.log(`Making request: ${options.method} ${options.endpoint}${options.pathSuffix || ''}`);
+      console.log(`=== API SERVICE REQUEST START ===`);
+      console.log(`Method: ${options.method}`);
+      console.log(`Endpoint: ${options.endpoint}`);
+      console.log(`Path suffix: ${options.pathSuffix || 'none'}`);
+      console.log(`Data:`, options.data);
       
       // Extract the function name from the endpoint (remove 'api-' prefix for function invoke)
       const functionName = options.endpoint.replace(/^api-/, '');
+      console.log(`Function name: ${functionName}`);
       
-      // Prepare the request data for the edge function
+      // Prepare the request payload for the edge function
       const requestPayload = {
         method: options.method,
         path: options.pathSuffix || '',
         data: options.data || null
       };
       
-      console.log(`Invoking function: ${functionName} with payload:`, requestPayload);
+      console.log(`Request payload:`, JSON.stringify(requestPayload, null, 2));
       
       // Use Supabase functions.invoke with proper error handling
       const response = await supabase.functions.invoke(functionName, {
@@ -46,11 +52,11 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
         }
       });
 
-      console.log('Function response:', response);
+      console.log(`Supabase function response:`, response);
 
       if (response.error) {
         console.error(`Supabase function error:`, response.error);
-        throw new Error(response.error.message || `Function invocation failed: ${response.error}`);
+        throw new Error(`Function error: ${response.error.message || response.error}`);
       }
 
       if (!response.data) {
@@ -58,17 +64,18 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
         throw new Error('No data returned from function');
       }
 
-      console.log(`Request successful:`, response.data);
+      console.log(`=== API SERVICE REQUEST SUCCESS ===`);
       return response.data;
     } catch (error) {
-      console.error(`API request failed for ${options.endpoint}:`, error);
+      console.error(`=== API SERVICE REQUEST FAILED ===`);
+      console.error(`Error details:`, error);
       
       // Provide more specific error messages
       if (error instanceof Error) {
         if (error.message.includes('Function not found')) {
           throw new Error(`Edge function '${options.endpoint}' not found or not deployed`);
         }
-        if (error.message.includes('network')) {
+        if (error.message.includes('network') || error.message.includes('fetch')) {
           throw new Error('Network error: Please check your connection');
         }
         throw error;
