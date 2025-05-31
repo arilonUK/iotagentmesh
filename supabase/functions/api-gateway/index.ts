@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -72,17 +73,14 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Forward request to appropriate handler
-    const handlerUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/${route.handler}`
-    
     // Prepare the request body
     let body = null
     if (req.method !== 'GET' && req.method !== 'DELETE') {
       body = await req.text()
     }
 
-    // Forward the request
-    const response = await fetch(handlerUrl, {
+    // Create a new request object for the target function
+    const targetRequest = new Request(`${Deno.env.get('SUPABASE_URL')}/functions/v1/${route.handler}${path}`, {
       method: req.method,
       headers: {
         'Authorization': req.headers.get('Authorization') || '',
@@ -92,6 +90,8 @@ serve(async (req) => {
       body: body
     })
 
+    // Forward the request directly
+    const response = await fetch(targetRequest)
     const responseData = await response.text()
     
     // Log the request for monitoring

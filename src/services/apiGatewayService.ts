@@ -32,32 +32,67 @@ export const apiGatewayService = {
    */
   async request<T = any>(request: ApiGatewayRequest): Promise<ApiGatewayResponse<T>> {
     try {
-      const { data, error } = await supabase.functions.invoke('api-gateway', {
+      console.log('API Gateway request:', request);
+      
+      // Get the current session for authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // Prepare headers for the edge function
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...(request.headers || {})
+      };
+      
+      // Add authorization header if we have a session
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      // Build the full URL for the edge function call
+      const url = `https://tuevghmlxosxuszxjral.supabase.co/functions/v1/api-gateway${request.endpoint}`;
+      
+      console.log('Making request to:', url);
+      console.log('Method:', request.method);
+      console.log('Headers:', headers);
+      console.log('Body:', request.data);
+
+      // Make the actual HTTP request to the edge function
+      const response = await fetch(url, {
         method: request.method,
-        body: {
-          method: request.method,
-          endpoint: request.endpoint,
-          data: request.data,
-          headers: request.headers
-        }
+        headers,
+        body: request.data ? JSON.stringify(request.data) : undefined
       });
 
-      if (error) {
-        console.error('API Gateway request failed:', error);
+      const responseText = await response.text();
+      console.log('Response status:', response.status);
+      console.log('Response text:', responseText);
+
+      let responseData;
+      try {
+        responseData = responseText ? JSON.parse(responseText) : null;
+      } catch (parseError) {
+        console.error('Failed to parse response:', parseError);
         return {
-          error: error.message || 'Request failed',
-          status: 500
+          error: 'Invalid response format',
+          status: response.status
+        };
+      }
+
+      if (!response.ok) {
+        return {
+          error: responseData?.error || `HTTP ${response.status}: ${response.statusText}`,
+          status: response.status
         };
       }
 
       return {
-        data: data,
-        status: 200
+        data: responseData,
+        status: response.status
       };
     } catch (error) {
       console.error('API Gateway service error:', error);
       return {
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Network error',
         status: 500
       };
     }
@@ -68,20 +103,17 @@ export const apiGatewayService = {
    */
   async getDocumentation(): Promise<ApiDocumentation | null> {
     try {
-      const { data, error } = await supabase.functions.invoke('api-gateway', {
+      const response = await this.request<ApiDocumentation>({
         method: 'GET',
-        body: {
-          method: 'GET',
-          endpoint: '/api/openapi.json'
-        }
+        endpoint: '/api/openapi.json'
       });
 
-      if (error) {
-        console.error('Failed to fetch API documentation:', error);
+      if (response.error) {
+        console.error('Failed to fetch API documentation:', response.error);
         return null;
       }
 
-      return data;
+      return response.data || null;
     } catch (error) {
       console.error('Error fetching API documentation:', error);
       return null;
