@@ -28,36 +28,93 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Authenticate API key first
-    const authResult = await supabaseClient.functions.invoke('api-auth', {
-      headers: {
-        Authorization: req.headers.get('Authorization') || ''
+    const authHeader = req.headers.get('Authorization') || '';
+    console.log('Auth header received:', authHeader ? 'Present' : 'Missing');
+
+    let organization_id: string;
+    let user_id: string | null = null;
+
+    // Check if this is a JWT token (user session) or API key
+    if (authHeader.startsWith('Bearer ey')) {
+      // This looks like a JWT token - validate with Supabase auth
+      console.log('Processing JWT token authentication');
+      
+      const { data: { user }, error: authError } = await supabaseClient.auth.getUser(
+        authHeader.replace('Bearer ', '')
+      );
+
+      if (authError || !user) {
+        console.error('JWT authentication failed:', authError);
+        return new Response(
+          JSON.stringify({ error: 'Authentication failed' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
       }
-    });
 
-    if (authResult.error || !authResult.data?.success) {
-      return new Response(
-        JSON.stringify({ error: authResult.data?.error || 'Authentication failed' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
+      user_id = user.id;
+      console.log('User authenticated:', user_id);
 
-    const { api_key_id, organization_id, scopes } = authResult.data;
+      // Get user's default organization
+      const { data: profile, error: profileError } = await supabaseClient
+        .from('profiles')
+        .select('default_organization_id')
+        .eq('id', user_id)
+        .single();
 
-    // Check if user has device permissions
-    if (!scopes.includes('devices') && !scopes.includes('write')) {
-      return new Response(
-        JSON.stringify({ error: 'Insufficient permissions for device operations' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      if (profileError || !profile?.default_organization_id) {
+        console.error('Failed to get user organization:', profileError);
+        return new Response(
+          JSON.stringify({ error: 'No organization found for user' }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      organization_id = profile.default_organization_id;
+      console.log('Using organization:', organization_id);
+
+    } else {
+      // Try API key authentication
+      console.log('Processing API key authentication');
+      
+      const authResult = await supabaseClient.functions.invoke('api-auth', {
+        headers: {
+          Authorization: authHeader
+        }
+      });
+
+      if (authResult.error || !authResult.data?.success) {
+        console.error('API key authentication failed:', authResult.error);
+        return new Response(
+          JSON.stringify({ error: authResult.data?.error || 'Authentication failed' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      organization_id = authResult.data.organization_id;
+      console.log('API key authenticated for organization:', organization_id);
+
+      // Check if user has device permissions
+      const scopes = authResult.data.scopes || [];
+      if (!scopes.includes('devices') && !scopes.includes('read') && !scopes.includes('write')) {
+        return new Response(
+          JSON.stringify({ error: 'Insufficient permissions for device operations' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
     }
 
     const url = new URL(req.url);
     const pathParts = url.pathname.split('/').filter(part => part);
-    const deviceId = pathParts[2]; // /api/devices/{id}
+    const deviceId = pathParts[pathParts.length - 1]; // Get last part as device ID
+
+    console.log('Request path:', url.pathname);
+    console.log('Method:', req.method);
+    console.log('Device ID:', deviceId);
 
     // GET /api/devices - List devices
-    if (req.method === 'GET' && !deviceId) {
+    if (req.method === 'GET' && (pathParts.length === 2 || !deviceId || deviceId === 'devices')) {
+      console.log('Fetching devices for organization:', organization_id);
+      
       const { data: devices, error } = await supabaseClient
         .rpc('get_devices_by_org_id', { p_organization_id: organization_id });
 
@@ -69,28 +126,18 @@ serve(async (req) => {
         )
       }
 
-      // Track usage
-      await supabaseClient.functions.invoke('usage-tracker', {
-        body: {
-          api_key_id,
-          organization_id,
-          endpoint: '/api/devices',
-          method: 'GET',
-          status_code: 200,
-          response_time_ms: 0,
-          ip_address: req.headers.get('CF-Connecting-IP') || req.headers.get('X-Forwarded-For'),
-          user_agent: req.headers.get('User-Agent')
-        }
-      });
+      console.log(`Found ${devices?.length || 0} devices`);
 
       return new Response(
-        JSON.stringify({ devices }),
+        JSON.stringify({ devices: devices || [] }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
     // GET /api/devices/{id} - Get specific device
-    if (req.method === 'GET' && deviceId) {
+    if (req.method === 'GET' && deviceId && deviceId !== 'devices') {
+      console.log('Fetching specific device:', deviceId);
+      
       const { data: device, error } = await supabaseClient
         .rpc('get_device_by_id_bypass_rls', { p_device_id: deviceId });
 
@@ -124,7 +171,7 @@ serve(async (req) => {
     }
 
     // POST /api/devices - Create device
-    if (req.method === 'POST' && !deviceId) {
+    if (req.method === 'POST') {
       const deviceData: DeviceData = await req.json();
 
       if (!deviceData.name || !deviceData.type) {
