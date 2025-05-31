@@ -110,6 +110,8 @@ serve(async (req) => {
 
     try {
       const body = await req.text();
+      console.log('Raw request body:', body);
+      
       if (body) {
         requestData = JSON.parse(body);
         method = requestData.method || req.method;
@@ -199,7 +201,7 @@ serve(async (req) => {
 
     // POST /api/devices - Create device
     if (method === 'POST') {
-      const deviceData: DeviceData = requestData.body || {};
+      const deviceData: DeviceData = requestData.data || {};
 
       if (!deviceData.name || !deviceData.type) {
         return new Response(
@@ -234,7 +236,7 @@ serve(async (req) => {
 
     // PUT /api/devices/{id} - Update device
     if (method === 'PUT' && deviceId) {
-      const updateData: Partial<DeviceData> = requestData.body || {};
+      const updateData: Partial<DeviceData> = requestData.data || {};
 
       const { data: device, error } = await supabaseClient
         .rpc('update_device_bypass_rls', {

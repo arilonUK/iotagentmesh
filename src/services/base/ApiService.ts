@@ -33,7 +33,7 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       const requestPayload = {
         method: options.method,
         path: options.pathSuffix || '',
-        ...(options.data && { body: options.data })
+        data: options.data || null
       };
       
       console.log(`Invoking function: ${functionName} with payload:`, requestPayload);
@@ -41,7 +41,10 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       // Use Supabase functions.invoke
       const { data, error } = await supabase.functions.invoke(functionName, {
         body: requestPayload,
-        headers: options.headers
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers
+        }
       });
 
       if (error) {
