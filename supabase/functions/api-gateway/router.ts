@@ -1,4 +1,5 @@
 
+
 import { forwardToDevicesHandler } from './handlers/devices.ts';
 import { forwardToAlarmsHandler } from './handlers/alarms.ts';
 import { forwardToEndpointsHandler } from './handlers/endpoints.ts';
@@ -14,6 +15,12 @@ export class Router {
   }
 
   private registerRoutes() {
+    // Documentation routes - register these first for exact matching
+    this.routes.set('/api/openapi.json', handleOpenApiDocs);
+    this.routes.set('/api/docs', handleApiDocs);
+    console.log('Route registered: /api/openapi.json');
+    console.log('Route registered: /api/docs');
+
     // Device routes
     this.routes.set('/api/devices', forwardToDevicesHandler);
     this.routes.set('/api/devices/*', forwardToDevicesHandler);
@@ -43,12 +50,6 @@ export class Router {
     this.routes.set('/api/profiles/*', forwardToProfilesHandler);
     console.log('Route registered: /api/profiles');
     console.log('Route registered: /api/profiles/*');
-
-    // Documentation routes
-    this.routes.set('/api/openapi.json', handleOpenApiDocs);
-    this.routes.set('/api/docs', handleApiDocs);
-    console.log('Route registered: /api/openapi.json');
-    console.log('Route registered: /api/docs');
   }
 
   async route(request: Request, pathname: string): Promise<Response> {
@@ -56,19 +57,20 @@ export class Router {
     console.log('Routing request to path:', pathname);
     console.log('Available routes:', Array.from(this.routes.keys()));
 
-    // Check for exact matches first
-    for (const [pattern, handler] of this.routes.entries()) {
-      console.log(`Checking pattern match: '${pathname}' against '${pattern}'`);
-      
-      if (pattern === pathname) {
-        console.log('Exact match found');
-        const response = await handler(request, {});
-        console.log('Router response status:', response.status);
-        console.log('=== ROUTER END ===');
-        return response;
-      }
+    // Check for exact matches first - prioritize documentation routes
+    const exactMatch = this.routes.get(pathname);
+    if (exactMatch) {
+      console.log('Exact match found for:', pathname);
+      const response = await exactMatch(request, {});
+      console.log('Router response status:', response.status);
+      console.log('=== ROUTER END ===');
+      return response;
+    }
 
-      // Handle wildcard patterns
+    // Handle wildcard patterns
+    for (const [pattern, handler] of this.routes.entries()) {
+      console.log(`Checking wildcard pattern: '${pathname}' against '${pattern}'`);
+      
       if (pattern.endsWith('/*')) {
         const basePattern = pattern.slice(0, -2);
         console.log(`Wildcard check: '${pathname}' starts with '${basePattern}'?`, pathname.startsWith(basePattern));
@@ -93,8 +95,6 @@ export class Router {
           return response;
         }
       }
-      
-      console.log('No pattern match found');
     }
 
     console.log('No route found for path:', pathname);
@@ -117,3 +117,4 @@ export class Router {
     });
   }
 }
+
