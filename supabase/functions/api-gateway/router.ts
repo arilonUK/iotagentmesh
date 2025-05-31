@@ -1,9 +1,9 @@
 
-import { handleDeviceRoutes } from './handlers/devices.ts';
-import { handleAlarmRoutes } from './handlers/alarms.ts';
-import { handleEndpointRoutes } from './handlers/endpoints.ts';
-import { handleProductRoutes } from './handlers/products.ts';
-import { handleProfileRoutes } from './handlers/profiles.ts';
+import { forwardToDevicesHandler } from './handlers/devices.ts';
+import { forwardToAlarmsHandler } from './handlers/alarms.ts';
+import { forwardToEndpointsHandler } from './handlers/endpoints.ts';
+import { forwardToProductsHandler } from './handlers/products.ts';
+import { forwardToProfilesHandler } from './handlers/profiles.ts';
 import { handleOpenApiDocs, handleApiDocs } from './handlers/docs.ts';
 
 export class Router {
@@ -15,32 +15,32 @@ export class Router {
 
   private registerRoutes() {
     // Device routes
-    this.routes.set('/api/devices', handleDeviceRoutes);
-    this.routes.set('/api/devices/*', handleDeviceRoutes);
+    this.routes.set('/api/devices', forwardToDevicesHandler);
+    this.routes.set('/api/devices/*', forwardToDevicesHandler);
     console.log('Route registered: /api/devices');
     console.log('Route registered: /api/devices/*');
 
     // Alarm routes
-    this.routes.set('/api/alarms', handleAlarmRoutes);
-    this.routes.set('/api/alarms/*', handleAlarmRoutes);
+    this.routes.set('/api/alarms', forwardToAlarmsHandler);
+    this.routes.set('/api/alarms/*', forwardToAlarmsHandler);
     console.log('Route registered: /api/alarms');
     console.log('Route registered: /api/alarms/*');
 
     // Endpoint routes
-    this.routes.set('/api/endpoints', handleEndpointRoutes);
-    this.routes.set('/api/endpoints/*', handleEndpointRoutes);
+    this.routes.set('/api/endpoints', forwardToEndpointsHandler);
+    this.routes.set('/api/endpoints/*', forwardToEndpointsHandler);
     console.log('Route registered: /api/endpoints');
     console.log('Route registered: /api/endpoints/*');
 
     // Product routes
-    this.routes.set('/api/products', handleProductRoutes);
-    this.routes.set('/api/products/*', handleProductRoutes);
+    this.routes.set('/api/products', forwardToProductsHandler);
+    this.routes.set('/api/products/*', forwardToProductsHandler);
     console.log('Route registered: /api/products');
     console.log('Route registered: /api/products/*');
 
     // Profile routes
-    this.routes.set('/api/profiles', handleProfileRoutes);
-    this.routes.set('/api/profiles/*', handleProfileRoutes);
+    this.routes.set('/api/profiles', forwardToProfilesHandler);
+    this.routes.set('/api/profiles/*', forwardToProfilesHandler);
     console.log('Route registered: /api/profiles');
     console.log('Route registered: /api/profiles/*');
 
