@@ -94,6 +94,9 @@ verify_jwt = false
 [functions.api-gateway]
 verify_jwt = false
 
+[functions.api-key-management]
+verify_jwt = true
+
 [edge_runtime]
 enabled = true
 port = 54327
