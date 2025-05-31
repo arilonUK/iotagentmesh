@@ -1,8 +1,8 @@
 
-import { ContextType, ContextRegistration, InitializationState } from './types';
+import { ContextType, ContextRegistration, InitializationState, ContextFactoryState } from './types';
 
 export const createContextInitializer = (
-  setState: React.Dispatch<React.SetStateAction<any>>,
+  setState: React.Dispatch<React.SetStateAction<ContextFactoryState>>,
   initializationRef: React.MutableRefObject<{ inProgress: boolean; completed: Set<ContextType> }>
 ) => {
   const initializeContext = async (
@@ -31,9 +31,9 @@ export const createContextInitializer = (
 
     try {
       // Update state to loading
-      setState((prev: any) => {
+      setState((prev: ContextFactoryState) => {
         const newContexts = new Map(prev.contexts);
-        const existingReg = newContexts.get(type);
+        const existingReg = newContexts.get(type) as ContextRegistration;
         if (!existingReg) {
           throw new Error(`Context ${type} not found in state`);
         }
@@ -54,9 +54,9 @@ export const createContextInitializer = (
       console.log(`Context ${type} initialized successfully:`, instance);
 
       // Update state to ready
-      setState((prev: any) => {
+      setState((prev: ContextFactoryState) => {
         const newContexts = new Map(prev.contexts);
-        const existingReg = newContexts.get(type);
+        const existingReg = newContexts.get(type) as ContextRegistration;
         if (!existingReg) {
           throw new Error(`Context ${type} not found in state`);
         }
@@ -79,9 +79,9 @@ export const createContextInitializer = (
       console.error(`Failed to initialize context ${type}:`, error);
       
       // Update state to error
-      setState((prev: any) => {
+      setState((prev: ContextFactoryState) => {
         const newContexts = new Map(prev.contexts);
-        const existingReg = newContexts.get(type);
+        const existingReg = newContexts.get(type) as ContextRegistration;
         if (!existingReg) {
           throw new Error(`Context ${type} not found in state`);
         }
