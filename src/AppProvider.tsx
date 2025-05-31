@@ -1,15 +1,25 @@
 
-import React from 'react';
-import { AppContextProvider } from '@/contexts/AppContextProvider';
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter } from "react-router-dom";
+import { AuthProvider } from "@/contexts/auth/AuthProvider";
 
-interface AppProviderProps {
-  children: React.ReactNode;
-}
+const queryClient = new QueryClient();
 
-export default function AppProvider({ children }: AppProviderProps) {
+const AppProvider = ({ children }: { children: React.ReactNode }) => {
   return (
-    <AppContextProvider>
-      {children}
-    </AppContextProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <BrowserRouter>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
-}
+};
+
+export default AppProvider;

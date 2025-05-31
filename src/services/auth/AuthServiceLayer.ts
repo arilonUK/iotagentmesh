@@ -163,19 +163,19 @@ export class AuthServiceLayer {
     try {
       this.stateManager.dispatch({ type: 'SET_LOADING' });
       
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Sign out timeout')), 10000);
-      });
-
-      const signOutPromise = supabase.auth.signOut();
+      // Clear state immediately to provide instant feedback
+      this.stateManager.dispatch({ type: 'RESET_AUTH' });
+      this.clearUserData();
       
-      const { error } = await Promise.race([signOutPromise, timeoutPromise]) as any;
+      // Attempt to sign out from Supabase
+      const { error } = await supabase.auth.signOut();
       
       if (error) {
-        console.error('AuthService: Supabase sign out error:', error);
+        console.error('AuthService: Sign out error:', error);
+        // Don't throw - we've already cleared local state
       }
-
-      // Clear storage and redirect
+      
+      // Clear any remaining storage
       try {
         localStorage.removeItem('supabase.auth.token');
         sessionStorage.clear();
@@ -183,14 +183,17 @@ export class AuthServiceLayer {
         console.warn('AuthService: Error clearing storage:', storageError);
       }
       
-      this.stateManager.dispatch({ type: 'RESET_AUTH' });
+      console.log('AuthService: Sign out completed, redirecting...');
       window.location.href = '/auth';
-      
       toast.success('Signed out successfully');
+      
     } catch (error: any) {
       console.error('AuthService: Error during sign out:', error);
       
-      // Force cleanup and redirect on error
+      // Even on error, clear everything and redirect
+      this.stateManager.dispatch({ type: 'RESET_AUTH' });
+      this.clearUserData();
+      
       try {
         localStorage.clear();
         sessionStorage.clear();
@@ -198,7 +201,6 @@ export class AuthServiceLayer {
         console.warn('AuthService: Error clearing storage during error recovery:', storageError);
       }
       
-      this.stateManager.dispatch({ type: 'RESET_AUTH' });
       window.location.href = '/auth';
       toast.error('Signed out (with errors)');
     }

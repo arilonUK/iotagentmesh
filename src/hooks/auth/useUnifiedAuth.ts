@@ -8,15 +8,21 @@ export const useUnifiedAuth = (): AuthContextType => {
   const [authState, setAuthState] = useState<AuthStateData>(authStateManager.getState());
 
   useEffect(() => {
+    console.log('useUnifiedAuth: Setting up auth state subscription');
+    
     // Subscribe to auth state changes
     const unsubscribe = authStateManager.subscribe((newState) => {
+      console.log('useUnifiedAuth: Auth state updated:', newState.state, newState.user?.id);
       setAuthState(newState);
     });
 
     // Initialize session
     authService.initializeSession();
 
-    return unsubscribe;
+    return () => {
+      console.log('useUnifiedAuth: Cleaning up subscription');
+      unsubscribe();
+    };
   }, []);
 
   // Derived state
@@ -25,6 +31,16 @@ export const useUnifiedAuth = (): AuthContextType => {
   const userId = authState.user?.id || null;
   const userEmail = authState.user?.email || null;
   const userRole = authState.currentOrganization?.role || null;
+
+  const signOut = async (): Promise<void> => {
+    console.log('useUnifiedAuth: Sign out requested');
+    try {
+      await authService.signOut();
+    } catch (error) {
+      console.error('useUnifiedAuth: Error during sign out:', error);
+      throw error;
+    }
+  };
 
   return {
     // Core auth state
@@ -51,13 +67,13 @@ export const useUnifiedAuth = (): AuthContextType => {
     // Actions - delegate to auth service
     signIn: authService.signIn.bind(authService),
     signUp: authService.signUp.bind(authService),
-    signOut: authService.signOut.bind(authService),
+    signOut,
     updateProfile: authService.updateProfile.bind(authService),
     switchOrganization: authService.switchOrganization.bind(authService),
     
     // Legacy method names
     login: authService.signIn.bind(authService),
     signup: authService.signUp.bind(authService),
-    logout: authService.signOut.bind(authService),
+    logout: signOut,
   };
 };
