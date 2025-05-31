@@ -34,6 +34,7 @@ import OAuthConnections from "./pages/OAuthConnections";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Outlet } from "react-router-dom";
 import AlarmConfigurationGuide from "./pages/AlarmConfigurationGuide";
+import ApiIntegrationGuide from "./pages/ApiIntegrationGuide";
 
 const router = createBrowserRouter([
   {
@@ -111,6 +112,10 @@ const router = createBrowserRouter([
           {
             path: "documentation/alarm-configuration",
             element: <AlarmConfigurationGuide />,
+          },
+          {
+            path: "documentation/api-integration",
+            element: <ApiIntegrationGuide />,
           },
           {
             path: "endpoints",

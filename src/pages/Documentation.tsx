@@ -83,7 +83,8 @@ const Documentation = () => {
       title: "API Integration",
       description: "Integrate with external services using our REST API",
       category: "Development",
-      readTime: "10 min"
+      readTime: "10 min",
+      link: "/dashboard/documentation/api-integration"
     },
     {
       title: "Security Best Practices",
