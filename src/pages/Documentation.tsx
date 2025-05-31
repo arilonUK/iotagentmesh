@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,9 +6,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { BookOpen, Code, Settings, Zap, Shield, Database, FileText, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import ApiDocumentationComponent from '@/components/ApiDocumentation';
 
 const Documentation = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = React.useState('overview');
   
   const quickStartSteps = [
     {
@@ -94,6 +95,10 @@ const Documentation = () => {
     }
   ];
 
+  const handleExploreAPI = () => {
+    setActiveTab('api');
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
@@ -106,7 +111,7 @@ const Documentation = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="overview" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="quickstart">Quick Start</TabsTrigger>
@@ -128,7 +133,11 @@ const Documentation = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => setActiveTab('quickstart')}
+                >
                   View Quick Start Guide
                 </Button>
               </CardContent>
@@ -145,7 +154,11 @@ const Documentation = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={handleExploreAPI}
+                >
                   Explore API
                 </Button>
               </CardContent>
@@ -257,39 +270,7 @@ const Documentation = () => {
         </TabsContent>
 
         <TabsContent value="api" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>API Reference</CardTitle>
-              <CardDescription>
-                Complete documentation for our REST API endpoints.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="rounded-lg border p-4">
-                  <h4 className="font-semibold mb-2">Base URL</h4>
-                  <code className="text-sm bg-muted px-2 py-1 rounded">
-                    https://api.iotagentmesh.com/v1
-                  </code>
-                </div>
-                
-                <div className="space-y-3">
-                  <h4 className="font-semibold">Endpoints</h4>
-                  {apiEndpoints.map((endpoint, index) => (
-                    <div key={index} className="rounded-lg border p-3">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge variant={endpoint.method === 'GET' ? 'default' : 'destructive'}>
-                          {endpoint.method}
-                        </Badge>
-                        <code className="text-sm">{endpoint.endpoint}</code>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{endpoint.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ApiDocumentationComponent />
         </TabsContent>
 
         <TabsContent value="examples" className="space-y-6">
