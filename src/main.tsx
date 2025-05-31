@@ -1,7 +1,6 @@
-
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import "./index.css";
 import App from "./App";
 import AppProvider from "./AppProvider";
@@ -241,6 +240,10 @@ const router = createBrowserRouter([
             </DashboardLayout>
           </ProtectedRoute>
         ),
+      },
+      {
+        path: "/dashboard/profile",
+        element: <Navigate to="/dashboard/settings" replace />,
       },
       {
         path: "/dashboard/settings/organization",
