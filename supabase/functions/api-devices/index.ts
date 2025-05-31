@@ -104,15 +104,24 @@ serve(async (req) => {
     }
 
     const url = new URL(req.url);
-    const pathParts = url.pathname.split('/').filter(part => part);
-    const deviceId = pathParts[pathParts.length - 1]; // Get last part as device ID
-
-    console.log('Request path:', url.pathname);
+    let pathname = url.pathname;
+    console.log('Request path:', pathname);
     console.log('Method:', req.method);
-    console.log('Device ID:', deviceId);
 
-    // GET /api/devices - List devices
-    if (req.method === 'GET' && (pathParts.length === 2 || !deviceId || deviceId === 'devices')) {
+    // Remove the /api-devices prefix if present (from edge function routing)
+    if (pathname.startsWith('/api-devices')) {
+      pathname = pathname.replace('/api-devices', '') || '/';
+    }
+    
+    // Parse the path to determine the operation
+    const pathParts = pathname.split('/').filter(part => part);
+    const deviceId = pathParts.length > 0 ? pathParts[0] : null;
+    
+    console.log('Parsed path parts:', pathParts);
+    console.log('Device ID from path:', deviceId);
+
+    // GET /api/devices - List devices (when no path parts or empty path)
+    if (req.method === 'GET' && (!deviceId || pathname === '/')) {
       console.log('Fetching devices for organization:', organization_id);
       
       const { data: devices, error } = await supabaseClient
@@ -135,8 +144,18 @@ serve(async (req) => {
     }
 
     // GET /api/devices/{id} - Get specific device
-    if (req.method === 'GET' && deviceId && deviceId !== 'devices') {
+    if (req.method === 'GET' && deviceId) {
       console.log('Fetching specific device:', deviceId);
+      
+      // Validate that deviceId is a valid UUID format
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(deviceId)) {
+        console.error('Invalid device ID format:', deviceId);
+        return new Response(
+          JSON.stringify({ error: 'Invalid device ID format' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
       
       const { data: device, error } = await supabaseClient
         .rpc('get_device_by_id_bypass_rls', { p_device_id: deviceId });
