@@ -1,35 +1,12 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { APIRouter } from './router.ts';
-import { forwardToDevicesHandler } from './handlers/devices.ts';
-import { forwardToAlarmsHandler } from './handlers/alarms.ts';
-import { forwardToEndpointsHandler } from './handlers/endpoints.ts';
-import { forwardToProfilesHandler } from './handlers/profiles.ts';
+import { Router } from './router.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
 };
-
-// Initialize router and add routes
-const router = new APIRouter();
-
-// Add device routes
-router.addRoute('/api/devices', forwardToDevicesHandler);
-router.addRoute('/api/devices/*', forwardToDevicesHandler);
-
-// Add alarm routes  
-router.addRoute('/api/alarms', forwardToAlarmsHandler);
-router.addRoute('/api/alarms/*', forwardToAlarmsHandler);
-
-// Add endpoint routes
-router.addRoute('/api/endpoints', forwardToEndpointsHandler);
-router.addRoute('/api/endpoints/*', forwardToEndpointsHandler);
-
-// Add profile routes
-router.addRoute('/api/profiles', forwardToProfilesHandler);
-router.addRoute('/api/profiles/*', forwardToProfilesHandler);
 
 serve(async (req) => {
   console.log(`=== API GATEWAY START ===`);
@@ -66,8 +43,9 @@ serve(async (req) => {
     const authHeader = req.headers.get('Authorization');
     console.log(`Auth header: ${authHeader ? 'Present' : 'Missing'}`);
     
-    // Route the request
-    const response = await router.route(req, path, authHeader);
+    // Create router instance and route the request
+    const router = new Router();
+    const response = await router.route(req, path);
     console.log(`Router response status: ${response.status}`);
     
     // Add CORS headers to response
