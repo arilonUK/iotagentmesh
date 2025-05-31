@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -17,6 +18,10 @@ const routes: RouteHandler[] = [
   { pattern: /^\/api\/data/, handler: 'api-data' },
   { pattern: /^\/api\/keys/, handler: 'api-key-management' },
   { pattern: /^\/api\/alarms/, handler: 'api-alarms' },
+  { pattern: /^\/api\/endpoints/, handler: 'api-endpoints' },
+  { pattern: /^\/api\/profiles/, handler: 'api-profiles' },
+  { pattern: /^\/api\/files/, handler: 'api-files' },
+  { pattern: /^\/api\/organizations/, handler: 'api-organizations' },
   { pattern: /^\/api\/openapi\.json$/, handler: 'openapi-docs' },
   { pattern: /^\/api\/docs/, handler: 'api-docs' }
 ]
@@ -62,6 +67,10 @@ serve(async (req) => {
             '/api/data',
             '/api/keys',
             '/api/alarms',
+            '/api/endpoints',
+            '/api/profiles',
+            '/api/files',
+            '/api/organizations',
             '/api/openapi.json',
             '/api/docs'
           ]
@@ -184,33 +193,12 @@ async function handleOpenApiDocs() {
           summary: "Get all devices",
           responses: {
             "200": {
-              description: "List of devices",
-              content: {
-                "application/json": {
-                  schema: {
-                    type: "object",
-                    properties: {
-                      devices: {
-                        type: "array",
-                        items: { $ref: "#/components/schemas/Device" }
-                      }
-                    }
-                  }
-                }
-              }
+              description: "List of devices"
             }
           }
         },
         post: {
           summary: "Create a new device",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: { $ref: "#/components/schemas/CreateDeviceRequest" }
-              }
-            }
-          },
           responses: {
             "201": {
               description: "Device created successfully"
@@ -218,82 +206,66 @@ async function handleOpenApiDocs() {
           }
         }
       },
-      "/api/alarms": {
+      "/api/endpoints": {
         get: {
-          summary: "Get all alarms",
+          summary: "Get all endpoints",
           responses: {
             "200": {
-              description: "List of alarms",
-              content: {
-                "application/json": {
-                  schema: {
-                    type: "object",
-                    properties: {
-                      alarms: {
-                        type: "array",
-                        items: { $ref: "#/components/schemas/Alarm" }
-                      }
-                    }
-                  }
-                }
-              }
+              description: "List of endpoints"
             }
           }
         },
         post: {
-          summary: "Create a new alarm",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: { $ref: "#/components/schemas/CreateAlarmRequest" }
-              }
-            }
-          },
+          summary: "Create a new endpoint",
           responses: {
             "201": {
-              description: "Alarm created successfully"
+              description: "Endpoint created successfully"
             }
           }
         }
       },
-      "/api/keys": {
+      "/api/profiles/me": {
         get: {
-          summary: "Get all API keys",
-          security: [{ BearerAuth: [] }],
+          summary: "Get current user profile",
           responses: {
             "200": {
-              description: "List of API keys",
-              content: {
-                "application/json": {
-                  schema: {
-                    type: "object",
-                    properties: {
-                      api_keys: {
-                        type: "array",
-                        items: { $ref: "#/components/schemas/ApiKey" }
-                      }
-                    }
-                  }
-                }
-              }
+              description: "User profile"
+            }
+          }
+        },
+        put: {
+          summary: "Update current user profile",
+          responses: {
+            "200": {
+              description: "Profile updated successfully"
+            }
+          }
+        }
+      },
+      "/api/files/profiles": {
+        get: {
+          summary: "Get file storage profiles",
+          responses: {
+            "200": {
+              description: "List of storage profiles"
             }
           }
         },
         post: {
-          summary: "Create a new API key",
-          security: [{ BearerAuth: [] }],
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: { $ref: "#/components/schemas/CreateApiKeyRequest" }
-              }
-            }
-          },
+          summary: "Create storage profile",
           responses: {
             "201": {
-              description: "API key created successfully"
+              description: "Storage profile created"
+            }
+          }
+        }
+      },
+      "/api/organizations": {
+        get: {
+          summary: "Get user organizations",
+          responses: {
+            "200": {
+              description: "List of organizations"
             }
           }
         }
