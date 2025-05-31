@@ -222,7 +222,7 @@ export class AuthServiceLayer {
       const state = this.stateManager.getState();
       if (!state.user) return false;
 
-      const success = await organizationService.switchUserOrganization(state.user.id, organizationId);
+      const success = await organizationService.switchOrganization(state.user.id, organizationId);
       
       if (success) {
         // Reload user organizations
