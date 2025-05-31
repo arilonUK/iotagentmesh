@@ -292,6 +292,10 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <AppProvider>
+        <RouterProvider router={router} />
+      </AppProvider>
+    </ThemeProvider>
   </StrictMode>
 );

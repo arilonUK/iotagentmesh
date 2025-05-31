@@ -1,12 +1,9 @@
 
 import React from 'react';
-import { StateManagementProvider } from '@/contexts/StateManagementProvider';
-import { ToastProvider } from '@/contexts/toast';
-import { AuthProvider } from '@/contexts/auth';
-import { OrganizationProvider } from '@/contexts/organization';
-import { NotificationProvider } from '@/contexts/notification/NotificationContext';
-import { Toaster } from '@/components/ui/toaster';
-import { TooltipProvider } from '@/components/ui/tooltip';
+import { AppContextFactory } from '@/contexts/AppContextFactory';
+import { CoreProvider } from '@/contexts/CoreProvider';
+import { AuthContextManager } from '@/contexts/auth/AuthContextManager';
+import { ServiceLayerManager } from '@/contexts/ServiceLayerManager';
 
 interface AppProviderProps {
   children: React.ReactNode;
@@ -14,19 +11,14 @@ interface AppProviderProps {
 
 export default function AppProvider({ children }: AppProviderProps) {
   return (
-    <ToastProvider>
-      <TooltipProvider>
-        <AuthProvider>
-          <StateManagementProvider>
-            <OrganizationProvider>
-              <NotificationProvider>
-                {children}
-                <Toaster />
-              </NotificationProvider>
-            </OrganizationProvider>
-          </StateManagementProvider>
-        </AuthProvider>
-      </TooltipProvider>
-    </ToastProvider>
+    <AppContextFactory>
+      <CoreProvider>
+        <AuthContextManager>
+          <ServiceLayerManager>
+            {children}
+          </ServiceLayerManager>
+        </AuthContextManager>
+      </CoreProvider>
+    </AppContextFactory>
   );
 }
