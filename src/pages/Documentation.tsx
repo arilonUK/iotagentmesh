@@ -6,8 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { BookOpen, Code, Settings, Zap, Shield, Database, FileText, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Documentation = () => {
+  const navigate = useNavigate();
+  
   const quickStartSteps = [
     {
       title: "Create Your Organization",
@@ -59,7 +62,8 @@ const Documentation = () => {
       title: "Device Management",
       description: "Learn how to manage, monitor, and control your IoT devices",
       category: "Core Features",
-      readTime: "5 min"
+      readTime: "5 min",
+      link: "/dashboard/documentation/device-management"
     },
     {
       title: "Data Buckets & Analytics",
@@ -226,7 +230,11 @@ const Documentation = () => {
         <TabsContent value="guides" className="space-y-6">
           <div className="grid gap-4">
             {guides.map((guide, index) => (
-              <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow">
+              <Card 
+                key={index} 
+                className="cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => guide.link && navigate(guide.link)}
+              >
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
