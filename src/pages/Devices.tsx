@@ -154,7 +154,7 @@ const Devices = () => {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Error loading devices: {error instanceof Error ? error.message : String(error)}
+            Error loading devices: {error}
           </AlertDescription>
         </Alert>
         <Button onClick={handleRetry}>Retry</Button>
