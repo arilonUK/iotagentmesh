@@ -22,7 +22,7 @@ export const useEndpointManager = () => {
     
     setIsLoading(true);
     try {
-      const data = await endpointsApiService.fetchEndpoints();
+      const data = await endpointsApiService.fetchAll();
       setEndpoints(data);
     } catch (error) {
       console.error('Error loading endpoints:', error);
@@ -37,7 +37,7 @@ export const useEndpointManager = () => {
     
     setIsCreating(true);
     try {
-      const newEndpoint = await endpointsApiService.createEndpoint(data);
+      const newEndpoint = await endpointsApiService.create(data);
       if (newEndpoint) {
         setEndpoints(prev => [...prev, newEndpoint]);
         toast.success('Endpoint created successfully');
@@ -53,12 +53,12 @@ export const useEndpointManager = () => {
   const handleUpdateEndpoint = async (data: EndpointFormData, endpointId: string) => {
     setIsUpdating(true);
     try {
-      const success = await endpointsApiService.updateEndpoint(endpointId, data);
-      if (success) {
+      const updated = await endpointsApiService.update(endpointId, data);
+      if (updated) {
         setEndpoints(prev => 
           prev.map(endpoint => 
             endpoint.id === endpointId 
-              ? { ...endpoint, ...data, updated_at: new Date().toISOString() } as EndpointConfig
+              ? { ...endpoint, ...updated } as EndpointConfig
               : endpoint
           )
         );
@@ -75,7 +75,7 @@ export const useEndpointManager = () => {
   const handleDeleteEndpoint = async (endpointId: string) => {
     setIsDeleting(true);
     try {
-      const success = await endpointsApiService.deleteEndpoint(endpointId);
+      const success = await endpointsApiService.delete(endpointId);
       if (success) {
         setEndpoints(prev => prev.filter(endpoint => endpoint.id !== endpointId));
         toast.success('Endpoint deleted successfully');
@@ -90,8 +90,8 @@ export const useEndpointManager = () => {
 
   const handleToggleEndpoint = async (endpointId: string, enabled: boolean) => {
     try {
-      const success = await endpointsApiService.updateEndpoint(endpointId, { enabled });
-      if (success) {
+      const updated = await endpointsApiService.update(endpointId, { enabled });
+      if (updated) {
         setEndpoints(prev => 
           prev.map(endpoint => 
             endpoint.id === endpointId 

@@ -17,7 +17,7 @@ export const useEndpoints = (organizationId?: string) => {
     queryFn: async () => {
       if (!organizationId) return [];
       console.log('Fetching endpoints for org:', organizationId);
-      return await endpointsApiService.fetchEndpoints();
+      return await endpointsApiService.fetchAll();
     },
     enabled: !!organizationId,
   });
@@ -26,7 +26,7 @@ export const useEndpoints = (organizationId?: string) => {
     mutationFn: async (endpointData: EndpointFormData) => {
       if (!organizationId) throw new Error('Organization ID is required');
       console.log('Creating endpoint with org:', organizationId, 'data:', endpointData);
-      const result = await endpointsApiService.createEndpoint(endpointData);
+      const result = await endpointsApiService.create(endpointData);
       if (!result) throw new Error('Failed to create endpoint');
       return result;
     },
@@ -43,9 +43,9 @@ export const useEndpoints = (organizationId?: string) => {
   const updateEndpointMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<EndpointFormData> }) => {
       console.log('Updating endpoint:', id, 'with data:', data);
-      const success = await endpointsApiService.updateEndpoint(id, data);
-      if (!success) throw new Error('Failed to update endpoint');
-      return success;
+      const updated = await endpointsApiService.update(id, data);
+      if (!updated) throw new Error('Failed to update endpoint');
+      return updated;
     },
     onSuccess: () => {
       console.log('Endpoint updated successfully, invalidating queries');
@@ -59,7 +59,7 @@ export const useEndpoints = (organizationId?: string) => {
 
   const deleteEndpointMutation = useMutation({
     mutationFn: async (id: string) => {
-      const success = await endpointsApiService.deleteEndpoint(id);
+      const success = await endpointsApiService.delete(id);
       if (!success) throw new Error('Failed to delete endpoint');
       return success;
     },

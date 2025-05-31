@@ -1,6 +1,7 @@
 
 // Re-export the new standardized device API service
-export { devicesApiService as deviceApiService, CreateDeviceRequest, UpdateDeviceRequest } from '@/services/api/devicesApiService';
+export { devicesApiService as deviceApiService } from '@/services/api/devicesApiService';
+export type { CreateDeviceRequest, UpdateDeviceRequest } from '@/services/api/devicesApiService';
 
 // Backward compatibility exports
 export const DeviceApiService = class {
@@ -30,4 +31,5 @@ export const DeviceApiService = class {
   }
 };
 
-export const deviceApiService = new DeviceApiService();
+// Create a separate instance to avoid conflicts
+export const legacyDeviceApiService = new DeviceApiService();

@@ -17,6 +17,23 @@ export class EndpointsApiService extends BaseApiService<EndpointConfig, Endpoint
     return 'Endpoint';
   }
 
+  // Backward compatibility methods
+  async fetchEndpoints(): Promise<EndpointConfig[]> {
+    return this.fetchAll();
+  }
+
+  async createEndpoint(data: EndpointFormData): Promise<EndpointConfig> {
+    return this.create(data);
+  }
+
+  async updateEndpoint(id: string, data: Partial<EndpointFormData>): Promise<EndpointConfig> {
+    return this.update(id, data);
+  }
+
+  async deleteEndpoint(id: string): Promise<boolean> {
+    return this.delete(id);
+  }
+
   async triggerEndpoint(id: string, payload: any = {}): Promise<boolean> {
     try {
       await this.makeRequest<{ success: boolean; message: string }>({

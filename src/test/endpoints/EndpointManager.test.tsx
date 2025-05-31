@@ -7,10 +7,10 @@ import { endpointsApiService } from '@/services/api/endpointsApiService';
 // Mock the endpoints service
 vi.mock('@/services/api/endpointsApiService', () => ({
   endpointsApiService: {
-    fetchEndpoints: vi.fn(),
-    createEndpoint: vi.fn(),
-    updateEndpoint: vi.fn(),
-    deleteEndpoint: vi.fn(),
+    fetchAll: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
     triggerEndpoint: vi.fn()
   }
 }));
@@ -19,8 +19,8 @@ describe('EndpointManager', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     
-    // Mock implementation for fetchEndpoints
-    vi.mocked(endpointsApiService.fetchEndpoints).mockResolvedValue([
+    // Mock implementation for fetchAll
+    vi.mocked(endpointsApiService.fetchAll).mockResolvedValue([
       {
         id: '1',
         name: 'Test Endpoint',
@@ -114,7 +114,7 @@ describe('EndpointManager', () => {
   });
 
   it('should handle errors when fetching endpoints', async () => {
-    vi.mocked(endpointsApiService.fetchEndpoints).mockRejectedValueOnce(new Error('Failed to fetch'));
+    vi.mocked(endpointsApiService.fetchAll).mockRejectedValueOnce(new Error('Failed to fetch'));
     
     render(<EndpointManager 
       endpoints={[]}

@@ -30,7 +30,8 @@ export const AlarmApiService = class {
   }
 };
 
-export const alarmApiService = new AlarmApiService();
+// Create a separate instance to avoid conflicts
+export const legacyAlarmApiService = new AlarmApiService();
 
 // Interface exports for backward compatibility
 export interface AlarmApiResponse {
