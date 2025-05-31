@@ -1,9 +1,9 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useStorageFiles } from '@/hooks/useFileStorage';
-import { StorageFile } from '@/services/storage';
-import { fileService } from '@/services/storage';
-import { toast } from 'sonner';
+import { useFileNavigation } from '@/hooks/useFileNavigation';
+import { useFileDialogs } from '@/hooks/useFileDialogs';
+import { useFileOperations } from '@/hooks/useFileOperations';
 import { NavigationToolbar } from './NavigationToolbar';
 import { FileOperationsToolbar } from './FileOperationsToolbar';
 import { FileContentArea } from './FileContentArea';
@@ -18,160 +18,93 @@ export const FileExplorerContainer: React.FC<FileExplorerContainerProps> = ({
   organizationId,
   initialPath = ''
 }) => {
-  const [currentPath, setCurrentPath] = useState(initialPath);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
-  const [newFolderDialogOpen, setNewFolderDialogOpen] = useState(false);
-  const [newFolderName, setNewFolderName] = useState('');
-  const [selectedFile, setSelectedFile] = useState<StorageFile | null>(null);
-  const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
-  const [filePreviewOpen, setFilePreviewOpen] = useState(false);
-
+  const navigation = useFileNavigation(initialPath);
+  const dialogs = useFileDialogs();
+  
   const { 
     files, 
     isLoading, 
     uploadFile, 
     deleteFile, 
     createDirectory,
-  } = useStorageFiles(undefined, organizationId, currentPath);
+  } = useStorageFiles(undefined, organizationId, navigation.currentPath);
 
-  const handleFileClick = (file: StorageFile) => {
-    if (file.mimetype && file.mimetype.includes('folder')) {
-      navigateToFolder(file.name);
-    } else {
-      setSelectedFile(file);
-      previewFile(file);
+  const fileOps = useFileOperations({
+    organizationId,
+    currentPath: navigation.currentPath,
+    uploadFile,
+    deleteFile,
+    createDirectory,
+    setSelectedFile: dialogs.setSelectedFile,
+    setFilePreviewUrl: dialogs.setFilePreviewUrl,
+    setFilePreviewOpen: dialogs.setFilePreviewOpen
+  });
+
+  const handleFileClick = (file: any) => {
+    const result = fileOps.handleFileClick(file);
+    if (result.action === 'navigate') {
+      navigation.navigateToFolder(result.folderName);
     }
-  };
-
-  const navigateToFolder = (folderName: string) => {
-    setCurrentPath(currentPath ? `${currentPath}/${folderName}` : folderName);
-  };
-
-  const navigateUp = () => {
-    const pathParts = currentPath.split('/');
-    pathParts.pop();
-    setCurrentPath(pathParts.join('/'));
   };
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files?.length) return;
-    
-    const file = files[0];
-    uploadFile.mutate(
-      { file }, 
-      {
-        onSuccess: () => {
-          setUploadDialogOpen(false);
-        }
-      }
-    );
+    fileOps.handleUpload(e);
+    dialogs.resetUploadDialog();
   };
 
   const handleCreateFolder = () => {
-    if (!newFolderName.trim()) {
-      toast.error('Folder name cannot be empty');
-      return;
-    }
-    
-    createDirectory.mutate(
-      { dirName: newFolderName },
-      {
-        onSuccess: () => {
-          setNewFolderName('');
-          setNewFolderDialogOpen(false);
-        }
-      }
-    );
+    fileOps.handleCreateFolder(dialogs.newFolderName);
+    dialogs.resetFolderDialog();
   };
 
-  const handleDeleteFile = (file: StorageFile) => {
-    if (confirm(`Are you sure you want to delete ${file.name}?`)) {
-      deleteFile.mutate(
-        { fileName: file.name },
-        {
-          onSuccess: () => {
-            if (selectedFile?.id === file.id) {
-              setSelectedFile(null);
-              setFilePreviewUrl(null);
-            }
-          }
-        }
-      );
-    }
+  const handleDeleteFile = (file: any) => {
+    fileOps.handleDeleteFile(file, dialogs.selectedFile);
   };
 
-  const downloadFile = async (file: StorageFile) => {
-    const url = await fileService.getFileUrl(organizationId, currentPath, file.name);
-    if (!url) return;
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = file.name;
-    link.click();
-  };
-
-  const previewFile = async (file: StorageFile) => {
-    if (
-      file.mimetype?.startsWith('image/') || 
-      file.mimetype?.startsWith('text/') || 
-      file.mimetype?.includes('pdf')
-    ) {
-      const url = await fileService.getFileUrl(organizationId, currentPath, file.name);
-      if (url) {
-        setFilePreviewUrl(url);
-        setFilePreviewOpen(true);
-      }
-    } else {
-      toast.info('Preview not available for this file type');
-    }
-  };
-
-  const filteredFiles = searchQuery
-    ? files.filter(file => file.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredFiles = navigation.searchQuery
+    ? files.filter(file => file.name.toLowerCase().includes(navigation.searchQuery.toLowerCase()))
     : files;
 
   return (
     <div className="space-y-4">
       <NavigationToolbar
-        currentPath={currentPath}
-        searchQuery={searchQuery}
-        onNavigateUp={navigateUp}
-        onSearchChange={setSearchQuery}
+        currentPath={navigation.currentPath}
+        searchQuery={navigation.searchQuery}
+        onNavigateUp={navigation.navigateUp}
+        onSearchChange={navigation.setSearchQuery}
       />
       
       <FileOperationsToolbar
         fileCount={filteredFiles.length}
         isLoading={isLoading}
-        searchQuery={searchQuery}
-        currentPath={currentPath}
+        searchQuery={navigation.searchQuery}
+        currentPath={navigation.currentPath}
         onUpload={handleUpload}
         onCreateFolder={handleCreateFolder}
-        uploadDialogOpen={uploadDialogOpen}
-        setUploadDialogOpen={setUploadDialogOpen}
-        newFolderDialogOpen={newFolderDialogOpen}
-        setNewFolderDialogOpen={setNewFolderDialogOpen}
-        newFolderName={newFolderName}
-        setNewFolderName={setNewFolderName}
+        uploadDialogOpen={dialogs.uploadDialogOpen}
+        setUploadDialogOpen={dialogs.setUploadDialogOpen}
+        newFolderDialogOpen={dialogs.newFolderDialogOpen}
+        setNewFolderDialogOpen={dialogs.setNewFolderDialogOpen}
+        newFolderName={dialogs.newFolderName}
+        setNewFolderName={dialogs.setNewFolderName}
       />
       
       <FileContentArea
         files={filteredFiles}
         isLoading={isLoading}
-        searchQuery={searchQuery}
+        searchQuery={navigation.searchQuery}
         onFileClick={handleFileClick}
-        onPreview={previewFile}
-        onDownload={downloadFile}
+        onPreview={fileOps.previewFile}
+        onDownload={fileOps.downloadFile}
         onDelete={handleDeleteFile}
       />
       
       <FilePreview 
-        open={filePreviewOpen}
-        onOpenChange={setFilePreviewOpen}
-        file={selectedFile}
-        previewUrl={filePreviewUrl}
-        onDownload={downloadFile}
+        open={dialogs.filePreviewOpen}
+        onOpenChange={dialogs.setFilePreviewOpen}
+        file={dialogs.selectedFile}
+        previewUrl={dialogs.filePreviewUrl}
+        onDownload={fileOps.downloadFile}
       />
     </div>
   );
