@@ -1,4 +1,3 @@
-
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -17,6 +16,7 @@ import Alarms from "./pages/Alarms";
 import DataBuckets from "./pages/DataBuckets";
 import Documentation from "./pages/Documentation";
 import DeviceManagementGuide from "./pages/DeviceManagementGuide";
+import DataBucketsAnalyticsGuide from "./pages/DataBucketsAnalyticsGuide";
 import Endpoints from "./pages/Endpoints";
 import FileStorage from "./pages/FileStorage";
 import FileExplorerPage from "./pages/FileExplorerPage";
@@ -102,6 +102,10 @@ const router = createBrowserRouter([
           {
             path: "documentation/device-management",
             element: <DeviceManagementGuide />,
+          },
+          {
+            path: "documentation/data-buckets-analytics",
+            element: <DataBucketsAnalyticsGuide />,
           },
           {
             path: "endpoints",

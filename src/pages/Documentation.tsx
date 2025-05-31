@@ -69,7 +69,8 @@ const Documentation = () => {
       title: "Data Buckets & Analytics",
       description: "Store, analyze, and visualize your IoT data effectively",
       category: "Data Management",
-      readTime: "8 min"
+      readTime: "8 min",
+      link: "/dashboard/documentation/data-buckets-analytics"
     },
     {
       title: "Alarm Configuration",
