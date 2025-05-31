@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { Users, Settings, User, Shield } from 'lucide-react';
+import { Users, Settings, User } from 'lucide-react';
+import { NavMenuItem } from '@/components/navigation/NavMenuItem';
+import { SidebarMenu } from '@/components/ui/sidebar';
 
 interface SettingsMenuItemsProps {
   userRole?: string;
@@ -9,47 +10,19 @@ interface SettingsMenuItemsProps {
 
 const SettingsMenuItems: React.FC<SettingsMenuItemsProps> = ({ userRole }) => {
   return (
-    <div className="space-y-1">
-      <NavLink
-        to="/dashboard/profile"
-        className={({ isActive }) =>
-          `flex items-center px-3 py-2 text-sm rounded-md transition-colors ${
-            isActive
-              ? 'bg-accent text-accent-foreground'
-              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-          }`
-        }
-      >
-        <User className="mr-2 h-4 w-4" />
-        <span>Profile</span>
-      </NavLink>
-      <NavLink
-        to="/dashboard/team"
-        className={({ isActive }) =>
-          `flex items-center px-3 py-2 text-sm rounded-md transition-colors ${
-            isActive
-              ? 'bg-accent text-accent-foreground'
-              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-          }`
-        }
-      >
-        <Users className="mr-2 h-4 w-4" />
-        <span>Team</span>
-      </NavLink>
-      <NavLink
-        to="/dashboard/settings"
-        className={({ isActive }) =>
-          `flex items-center px-3 py-2 text-sm rounded-md transition-colors ${
-            isActive
-              ? 'bg-accent text-accent-foreground'
-              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-          }`
-        }
-      >
-        <Settings className="mr-2 h-4 w-4" />
-        <span>Organization</span>
-      </NavLink>
-    </div>
+    <SidebarMenu className="list-none p-0 m-0">
+      <NavMenuItem to="/dashboard/profile" icon={User}>
+        Profile
+      </NavMenuItem>
+      
+      <NavMenuItem to="/dashboard/team" icon={Users}>
+        Team
+      </NavMenuItem>
+      
+      <NavMenuItem to="/dashboard/settings" icon={Settings}>
+        Organization
+      </NavMenuItem>
+    </SidebarMenu>
   );
 };
 
