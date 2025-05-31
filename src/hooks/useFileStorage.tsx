@@ -26,3 +26,6 @@ export const useStorageFiles = (
     refetch: filesQuery.refetch,
   };
 };
+
+// Export the storage profiles hook
+export { useStorageProfiles } from './useStorageProfiles';

@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { useQuery, useMutation, useQueryClient, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 
@@ -23,21 +24,24 @@ export const useStandardQuery = <TData, TError = Error>(
   const { toast } = useToast();
   const { showErrorToast = true, errorMessage, ...queryOptions } = options;
 
-  return useQuery({
+  const query = useQuery({
     queryKey,
     queryFn,
     ...queryOptions,
-    onError: (error: TError) => {
-      if (showErrorToast) {
-        toast({
-          title: 'Error',
-          description: errorMessage || 'An error occurred',
-          variant: 'destructive',
-        });
-      }
-      options.onError?.(error);
-    },
   });
+
+  // Handle errors using useEffect-like pattern
+  React.useEffect(() => {
+    if (query.error && showErrorToast) {
+      toast({
+        title: 'Error',
+        description: errorMessage || 'An error occurred',
+        variant: 'destructive',
+      });
+    }
+  }, [query.error, showErrorToast, errorMessage, toast]);
+
+  return query;
 };
 
 export const useStandardMutation = <TData, TError = Error, TVariables = void, TContext = unknown>(
