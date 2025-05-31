@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { QueryClient } from '@tanstack/react-query';
 import { Session, User } from '@supabase/supabase-js';
@@ -97,9 +98,11 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
     user: null,
   });
 
-  // Use a ref to always get the latest state
-  const stateRef = useRef(state);
-  stateRef.current = state;
+  // Use a ref to track initialization progress
+  const initializationRef = useRef<{ inProgress: boolean; completed: Set<ContextType> }>({
+    inProgress: false,
+    completed: new Set()
+  });
 
   // Register context factories
   useEffect(() => {
@@ -173,22 +176,22 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
   }, []);
 
   const getContext = useCallback(<T = any>(type: ContextType): T | null => {
-    const registration = stateRef.current.contexts.get(type);
+    const registration = state.contexts.get(type);
     if (!registration || registration.state !== InitializationState.READY) {
       return null;
     }
     return registration.instance as T;
-  }, []);
+  }, [state.contexts]);
 
   const isReady = useCallback((type: ContextType): boolean => {
-    const registration = stateRef.current.contexts.get(type);
+    const registration = state.contexts.get(type);
     return registration?.state === InitializationState.READY;
-  }, []);
+  }, [state.contexts]);
 
   const getError = useCallback((type: ContextType): Error | null => {
-    const registration = stateRef.current.contexts.get(type);
+    const registration = state.contexts.get(type);
     return registration?.error || null;
-  }, []);
+  }, [state.contexts]);
 
   const setSession = useCallback((session: Session | null) => {
     setState(prev => ({
@@ -198,26 +201,23 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
     }));
   }, []);
 
-  const initializeContext = useCallback(async (type: ContextType): Promise<void> => {
+  const initializeContext = useCallback(async (type: ContextType, currentContexts: Map<ContextType, ContextRegistration>): Promise<void> => {
     console.log(`Starting initialization for context: ${type}`);
     
-    // Get current state to check registration
-    const currentState = stateRef.current;
-    const registration = currentState.contexts.get(type);
+    const registration = currentContexts.get(type);
     if (!registration) {
       throw new Error(`Context ${type} not found`);
     }
 
     if (registration.state === InitializationState.READY) {
       console.log(`Context ${type} already ready`);
+      initializationRef.current.completed.add(type);
       return;
     }
 
-    // Check dependencies using current state
+    // Check dependencies
     for (const dep of registration.dependencies) {
-      const depRegistration = currentState.contexts.get(dep);
-      console.log(`Checking dependency ${dep} for ${type}:`, depRegistration?.state);
-      if (!depRegistration || depRegistration.state !== InitializationState.READY) {
+      if (!initializationRef.current.completed.has(dep)) {
         throw new Error(`Dependency ${dep} not ready for ${type}`);
       }
     }
@@ -246,6 +246,9 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
         newContexts.set(type, reg);
         return { ...prev, contexts: newContexts };
       });
+
+      // Mark as completed
+      initializationRef.current.completed.add(type);
     } catch (error) {
       console.error(`Failed to initialize context ${type}:`, error);
       
@@ -264,30 +267,25 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
 
   const retryInitialization = useCallback(async (type?: ContextType): Promise<void> => {
     if (type) {
-      await initializeContext(type);
+      await initializeContext(type, state.contexts);
     } else {
-      // Retry all failed contexts
-      for (const [contextType, registration] of stateRef.current.contexts) {
-        if (registration.state === InitializationState.ERROR) {
-          try {
-            await initializeContext(contextType);
-          } catch (error) {
-            console.error(`Retry failed for ${contextType}:`, error);
-          }
-        }
-      }
+      // Reset and retry all
+      initializationRef.current.completed.clear();
+      initializationRef.current.inProgress = false;
+      setState(prev => ({ ...prev, globalState: InitializationState.PENDING }));
     }
-  }, [initializeContext]);
+  }, [initializeContext, state.contexts]);
 
   // Initialize non-lazy contexts in order
   useEffect(() => {
-    if (state.contexts.size === 0) {
+    if (state.contexts.size === 0 || initializationRef.current.inProgress) {
       return;
     }
 
     const initializeNonLazyContexts = async () => {
       try {
         console.log('Starting context initialization...');
+        initializationRef.current.inProgress = true;
         setState(prev => ({ ...prev, globalState: InitializationState.LOADING }));
         
         // Initialize contexts sequentially to ensure proper dependency order
@@ -295,7 +293,7 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
           const registration = state.contexts.get(type);
           if (registration && !registration.lazy) {
             console.log(`Initializing ${type}...`);
-            await initializeContext(type);
+            await initializeContext(type, state.contexts);
             console.log(`${type} initialization complete`);
           }
         }
@@ -309,6 +307,8 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
           globalState: InitializationState.ERROR,
           error: error as Error
         }));
+      } finally {
+        initializationRef.current.inProgress = false;
       }
     };
 
