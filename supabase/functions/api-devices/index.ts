@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -16,8 +15,13 @@ interface DeviceData {
 }
 
 serve(async (req) => {
+  console.log(`=== API-DEVICES FUNCTION START ===`);
+  console.log(`Request method: ${req.method}`);
+  console.log(`Request URL: ${req.url}`);
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
@@ -46,7 +50,7 @@ serve(async (req) => {
       if (authError || !user) {
         console.error('JWT authentication failed:', authError);
         return new Response(
-          JSON.stringify({ error: 'Authentication failed' }),
+          JSON.stringify({ error: 'Authentication failed', details: authError?.message }),
           { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
@@ -64,7 +68,7 @@ serve(async (req) => {
       if (profileError || !profile?.default_organization_id) {
         console.error('Failed to get user organization:', profileError);
         return new Response(
-          JSON.stringify({ error: 'No organization found for user' }),
+          JSON.stringify({ error: 'No organization found for user', details: profileError?.message }),
           { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
@@ -76,29 +80,37 @@ serve(async (req) => {
       // Try API key authentication
       console.log('Processing API key authentication');
       
-      const authResult = await supabaseClient.functions.invoke('api-auth', {
-        headers: {
-          Authorization: authHeader
+      try {
+        const authResult = await supabaseClient.functions.invoke('api-auth', {
+          headers: {
+            Authorization: authHeader
+          }
+        });
+
+        if (authResult.error || !authResult.data?.success) {
+          console.error('API key authentication failed:', authResult.error);
+          return new Response(
+            JSON.stringify({ error: authResult.data?.error || 'Authentication failed' }),
+            { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
         }
-      });
 
-      if (authResult.error || !authResult.data?.success) {
-        console.error('API key authentication failed:', authResult.error);
+        organization_id = authResult.data.organization_id;
+        console.log('API key authenticated for organization:', organization_id);
+
+        // Check if user has device permissions
+        const scopes = authResult.data.scopes || [];
+        if (!scopes.includes('devices') && !scopes.includes('read') && !scopes.includes('write')) {
+          return new Response(
+            JSON.stringify({ error: 'Insufficient permissions for device operations' }),
+            { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+      } catch (apiAuthError) {
+        console.error('API auth function error:', apiAuthError);
         return new Response(
-          JSON.stringify({ error: authResult.data?.error || 'Authentication failed' }),
-          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      }
-
-      organization_id = authResult.data.organization_id;
-      console.log('API key authenticated for organization:', organization_id);
-
-      // Check if user has device permissions
-      const scopes = authResult.data.scopes || [];
-      if (!scopes.includes('devices') && !scopes.includes('read') && !scopes.includes('write')) {
-        return new Response(
-          JSON.stringify({ error: 'Insufficient permissions for device operations' }),
-          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ error: 'Authentication service unavailable', details: apiAuthError.message }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
     }
@@ -112,15 +124,27 @@ serve(async (req) => {
       const body = await req.text();
       console.log('Raw request body:', body);
       
-      if (body) {
-        requestData = JSON.parse(body);
-        method = requestData.method || req.method;
-        path = requestData.path || '';
-        console.log('Parsed request data:', requestData);
-        console.log('Method:', method, 'Path:', path);
+      if (body && body.trim()) {
+        try {
+          requestData = JSON.parse(body);
+          method = requestData.method || req.method;
+          path = requestData.path || '';
+          console.log('Parsed request data:', requestData);
+          console.log('Method:', method, 'Path:', path);
+        } catch (parseError) {
+          console.error('JSON parsing error:', parseError);
+          return new Response(
+            JSON.stringify({ error: 'Invalid JSON in request body', details: parseError.message }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
       }
-    } catch (parseError) {
-      console.log('No JSON body or parsing failed, using defaults');
+    } catch (bodyError) {
+      console.error('Error reading request body:', bodyError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to read request body', details: bodyError.message }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
     
     // Parse the path to determine the operation
@@ -134,23 +158,31 @@ serve(async (req) => {
     if (method === 'GET' && (!deviceId || path === '' || path === '/')) {
       console.log('Fetching devices for organization:', organization_id);
       
-      const { data: devices, error } = await supabaseClient
-        .rpc('get_devices_by_org_id', { p_organization_id: organization_id });
+      try {
+        const { data: devices, error } = await supabaseClient
+          .rpc('get_devices_by_org_id', { p_organization_id: organization_id });
 
-      if (error) {
-        console.error('Error fetching devices:', error);
+        if (error) {
+          console.error('Error fetching devices:', error);
+          return new Response(
+            JSON.stringify({ error: 'Failed to fetch devices', details: error.message }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        console.log(`Found ${devices?.length || 0} devices`);
+
         return new Response(
-          JSON.stringify({ error: 'Failed to fetch devices' }),
+          JSON.stringify({ devices: devices || [] }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      } catch (dbError) {
+        console.error('Database error:', dbError);
+        return new Response(
+          JSON.stringify({ error: 'Database error', details: dbError.message }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
-
-      console.log(`Found ${devices?.length || 0} devices`);
-
-      return new Response(
-        JSON.stringify({ devices: devices || [] }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
     }
 
     // GET /api/devices/{id} - Get specific device
@@ -167,36 +199,44 @@ serve(async (req) => {
         )
       }
       
-      const { data: device, error } = await supabaseClient
-        .rpc('get_device_by_id_bypass_rls', { p_device_id: deviceId });
+      try {
+        const { data: device, error } = await supabaseClient
+          .rpc('get_device_by_id_bypass_rls', { p_device_id: deviceId });
 
-      if (error) {
-        console.error('Error fetching device:', error);
+        if (error) {
+          console.error('Error fetching device:', error);
+          return new Response(
+            JSON.stringify({ error: 'Failed to fetch device', details: error.message }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        if (!device || device.length === 0) {
+          return new Response(
+            JSON.stringify({ error: 'Device not found' }),
+            { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        // Check if device belongs to the organization
+        if (device[0].organization_id !== organization_id) {
+          return new Response(
+            JSON.stringify({ error: 'Device not found' }),
+            { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
         return new Response(
-          JSON.stringify({ error: 'Failed to fetch device' }),
+          JSON.stringify({ device: device[0] }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      } catch (dbError) {
+        console.error('Database error:', dbError);
+        return new Response(
+          JSON.stringify({ error: 'Database error', details: dbError.message }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
-
-      if (!device || device.length === 0) {
-        return new Response(
-          JSON.stringify({ error: 'Device not found' }),
-          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      }
-
-      // Check if device belongs to the organization
-      if (device[0].organization_id !== organization_id) {
-        return new Response(
-          JSON.stringify({ error: 'Device not found' }),
-          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      }
-
-      return new Response(
-        JSON.stringify({ device: device[0] }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
     }
 
     // POST /api/devices - Create device
@@ -285,7 +325,11 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in api-devices function:', error)
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ 
+        error: 'Internal server error', 
+        details: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }

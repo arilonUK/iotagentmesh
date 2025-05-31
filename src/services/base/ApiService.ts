@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -38,8 +37,8 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       
       console.log(`Invoking function: ${functionName} with payload:`, requestPayload);
       
-      // Use Supabase functions.invoke
-      const { data, error } = await supabase.functions.invoke(functionName, {
+      // Use Supabase functions.invoke with proper error handling
+      const response = await supabase.functions.invoke(functionName, {
         body: requestPayload,
         headers: {
           'Content-Type': 'application/json',
@@ -47,16 +46,35 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
         }
       });
 
-      if (error) {
-        console.error(`Supabase function error:`, error);
-        throw new Error(error.message || 'Function invocation failed');
+      console.log('Function response:', response);
+
+      if (response.error) {
+        console.error(`Supabase function error:`, response.error);
+        throw new Error(response.error.message || `Function invocation failed: ${response.error}`);
       }
 
-      console.log(`Request successful:`, data);
-      return data;
+      if (!response.data) {
+        console.error('No data returned from function');
+        throw new Error('No data returned from function');
+      }
+
+      console.log(`Request successful:`, response.data);
+      return response.data;
     } catch (error) {
       console.error(`API request failed for ${options.endpoint}:`, error);
-      throw error;
+      
+      // Provide more specific error messages
+      if (error instanceof Error) {
+        if (error.message.includes('Function not found')) {
+          throw new Error(`Edge function '${options.endpoint}' not found or not deployed`);
+        }
+        if (error.message.includes('network')) {
+          throw new Error('Network error: Please check your connection');
+        }
+        throw error;
+      }
+      
+      throw new Error(`Unknown error occurred: ${error}`);
     }
   }
 
