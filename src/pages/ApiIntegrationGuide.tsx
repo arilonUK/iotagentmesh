@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { 
-  Api, 
+  Server, 
   Code, 
   Settings, 
   Key, 
@@ -14,7 +13,6 @@ import {
   Shield,
   ExternalLink,
   ArrowLeft,
-  Server,
   Zap,
   FileText,
   Globe,
@@ -30,7 +28,7 @@ const ApiIntegrationGuide = () => {
     {
       id: 'overview',
       title: 'API Integration Overview',
-      icon: Api,
+      icon: Server,
       content: [
         'Our REST API provides comprehensive access to all platform features, enabling seamless integration with external systems and custom applications.',
         'The API follows RESTful principles with predictable URLs, standard HTTP methods, and JSON responses for easy integration.',
@@ -312,7 +310,7 @@ Content-Type: application/json`
       title: 'Test API Calls',
       description: 'Interactive API documentation and testing tools',
       action: 'API Reference',
-      icon: Api,
+      icon: Server,
       link: '/dashboard/documentation'
     }
   ];
@@ -333,7 +331,7 @@ Content-Type: application/json`
       </div>
 
       <div className="flex items-center gap-3">
-        <Api className="h-8 w-8 text-primary" />
+        <Server className="h-8 w-8 text-primary" />
         <div>
           <h1 className="text-3xl font-bold">API Integration Guide</h1>
           <p className="text-muted-foreground">
