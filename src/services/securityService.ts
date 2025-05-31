@@ -60,11 +60,15 @@ export const securityService = {
         return false;
       }
 
-      const { data, error } = await supabase.rpc('validate_invitation_token', {
-        p_token: token
-      });
+      // Use direct query instead of RPC function
+      const { data, error } = await supabase
+        .from('invitations')
+        .select('id')
+        .eq('token', token)
+        .gt('expires_at', new Date().toISOString())
+        .limit(1);
 
-      if (error || !data) {
+      if (error || !data || data.length === 0) {
         await securityService.logSecurityEvent('suspicious_activity', {
           reason: 'Invalid or expired invitation token',
           error: error?.message
@@ -98,12 +102,15 @@ export const securityService = {
         return false;
       }
 
-      const { data: userRole } = await supabase.rpc('get_user_org_role', {
-        p_org_id: organizationId,
-        p_user_id: user.id
-      });
+      // Use direct query instead of RPC function
+      const { data: memberData } = await supabase
+        .from('organization_members')
+        .select('role')
+        .eq('organization_id', organizationId)
+        .eq('user_id', user.id)
+        .single();
 
-      if (!userRole) {
+      if (!memberData) {
         await securityService.logSecurityEvent('permission_denied', {
           reason: 'User not member of organization',
           organization_id: organizationId,
@@ -114,7 +121,7 @@ export const securityService = {
 
       // Check role hierarchy
       const roleHierarchy = { viewer: 0, member: 1, admin: 2, owner: 3 };
-      const userRoleLevel = roleHierarchy[userRole as keyof typeof roleHierarchy] || 0;
+      const userRoleLevel = roleHierarchy[memberData.role as keyof typeof roleHierarchy] || 0;
       const requiredRoleLevel = roleHierarchy[requiredRole];
 
       if (userRoleLevel < requiredRoleLevel) {
@@ -122,7 +129,7 @@ export const securityService = {
           reason: 'Insufficient role permissions',
           organization_id: organizationId,
           user_id: user.id,
-          user_role: userRole,
+          user_role: memberData.role,
           required_role: requiredRole
         });
         return false;
