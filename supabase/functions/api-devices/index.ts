@@ -116,45 +116,37 @@ serve(async (req) => {
       }
     }
 
-    // Parse the request body to get method and path
-    let requestData: any = {};
-    let method = req.method;
-    let path = '';
-
-    try {
-      const body = await req.text();
-      console.log('Raw request body:', body);
-      
-      if (body && body.trim()) {
-        try {
-          requestData = JSON.parse(body);
-          method = requestData.method || req.method;
-          path = requestData.path || '';
-          console.log('Parsed request data:', requestData);
-          console.log('Final method:', method, 'Final path:', path);
-        } catch (parseError) {
-          console.error('JSON parsing error:', parseError);
-          // If JSON parsing fails, treat as direct request
-          method = req.method;
-          path = '';
-        }
-      }
-    } catch (bodyError) {
-      console.error('Error reading request body:', bodyError);
-      // Continue with default values
-      method = req.method;
-      path = '';
-    }
-    
-    // Parse the path to determine the operation
-    const pathParts = path.split('/').filter(part => part);
+    // Parse URL for path parameters
+    const url = new URL(req.url);
+    const pathParts = url.pathname.split('/').filter(part => part && part !== 'api-devices');
     const deviceId = pathParts.length > 0 ? pathParts[0] : null;
     
+    console.log('URL pathname:', url.pathname);
     console.log('Parsed path parts:', pathParts);
     console.log('Device ID from path:', deviceId);
 
-    // GET /api/devices - List devices (when no path parts or empty path)
-    if (method === 'GET' && (!deviceId || path === '' || path === '/')) {
+    // Parse request body for POST/PUT requests
+    let requestBody: any = {};
+    if (req.method === 'POST' || req.method === 'PUT') {
+      try {
+        const bodyText = await req.text();
+        console.log('Raw request body:', bodyText);
+        
+        if (bodyText && bodyText.trim()) {
+          requestBody = JSON.parse(bodyText);
+          console.log('Parsed request body:', requestBody);
+        }
+      } catch (parseError) {
+        console.error('Error parsing request body:', parseError);
+        return new Response(
+          JSON.stringify({ error: 'Invalid JSON in request body' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    }
+
+    // GET /api/devices - List devices
+    if (req.method === 'GET' && !deviceId) {
       console.log('Fetching devices for organization:', organization_id);
       
       try {
@@ -186,7 +178,7 @@ serve(async (req) => {
     }
 
     // GET /api/devices/{id} - Get specific device
-    if (method === 'GET' && deviceId) {
+    if (req.method === 'GET' && deviceId) {
       console.log('Fetching specific device:', deviceId);
       
       // Validate that deviceId is a valid UUID format
@@ -240,8 +232,13 @@ serve(async (req) => {
     }
 
     // POST /api/devices - Create device
-    if (method === 'POST') {
-      const deviceData: DeviceData = requestData.data || {};
+    if (req.method === 'POST' && !deviceId) {
+      console.log('Creating new device with body:', requestBody);
+      
+      // Extract device data - handle both direct calls and API gateway format
+      const deviceData: DeviceData = requestBody.data || requestBody;
+      
+      console.log('Device data to create:', deviceData);
 
       if (!deviceData.name || !deviceData.type) {
         return new Response(
@@ -250,75 +247,109 @@ serve(async (req) => {
         )
       }
 
-      const { data: device, error } = await supabaseClient
-        .rpc('create_device_bypass_rls', {
-          p_name: deviceData.name,
-          p_type: deviceData.type,
-          p_status: deviceData.status || 'offline',
-          p_description: deviceData.description || null,
-          p_organization_id: organization_id,
-          p_product_template_id: deviceData.product_template_id || null
-        });
+      try {
+        const { data: device, error } = await supabaseClient
+          .rpc('create_device_bypass_rls', {
+            p_name: deviceData.name,
+            p_type: deviceData.type,
+            p_status: deviceData.status || 'offline',
+            p_description: deviceData.description || null,
+            p_organization_id: organization_id,
+            p_product_template_id: deviceData.product_template_id || null
+          });
 
-      if (error) {
-        console.error('Error creating device:', error);
+        if (error) {
+          console.error('Error creating device:', error);
+          return new Response(
+            JSON.stringify({ error: 'Failed to create device', details: error.message }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        console.log('Device created successfully:', device);
         return new Response(
-          JSON.stringify({ error: 'Failed to create device' }),
+          JSON.stringify(device),
+          { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      } catch (dbError) {
+        console.error('Database error creating device:', dbError);
+        return new Response(
+          JSON.stringify({ error: 'Database error', details: dbError.message }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
-
-      return new Response(
-        JSON.stringify(device),
-        { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
     }
 
     // PUT /api/devices/{id} - Update device
-    if (method === 'PUT' && deviceId) {
-      const updateData: Partial<DeviceData> = requestData.data || {};
+    if (req.method === 'PUT' && deviceId) {
+      console.log('Updating device:', deviceId, 'with body:', requestBody);
+      
+      // Extract update data - handle both direct calls and API gateway format
+      const updateData: Partial<DeviceData> = requestBody.data || requestBody;
+      
+      console.log('Update data:', updateData);
 
-      const { data: device, error } = await supabaseClient
-        .rpc('update_device_bypass_rls', {
-          p_device_id: deviceId,
-          p_data: JSON.stringify(updateData)
-        });
+      try {
+        const { data: device, error } = await supabaseClient
+          .rpc('update_device_bypass_rls', {
+            p_device_id: deviceId,
+            p_data: JSON.stringify(updateData)
+          });
 
-      if (error) {
-        console.error('Error updating device:', error);
+        if (error) {
+          console.error('Error updating device:', error);
+          return new Response(
+            JSON.stringify({ error: 'Failed to update device', details: error.message }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        console.log('Device updated successfully:', device);
         return new Response(
-          JSON.stringify({ error: 'Failed to update device' }),
+          JSON.stringify(device),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      } catch (dbError) {
+        console.error('Database error updating device:', dbError);
+        return new Response(
+          JSON.stringify({ error: 'Database error', details: dbError.message }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
-
-      return new Response(
-        JSON.stringify(device),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
     }
 
     // DELETE /api/devices/{id} - Delete device
-    if (method === 'DELETE' && deviceId) {
-      const { error } = await supabaseClient
-        .rpc('delete_device_bypass_rls', { p_device_id: deviceId });
+    if (req.method === 'DELETE' && deviceId) {
+      console.log('Deleting device:', deviceId);
+      
+      try {
+        const { error } = await supabaseClient
+          .rpc('delete_device_bypass_rls', { p_device_id: deviceId });
 
-      if (error) {
-        console.error('Error deleting device:', error);
+        if (error) {
+          console.error('Error deleting device:', error);
+          return new Response(
+            JSON.stringify({ error: 'Failed to delete device', details: error.message }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        console.log('Device deleted successfully');
         return new Response(
-          JSON.stringify({ error: 'Failed to delete device' }),
+          JSON.stringify({ message: 'Device deleted successfully' }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      } catch (dbError) {
+        console.error('Database error deleting device:', dbError);
+        return new Response(
+          JSON.stringify({ error: 'Database error', details: dbError.message }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
-
-      return new Response(
-        JSON.stringify({ message: 'Device deleted successfully' }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
     }
 
     return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
+      JSON.stringify({ error: 'Method not allowed or invalid path' }),
       { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
