@@ -1,6 +1,4 @@
-import { Navigate } from "react-router-dom";
-import Index from "@/pages/Index";
-import Auth from "@/pages/Auth";
+
 import Dashboard from "@/pages/Dashboard";
 import Devices from "@/pages/Devices";
 import DeviceDetail from "@/pages/DeviceDetail";
@@ -11,55 +9,15 @@ import DataBuckets from "@/pages/DataBuckets";
 import Documentation from "@/pages/Documentation";
 import DeviceManagementGuide from "@/pages/DeviceManagementGuide";
 import DataBucketsAnalyticsGuide from "@/pages/DataBucketsAnalyticsGuide";
+import AlarmConfigurationGuide from "@/pages/AlarmConfigurationGuide";
+import ApiIntegrationGuide from "@/pages/ApiIntegrationGuide";
 import Endpoints from "@/pages/Endpoints";
+import IntegrationsAndConnectivity from "@/pages/IntegrationsAndConnectivity";
 import FileStorage from "@/pages/FileStorage";
 import FileExplorerPage from "@/pages/FileExplorerPage";
 import NotificationSettings from "@/pages/NotificationSettings";
-import ProfileSettings from "@/pages/ProfileSettings";
-import OrganizationSettings from "@/pages/OrganizationSettings";
-import TeamSettings from "@/pages/TeamSettings";
-import AcceptInvitation from "@/pages/AcceptInvitation";
-import ApiKeyManagement from "@/pages/ApiKeyManagement";
-import NotFound from "@/pages/NotFound";
-import Blog from "@/pages/Blog";
-import BlogPost from "@/pages/BlogPost";
-import IntegrationsAndConnectivity from "@/pages/IntegrationsAndConnectivity";
-import OAuthConnections from "@/pages/OAuthConnections";
-import AlarmConfigurationGuide from "@/pages/AlarmConfigurationGuide";
-import ApiIntegrationGuide from "@/pages/ApiIntegrationGuide";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardLayout from "@/layouts/DashboardLayout";
-
-export const publicRoutes = [
-  {
-    path: "/",
-    element: <Index />,
-  },
-  {
-    path: "/auth",
-    element: <Auth />,
-  },
-  {
-    path: "/signup",
-    element: <Auth />,
-  },
-  {
-    path: "/docs",
-    element: <Documentation />,
-  },
-  {
-    path: "/blog",
-    element: <Blog />,
-  },
-  {
-    path: "/blog/:slug",
-    element: <BlogPost />,
-  },
-  {
-    path: "/accept-invitation/:token",
-    element: <AcceptInvitation />,
-  },
-];
 
 export const dashboardRoutes = [
   {
@@ -228,63 +186,6 @@ export const dashboardRoutes = [
       <ProtectedRoute>
         <DashboardLayout>
           <NotificationSettings />
-        </DashboardLayout>
-      </ProtectedRoute>
-    ),
-  },
-];
-
-export const settingsRoutes = [
-  {
-    path: "/dashboard/settings",
-    element: (
-      <ProtectedRoute>
-        <DashboardLayout>
-          <ProfileSettings />
-        </DashboardLayout>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/dashboard/profile",
-    element: <Navigate to="/dashboard/settings" replace />,
-  },
-  {
-    path: "/dashboard/settings/organization",
-    element: (
-      <ProtectedRoute>
-        <DashboardLayout>
-          <OrganizationSettings />
-        </DashboardLayout>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/dashboard/settings/team",
-    element: (
-      <ProtectedRoute>
-        <DashboardLayout>
-          <TeamSettings />
-        </DashboardLayout>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/dashboard/settings/oauth",
-    element: (
-      <ProtectedRoute>
-        <DashboardLayout>
-          <OAuthConnections />
-        </DashboardLayout>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/dashboard/settings/api-keys",
-    element: (
-      <ProtectedRoute>
-        <DashboardLayout>
-          <ApiKeyManagement />
         </DashboardLayout>
       </ProtectedRoute>
     ),
