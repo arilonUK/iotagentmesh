@@ -116,12 +116,19 @@ serve(async (req) => {
       }
     }
 
-    // Parse request body and determine HTTP method and device ID
-    let requestBody: any = {};
-    let deviceId: string | null = null;
+    // Parse URL to determine the operation and device ID
+    const url = new URL(req.url);
+    const pathParts = url.pathname.split('/').filter(part => part && part !== 'api-devices');
+    let deviceId: string | null = pathParts.length > 0 ? pathParts[0] : null;
     let httpMethod = req.method;
-    
-    if (req.method === 'POST') {
+    let requestBody: any = {};
+
+    console.log('URL pathname:', url.pathname);
+    console.log('Path parts:', pathParts);
+    console.log('Device ID from URL:', deviceId);
+
+    // Handle request body for POST/PUT operations
+    if (req.method === 'POST' || req.method === 'PUT') {
       try {
         const bodyText = await req.text();
         console.log('Raw request body:', bodyText);
@@ -133,16 +140,15 @@ serve(async (req) => {
           // Handle Supabase client format { method: 'POST', path: '', data: {...} }
           if (parsedBody.method && parsedBody.data !== undefined) {
             httpMethod = parsedBody.method;
-            deviceId = parsedBody.path ? parsedBody.path.replace('/', '') : null;
+            if (parsedBody.path && parsedBody.path !== '') {
+              deviceId = parsedBody.path.replace('/', '');
+            }
             requestBody = parsedBody.data || {};
             console.log('Supabase client format detected - method:', httpMethod, 'deviceId:', deviceId, 'data:', requestBody);
           } else {
             // Handle direct API calls
             requestBody = parsedBody;
-            const url = new URL(req.url);
-            const pathParts = url.pathname.split('/').filter(part => part && part !== 'api-devices');
-            deviceId = pathParts.length > 0 ? pathParts[0] : null;
-            console.log('Direct API call format detected - deviceId:', deviceId, 'data:', requestBody);
+            console.log('Direct API call format detected - data:', requestBody);
           }
         }
       } catch (parseError) {
@@ -152,12 +158,6 @@ serve(async (req) => {
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
-    } else {
-      // For GET/DELETE requests, parse URL for device ID
-      const url = new URL(req.url);
-      const pathParts = url.pathname.split('/').filter(part => part && part !== 'api-devices');
-      deviceId = pathParts.length > 0 ? pathParts[0] : null;
-      console.log('GET/DELETE request - deviceId from URL:', deviceId);
     }
 
     console.log('Final parsed values - Method:', httpMethod, 'DeviceId:', deviceId);
@@ -165,7 +165,8 @@ serve(async (req) => {
 
     // GET /api/devices - List devices
     if (httpMethod === 'GET' && !deviceId) {
-      console.log('Fetching devices for organization:', organization_id);
+      console.log('=== FETCHING ALL DEVICES ===');
+      console.log('Organization ID:', organization_id);
       
       if (!organization_id) {
         console.error('No organization ID available for device fetch');
@@ -181,6 +182,10 @@ serve(async (req) => {
         const { data: devices, error } = await supabaseClient
           .rpc('get_devices_by_org_id', { p_organization_id: organization_id });
 
+        console.log('RPC call completed');
+        console.log('Error:', error);
+        console.log('Data:', devices);
+
         if (error) {
           console.error('Error fetching devices:', error);
           return new Response(
@@ -195,6 +200,7 @@ serve(async (req) => {
         // Ensure we return an array
         const deviceList = Array.isArray(devices) ? devices : (devices ? [devices] : []);
 
+        console.log('Returning device list:', deviceList);
         return new Response(
           JSON.stringify(deviceList),
           { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
