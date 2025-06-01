@@ -116,25 +116,34 @@ serve(async (req) => {
       }
     }
 
-    // Parse URL for path parameters
-    const url = new URL(req.url);
-    const pathParts = url.pathname.split('/').filter(part => part && part !== 'api-devices');
-    const deviceId = pathParts.length > 0 ? pathParts[0] : null;
-    
-    console.log('URL pathname:', url.pathname);
-    console.log('Parsed path parts:', pathParts);
-    console.log('Device ID from path:', deviceId);
-
-    // Parse request body for POST/PUT requests
+    // Parse request body for POST/PUT requests - handle both direct calls and Supabase client calls
     let requestBody: any = {};
+    let deviceId: string | null = null;
+    let httpMethod = req.method;
+    
     if (req.method === 'POST' || req.method === 'PUT') {
       try {
         const bodyText = await req.text();
         console.log('Raw request body:', bodyText);
         
         if (bodyText && bodyText.trim()) {
-          requestBody = JSON.parse(bodyText);
-          console.log('Parsed request body:', requestBody);
+          const parsedBody = JSON.parse(bodyText);
+          console.log('Parsed request body:', parsedBody);
+          
+          // Handle Supabase client format
+          if (parsedBody.method && parsedBody.path !== undefined) {
+            httpMethod = parsedBody.method;
+            deviceId = parsedBody.path ? parsedBody.path.replace('/', '') : null;
+            requestBody = parsedBody.data || {};
+            console.log('Supabase client format detected - method:', httpMethod, 'deviceId:', deviceId);
+          } else {
+            // Handle direct API calls
+            requestBody = parsedBody;
+            const url = new URL(req.url);
+            const pathParts = url.pathname.split('/').filter(part => part && part !== 'api-devices');
+            deviceId = pathParts.length > 0 ? pathParts[0] : null;
+            console.log('Direct API call format detected - deviceId:', deviceId);
+          }
         }
       } catch (parseError) {
         console.error('Error parsing request body:', parseError);
@@ -143,10 +152,18 @@ serve(async (req) => {
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
+    } else {
+      // For GET/DELETE requests, parse URL for device ID
+      const url = new URL(req.url);
+      const pathParts = url.pathname.split('/').filter(part => part && part !== 'api-devices');
+      deviceId = pathParts.length > 0 ? pathParts[0] : null;
+      console.log('GET/DELETE request - deviceId from URL:', deviceId);
     }
 
+    console.log('Final parsed values - Method:', httpMethod, 'DeviceId:', deviceId);
+
     // GET /api/devices - List devices
-    if (req.method === 'GET' && !deviceId) {
+    if (httpMethod === 'GET' && !deviceId) {
       console.log('Fetching devices for organization:', organization_id);
       
       try {
@@ -178,7 +195,7 @@ serve(async (req) => {
     }
 
     // GET /api/devices/{id} - Get specific device
-    if (req.method === 'GET' && deviceId) {
+    if (httpMethod === 'GET' && deviceId) {
       console.log('Fetching specific device:', deviceId);
       
       // Validate that deviceId is a valid UUID format
@@ -232,7 +249,7 @@ serve(async (req) => {
     }
 
     // POST /api/devices - Create device
-    if (req.method === 'POST' && !deviceId) {
+    if (httpMethod === 'POST' && !deviceId) {
       console.log('Creating new device with body:', requestBody);
       
       // Extract device data - handle both direct calls and API gateway format
@@ -281,7 +298,7 @@ serve(async (req) => {
     }
 
     // PUT /api/devices/{id} - Update device
-    if (req.method === 'PUT' && deviceId) {
+    if (httpMethod === 'PUT' && deviceId) {
       console.log('Updating device:', deviceId, 'with body:', requestBody);
       
       // Extract update data - handle both direct calls and API gateway format
@@ -319,7 +336,7 @@ serve(async (req) => {
     }
 
     // DELETE /api/devices/{id} - Delete device
-    if (req.method === 'DELETE' && deviceId) {
+    if (httpMethod === 'DELETE' && deviceId) {
       console.log('Deleting device:', deviceId);
       
       try {
