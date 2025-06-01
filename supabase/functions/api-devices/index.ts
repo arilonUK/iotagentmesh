@@ -127,7 +127,7 @@ serve(async (req) => {
     console.log('Path parts:', pathParts);
     console.log('Device ID from URL:', deviceId);
 
-    // Handle request body for POST/PUT operations
+    // Handle request body parsing - but only for actual POST/PUT requests
     if (req.method === 'POST' || req.method === 'PUT') {
       try {
         const bodyText = await req.text();
@@ -138,16 +138,17 @@ serve(async (req) => {
           console.log('Parsed request body:', parsedBody);
           
           // Handle Supabase client format { method: 'POST', path: '', data: {...} }
-          if (parsedBody.method && parsedBody.data !== undefined) {
+          // BUT only if it's actually specifying a different method
+          if (parsedBody.method && parsedBody.method !== req.method) {
             httpMethod = parsedBody.method;
             if (parsedBody.path && parsedBody.path !== '') {
               deviceId = parsedBody.path.replace('/', '');
             }
             requestBody = parsedBody.data || {};
-            console.log('Supabase client format detected - method:', httpMethod, 'deviceId:', deviceId, 'data:', requestBody);
+            console.log('Supabase client format with method override - method:', httpMethod, 'deviceId:', deviceId, 'data:', requestBody);
           } else {
-            // Handle direct API calls
-            requestBody = parsedBody;
+            // Handle direct API calls or same-method Supabase calls
+            requestBody = parsedBody.data || parsedBody;
             console.log('Direct API call format detected - data:', requestBody);
           }
         }
