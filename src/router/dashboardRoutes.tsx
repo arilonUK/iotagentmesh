@@ -1,4 +1,3 @@
-
 import Dashboard from "@/pages/Dashboard";
 import Devices from "@/pages/Devices";
 import DeviceDetail from "@/pages/DeviceDetail";
@@ -176,6 +175,16 @@ export const dashboardRoutes = [
       <ProtectedRoute>
         <DashboardLayout>
           <FileExplorerPage />
+        </DashboardLayout>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/dashboard/notification-settings",
+    element: (
+      <ProtectedRoute>
+        <DashboardLayout>
+          <NotificationSettings />
         </DashboardLayout>
       </ProtectedRoute>
     ),
