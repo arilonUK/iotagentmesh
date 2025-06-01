@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -18,6 +18,12 @@ const AvatarUpload = ({ initialAvatarUrl, username, onAvatarChange }: AvatarUplo
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Update local state when prop changes
+  useEffect(() => {
+    console.log('AvatarUpload: initialAvatarUrl changed to:', initialAvatarUrl);
+    setAvatarUrl(initialAvatarUrl);
+  }, [initialAvatarUrl]);
 
   // Helper function to get user initials for avatar fallback
   const getUserInitials = () => {
@@ -54,18 +60,21 @@ const AvatarUpload = ({ initialAvatarUrl, username, onAvatarChange }: AvatarUplo
       
       // Create a preview URL for the uploaded image
       const previewUrl = URL.createObjectURL(file);
+      console.log('AvatarUpload: Created preview URL:', previewUrl);
+      
       setAvatarUrl(previewUrl);
+      onAvatarChange(previewUrl);
       
       // In a real app, you would upload the file to a storage service
       // and get back a permanent URL
       // For demo purposes, we'll just simulate a delay and use the preview URL
       setTimeout(() => {
-        onAvatarChange(previewUrl);
         setUploading(false);
         toast({
           title: "Avatar updated",
           description: "Your avatar has been uploaded successfully"
         });
+        console.log('AvatarUpload: Upload complete, URL set to:', previewUrl);
       }, 1000);
 
       // Here's how you would upload to Supabase Storage in a real app:
@@ -90,6 +99,7 @@ const AvatarUpload = ({ initialAvatarUrl, username, onAvatarChange }: AvatarUplo
       onAvatarChange(publicUrl);
       */
     } catch (error: any) {
+      console.error('AvatarUpload: Upload error:', error);
       toast({
         title: "Upload failed",
         description: error.message || "Something went wrong",
@@ -101,6 +111,7 @@ const AvatarUpload = ({ initialAvatarUrl, username, onAvatarChange }: AvatarUplo
   };
 
   const handleRemoveAvatar = () => {
+    console.log('AvatarUpload: Removing avatar');
     setAvatarUrl(null);
     onAvatarChange('');
     toast({

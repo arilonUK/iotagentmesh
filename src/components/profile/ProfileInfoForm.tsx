@@ -31,6 +31,7 @@ const ProfileInfoForm = () => {
 
   useEffect(() => {
     if (profile) {
+      console.log('Profile updated, refreshing form data:', profile);
       setFormData({
         username: profile.username || '',
         full_name: profile.full_name || '',
@@ -40,17 +41,22 @@ const ProfileInfoForm = () => {
   }, [profile]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
+    const newFormData = {
       ...formData,
       [e.target.name]: e.target.value,
-    });
+    };
+    console.log('Form data updated:', newFormData);
+    setFormData(newFormData);
   };
 
   const handleAvatarChange = (url: string) => {
-    setFormData({
+    console.log('Avatar URL changed to:', url);
+    const newFormData = {
       ...formData,
       avatar_url: url,
-    });
+    };
+    console.log('Updated form data with new avatar:', newFormData);
+    setFormData(newFormData);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,13 +65,19 @@ const ProfileInfoForm = () => {
     setError(null);
 
     try {
-      // Pass only the form data to updateProfile as it now expects only one parameter
-      await updateProfile(formData);
+      console.log('Submitting profile update with data:', formData);
+      const result = await updateProfile(formData);
+      console.log('Profile update result:', result);
+      
       toast('Profile updated successfully', {
         style: { backgroundColor: 'green', color: 'white' }
       });
     } catch (error: any) {
+      console.error('Profile update error:', error);
       setError(error.message || 'Failed to update profile');
+      toast('Failed to update profile', {
+        style: { backgroundColor: 'red', color: 'white' }
+      });
     } finally {
       setIsLoading(false);
     }
@@ -204,8 +216,8 @@ const ProfileInfoForm = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="flex justify-center mb-6">
           <AvatarUpload 
-            initialAvatarUrl={profile?.avatar_url || null}
-            username={profile?.username || null}
+            initialAvatarUrl={formData.avatar_url || null}
+            username={formData.username || null}
             onAvatarChange={handleAvatarChange}
           />
         </div>
