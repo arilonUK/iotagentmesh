@@ -1371,6 +1371,26 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_device_bypass_rls: {
+        Args: {
+          p_name: string
+          p_type: string
+          p_status: string
+          p_description: string
+          p_organization_id: string
+          p_product_template_id: string
+        }
+        Returns: {
+          description: string | null
+          id: string
+          last_active_at: string | null
+          name: string
+          organization_id: string
+          product_template_id: string | null
+          status: string
+          type: string
+        }
+      }
       create_notification: {
         Args: {
           p_user_id: string
@@ -1431,6 +1451,10 @@ export type Database = {
           updated_at: string
           validation_rules: Json | null
         }
+      }
+      delete_device_bypass_rls: {
+        Args: { p_device_id: string }
+        Returns: undefined
       }
       delete_expired_notifications: {
         Args: Record<PropertyKey, never>
@@ -1723,6 +1747,19 @@ export type Database = {
       switch_user_organization: {
         Args: { p_user_id: string; p_org_id: string }
         Returns: boolean
+      }
+      update_device_bypass_rls: {
+        Args: { p_device_id: string; p_data: Json }
+        Returns: {
+          description: string | null
+          id: string
+          last_active_at: string | null
+          name: string
+          organization_id: string
+          product_template_id: string | null
+          status: string
+          type: string
+        }
       }
       update_product_bypass_rls: {
         Args: { p_id: string; p_data: Json }

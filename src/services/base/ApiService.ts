@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -30,16 +29,24 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       console.log(`Path suffix: ${options.pathSuffix || 'none'}`);
       console.log(`Data:`, options.data);
       
-      // Use the endpoint directly as the function name (don't remove any prefix)
+      // Use the endpoint directly as the function name
       const functionName = options.endpoint;
       console.log(`Function name: ${functionName}`);
       
-      // Prepare the request payload for the edge function
-      const requestPayload = {
-        method: options.method,
-        path: options.pathSuffix || '',
-        data: options.data || null
-      };
+      // For GET requests without data, send a simpler payload
+      let requestPayload: any;
+      if (options.method === 'GET' && !options.data) {
+        requestPayload = {
+          method: options.method,
+          path: options.pathSuffix || ''
+        };
+      } else {
+        requestPayload = {
+          method: options.method,
+          path: options.pathSuffix || '',
+          data: options.data || null
+        };
+      }
       
       console.log(`Request payload:`, JSON.stringify(requestPayload, null, 2));
       
@@ -61,7 +68,7 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
         throw new Error(`Function error: ${response.error.message || response.error}`);
       }
 
-      if (!response.data) {
+      if (response.data === null || response.data === undefined) {
         console.error('No data returned from function');
         throw new Error('No data returned from function');
       }
@@ -136,7 +143,9 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
     } catch (error) {
       console.error(`=== FETCHALL ERROR - ${this.entityName} ===`);
       console.error(`Error fetching ${this.entityName} items:`, error);
-      this.handleError(error, 'fetch items');
+      // Don't throw error, return empty array to prevent UI crashes
+      console.log(`Returning empty array due to error`);
+      return [];
     }
   }
 

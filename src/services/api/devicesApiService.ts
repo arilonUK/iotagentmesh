@@ -51,7 +51,89 @@ export class DevicesApiService extends ApiService<Device, CreateDeviceRequest, U
     } catch (error) {
       console.error(`=== DEVICES API SERVICE FETCHALL ERROR ===`);
       console.error(`Error fetching devices:`, error);
-      this.handleError(error, 'fetch devices');
+      // Return empty array instead of throwing to prevent UI crashes
+      return [];
+    }
+  }
+
+  // Override fetchById to handle potential null responses gracefully
+  async fetchById(id: string): Promise<Device | null> {
+    try {
+      console.log(`Fetching device with ID: ${id}`);
+      
+      const response = await this.makeRequest<Device>({
+        method: 'GET',
+        endpoint: this.endpoint,
+        pathSuffix: `/${id}`
+      });
+
+      console.log(`Device fetch response:`, response);
+      return response || null;
+    } catch (error) {
+      if (error instanceof Error && (error.message.includes('404') || error.message.includes('not found'))) {
+        console.log(`Device not found with ID: ${id}`);
+        return null;
+      }
+      console.error(`Error fetching device:`, error);
+      return null;
+    }
+  }
+
+  // Override create to handle the response format
+  async create(data: CreateDeviceRequest): Promise<Device> {
+    try {
+      console.log(`Creating device:`, data);
+      
+      const response = await this.makeRequest<Device>({
+        method: 'POST',
+        endpoint: this.endpoint,
+        data
+      });
+
+      console.log(`Device created successfully:`, response);
+      return response;
+    } catch (error) {
+      console.error(`Error creating device:`, error);
+      throw error;
+    }
+  }
+
+  // Override update to handle the response format
+  async update(id: string, data: UpdateDeviceRequest): Promise<Device> {
+    try {
+      console.log(`Updating device ${id}:`, data);
+      
+      const response = await this.makeRequest<Device>({
+        method: 'PUT',
+        endpoint: this.endpoint,
+        pathSuffix: `/${id}`,
+        data
+      });
+
+      console.log(`Device updated successfully:`, response);
+      return response;
+    } catch (error) {
+      console.error(`Error updating device:`, error);
+      throw error;
+    }
+  }
+
+  // Override delete to handle boolean response
+  async delete(id: string): Promise<boolean> {
+    try {
+      console.log(`Deleting device ${id}`);
+      
+      await this.makeRequest({
+        method: 'DELETE',
+        endpoint: this.endpoint,
+        pathSuffix: `/${id}`
+      });
+
+      console.log(`Device deleted successfully`);
+      return true;
+    } catch (error) {
+      console.error(`Error deleting device:`, error);
+      return false;
     }
   }
 
