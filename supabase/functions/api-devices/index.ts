@@ -29,25 +29,31 @@ serve(async (req) => {
 
     // Route requests to appropriate handlers
     if (httpMethod === 'GET' && !deviceId) {
+      console.log('Routing to getAllDevices');
       return await getAllDevices(organization_id);
     }
 
     if (httpMethod === 'GET' && deviceId) {
+      console.log('Routing to getDeviceById with ID:', deviceId);
       return await getDeviceById(deviceId, organization_id);
     }
 
     if (httpMethod === 'POST' && !deviceId) {
+      console.log('Routing to createDevice');
       return await createDevice(requestBody, organization_id);
     }
 
     if (httpMethod === 'PUT' && deviceId) {
+      console.log('Routing to updateDevice with ID:', deviceId);
       return await updateDevice(deviceId, requestBody);
     }
 
     if (httpMethod === 'DELETE' && deviceId) {
+      console.log('Routing to deleteDevice with ID:', deviceId);
       return await deleteDevice(deviceId);
     }
 
+    console.log('No matching route found for:', { httpMethod, deviceId, hasBody: !!requestBody });
     return new Response(
       JSON.stringify({ error: 'Method not allowed or invalid path' }),
       { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

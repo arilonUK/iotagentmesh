@@ -19,6 +19,7 @@ export function parseRequest(req: Request, url: URL): ParsedRequest {
 }
 
 export async function parseRequestBody(req: Request, parsedRequest: ParsedRequest): Promise<ParsedRequest> {
+  // Only parse body for POST and PUT requests
   if (req.method === 'POST' || req.method === 'PUT') {
     try {
       const bodyText = await req.text();
@@ -29,18 +30,30 @@ export async function parseRequestBody(req: Request, parsedRequest: ParsedReques
         console.log('Parsed request body:', parsedBody);
         
         // Handle Supabase client format { method: 'POST', path: '', data: {...} }
-        // BUT only if it's actually specifying a different method
+        // BUT only if the method is different from the HTTP method OR if there's actual data
         if (parsedBody.method && parsedBody.method !== req.method) {
+          console.log('Supabase client format with method override detected');
           parsedRequest.httpMethod = parsedBody.method;
           if (parsedBody.path && parsedBody.path !== '') {
             parsedRequest.deviceId = parsedBody.path.replace('/', '');
           }
           parsedRequest.requestBody = parsedBody.data || {};
-          console.log('Supabase client format with method override - method:', parsedRequest.httpMethod, 'deviceId:', parsedRequest.deviceId, 'data:', parsedRequest.requestBody);
+        } else if (parsedBody.data) {
+          // Handle Supabase client format with data
+          parsedRequest.requestBody = parsedBody.data;
+          console.log('Supabase client format with data detected');
         } else {
-          // Handle direct API calls or same-method Supabase calls
-          parsedRequest.requestBody = parsedBody.data || parsedBody;
-          console.log('Direct API call format detected - data:', parsedRequest.requestBody);
+          // Handle direct API calls
+          parsedRequest.requestBody = parsedBody;
+          console.log('Direct API call format detected');
+        }
+      } else {
+        console.log('Empty request body for POST/PUT request');
+        // For empty bodies on POST/PUT, this might be a Supabase client issue
+        // Let's treat empty POST requests as potential GET requests from the client
+        if (req.method === 'POST' && !parsedRequest.deviceId) {
+          console.log('Converting empty POST to GET request');
+          parsedRequest.httpMethod = 'GET';
         }
       }
     } catch (parseError) {
