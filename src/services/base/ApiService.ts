@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -29,30 +30,34 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       console.log(`Path suffix: ${options.pathSuffix || 'none'}`);
       console.log(`Data:`, options.data);
       
-      // Use the endpoint directly as the function name
       const functionName = options.endpoint;
       console.log(`Function name: ${functionName}`);
       
-      // For GET requests without data, send a simpler payload
-      let requestPayload: any;
-      if (options.method === 'GET' && !options.data) {
-        requestPayload = {
-          method: options.method,
-          path: options.pathSuffix || ''
-        };
+      // For Supabase functions.invoke, we need to send the data directly in the body
+      let requestBody: any = null;
+      
+      if (options.method === 'GET' || options.method === 'DELETE') {
+        // For GET/DELETE, only send path info if needed
+        if (options.pathSuffix) {
+          requestBody = {
+            method: options.method,
+            path: options.pathSuffix
+          };
+        }
       } else {
-        requestPayload = {
+        // For POST/PUT, send the data along with method and path info
+        requestBody = {
           method: options.method,
           path: options.pathSuffix || '',
-          data: options.data || null
+          data: options.data || {}
         };
       }
       
-      console.log(`Request payload:`, JSON.stringify(requestPayload, null, 2));
+      console.log(`Request body:`, requestBody);
       
       // Use Supabase functions.invoke with proper error handling
       const response = await supabase.functions.invoke(functionName, {
-        body: requestPayload,
+        body: requestBody,
         headers: {
           'Content-Type': 'application/json',
           ...options.headers

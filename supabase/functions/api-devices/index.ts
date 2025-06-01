@@ -116,12 +116,12 @@ serve(async (req) => {
       }
     }
 
-    // Parse request body for POST/PUT requests - handle both direct calls and Supabase client calls
+    // Parse request body and determine HTTP method and device ID
     let requestBody: any = {};
     let deviceId: string | null = null;
     let httpMethod = req.method;
     
-    if (req.method === 'POST' || req.method === 'PUT') {
+    if (req.method === 'POST') {
       try {
         const bodyText = await req.text();
         console.log('Raw request body:', bodyText);
@@ -130,19 +130,19 @@ serve(async (req) => {
           const parsedBody = JSON.parse(bodyText);
           console.log('Parsed request body:', parsedBody);
           
-          // Handle Supabase client format
-          if (parsedBody.method && parsedBody.path !== undefined) {
+          // Handle Supabase client format { method: 'POST', path: '', data: {...} }
+          if (parsedBody.method && parsedBody.data !== undefined) {
             httpMethod = parsedBody.method;
             deviceId = parsedBody.path ? parsedBody.path.replace('/', '') : null;
             requestBody = parsedBody.data || {};
-            console.log('Supabase client format detected - method:', httpMethod, 'deviceId:', deviceId);
+            console.log('Supabase client format detected - method:', httpMethod, 'deviceId:', deviceId, 'data:', requestBody);
           } else {
             // Handle direct API calls
             requestBody = parsedBody;
             const url = new URL(req.url);
             const pathParts = url.pathname.split('/').filter(part => part && part !== 'api-devices');
             deviceId = pathParts.length > 0 ? pathParts[0] : null;
-            console.log('Direct API call format detected - deviceId:', deviceId);
+            console.log('Direct API call format detected - deviceId:', deviceId, 'data:', requestBody);
           }
         }
       } catch (parseError) {
@@ -252,8 +252,7 @@ serve(async (req) => {
     if (httpMethod === 'POST' && !deviceId) {
       console.log('Creating new device with body:', requestBody);
       
-      // Extract device data - handle both direct calls and API gateway format
-      const deviceData: DeviceData = requestBody.data || requestBody;
+      const deviceData: DeviceData = requestBody;
       
       console.log('Device data to create:', deviceData);
 
@@ -301,8 +300,7 @@ serve(async (req) => {
     if (httpMethod === 'PUT' && deviceId) {
       console.log('Updating device:', deviceId, 'with body:', requestBody);
       
-      // Extract update data - handle both direct calls and API gateway format
-      const updateData: Partial<DeviceData> = requestBody.data || requestBody;
+      const updateData: Partial<DeviceData> = requestBody;
       
       console.log('Update data:', updateData);
 
