@@ -161,12 +161,23 @@ serve(async (req) => {
     }
 
     console.log('Final parsed values - Method:', httpMethod, 'DeviceId:', deviceId);
+    console.log('Organization ID for operation:', organization_id);
 
     // GET /api/devices - List devices
     if (httpMethod === 'GET' && !deviceId) {
       console.log('Fetching devices for organization:', organization_id);
       
+      if (!organization_id) {
+        console.error('No organization ID available for device fetch');
+        return new Response(
+          JSON.stringify({ error: 'No organization ID found' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      
       try {
+        console.log('Calling get_devices_by_org_id with organization_id:', organization_id);
+        
         const { data: devices, error } = await supabaseClient
           .rpc('get_devices_by_org_id', { p_organization_id: organization_id });
 
@@ -181,8 +192,11 @@ serve(async (req) => {
         console.log(`Found ${devices?.length || 0} devices`);
         console.log('Devices data:', devices);
 
+        // Ensure we return an array
+        const deviceList = Array.isArray(devices) ? devices : (devices ? [devices] : []);
+
         return new Response(
-          JSON.stringify(devices || []),
+          JSON.stringify(deviceList),
           { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       } catch (dbError) {

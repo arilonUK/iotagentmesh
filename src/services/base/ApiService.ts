@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -36,8 +35,11 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       // For Supabase functions.invoke, we need to send the data directly in the body
       let requestBody: any = null;
       
-      if (options.method === 'GET' || options.method === 'DELETE') {
-        // For GET/DELETE, only send path info if needed
+      if (options.method === 'GET' && !options.pathSuffix) {
+        // For simple GET requests (like fetching all devices), don't send any body
+        requestBody = null;
+      } else if (options.method === 'GET' || options.method === 'DELETE') {
+        // For GET/DELETE with path, only send path info if needed
         if (options.pathSuffix) {
           requestBody = {
             method: options.method,
