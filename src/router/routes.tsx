@@ -1,4 +1,3 @@
-
 import { Navigate } from "react-router-dom";
 import Index from "@/pages/Index";
 import Auth from "@/pages/Auth";
@@ -39,6 +38,14 @@ export const publicRoutes = [
   {
     path: "/auth",
     element: <Auth />,
+  },
+  {
+    path: "/signup",
+    element: <Auth />,
+  },
+  {
+    path: "/docs",
+    element: <Documentation />,
   },
   {
     path: "/blog",
