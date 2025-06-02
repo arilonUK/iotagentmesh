@@ -1,64 +1,94 @@
 
-export async function forwardToProfilesHandler(
-  req: Request,
-  pathParams: Record<string, string>,
-  authHeader: string | null
-): Promise<Response> {
-  console.log(`=== PROFILES HANDLER START ===`);
-  console.log(`Auth header: ${authHeader ? 'Present' : 'Missing'}`);
-  
+import { corsHeaders } from '../../_shared/cors.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+export async function handleProfiles(req: Request, path: string): Promise<Response> {
+  const supabaseClient = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  );
+
   try {
-    const baseUrl = Deno.env.get('SUPABASE_URL');
-    if (!baseUrl) {
-      throw new Error('SUPABASE_URL environment variable not set');
-    }
-    
     const url = new URL(req.url);
-    let profilePath = url.pathname;
-    if (profilePath.includes('/api-gateway')) {
-      profilePath = profilePath.replace('/api-gateway', '');
-    }
-    
-    const targetUrl = `${baseUrl}/functions/v1/api-profiles${profilePath.replace('/api/profiles', '')}`;
-    
-    let body = null;
-    if (req.method !== 'GET' && req.method !== 'DELETE') {
-      body = await req.text();
-    }
+    const segments = path.replace('/api/profiles', '').split('/').filter(Boolean);
+    const method = req.method;
 
-    const headers: Record<string, string> = {
-      'Content-Type': req.headers.get('Content-Type') || 'application/json',
-    };
-
-    if (authHeader) {
-      headers['Authorization'] = authHeader;
+    // Get auth header and verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Missing authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    const response = await fetch(new Request(targetUrl, {
-      method: req.method,
-      headers,
-      body: body
-    }));
+    // Verify the user's JWT token
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
     
-    const responseText = await response.text();
-    console.log(`=== PROFILES HANDLER END ===`);
-    
-    return new Response(responseText, {
-      status: response.status,
-      headers: new Headers(response.headers)
-    });
-    
-  } catch (error) {
-    console.error('Error in forwardToProfilesHandler:', error);
-    return new Response(
-      JSON.stringify({ 
-        error: 'Failed to forward request to profiles service',
-        details: error.message
-      }),
-      { 
-        status: 500, 
-        headers: { 'Content-Type': 'application/json' } 
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid authentication token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Route handling
+    if (method === 'GET' && segments.length === 0) {
+      // GET /api/profiles - Get current user profile
+      const { data: profile, error } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Profile not found' }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
+
+      return new Response(
+        JSON.stringify({ success: true, profile: profile }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (method === 'PUT' && segments.length === 0) {
+      // PUT /api/profiles - Update current user profile
+      const updates = await req.json();
+
+      const { data: updatedProfile, error } = await supabaseClient
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id)
+        .select()
+        .single();
+
+      if (error) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Failed to update profile' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({ success: true, profile: updatedProfile }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    return new Response(
+      JSON.stringify({ success: false, error: 'Route not found' }),
+      { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error) {
+    console.error('Error in profiles handler:', error);
+    return new Response(
+      JSON.stringify({ success: false, error: 'Internal server error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 }
