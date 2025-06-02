@@ -1,93 +1,199 @@
 
-export async function forwardToDevicesHandler(
-  req: Request,
-  pathParams: Record<string, string>
-): Promise<Response> {
-  console.log(`=== DEVICES HANDLER START ===`);
-  console.log(`Request method: ${req.method}`);
-  console.log(`Path params:`, pathParams);
+import { corsHeaders } from '../../_shared/cors.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+export async function handleDevices(req: Request, path: string): Promise<Response> {
+  const supabaseClient = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  );
 
   try {
-    // Get auth header from the original request
-    const authHeader = req.headers.get('Authorization');
-    console.log(`Auth header: ${authHeader ? 'Present' : 'Missing'}`);
-
-    // Build the target URL - forward to the api-devices function
-    const baseUrl = Deno.env.get('SUPABASE_URL');
-    if (!baseUrl) {
-      throw new Error('SUPABASE_URL environment variable not set');
-    }
-    
-    // Extract the path after /api/devices
     const url = new URL(req.url);
-    const originalPath = url.pathname;
-    console.log(`Original path: ${originalPath}`);
-    
-    // Remove api-gateway prefix if present
-    let devicePath = originalPath;
-    if (devicePath.includes('/api-gateway')) {
-      devicePath = devicePath.replace('/api-gateway', '');
-    }
-    
-    // The target should be the api-devices function with the remaining path
-    const targetUrl = `${baseUrl}/functions/v1/api-devices${devicePath.replace('/api/devices', '')}`;
-    console.log(`Target URL: ${targetUrl}`);
+    const segments = path.replace('/api/devices', '').split('/').filter(Boolean);
+    const method = req.method;
 
-    // Get request body if present
-    let body = null;
-    if (req.method !== 'GET' && req.method !== 'DELETE') {
-      body = await req.text();
-      console.log(`Request body: ${body || 'empty'}`);
+    // Get auth header and verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Missing authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Prepare headers
-    const headers: Record<string, string> = {
-      'Content-Type': req.headers.get('Content-Type') || 'application/json',
-    };
-
-    // Add authorization header if present
-    if (authHeader) {
-      headers['Authorization'] = authHeader;
+    // Verify the user's JWT token
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
+    
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid authentication token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    console.log(`Request headers:`, headers);
+    // Get user's organization
+    const { data: orgMember, error: orgError } = await supabaseClient
+      .from('organization_members')
+      .select('organization_id, role')
+      .eq('user_id', user.id)
+      .single();
 
-    // Make the forwarded request
-    const targetRequest = new Request(targetUrl, {
-      method: req.method,
-      headers,
-      body: body
-    });
+    if (orgError || !orgMember) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'User not associated with any organization' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
-    console.log(`Making forwarded request...`);
-    const response = await fetch(targetRequest);
-    console.log(`Forwarded response status: ${response.status}`);
-    
-    // Get response body
-    const responseText = await response.text();
-    console.log(`Forwarded response body: ${responseText}`);
-    
-    // Return the response with original headers
-    const responseHeaders = new Headers(response.headers);
-    
-    console.log(`=== DEVICES HANDLER END ===`);
-    
-    return new Response(responseText, {
-      status: response.status,
-      headers: responseHeaders
-    });
-    
-  } catch (error) {
-    console.error('Error in forwardToDevicesHandler:', error);
-    return new Response(
-      JSON.stringify({ 
-        error: 'Failed to forward request to devices service',
-        details: error.message
-      }),
-      { 
-        status: 500, 
-        headers: { 'Content-Type': 'application/json' } 
+    const organizationId = orgMember.organization_id;
+
+    // Route handling
+    if (method === 'GET' && segments.length === 0) {
+      // GET /api/devices - List devices
+      const { data: devices, error } = await supabaseClient
+        .from('devices')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Failed to fetch devices' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
+
+      return new Response(
+        JSON.stringify({ success: true, devices: devices }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (method === 'POST' && segments.length === 0) {
+      // POST /api/devices - Create new device
+      const requestData = await req.json();
+      
+      // Validate request data
+      if (!requestData.name || !requestData.type) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Missing required fields: name and type' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Insert device into database
+      const { data: device, error: insertError } = await supabaseClient
+        .from('devices')
+        .insert({
+          organization_id: organizationId,
+          name: requestData.name,
+          type: requestData.type,
+          description: requestData.description || null,
+          status: requestData.status || 'offline',
+          product_template_id: requestData.product_template_id || null,
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('Error inserting device:', insertError);
+        return new Response(
+          JSON.stringify({ success: false, error: 'Failed to create device' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({ success: true, device: device }),
+        { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (method === 'GET' && segments.length === 1) {
+      // GET /api/devices/:id - Get specific device
+      const deviceId = segments[0];
+
+      const { data: device, error } = await supabaseClient
+        .from('devices')
+        .select('*')
+        .eq('id', deviceId)
+        .eq('organization_id', organizationId)
+        .single();
+
+      if (error) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Device not found' }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({ success: true, device: device }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (method === 'PUT' && segments.length === 1) {
+      // PUT /api/devices/:id - Update device
+      const deviceId = segments[0];
+      const updates = await req.json();
+
+      const { data: updatedDevice, error } = await supabaseClient
+        .from('devices')
+        .update(updates)
+        .eq('id', deviceId)
+        .eq('organization_id', organizationId)
+        .select()
+        .single();
+
+      if (error) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Failed to update device' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({ success: true, device: updatedDevice }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (method === 'DELETE' && segments.length === 1) {
+      // DELETE /api/devices/:id - Delete device
+      const deviceId = segments[0];
+
+      const { error } = await supabaseClient
+        .from('devices')
+        .delete()
+        .eq('id', deviceId)
+        .eq('organization_id', organizationId);
+
+      if (error) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Failed to delete device' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({ success: true }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    return new Response(
+      JSON.stringify({ success: false, error: 'Route not found' }),
+      { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error) {
+    console.error('Error in devices handler:', error);
+    return new Response(
+      JSON.stringify({ success: false, error: 'Internal server error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 }
