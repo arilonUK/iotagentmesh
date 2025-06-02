@@ -1,6 +1,6 @@
+
 import { handleOpenApiDocs, handleApiDocs } from './handlers/docs.ts';
 import { handleDevices } from './handlers/devices.ts';
-import { handleAlarms } from './handlers/alarms.ts';
 import { handleEndpoints } from './handlers/endpoints.ts';
 import { handleProducts } from './handlers/products.ts';
 import { handleProfiles } from './handlers/profiles.ts';
@@ -17,8 +17,6 @@ export function createRouter() {
   // API routes with their handlers
   routes.set('/api/devices', handleDevices);
   routes.set('/api/devices/*', handleDevices);
-  routes.set('/api/alarms', handleAlarms);
-  routes.set('/api/alarms/*', handleAlarms);
   routes.set('/api/endpoints', handleEndpoints);
   routes.set('/api/endpoints/*', handleEndpoints);
   routes.set('/api/products', handleProducts);
