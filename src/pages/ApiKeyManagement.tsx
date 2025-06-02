@@ -10,24 +10,35 @@ import { ApiKeyCreatedCard } from '@/components/apiKeys/ApiKeyCreatedCard';
 import { apiKeyService } from '@/services/apiKeyService';
 
 export default function ApiKeyManagement() {
-  const { profile } = useAuth();
+  const { profile, organization } = useAuth();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [showNewKey, setShowNewKey] = useState('');
   const [loading, setLoading] = useState(false);
   
+  const organizationId = organization?.id;
+  
+  console.log('ApiKeyManagement - organizationId:', organizationId);
+  console.log('ApiKeyManagement - profile:', profile);
+  console.log('ApiKeyManagement - organization:', organization);
+  
   useEffect(() => {
-    if (profile?.default_organization_id) {
+    if (organizationId) {
       loadApiKeys();
     }
-  }, [profile?.default_organization_id]);
+  }, [organizationId]);
 
   const loadApiKeys = async () => {
-    if (!profile?.default_organization_id) return;
+    if (!organizationId) {
+      console.log('No organization ID available for loading API keys');
+      return;
+    }
     
     setLoading(true);
     try {
-      const keys = await apiKeyService.getApiKeys(profile.default_organization_id);
+      console.log('Loading API keys for organization:', organizationId);
+      const keys = await apiKeyService.getApiKeys(organizationId);
       setApiKeys(keys);
+      console.log('Loaded API keys:', keys);
     } catch (error) {
       console.error('Error loading API keys:', error);
       toast.error('Failed to load API keys');
@@ -37,13 +48,17 @@ export default function ApiKeyManagement() {
   };
   
   const handleCreateKey = async (formData: NewApiKeyFormData) => {
-    if (!profile?.default_organization_id) {
-      toast.error('No organization selected');
+    if (!organizationId) {
+      console.error('No organization ID available for creating API key');
+      toast.error('No organization selected. Please check your organization settings.');
       return;
     }
 
+    console.log('Creating API key with organization:', organizationId, 'data:', formData);
+    
     try {
-      const response = await apiKeyService.createApiKey(profile.default_organization_id, formData);
+      const response = await apiKeyService.createApiKey(organizationId, formData);
+      console.log('API key created successfully:', response);
       setApiKeys([response.api_key, ...apiKeys]);
       setShowNewKey(response.full_key);
       toast.success('API key created successfully');
@@ -76,6 +91,46 @@ export default function ApiKeyManagement() {
       toast.error('Failed to delete API key');
     }
   };
+  
+  // Show loading state while organization is being loaded
+  if (loading && !organizationId) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold">API Key Management</h1>
+            <p className="text-muted-foreground">
+              Loading organization data...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if no organization is available
+  if (!organizationId) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold">API Key Management</h1>
+            <p className="text-muted-foreground">
+              No organization available. Please check your organization settings.
+            </p>
+          </div>
+        </div>
+        
+        <Card>
+          <CardContent className="text-center py-8">
+            <p className="text-muted-foreground">
+              You need to be part of an organization to manage API keys.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-6">
