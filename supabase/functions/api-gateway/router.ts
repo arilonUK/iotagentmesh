@@ -29,7 +29,7 @@ export function createRouter() {
   routes.set('/api/keys/*', handleApiKeys);
 
   return {
-    async handle(req: Request, path: string): Promise<Response> {
+    async route(req: Request, path: string): Promise<Response> {
       console.log(`=== ROUTER START ===`);
       console.log(`Routing request to path: ${path}`);
       

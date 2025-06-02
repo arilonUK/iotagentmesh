@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { Router } from './router.ts';
+import { createRouter } from './router.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -44,7 +44,7 @@ serve(async (req) => {
     console.log(`Auth header: ${authHeader ? 'Present' : 'Missing'}`);
     
     // Create router instance and route the request
-    const router = new Router();
+    const router = createRouter();
     const response = await router.route(req, path);
     console.log(`Router response status: ${response.status}`);
     
