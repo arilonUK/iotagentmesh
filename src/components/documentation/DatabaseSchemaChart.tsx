@@ -122,8 +122,8 @@ const DatabaseSchemaChart = () => {
         { name: 'condition_operator', type: 'condition_operator', nullable: false, default: null },
         { name: 'condition_value', type: 'jsonb', nullable: false, default: null },
         { name: 'severity', type: 'alarm_severity', nullable: false, default: 'warning' },
-        { name: 'enabled', type: 'boolean', nullable: false, default: true },
-        { name: 'cooldown_minutes', type: 'integer', nullable: false, default: 15 },
+        { name: 'enabled', type: 'boolean', nullable: false, default: 'true' },
+        { name: 'cooldown_minutes', type: 'integer', nullable: false, default: '15' },
         { name: 'created_at', type: 'timestamp with time zone', nullable: false, default: 'now()' },
         { name: 'updated_at', type: 'timestamp with time zone', nullable: false, default: 'now()' },
       ]
@@ -138,7 +138,7 @@ const DatabaseSchemaChart = () => {
         { name: 'description', type: 'text', nullable: true, default: null },
         { name: 'type', type: 'text', nullable: false, default: null },
         { name: 'configuration', type: 'jsonb', nullable: false, default: null },
-        { name: 'enabled', type: 'boolean', nullable: false, default: true },
+        { name: 'enabled', type: 'boolean', nullable: false, default: 'true' },
         { name: 'created_at', type: 'timestamp with time zone', nullable: false, default: 'now()' },
         { name: 'updated_at', type: 'timestamp with time zone', nullable: false, default: 'now()' },
       ]
@@ -155,7 +155,7 @@ const DatabaseSchemaChart = () => {
         { name: 'scopes', type: 'text[]', nullable: false, default: '{}' },
         { name: 'expires_at', type: 'timestamp with time zone', nullable: true, default: null },
         { name: 'last_used', type: 'timestamp with time zone', nullable: true, default: null },
-        { name: 'is_active', type: 'boolean', nullable: true, default: true },
+        { name: 'is_active', type: 'boolean', nullable: true, default: 'true' },
         { name: 'created_at', type: 'timestamp with time zone', nullable: true, default: 'now()' },
         { name: 'updated_at', type: 'timestamp with time zone', nullable: true, default: 'now()' },
       ]
@@ -252,7 +252,7 @@ const DatabaseSchemaChart = () => {
           <Database className="h-4 w-4" />
           {table.name}
         </h3>
-        <Badge variant="outline">{table.columns.length} columns</Badge>
+        <Badge variant="outline">{table.columns.length.toString()} columns</Badge>
       </div>
       {table.description && (
         <p className="text-sm text-muted-foreground mb-3">{table.description}</p>
@@ -335,7 +335,7 @@ const DatabaseSchemaChart = () => {
             className="pl-10"
           />
         </div>
-        <Badge variant="outline">{filteredTables.length} tables</Badge>
+        <Badge variant="outline">{filteredTables.length.toString()} tables</Badge>
       </div>
 
       <Tabs defaultValue="cards" className="w-full">

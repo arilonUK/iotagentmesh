@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { DashboardLayout } from '@/layouts/DashboardLayout';
+import DashboardLayout from '@/layouts/DashboardLayout';
 import DatabaseSchemaChart from '@/components/documentation/DatabaseSchemaChart';
 
 const DatabaseSchema = () => {
