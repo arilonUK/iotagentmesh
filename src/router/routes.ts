@@ -1,3 +1,4 @@
+
 import { RouteObject } from 'react-router-dom';
 import { lazy } from 'react';
 
@@ -24,6 +25,7 @@ import Organization from '@/pages/Organization';
 import DataExplorer from '@/pages/DataExplorer';
 import DataVisualizer from '@/pages/DataVisualizer';
 import NotFound from '@/pages/NotFound';
+import DatabaseSchema from '@/pages/DatabaseSchema';
 
 // Import components
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
@@ -33,131 +35,126 @@ const ForgotPassword = lazy(() => import('@/pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
 const VerifyEmail = lazy(() => import('@/pages/VerifyEmail'));
 
-import DatabaseSchema from '@/pages/DatabaseSchema';
-
-// Add the database schema route to the existing routes
-export const databaseSchemaRoute = {
-  path: '/database-schema',
-  element: <DatabaseSchema />,
-};
-
 // Define routes
 export const routes: RouteObject[] = [
   {
     path: '/',
-    element: <Dashboard />,
+    element: Dashboard,
   },
   {
     path: '/dashboard',
-    element: <Dashboard />,
+    element: Dashboard,
   },
   {
     path: '/login',
-    element: <Login />,
+    element: Login,
   },
   {
     path: '/register',
-    element: <Register />,
+    element: Register,
   },
   {
     path: '/forgot-password',
-    element: <ForgotPassword />,
+    element: ForgotPassword,
   },
   {
     path: '/reset-password',
-    element: <ResetPassword />,
+    element: ResetPassword,
   },
   {
     path: '/verify-email',
-    element: <VerifyEmail />,
+    element: VerifyEmail,
   },
   {
     path: '/devices',
-    element: <Devices />,
+    element: Devices,
   },
   {
     path: '/devices/new',
-    element: <NewDevice />,
+    element: NewDevice,
   },
   {
     path: '/devices/:id/edit',
-    element: <EditDevice />,
+    element: EditDevice,
   },
   {
     path: '/endpoints',
-    element: <Endpoints />,
+    element: Endpoints,
   },
   {
     path: '/endpoints/new',
-    element: <NewEndpoint />,
+    element: NewEndpoint,
   },
   {
     path: '/endpoints/:id/edit',
-    element: <EditEndpoint />,
+    element: EditEndpoint,
   },
   {
     path: '/products',
-    element: <Products />,
+    element: Products,
   },
   {
     path: '/products/new',
-    element: <NewProduct />,
+    element: NewProduct,
   },
   {
     path: '/products/:id/edit',
-    element: <EditProduct />,
+    element: EditProduct,
   },
   {
     path: '/alarms',
-    element: <Alarms />,
+    element: Alarms,
   },
   {
     path: '/alarms/new',
-    element: <NewAlarm />,
+    element: NewAlarm,
   },
   {
     path: '/alarms/:id/edit',
-    element: <EditAlarm />,
+    element: EditAlarm,
   },
   {
     path: '/api-keys',
-    element: <ApiKeys />,
+    element: ApiKeys,
   },
   {
     path: '/api-keys/new',
-    element: <NewApiKey />,
+    element: NewApiKey,
   },
   {
     path: '/api-keys/:id/edit',
-    element: <EditApiKey />,
+    element: EditApiKey,
   },
   {
     path: '/audit-logs',
-    element: <AuditLogs />,
+    element: AuditLogs,
   },
   {
     path: '/settings',
-    element: <Settings />,
+    element: Settings,
   },
   {
     path: '/profile',
-    element: <Profile />,
+    element: Profile,
   },
   {
     path: '/organization',
-    element: <Organization />,
+    element: Organization,
   },
   {
     path: '/data-explorer',
-    element: <DataExplorer />,
+    element: DataExplorer,
   },
   {
     path: '/data-visualizer',
-    element: <DataVisualizer />,
+    element: DataVisualizer,
   },
-  databaseSchemaRoute,
+  {
+    path: '/database-schema',
+    element: DatabaseSchema,
+  },
   {
     path: '*',
-    element: <NotFound />,
+    element: NotFound,
   },
 ];
