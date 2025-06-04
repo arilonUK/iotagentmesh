@@ -17,34 +17,34 @@ const Dashboard = lazy(() => import('@/pages/Dashboard'));
 export const routes: RouteObject[] = [
   {
     path: '/',
-    element: Dashboard,
+    element: <Dashboard />,
   },
   {
     path: '/dashboard',
-    element: Dashboard,
+    element: <Dashboard />,
   },
   {
     path: '/devices',
-    element: Devices,
+    element: <Devices />,
   },
   {
     path: '/endpoints',
-    element: Endpoints,
+    element: <Endpoints />,
   },
   {
     path: '/products',
-    element: Products,
+    element: <Products />,
   },
   {
     path: '/alarms',
-    element: Alarms,
+    element: <Alarms />,
   },
   {
     path: '/database-schema',
-    element: DatabaseSchema,
+    element: <DatabaseSchema />,
   },
   {
     path: '*',
-    element: NotFound,
+    element: <NotFound />,
   },
 ];
