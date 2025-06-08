@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowRight, ArrowUp, ArrowDown, Activity } from 'lucide-react';
+import { ArrowRight, ArrowUp, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import DeviceCard from '@/components/DeviceCard';
 import { useDevices } from '@/hooks/useDevices';
@@ -9,59 +9,18 @@ import { useOrganization } from '@/contexts/organization';
 import { useAuth } from '@/contexts/auth';
 
 const Dashboard = () => {
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { organization, isLoading: orgLoading } = useOrganization();
   const { devices, isLoading: devicesLoading, error } = useDevices(organization?.id);
 
   console.log('=== DASHBOARD COMPONENT DEBUG ===');
-  console.log('Auth state:', { isAuthenticated, authLoading });
+  console.log('Auth state:', { isAuthenticated });
   console.log('Organization:', organization);
   console.log('Organization ID:', organization?.id);
   console.log('Devices:', devices);
   console.log('Devices length:', devices?.length);
   console.log('Is loading devices:', devicesLoading);
   console.log('Error:', error);
-
-  // Show loading state while auth is initializing
-  if (authLoading) {
-    return (
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
-          <p className="text-muted-foreground">Initializing...</p>
-        </div>
-        <div className="flex items-center justify-center h-48">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show authentication required state
-  if (!isAuthenticated) {
-    return (
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
-          <p className="text-muted-foreground">Access your IoT control center.</p>
-        </div>
-        <Card className="border-blue-200 bg-blue-50">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold text-blue-800 mb-2">Authentication Required</h3>
-              <p className="text-blue-600 mb-4">Please sign in to access your dashboard.</p>
-              <Link 
-                to="/auth" 
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
-                Sign In
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   // Show organization loading state
   if (orgLoading) {

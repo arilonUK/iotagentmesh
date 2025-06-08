@@ -1,10 +1,10 @@
 
 import { ReactNode } from 'react';
 import { AuthContext } from './AuthContext';
-import { useUnifiedAuth } from '@/hooks/auth/useUnifiedAuth';
+import { useAuthProvider } from './useAuthProvider';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const authContextValue = useUnifiedAuth();
+  const authContextValue = useAuthProvider();
 
   return (
     <AuthContext.Provider value={authContextValue}>
