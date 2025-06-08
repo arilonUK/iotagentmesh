@@ -6,29 +6,29 @@ import { Link } from 'react-router-dom';
 import DeviceCard from '@/components/DeviceCard';
 import { useDevices } from '@/hooks/useDevices';
 import { useOrganization } from '@/contexts/organization';
+import { useAuth } from '@/contexts/auth';
 
 const Dashboard = () => {
-  const { organization } = useOrganization();
-  const { devices, isLoading, error } = useDevices(organization?.id);
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { organization, isLoading: orgLoading } = useOrganization();
+  const { devices, isLoading: devicesLoading, error } = useDevices(organization?.id);
 
   console.log('=== DASHBOARD COMPONENT DEBUG ===');
+  console.log('Auth state:', { isAuthenticated, authLoading });
   console.log('Organization:', organization);
   console.log('Organization ID:', organization?.id);
   console.log('Devices:', devices);
   console.log('Devices length:', devices?.length);
-  console.log('Is loading:', isLoading);
+  console.log('Is loading devices:', devicesLoading);
   console.log('Error:', error);
 
-  // Get only the first 4 devices for the dashboard preview
-  const recentDevices = devices.slice(0, 4);
-
-  // Show loading state
-  if (isLoading && devices.length === 0) {
+  // Show loading state while auth is initializing
+  if (authLoading) {
     return (
       <div className="space-y-8">
         <div>
           <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
-          <p className="text-muted-foreground">Loading your IoT control center...</p>
+          <p className="text-muted-foreground">Initializing...</p>
         </div>
         <div className="flex items-center justify-center h-48">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -37,22 +37,43 @@ const Dashboard = () => {
     );
   }
 
-  // Show error state if there's an error
-  if (error) {
+  // Show authentication required state
+  if (!isAuthenticated) {
     return (
       <div className="space-y-8">
         <div>
           <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back to your IoT control center.</p>
+          <p className="text-muted-foreground">Access your IoT control center.</p>
         </div>
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-blue-200 bg-blue-50">
           <CardContent className="pt-6">
-            <p className="text-red-600">Error loading devices: {error}</p>
-            <p className="text-sm text-red-500 mt-2">
-              Organization ID: {organization?.id || 'No organization'}
-            </p>
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-blue-800 mb-2">Authentication Required</h3>
+              <p className="text-blue-600 mb-4">Please sign in to access your dashboard.</p>
+              <Link 
+                to="/auth" 
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Sign In
+              </Link>
+            </div>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  // Show organization loading state
+  if (orgLoading) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
+          <p className="text-muted-foreground">Loading organization...</p>
+        </div>
+        <div className="flex items-center justify-center h-48">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
       </div>
     );
   }
@@ -63,16 +84,48 @@ const Dashboard = () => {
       <div className="space-y-8">
         <div>
           <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back to your IoT control center.</p>
+          <p className="text-muted-foreground">Welcome to your IoT control center.</p>
         </div>
         <Card className="border-yellow-200 bg-yellow-50">
           <CardContent className="pt-6">
-            <p className="text-yellow-600">No organization selected. Please select an organization to view devices.</p>
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-yellow-800 mb-2">No Organization Selected</h3>
+              <p className="text-yellow-600 mb-4">Please select an organization to view devices and manage your IoT infrastructure.</p>
+              <div className="text-sm text-yellow-500">
+                You may need to create an organization or be invited to one to continue.
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
     );
   }
+
+  // Show error state if there's an error loading devices
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
+          <p className="text-muted-foreground">Welcome back to your IoT control center.</p>
+        </div>
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Devices</h3>
+              <p className="text-red-600 mb-2">{error}</p>
+              <p className="text-sm text-red-500">
+                Organization: {organization.name} (ID: {organization.id})
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Get only the first 4 devices for the dashboard preview
+  const recentDevices = devices.slice(0, 4);
 
   return (
     <div className="space-y-8">
@@ -80,9 +133,11 @@ const Dashboard = () => {
         <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
         <p className="text-muted-foreground">Welcome back to your IoT control center.</p>
         {/* Debug info - remove this later */}
-        <div className="text-xs text-gray-400 mt-2">
-          Org: {organization.name} | ID: {organization.id} | Devices: {devices.length}
-        </div>
+        {process.env.NODE_ENV === 'development' && (
+          <div className="text-xs text-gray-400 mt-2">
+            Org: {organization.name} | ID: {organization.id} | Devices: {devices.length}
+          </div>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -160,13 +215,13 @@ const Dashboard = () => {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">Recent Devices</h2>
-          <Link to="/dashboard/devices" className="text-sm text-primary flex items-center hover:underline">
+          <Link to="/devices" className="text-sm text-primary flex items-center hover:underline">
             View all devices
             <ArrowRight className="ml-1 h-4 w-4" />
           </Link>
         </div>
         
-        {isLoading ? (
+        {devicesLoading ? (
           <div className="flex items-center justify-center h-48">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
@@ -190,7 +245,7 @@ const Dashboard = () => {
                       No devices found. Add your first device to get started.
                     </p>
                     <Link 
-                      to="/dashboard/devices" 
+                      to="/devices" 
                       className="text-primary hover:underline"
                     >
                       Go to Devices page to add a device

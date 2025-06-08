@@ -9,6 +9,8 @@ import Products from '@/pages/Products';
 import Alarms from '@/pages/Alarms';
 import NotFound from '@/pages/NotFound';
 import DatabaseSchema from '@/pages/DatabaseSchema';
+import Auth from '@/pages/Auth';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 // Import components using lazy loading for pages that exist
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
@@ -17,31 +19,35 @@ const Dashboard = lazy(() => import('@/pages/Dashboard'));
 export const routes: RouteObject[] = [
   {
     path: '/',
-    element: <Dashboard />,
+    element: <ProtectedRoute><Dashboard /></ProtectedRoute>,
   },
   {
     path: '/dashboard',
-    element: <Dashboard />,
+    element: <ProtectedRoute><Dashboard /></ProtectedRoute>,
   },
   {
     path: '/devices',
-    element: <Devices />,
+    element: <ProtectedRoute><Devices /></ProtectedRoute>,
   },
   {
     path: '/endpoints',
-    element: <Endpoints />,
+    element: <ProtectedRoute><Endpoints /></ProtectedRoute>,
   },
   {
     path: '/products',
-    element: <Products />,
+    element: <ProtectedRoute><Products /></ProtectedRoute>,
   },
   {
     path: '/alarms',
-    element: <Alarms />,
+    element: <ProtectedRoute><Alarms /></ProtectedRoute>,
   },
   {
     path: '/database-schema',
-    element: <DatabaseSchema />,
+    element: <ProtectedRoute><DatabaseSchema /></ProtectedRoute>,
+  },
+  {
+    path: '/auth',
+    element: <Auth />,
   },
   {
     path: '*',
