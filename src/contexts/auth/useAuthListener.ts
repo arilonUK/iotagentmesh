@@ -36,6 +36,7 @@ export const useAuthListener = ({
     const initializeAuth = async () => {
       try {
         console.log("Setting up auth listener...");
+        setLoading(true);
 
         // Clean up any existing listener
         if (listenerRef.current) {
@@ -45,19 +46,22 @@ export const useAuthListener = ({
         // Set up auth state listener
         const { data: authListener } = supabase.auth.onAuthStateChange(
           async (event, session) => {
-            console.log("Auth state change:", event);
+            console.log("Auth state change:", event, session?.user?.id);
             
             if (event === 'SIGNED_IN' && session?.user) {
+              console.log("User signed in, updating state");
               setSession(session);
               setUser(session.user);
               setIsAuthenticated(true);
               setLoading(false);
               
-              // Load organizations in background - don't await
+              // Load organizations after a short delay to avoid blocking UI
               setTimeout(async () => {
                 try {
+                  console.log("Loading user organizations...");
                   const userOrgs = await organizationService.getUserOrganizations(session.user.id);
                   if (userOrgs && userOrgs.length > 0) {
+                    console.log("Organizations loaded:", userOrgs.length);
                     setUserOrganizations(userOrgs);
                     const defaultOrg = userOrgs.find(org => org.is_default) || userOrgs[0];
                     if (defaultOrg) {
@@ -75,6 +79,7 @@ export const useAuthListener = ({
               }, 100);
               
             } else if (event === 'SIGNED_OUT') {
+              console.log("User signed out, clearing state");
               setSession(null);
               setUser(null);
               setIsAuthenticated(false);
@@ -85,8 +90,22 @@ export const useAuthListener = ({
               setProfile(null);
               organizationService.clearCache();
             } else if (event === 'TOKEN_REFRESHED' && session) {
+              console.log("Token refreshed");
               setSession(session);
               setUser(session.user);
+              setIsAuthenticated(true);
+              setLoading(false);
+            } else if (event === 'INITIAL_SESSION') {
+              if (session?.user) {
+                console.log("Initial session found");
+                setSession(session);
+                setUser(session.user);
+                setIsAuthenticated(true);
+              } else {
+                console.log("No initial session");
+                setIsAuthenticated(false);
+              }
+              setLoading(false);
             }
           }
         );
@@ -94,22 +113,24 @@ export const useAuthListener = ({
         listenerRef.current = authListener;
 
         // Check for existing session
-        const { data, error } = await supabase.auth.getUser();
+        const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (error || !data?.user) {
-          console.log("No authenticated user found");
+        if (error) {
+          console.error("Error getting session:", error);
           setIsAuthenticated(false);
           setLoading(false);
           return;
         }
 
-        console.log("User found, setting auth state");
-        setIsAuthenticated(true);
-        setUser(data.user);
-        
-        // Get session
-        const { data: sessionData } = await supabase.auth.getSession();
-        setSession(sessionData.session);
+        if (session?.user) {
+          console.log("Existing session found");
+          setSession(session);
+          setUser(session.user);
+          setIsAuthenticated(true);
+        } else {
+          console.log("No existing session");
+          setIsAuthenticated(false);
+        }
         setLoading(false);
 
       } catch (error) {
