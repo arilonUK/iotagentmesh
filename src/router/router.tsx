@@ -9,6 +9,6 @@ export const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: routes,
-    errorBoundary: NotFound,
+    ErrorBoundary: NotFound,
   },
 ]);
