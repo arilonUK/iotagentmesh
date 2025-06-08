@@ -18,6 +18,7 @@ const Auth = () => {
       
       // Get the original destination from location state, default to dashboard
       const from = location.state?.from?.pathname || '/dashboard';
+      console.log('Auth page: Redirecting to:', from);
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, loading, navigate, location]);

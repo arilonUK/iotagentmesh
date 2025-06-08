@@ -11,6 +11,13 @@ function App() {
   const { isAuthenticated, loading } = useAuth();
   const location = useLocation();
   
+  console.log('App component render:', { 
+    isAuthenticated, 
+    loading, 
+    pathname: location.pathname,
+    search: location.search 
+  });
+  
   // Check if we're on the auth page
   const isAuthPage = location.pathname === '/auth';
 
@@ -28,6 +35,7 @@ function App() {
 
   // If on auth page, show basic layout regardless of auth status
   if (isAuthPage) {
+    console.log('App: Rendering auth page layout');
     return (
       <TooltipProvider>
         <Outlet />
@@ -38,6 +46,7 @@ function App() {
 
   // If not authenticated and not on auth page, show basic layout (ProtectedRoute will handle redirect)
   if (!isAuthenticated) {
+    console.log('App: Not authenticated, showing basic layout');
     return (
       <TooltipProvider>
         <Outlet />
@@ -47,6 +56,7 @@ function App() {
   }
 
   // For authenticated users on any route other than auth, show dashboard layout with sidebar
+  console.log('App: Authenticated user, showing dashboard layout');
   return (
     <TooltipProvider>
       <SidebarProvider defaultOpen={true}>

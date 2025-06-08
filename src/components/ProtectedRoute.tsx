@@ -12,8 +12,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const location = useLocation();
 
   useEffect(() => {
-    console.log('ProtectedRoute: Auth state check', { isAuthenticated, loading, path: location.pathname });
-  }, [isAuthenticated, loading, location.pathname]);
+    console.log('ProtectedRoute: Auth state check', { 
+      isAuthenticated, 
+      loading, 
+      path: location.pathname,
+      search: location.search 
+    });
+  }, [isAuthenticated, loading, location.pathname, location.search]);
 
   // Show loading while determining auth state
   if (loading) {
