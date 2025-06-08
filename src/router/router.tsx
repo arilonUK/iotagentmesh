@@ -9,9 +9,6 @@ export const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: routes,
-  },
-  {
-    path: "*",
-    element: <NotFound />,
+    errorBoundary: NotFound,
   },
 ]);
