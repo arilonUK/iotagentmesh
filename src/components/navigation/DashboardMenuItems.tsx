@@ -6,75 +6,75 @@ import { SidebarMenu } from '@/components/ui/sidebar';
 export default function DashboardMenuItems() {
   return (
     <SidebarMenu className="list-none p-0 m-0">
-      <NavMenuItem to="/dashboard" icon={Home} end>
+      <NavMenuItem to="/" icon={Home} end>
         Dashboard
       </NavMenuItem>
       
       <NavMenuItem 
-        to="/dashboard/devices" 
+        to="/devices" 
         icon={Laptop}
       >
         Devices
       </NavMenuItem>
       
       <NavMenuItem 
-        to="/dashboard/products" 
+        to="/products" 
         icon={Package}
       >
         Products
       </NavMenuItem>
       
       <NavMenuItem 
-        to="/dashboard/alarms" 
+        to="/alarms" 
         icon={AlertTriangle}
       >
         Alarms
       </NavMenuItem>
 
       <NavMenuItem 
-        to="/dashboard/data-buckets" 
+        to="/data-buckets" 
         icon={Layers}
       >
         Data Management
       </NavMenuItem>
       
       <NavMenuItem 
-        to="/dashboard/integrations" 
+        to="/integrations" 
         icon={Link}
       >
         Integrations
       </NavMenuItem>
       
       <NavMenuItem 
-        to="/dashboard/endpoints" 
+        to="/endpoints" 
         icon={Link}
       >
         Endpoints
       </NavMenuItem>
       
       <NavMenuItem 
-        to="/dashboard/file-storage" 
+        to="/file-storage" 
         icon={Upload}
       >
         File Storage
       </NavMenuItem>
       
       <NavMenuItem 
-        to="/dashboard/notifications/settings" 
+        to="/notifications/settings" 
         icon={Bell}
       >
         Notifications
       </NavMenuItem>
       
       <NavMenuItem 
-        to="/dashboard/settings" 
+        to="/settings" 
         icon={Settings}
       >
         Settings
       </NavMenuItem>
       
       <NavMenuItem 
-        to="/dashboard/documentation" 
+        to="/documentation" 
         icon={LifeBuoy}
       >
         Documentation
