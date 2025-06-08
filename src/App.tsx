@@ -46,7 +46,7 @@ function App() {
     );
   }
 
-  // For authenticated users on protected pages, show dashboard layout with sidebar
+  // For authenticated users on any route other than auth, show dashboard layout with sidebar
   return (
     <TooltipProvider>
       <SidebarProvider defaultOpen={true}>
