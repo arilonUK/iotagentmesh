@@ -12,7 +12,7 @@ const Auth = () => {
   useEffect(() => {
     console.log('Auth page: checking auth state', { isAuthenticated, loading });
     
-    // If user is already authenticated, redirect them
+    // Only redirect if user is authenticated and not loading
     if (isAuthenticated && !loading) {
       console.log('Auth page: User already authenticated, redirecting to dashboard');
       
@@ -22,7 +22,7 @@ const Auth = () => {
     }
   }, [isAuthenticated, loading, navigate, location]);
 
-  // Show loading while checking auth state
+  // Show loading only while auth state is being determined
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -34,18 +34,7 @@ const Auth = () => {
     );
   }
 
-  // If user is authenticated, don't show the auth form (they should be redirected)
-  if (isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Redirecting to dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
+  // Show auth form for unauthenticated users
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full space-y-8">

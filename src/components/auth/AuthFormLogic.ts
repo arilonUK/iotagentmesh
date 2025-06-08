@@ -12,11 +12,11 @@ export const useAuthFormLogic = () => {
     setIsLoading(true);
     
     try {
-      console.log("Attempting login for:", email);
+      console.log("AuthFormLogic: Attempting login for:", email);
       const result = await signIn(email, password);
       
       if (result?.error) {
-        console.error("Login error:", result.error);
+        console.error("AuthFormLogic: Login error:", result.error);
         let errorMessage = result.error.message;
         if (errorMessage.includes('Invalid login credentials')) {
           errorMessage = 'Invalid email or password. Please check your credentials and try again.';
@@ -28,11 +28,10 @@ export const useAuthFormLogic = () => {
         return { error: errorMessage };
       }
       
-      console.log("Login successful");
-      // Don't set loading to false here - let the auth state change handle it
+      console.log("AuthFormLogic: Login successful, auth context will handle redirect");
       return { success: true };
     } catch (error: any) {
-      console.error("Login exception:", error);
+      console.error("AuthFormLogic: Login exception:", error);
       setIsLoading(false);
       return { error: error.message || 'An unexpected error occurred during sign in' };
     }

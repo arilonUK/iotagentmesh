@@ -15,6 +15,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     console.log('ProtectedRoute: Auth state check', { isAuthenticated, loading, path: location.pathname });
   }, [isAuthenticated, loading, location.pathname]);
 
+  // Show loading while determining auth state
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -26,10 +27,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
+  // Redirect to auth if not authenticated
   if (!isAuthenticated) {
     console.log("ProtectedRoute: No active session, redirecting to auth page");
-    
-    // Redirect to auth page with a reason parameter and save the current location
     return <Navigate to="/auth?reason=protected" state={{ from: location }} replace />;
   }
 
