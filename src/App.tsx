@@ -26,8 +26,18 @@ function App() {
     );
   }
 
-  // If on auth page or not authenticated, show basic layout
-  if (isAuthPage || !isAuthenticated) {
+  // If on auth page, show basic layout regardless of auth status
+  if (isAuthPage) {
+    return (
+      <TooltipProvider>
+        <Outlet />
+        <Toaster />
+      </TooltipProvider>
+    );
+  }
+
+  // If not authenticated and not on auth page, show basic layout (ProtectedRoute will handle redirect)
+  if (!isAuthenticated) {
     return (
       <TooltipProvider>
         <Outlet />
