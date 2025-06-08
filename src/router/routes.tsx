@@ -18,6 +18,10 @@ const Dashboard = lazy(() => import('@/pages/Dashboard'));
 // Define routes
 export const routes: RouteObject[] = [
   {
+    path: '/auth',
+    element: <Auth />,
+  },
+  {
     path: '/',
     element: <ProtectedRoute><Dashboard /></ProtectedRoute>,
   },
@@ -44,10 +48,6 @@ export const routes: RouteObject[] = [
   {
     path: '/database-schema',
     element: <ProtectedRoute><DatabaseSchema /></ProtectedRoute>,
-  },
-  {
-    path: '/auth',
-    element: <Auth />,
   },
   {
     path: '*',

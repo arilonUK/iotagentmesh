@@ -1,5 +1,5 @@
 
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/contexts/auth";
@@ -9,6 +9,10 @@ import Header from "@/components/Header";
 
 function App() {
   const { isAuthenticated, loading } = useAuth();
+  const location = useLocation();
+  
+  // Check if we're on the auth page
+  const isAuthPage = location.pathname === '/auth';
 
   // Show loading while auth is being determined
   if (loading) {
@@ -22,31 +26,31 @@ function App() {
     );
   }
 
-  // If authenticated, show dashboard layout with sidebar
-  if (isAuthenticated) {
+  // If on auth page or not authenticated, show basic layout
+  if (isAuthPage || !isAuthenticated) {
     return (
       <TooltipProvider>
-        <SidebarProvider defaultOpen={true}>
-          <div className="flex min-h-screen w-full">
-            <DashboardNav />
-            <div className="flex-1 flex flex-col">
-              <Header />
-              <main className="flex-1 p-4 lg:p-8 bg-gray-50">
-                <Outlet />
-              </main>
-            </div>
-          </div>
-          <Toaster />
-        </SidebarProvider>
+        <Outlet />
+        <Toaster />
       </TooltipProvider>
     );
   }
 
-  // For unauthenticated users, show basic layout
+  // For authenticated users on protected pages, show dashboard layout with sidebar
   return (
     <TooltipProvider>
-      <Outlet />
-      <Toaster />
+      <SidebarProvider defaultOpen={true}>
+        <div className="flex min-h-screen w-full">
+          <DashboardNav />
+          <div className="flex-1 flex flex-col">
+            <Header />
+            <main className="flex-1 p-4 lg:p-8 bg-gray-50">
+              <Outlet />
+            </main>
+          </div>
+        </div>
+        <Toaster />
+      </SidebarProvider>
     </TooltipProvider>
   );
 }
