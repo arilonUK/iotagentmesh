@@ -10,6 +10,7 @@ import Alarms from '@/pages/Alarms';
 import NotFound from '@/pages/NotFound';
 import DatabaseSchema from '@/pages/DatabaseSchema';
 import Auth from '@/pages/Auth';
+import Documentation from '@/pages/Documentation';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 // Import components using lazy loading for pages that exist
@@ -44,6 +45,10 @@ export const routes: RouteObject[] = [
   {
     path: '/alarms',
     element: <ProtectedRoute><Alarms /></ProtectedRoute>,
+  },
+  {
+    path: '/documentation',
+    element: <ProtectedRoute><Documentation /></ProtectedRoute>,
   },
   {
     path: '/database-schema',
