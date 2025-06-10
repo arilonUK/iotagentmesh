@@ -9,6 +9,7 @@ import { useOrganization } from '@/contexts/organization';
 import { useAuth } from '@/contexts/auth';
 import { LoadingProgress } from '@/components/LoadingProgress';
 import { useContextFactory } from '@/contexts/factory/ContextFactoryProvider';
+import { Device } from '@/types/device';
 
 const Dashboard = () => {
   const { isAuthenticated } = useAuth();
@@ -18,30 +19,33 @@ const Dashboard = () => {
   // Use optimized query for devices with caching
   const { data: devices = [], isLoading: devicesLoading, error } = useOptimizedQuery({
     queryKey: ['devices', organization?.id],
-    queryFn: async () => {
+    queryFn: async (): Promise<Device[]> => {
       if (!organization?.id) return [];
       
-      // Mock device data for demonstration
+      // Mock device data for demonstration with correct status types
       return [
         {
           id: '1',
           name: 'Temperature Sensor 01',
           type: 'sensor',
-          status: 'online',
+          status: 'online' as const,
+          organization_id: organization.id,
           last_active_at: new Date().toISOString()
         },
         {
           id: '2',
           name: 'Humidity Monitor',
           type: 'monitor', 
-          status: 'online',
+          status: 'online' as const,
+          organization_id: organization.id,
           last_active_at: new Date().toISOString()
         },
         {
           id: '3',
           name: 'Air Quality Detector',
           type: 'detector',
-          status: 'warning',
+          status: 'warning' as const,
+          organization_id: organization.id,
           last_active_at: new Date().toISOString()
         }
       ];
