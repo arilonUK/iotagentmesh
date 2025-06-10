@@ -1,11 +1,9 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProducts } from '@/hooks/useProducts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CreateProductDialog } from './CreateProductDialog';
-import { EditProductDialog } from './EditProductDialog';
-import { DeleteProductDialog } from './DeleteProductDialog';
+import { ProductCardActions } from './ProductCardActions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -129,17 +127,10 @@ export function ProductList() {
                         Version {product.version}
                       </CardDescription>
                     </div>
-                    <div 
-                      className="flex items-center gap-1 flex-shrink-0"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <EditProductDialog product={product} />
-                      <DeleteProductDialog 
-                        productId={product.id} 
-                        productName={product.name} 
-                        onDelete={handleProductDelete}
-                      />
-                    </div>
+                    <ProductCardActions 
+                      product={product} 
+                      onDelete={handleProductDelete}
+                    />
                   </div>
                   {product.status && (
                     <Badge className={`w-fit ${getStatusBadgeColor(product.status)}`}>
