@@ -28,16 +28,13 @@ const Dashboard = lazy(() => import('@/pages/Dashboard'));
 
 // Define routes
 export const routes: RouteObject[] = [
-  // Auth route - must be before protected routes
-  {
-    path: '/auth',
-    element: <Auth />,
-  },
+  // Public routes first (including auth)
+  ...publicRoutes,
   
   // Root redirect to dashboard for authenticated users
   {
     path: '/',
-    element: <ProtectedRoute><Dashboard /></ProtectedRoute>,
+    element: <Navigate to="/dashboard" replace />,
   },
   
   // Dashboard routes (includes /dashboard and sub-routes)
@@ -93,9 +90,6 @@ export const routes: RouteObject[] = [
     path: '/notifications/settings',
     element: <ProtectedRoute><NotificationSettings /></ProtectedRoute>,
   },
-  
-  // Public routes (should come after protected routes to avoid conflicts)
-  ...publicRoutes,
   
   // 404 catch-all route - must be last
   {

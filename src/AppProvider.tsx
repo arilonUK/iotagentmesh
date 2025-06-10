@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/contexts/auth/AuthProvider";
 import { ToastProvider } from "@/contexts/toast";
 import { OrganizationProvider } from "@/contexts/organization";
+import { ContextFactoryProvider } from "@/contexts/factory/ContextFactoryProvider";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,11 +32,13 @@ const AppProvider = ({ children }: { children: React.ReactNode }) => {
       <TooltipProvider>
         <ToastProvider>
           <Toaster />
-          <AuthProvider>
-            <OrganizationProvider>
-              {children}
-            </OrganizationProvider>
-          </AuthProvider>
+          <ContextFactoryProvider>
+            <AuthProvider>
+              <OrganizationProvider>
+                {children}
+              </OrganizationProvider>
+            </AuthProvider>
+          </ContextFactoryProvider>
         </ToastProvider>
       </TooltipProvider>
     </QueryClientProvider>
