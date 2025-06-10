@@ -16,6 +16,7 @@ import IntegrationsAndConnectivity from '@/pages/IntegrationsAndConnectivity';
 import FileStorage from '@/pages/FileStorage';
 import NotificationSettings from '@/pages/NotificationSettings';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { Navigate } from 'react-router-dom';
 
 // Import route configurations
 import { settingsRoutes } from './settingsRoutes';
@@ -44,6 +45,12 @@ export const routes: RouteObject[] = [
   
   // Settings routes
   ...settingsRoutes,
+  
+  // Redirect /settings to /dashboard/settings
+  {
+    path: '/settings',
+    element: <Navigate to="/dashboard/settings" replace />,
+  },
   
   // Legacy routes for backward compatibility
   {
