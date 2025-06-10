@@ -1339,7 +1339,15 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      timezone_cache: {
+        Row: {
+          abbrev: string | null
+          is_dst: boolean | null
+          name: string | null
+          utc_offset: unknown | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       acknowledge_alarm_event_bypass_rls: {
@@ -1359,6 +1367,10 @@ export type Database = {
         Returns: boolean
       }
       cleanup_old_api_logs: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      cleanup_old_data: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
@@ -1559,6 +1571,23 @@ export type Database = {
           delta: number
         }[]
       }
+      get_device_readings_optimized: {
+        Args: {
+          p_device_id: string
+          p_reading_type?: string
+          p_start_time?: string
+          p_end_time?: string
+          p_limit?: number
+        }
+        Returns: {
+          id: string
+          device_id: string
+          reading_type: string
+          value: number
+          reading_timestamp: string
+          metadata: Json
+        }[]
+      }
       get_devices_by_org_id: {
         Args: { p_organization_id: string }
         Returns: {
@@ -1628,6 +1657,18 @@ export type Database = {
           role: Database["public"]["Enums"]["role_type"]
           updated_at: string
           user_id: string
+        }[]
+      }
+      get_organization_summary: {
+        Args: { p_organization_id: string }
+        Returns: {
+          total_devices: number
+          active_devices: number
+          total_alarms: number
+          active_alarms: number
+          total_endpoints: number
+          active_endpoints: number
+          recent_readings_count: number
         }[]
       }
       get_organization_with_role: {
@@ -1735,6 +1776,10 @@ export type Database = {
       mark_notification_as_read: {
         Args: { p_notification_id: string; p_user_id: string }
         Returns: boolean
+      }
+      refresh_timezone_cache: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       reset_expired_rate_limits: {
         Args: Record<PropertyKey, never>
