@@ -12,7 +12,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, Trash2 } from "lucide-react";
 import { productServices } from "@/services/products";
 import { useToast } from "@/hooks/use-toast";
 
@@ -51,7 +51,14 @@ export function DeleteProductDialog({ productId, productName, onDelete }: Delete
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive">Delete Product</Button>
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className="hover:bg-destructive/10 hover:text-destructive"
+          title="Delete product"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
