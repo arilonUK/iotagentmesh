@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, ArrowUp, Activity } from 'lucide-react';
@@ -20,10 +21,30 @@ const Dashboard = () => {
     queryFn: async () => {
       if (!organization?.id) return [];
       
-      // This would be replaced with your actual device fetching logic
-      const response = await fetch(`/api/organizations/${organization.id}/devices`);
-      if (!response.ok) throw new Error('Failed to fetch devices');
-      return response.json();
+      // Mock device data for demonstration
+      return [
+        {
+          id: '1',
+          name: 'Temperature Sensor 01',
+          type: 'sensor',
+          status: 'online',
+          last_active_at: new Date().toISOString()
+        },
+        {
+          id: '2',
+          name: 'Humidity Monitor',
+          type: 'monitor', 
+          status: 'online',
+          last_active_at: new Date().toISOString()
+        },
+        {
+          id: '3',
+          name: 'Air Quality Detector',
+          type: 'detector',
+          status: 'warning',
+          last_active_at: new Date().toISOString()
+        }
+      ];
     },
     enabled: !!organization?.id,
     cacheConfig: 'DEVICE_LIST',
@@ -43,21 +64,6 @@ const Dashboard = () => {
         title="Loading Dashboard"
         description="Optimizing your IoT control center..."
       />
-    );
-  }
-
-  // Show organization loading state
-  if (orgLoading) {
-    return (
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
-          <p className="text-muted-foreground">Loading organization...</p>
-        </div>
-        <div className="flex items-center justify-center h-48">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </div>
     );
   }
 

@@ -41,7 +41,7 @@ export function useOptimizedQuery<T>({
       return data;
     },
     staleTime: config.staleTime,
-    cacheTime: config.cacheTime,
+    gcTime: config.cacheTime, // Updated from cacheTime to gcTime for TanStack Query v5
     ...options,
   });
 }

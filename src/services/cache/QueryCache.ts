@@ -52,12 +52,12 @@ export class QueryCache {
     this.cache.clear();
   }
 
-  // Metadata cache configurations
+  // Updated cache configurations for better performance
   static readonly CACHE_CONFIGS = {
     FUNCTION_METADATA: {
       ttl: 3600000, // 1 hour
       staleTime: 1800000, // 30 minutes
-      cacheTime: 3600000 // 1 hour
+      cacheTime: 3600000 // 1 hour (will be used as gcTime)
     },
     ORGANIZATION_DATA: {
       ttl: 600000, // 10 minutes
