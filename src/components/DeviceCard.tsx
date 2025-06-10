@@ -21,11 +21,11 @@ const statusColors = {
 
 const DeviceCard: React.FC<DeviceCardProps> = ({ id, name, type, status, last_active_at }) => {
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-shadow overflow-hidden">
       <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-lg font-medium">{name}</CardTitle>
-          <Badge variant={status === 'online' ? 'default' : 'secondary'} className="ml-2">
+        <div className="flex justify-between items-start gap-2">
+          <CardTitle className="text-lg font-medium flex-1 min-w-0 truncate">{name}</CardTitle>
+          <Badge variant={status === 'online' ? 'default' : 'secondary'} className="flex-shrink-0 whitespace-nowrap">
             <Circle className={`h-2 w-2 mr-1 ${statusColors[status]}`} />
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </Badge>
