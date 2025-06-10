@@ -12,6 +12,7 @@ import DatabaseSchema from '@/pages/DatabaseSchema';
 import Auth from '@/pages/Auth';
 import Documentation from '@/pages/Documentation';
 import DataBuckets from '@/pages/DataBuckets';
+import IntegrationsAndConnectivity from '@/pages/IntegrationsAndConnectivity';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 // Import route configurations
@@ -62,6 +63,10 @@ export const routes: RouteObject[] = [
   {
     path: '/data-buckets',
     element: <ProtectedRoute><DataBuckets /></ProtectedRoute>,
+  },
+  {
+    path: '/integrations',
+    element: <ProtectedRoute><IntegrationsAndConnectivity /></ProtectedRoute>,
   },
   {
     path: '/database-schema',
