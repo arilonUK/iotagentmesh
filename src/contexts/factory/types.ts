@@ -1,20 +1,19 @@
 
-import { QueryClient } from '@tanstack/react-query';
 import { Session, User } from '@supabase/supabase-js';
 
 export enum ContextType {
-  QUERY_CLIENT = 'queryClient',
-  AUTH = 'auth',
-  ORGANIZATION = 'organization',
-  NOTIFICATION = 'notification',
-  TOAST = 'toast'
+  QUERY_CLIENT = 'QUERY_CLIENT',
+  TOAST = 'TOAST',
+  AUTH = 'AUTH',
+  ORGANIZATION = 'ORGANIZATION',
+  NOTIFICATION = 'NOTIFICATION',
 }
 
 export enum InitializationState {
   PENDING = 'pending',
   LOADING = 'loading',
   READY = 'ready',
-  ERROR = 'error'
+  ERROR = 'error',
 }
 
 export interface ContextRegistration {
@@ -42,4 +41,5 @@ export interface ContextFactoryValue extends ContextFactoryState {
   getError: (type: ContextType) => Error | null;
   setSession: (session: Session | null) => void;
   retryInitialization: (type?: ContextType) => Promise<void>;
+  initializationProgress?: number;
 }

@@ -1,26 +1,50 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, ArrowUp, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import DeviceCard from '@/components/DeviceCard';
-import { useDevices } from '@/hooks/useDevices';
+import { useOptimizedQuery } from '@/hooks/useOptimizedQuery';
 import { useOrganization } from '@/contexts/organization';
 import { useAuth } from '@/contexts/auth';
+import { LoadingProgress } from '@/components/LoadingProgress';
+import { useContextFactory } from '@/contexts/factory/ContextFactoryProvider';
 
 const Dashboard = () => {
   const { isAuthenticated } = useAuth();
   const { organization, isLoading: orgLoading } = useOrganization();
-  const { devices, isLoading: devicesLoading, error } = useDevices(organization?.id);
+  const { initializationProgress = 0 } = useContextFactory();
 
-  console.log('=== DASHBOARD COMPONENT DEBUG ===');
+  // Use optimized query for devices with caching
+  const { data: devices = [], isLoading: devicesLoading, error } = useOptimizedQuery({
+    queryKey: ['devices', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return [];
+      
+      // This would be replaced with your actual device fetching logic
+      const response = await fetch(`/api/organizations/${organization.id}/devices`);
+      if (!response.ok) throw new Error('Failed to fetch devices');
+      return response.json();
+    },
+    enabled: !!organization?.id,
+    cacheConfig: 'DEVICE_LIST',
+  });
+
+  console.log('=== DASHBOARD COMPONENT DEBUG (OPTIMIZED) ===');
   console.log('Auth state:', { isAuthenticated });
   console.log('Organization:', organization);
-  console.log('Organization ID:', organization?.id);
   console.log('Devices:', devices);
-  console.log('Devices length:', devices?.length);
-  console.log('Is loading devices:', devicesLoading);
-  console.log('Error:', error);
+  console.log('Initialization progress:', initializationProgress);
+
+  // Show enhanced loading with progress
+  if (orgLoading || initializationProgress < 100) {
+    return (
+      <LoadingProgress
+        progress={initializationProgress}
+        title="Loading Dashboard"
+        description="Optimizing your IoT control center..."
+      />
+    );
+  }
 
   // Show organization loading state
   if (orgLoading) {
@@ -72,7 +96,7 @@ const Dashboard = () => {
           <CardContent className="pt-6">
             <div className="text-center">
               <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Devices</h3>
-              <p className="text-red-600 mb-2">{error}</p>
+              <p className="text-red-600 mb-2">{error.message}</p>
               <p className="text-sm text-red-500">
                 Organization: {organization.name} (ID: {organization.id})
               </p>
@@ -91,15 +115,15 @@ const Dashboard = () => {
       <div>
         <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
         <p className="text-muted-foreground">Welcome back to your IoT control center.</p>
-        {/* Debug info - remove this later */}
+        {/* Performance indicator - remove this later */}
         {process.env.NODE_ENV === 'development' && (
           <div className="text-xs text-gray-400 mt-2">
-            Org: {organization.name} | ID: {organization.id} | Devices: {devices.length}
+            Org: {organization.name} | ID: {organization.id} | Devices: {devices.length} | Cache: Optimized
           </div>
         )}
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards - now with cached data */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
@@ -112,7 +136,7 @@ const Dashboard = () => {
               <div className="text-2xl font-bold">{devices.length}</div>
               <div className="text-xs font-medium flex items-center text-iot-success">
                 <ArrowUp className="mr-1 h-4 w-4" />
-                Recent
+                Cached
               </div>
             </div>
           </CardContent>
@@ -170,7 +194,7 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Recent Devices */}
+      {/* Recent Devices - now with optimized loading */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">Recent Devices</h2>

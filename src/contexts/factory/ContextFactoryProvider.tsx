@@ -10,6 +10,7 @@ import {
 import { createContextRegistrations } from './contextRegistrations';
 import { createContextInitializer } from './contextInitializer';
 import { createContextHooks } from './contextHooks';
+import { createOptimizedContextInitializer } from './optimizedContextInitializer';
 
 const ContextFactoryContext = createContext<ContextFactoryValue | undefined>(undefined);
 
@@ -36,6 +37,10 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
     user: null,
   });
 
+  // Performance tracking
+  const [initializationProgress, setInitializationProgress] = useState(0);
+  const initStartTime = useRef<number>(0);
+
   // Use a ref to track initialization progress
   const initializationRef = useRef<{ inProgress: boolean; completed: Set<ContextType> }>({
     inProgress: false,
@@ -45,7 +50,13 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
   // Create context hooks
   const { getContext, isReady, getError } = createContextHooks(state);
 
-  // Create context initializer
+  // Create optimized context initializer
+  const optimizedInitializer = createOptimizedContextInitializer(
+    state.contexts,
+    setState
+  );
+
+  // Create context initializer (legacy fallback)
   const { initializeContext } = createContextInitializer(setState, initializationRef);
 
   // Register context factories
@@ -72,39 +83,55 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
     if (type) {
       await initializeContext(type, state.contexts);
     } else {
-      // Reset and retry all
-      initializationRef.current.completed.clear();
-      initializationRef.current.inProgress = false;
-      setState(prev => ({ ...prev, globalState: InitializationState.PENDING }));
+      // Use optimized parallel retry
+      await optimizedInitializer.retryFailedContexts();
     }
-  }, [initializeContext, state.contexts]);
+  }, [initializeContext, optimizedInitializer, state.contexts]);
 
-  // Initialize non-lazy contexts in order
+  // Optimized parallel initialization
   useEffect(() => {
     if (state.contexts.size === 0 || initializationRef.current.inProgress) {
       return;
     }
 
-    const initializeNonLazyContexts = async () => {
+    const initializeContextsOptimized = async () => {
       try {
-        console.log('Starting context initialization...');
+        console.log('Starting optimized context initialization...');
+        initStartTime.current = performance.now();
         initializationRef.current.inProgress = true;
         setState(prev => ({ ...prev, globalState: InitializationState.LOADING }));
         
-        // Initialize contexts sequentially to ensure proper dependency order
-        for (const type of state.initializationOrder) {
-          const registration = state.contexts.get(type);
-          if (registration && !registration.lazy) {
-            console.log(`Initializing ${type}...`);
-            await initializeContext(type, state.contexts);
-            console.log(`${type} initialization complete`);
-          }
-        }
+        // Use parallel initialization for better performance
+        const results = await optimizedInitializer.initializeContextsParallel();
         
-        console.log('All non-lazy contexts initialized successfully');
-        setState(prev => ({ ...prev, globalState: InitializationState.READY }));
+        // Update progress tracking
+        const progressInterval = setInterval(() => {
+          const progress = optimizedInitializer.getInitializationProgress();
+          setInitializationProgress(progress);
+          
+          if (progress >= 100) {
+            clearInterval(progressInterval);
+          }
+        }, 100);
+        
+        const successCount = Array.from(results.values()).filter(r => r.success).length;
+        const totalTime = performance.now() - initStartTime.current;
+        
+        console.log(`Optimized context initialization completed in ${totalTime.toFixed(2)}ms`);
+        console.log(`Success rate: ${successCount}/${results.size} contexts`);
+        
+        setState(prev => ({ 
+          ...prev, 
+          globalState: successCount === results.size 
+            ? InitializationState.READY 
+            : InitializationState.ERROR
+        }));
+        
+        clearInterval(progressInterval);
+        setInitializationProgress(100);
+        
       } catch (error) {
-        console.error('Context initialization failed:', error);
+        console.error('Optimized context initialization failed:', error);
         setState(prev => ({ 
           ...prev, 
           globalState: InitializationState.ERROR,
@@ -116,9 +143,9 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
     };
 
     if (state.globalState === InitializationState.PENDING) {
-      initializeNonLazyContexts();
+      initializeContextsOptimized();
     }
-  }, [state.contexts, state.globalState, state.initializationOrder, initializeContext]);
+  }, [state.contexts, state.globalState, optimizedInitializer]);
 
   const value: ContextFactoryValue = {
     ...state,
@@ -127,6 +154,7 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
     getError,
     setSession,
     retryInitialization,
+    initializationProgress,
   };
 
   return (
