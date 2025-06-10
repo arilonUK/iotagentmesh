@@ -6,16 +6,13 @@ import TeamSettings from "@/pages/TeamSettings";
 import OAuthConnections from "@/pages/OAuthConnections";
 import ApiKeyManagement from "@/pages/ApiKeyManagement";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import DashboardLayout from "@/layouts/DashboardLayout";
 
 export const settingsRoutes = [
   {
     path: "/dashboard/settings",
     element: (
       <ProtectedRoute>
-        <DashboardLayout>
-          <ProfileSettings />
-        </DashboardLayout>
+        <ProfileSettings />
       </ProtectedRoute>
     ),
   },
@@ -27,9 +24,7 @@ export const settingsRoutes = [
     path: "/dashboard/settings/organization",
     element: (
       <ProtectedRoute>
-        <DashboardLayout>
-          <OrganizationSettings />
-        </DashboardLayout>
+        <OrganizationSettings />
       </ProtectedRoute>
     ),
   },
@@ -37,9 +32,7 @@ export const settingsRoutes = [
     path: "/dashboard/settings/team",
     element: (
       <ProtectedRoute>
-        <DashboardLayout>
-          <TeamSettings />
-        </DashboardLayout>
+        <TeamSettings />
       </ProtectedRoute>
     ),
   },
@@ -47,9 +40,7 @@ export const settingsRoutes = [
     path: "/dashboard/settings/oauth",
     element: (
       <ProtectedRoute>
-        <DashboardLayout>
-          <OAuthConnections />
-        </DashboardLayout>
+        <OAuthConnections />
       </ProtectedRoute>
     ),
   },
@@ -57,9 +48,7 @@ export const settingsRoutes = [
     path: "/dashboard/settings/api-keys",
     element: (
       <ProtectedRoute>
-        <DashboardLayout>
-          <ApiKeyManagement />
-        </DashboardLayout>
+        <ApiKeyManagement />
       </ProtectedRoute>
     ),
   },
