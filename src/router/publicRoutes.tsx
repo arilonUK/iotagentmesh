@@ -8,7 +8,7 @@ import Index from "@/pages/Index";
 
 export const publicRoutes = [
   {
-    path: "/",
+    path: "/welcome",
     element: <Index />,
   },
   {

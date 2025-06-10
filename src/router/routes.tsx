@@ -34,7 +34,7 @@ export const routes: RouteObject[] = [
   // Root redirect to dashboard for authenticated users
   {
     path: '/',
-    element: <Navigate to="/dashboard" replace />,
+    element: <ProtectedRoute><Navigate to="/dashboard" replace /></ProtectedRoute>,
   },
   
   // Dashboard routes (includes /dashboard and sub-routes)
