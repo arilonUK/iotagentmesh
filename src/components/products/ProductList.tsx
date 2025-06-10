@@ -119,35 +119,41 @@ export function ProductList() {
               onClick={() => handleProductClick(product.id)}
             >
               <CardHeader className="flex-1 pb-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <CardTitle className="text-xl truncate">{product.name}</CardTitle>
-                    {product.status && (
-                      <Badge className={`mt-1 ${getStatusBadgeColor(product.status)}`}>
-                        {product.status}
-                      </Badge>
-                    )}
-                    <CardDescription className="mt-2">Version {product.version}</CardDescription>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-lg font-semibold mb-2 text-foreground">
+                        {product.name}
+                      </CardTitle>
+                      <CardDescription className="text-sm text-muted-foreground">
+                        Version {product.version}
+                      </CardDescription>
+                    </div>
+                    <div 
+                      className="flex items-center gap-1 flex-shrink-0"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <EditProductDialog product={product} />
+                      <DeleteProductDialog 
+                        productId={product.id} 
+                        productName={product.name} 
+                        onDelete={handleProductDelete}
+                      />
+                    </div>
                   </div>
-                  <div 
-                    className="flex items-center gap-1 flex-shrink-0"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <EditProductDialog product={product} />
-                    <DeleteProductDialog 
-                      productId={product.id} 
-                      productName={product.name} 
-                      onDelete={handleProductDelete}
-                    />
-                  </div>
+                  {product.status && (
+                    <Badge className={`w-fit ${getStatusBadgeColor(product.status)}`}>
+                      {product.status}
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <p className="text-sm text-muted-foreground line-clamp-2">
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                   {product.description || "No description provided"}
                 </p>
                 {product.category && (
-                  <p className="text-xs text-muted-foreground mt-2">
+                  <p className="text-xs text-muted-foreground">
                     Category: {product.category}
                   </p>
                 )}
