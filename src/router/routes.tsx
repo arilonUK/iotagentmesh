@@ -12,6 +12,10 @@ import DatabaseSchema from '@/pages/DatabaseSchema';
 import Auth from '@/pages/Auth';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
+// Import route configurations
+import { settingsRoutes } from './settingsRoutes';
+import { dashboardRoutes } from './dashboardRoutes';
+
 // Import components using lazy loading for pages that exist
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
 
@@ -49,6 +53,10 @@ export const routes: RouteObject[] = [
     path: '/database-schema',
     element: <ProtectedRoute><DatabaseSchema /></ProtectedRoute>,
   },
+  // Include settings routes
+  ...settingsRoutes,
+  // Include dashboard routes
+  ...dashboardRoutes,
   {
     path: '*',
     element: <NotFound />,
