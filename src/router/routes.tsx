@@ -14,6 +14,7 @@ import Documentation from '@/pages/Documentation';
 import DataBuckets from '@/pages/DataBuckets';
 import IntegrationsAndConnectivity from '@/pages/IntegrationsAndConnectivity';
 import FileStorage from '@/pages/FileStorage';
+import NotificationSettings from '@/pages/NotificationSettings';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 // Import route configurations
@@ -80,6 +81,10 @@ export const routes: RouteObject[] = [
   {
     path: '/documentation',
     element: <ProtectedRoute><Documentation /></ProtectedRoute>,
+  },
+  {
+    path: '/notifications/settings',
+    element: <ProtectedRoute><NotificationSettings /></ProtectedRoute>,
   },
   
   // Public routes (should come after protected routes to avoid conflicts)
