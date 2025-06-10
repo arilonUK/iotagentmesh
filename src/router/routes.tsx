@@ -13,6 +13,7 @@ import Auth from '@/pages/Auth';
 import Documentation from '@/pages/Documentation';
 import DataBuckets from '@/pages/DataBuckets';
 import IntegrationsAndConnectivity from '@/pages/IntegrationsAndConnectivity';
+import FileStorage from '@/pages/FileStorage';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 // Import route configurations
@@ -67,6 +68,10 @@ export const routes: RouteObject[] = [
   {
     path: '/integrations',
     element: <ProtectedRoute><IntegrationsAndConnectivity /></ProtectedRoute>,
+  },
+  {
+    path: '/file-storage',
+    element: <ProtectedRoute><FileStorage /></ProtectedRoute>,
   },
   {
     path: '/database-schema',
