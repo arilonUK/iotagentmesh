@@ -11,6 +11,7 @@ import NotFound from '@/pages/NotFound';
 import DatabaseSchema from '@/pages/DatabaseSchema';
 import Auth from '@/pages/Auth';
 import Documentation from '@/pages/Documentation';
+import DataBuckets from '@/pages/DataBuckets';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 // Import route configurations
@@ -57,6 +58,10 @@ export const routes: RouteObject[] = [
   {
     path: '/alarms',
     element: <ProtectedRoute><Alarms /></ProtectedRoute>,
+  },
+  {
+    path: '/data-buckets',
+    element: <ProtectedRoute><DataBuckets /></ProtectedRoute>,
   },
   {
     path: '/database-schema',
