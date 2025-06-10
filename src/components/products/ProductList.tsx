@@ -9,16 +9,12 @@ import { DeleteProductDialog } from './DeleteProductDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-// Removed Input import, since we're removing the search input section
-// import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useOrganization } from '@/contexts/organization';
 
 export function ProductList() {
   console.log('ProductList rendered');
   const { products, isLoading, error } = useProducts();
-  // Remove searchTerm state and setSearchTerm
-  // const [searchTerm, setSearchTerm] = React.useState('');
   const navigate = useNavigate();
   const { organization } = useOrganization();
 
@@ -26,15 +22,6 @@ export function ProductList() {
   console.log('Products:', products);
   console.log('Loading:', isLoading);
   console.log('Error:', error);
-
-  // Remove search filtering since the input is gone
-  // const filteredProducts = React.useMemo(() => {
-  //   if (!products) return [];
-  //   return products.filter(product => 
-  //     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  //   );
-  // }, [products, searchTerm]);
 
   const getStatusBadgeColor = (status?: string) => {
     switch (status) {
@@ -112,17 +99,7 @@ export function ProductList() {
         <h2 className="text-2xl font-bold">Products</h2>
         <CreateProductDialog />
       </div>
-      {/* Removed search input section here */}
-      {/* <div className="mb-4">
-        <Input
-          placeholder="Search products..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-md"
-        />
-      </div> */}
 
-      {/* Use products array directly since filtering is removed */}
       {!products || products.length === 0 ? (
         <Card className="p-8 text-center">
           <div className="flex flex-col items-center justify-center gap-2">
@@ -138,21 +115,22 @@ export function ProductList() {
           {products.map((product) => (
             <Card 
               key={product.id} 
-              className="flex flex-col cursor-pointer hover:border-primary/50 transition-all"
+              className="flex flex-col cursor-pointer hover:border-primary/50 transition-all relative overflow-hidden"
               onClick={() => handleProductClick(product.id)}
             >
-              <CardHeader className="flex-1">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl">{product.name}</CardTitle>
+              <CardHeader className="flex-1 pb-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-xl truncate">{product.name}</CardTitle>
                     {product.status && (
                       <Badge className={`mt-1 ${getStatusBadgeColor(product.status)}`}>
                         {product.status}
                       </Badge>
                     )}
+                    <CardDescription className="mt-2">Version {product.version}</CardDescription>
                   </div>
                   <div 
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-1 flex-shrink-0"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <EditProductDialog product={product} />
@@ -163,10 +141,9 @@ export function ProductList() {
                     />
                   </div>
                 </div>
-                <CardDescription className="mt-2">Version {product.version}</CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
+              <CardContent className="pt-0">
+                <p className="text-sm text-muted-foreground line-clamp-2">
                   {product.description || "No description provided"}
                 </p>
                 {product.category && (
