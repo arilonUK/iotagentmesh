@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Check, Building, ChevronDown } from 'lucide-react';
+import { Check, Building, ChevronDown, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface OrganizationSwitcherProps {
@@ -31,7 +31,7 @@ const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: Organizat
   
   console.log('OrganizationSwitcher render:', {
     displayOrganization,
-    availableOrganizations,
+    availableOrganizations: availableOrganizations.length,
     loading,
     authCurrentOrg: currentOrganization,
     contextOrg: organization
@@ -46,36 +46,35 @@ const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: Organizat
         className={cn("flex items-center gap-2 px-3", triggerClassName)}
         disabled
       >
-        <Building className="h-4 w-4" />
+        <Loader2 className="h-4 w-4 animate-spin" />
         <span>Loading...</span>
       </Button>
     );
   }
   
-  // Show nothing if no organizations are available
-  if (!availableOrganizations || availableOrganizations.length === 0) {
-    // If we have organization from context but no userOrganizations, still show it
-    if (displayOrganization) {
-      return (
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className={cn("flex items-center gap-2 px-3", triggerClassName)}
-        >
-          <Building className="h-4 w-4" />
-          <span className="truncate max-w-[150px]">
-            {displayOrganization.name}
-          </span>
-        </Button>
-      );
-    }
-    
+  // Show default organization if we have one but no userOrganizations array
+  if (displayOrganization && (!availableOrganizations || availableOrganizations.length === 0)) {
     return (
       <Button 
         variant="outline" 
         size="sm" 
         className={cn("flex items-center gap-2 px-3", triggerClassName)}
-        disabled
+      >
+        <Building className="h-4 w-4" />
+        <span className="truncate max-w-[150px]">
+          {displayOrganization.name}
+        </span>
+      </Button>
+    );
+  }
+  
+  // Show "No Organization" only if we have no organizations at all
+  if (!displayOrganization && (!availableOrganizations || availableOrganizations.length === 0)) {
+    return (
+      <Button 
+        variant="outline" 
+        size="sm" 
+        className={cn("flex items-center gap-2 px-3 text-amber-600 border-amber-300", triggerClassName)}
       >
         <Building className="h-4 w-4" />
         <span>No Organization</span>
@@ -112,7 +111,7 @@ const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: Organizat
     }
   };
 
-  const displayName = displayOrganization?.name || availableOrganizations[0]?.name || 'Select Organization';
+  const displayName = displayOrganization?.name || 'Select Organization';
 
   return (
     <DropdownMenu>

@@ -27,6 +27,43 @@ export const useAuthListener = ({
   const initializingRef = useRef(false);
   const listenerRef = useRef<any>(null);
 
+  const loadUserOrganizations = async (userId: string) => {
+    try {
+      console.log("Loading user organizations for user:", userId);
+      const userOrgs = await organizationService.getUserOrganizations(userId);
+      console.log("Loaded organizations:", userOrgs);
+      
+      if (userOrgs && userOrgs.length > 0) {
+        console.log("Setting organizations:", userOrgs.length);
+        setUserOrganizations(userOrgs);
+        
+        // Find default organization or use first one
+        const defaultOrg = userOrgs.find(org => org.is_default) || userOrgs[0];
+        console.log("Setting default organization:", defaultOrg);
+        
+        if (defaultOrg) {
+          setCurrentOrganization(defaultOrg);
+          setOrganization({
+            id: defaultOrg.id,
+            name: defaultOrg.name,
+            slug: defaultOrg.slug
+          });
+        }
+      } else {
+        console.log("No organizations found for user");
+        setUserOrganizations([]);
+        setCurrentOrganization(null);
+        setOrganization(null);
+      }
+    } catch (error) {
+      console.error("Error loading organizations:", error);
+      // Still set empty arrays to prevent loading state
+      setUserOrganizations([]);
+      setCurrentOrganization(null);
+      setOrganization(null);
+    }
+  };
+
   useEffect(() => {
     if (initializingRef.current) {
       return;
@@ -53,30 +90,10 @@ export const useAuthListener = ({
               setSession(session);
               setUser(session.user);
               setIsAuthenticated(true);
-              setLoading(false);
               
-              // Load organizations after a short delay to avoid blocking UI
-              setTimeout(async () => {
-                try {
-                  console.log("Loading user organizations...");
-                  const userOrgs = await organizationService.getUserOrganizations(session.user.id);
-                  if (userOrgs && userOrgs.length > 0) {
-                    console.log("Organizations loaded:", userOrgs.length);
-                    setUserOrganizations(userOrgs);
-                    const defaultOrg = userOrgs.find(org => org.is_default) || userOrgs[0];
-                    if (defaultOrg) {
-                      setCurrentOrganization(defaultOrg);
-                      setOrganization({
-                        id: defaultOrg.id,
-                        name: defaultOrg.name,
-                        slug: defaultOrg.slug
-                      });
-                    }
-                  }
-                } catch (error) {
-                  console.error("Error loading organizations:", error);
-                }
-              }, 100);
+              // Load organizations immediately, not after delay
+              await loadUserOrganizations(session.user.id);
+              setLoading(false);
               
             } else if (event === 'SIGNED_OUT') {
               console.log("User signed out, clearing state");
@@ -101,6 +118,9 @@ export const useAuthListener = ({
                 setSession(session);
                 setUser(session.user);
                 setIsAuthenticated(true);
+                
+                // Load organizations for initial session
+                await loadUserOrganizations(session.user.id);
               } else {
                 console.log("No initial session");
                 setIsAuthenticated(false);
@@ -123,10 +143,13 @@ export const useAuthListener = ({
         }
 
         if (session?.user) {
-          console.log("Existing session found");
+          console.log("Existing session found, loading organizations immediately");
           setSession(session);
           setUser(session.user);
           setIsAuthenticated(true);
+          
+          // Load organizations for existing session
+          await loadUserOrganizations(session.user.id);
         } else {
           console.log("No existing session");
           setIsAuthenticated(false);
