@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, ArrowUp, Activity } from 'lucide-react';
@@ -51,7 +50,7 @@ const Dashboard = () => {
       ];
     },
     enabled: !!organization?.id,
-    cacheConfig: 'DEVICE_LIST',
+    cacheConfig: 'ORGANIZATION_DATA',
   });
 
   console.log('=== DASHBOARD COMPONENT DEBUG (OPTIMIZED) ===');
