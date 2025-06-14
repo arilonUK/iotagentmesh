@@ -4,7 +4,7 @@ import { useDevice } from '@/hooks/useDevices';
 import { Separator } from "@/components/ui/separator";
 import DeviceAlarms from '@/components/alarms/DeviceAlarms';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react';
+import { AlertTriangle, AlertCircle, RefreshCw, ArrowLeft, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { DeviceDashboard } from '@/components/dashboard/DeviceDashboard';
@@ -41,6 +41,14 @@ export default function DeviceDetail() {
     refetchTemperature();
   };
 
+  const handleGoToDashboard = () => {
+    navigate('/dashboard');
+  };
+
+  const handleGoToDevices = () => {
+    navigate('/dashboard/devices');
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-48">
@@ -72,7 +80,7 @@ export default function DeviceDetail() {
             </Button>
             <Button 
               variant="outline"
-              onClick={() => navigate('/dashboard/devices')}
+              onClick={handleGoToDevices}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Devices
@@ -85,21 +93,33 @@ export default function DeviceDetail() {
 
   if (!device) {
     return (
-      <Alert variant="default" className="my-4">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Device not found</AlertTitle>
-        <AlertDescription>
-          <p>We couldn't find a device with the ID: {id}</p>
-          <Button 
-            variant="outline" 
-            className="mt-4"
-            onClick={() => navigate('/dashboard/devices')}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Devices List
-          </Button>
-        </AlertDescription>
-      </Alert>
+      <div className="space-y-6">
+        <Alert variant="default" className="my-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Device not found</AlertTitle>
+          <AlertDescription>
+            <p>We couldn't find a device with the ID: {id}</p>
+            <p className="text-sm mt-2 text-muted-foreground">
+              This device may not exist or may have been deleted. You can go back to the devices list or dashboard to see available devices.
+            </p>
+            <div className="flex gap-3 mt-4">
+              <Button 
+                variant="outline" 
+                onClick={handleGoToDevices}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Devices List
+              </Button>
+              <Button 
+                variant="default" 
+                onClick={handleGoToDashboard}
+              >
+                Go to Dashboard
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
@@ -109,7 +129,7 @@ export default function DeviceDetail() {
         <h1 className="text-2xl font-bold">{device.name}</h1>
         <Button 
           variant="outline" 
-          onClick={() => navigate('/dashboard/devices')}
+          onClick={handleGoToDevices}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Devices
