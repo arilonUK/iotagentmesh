@@ -34,6 +34,12 @@ export const Header = () => {
     }
   }
 
+  const handleMenuItemClick = (href: string) => {
+    console.log("Navigating to:", href);
+    navigate(href);
+    setIsDropdownOpen(false);
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-14 items-center px-4">
@@ -52,7 +58,7 @@ export const Header = () => {
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" forceMount>
+            <DropdownMenuContent align="end" forceMount className="w-56 bg-white border shadow-lg">
               <div className="flex flex-col space-y-1 p-2">
                 <p className="text-sm font-medium leading-none">{user?.user_metadata?.full_name || user?.email}</p>
                 <p className="text-xs leading-none text-muted-foreground">
@@ -61,21 +67,24 @@ export const Header = () => {
               </div>
               <DropdownMenuSeparator />
               {settingsMenuConfig.map((item) => (
-                <DropdownMenuItem key={item.href} onSelect={() => {
-                  navigate(item.href)
-                  setIsDropdownOpen(false)
-                }}>
+                <DropdownMenuItem 
+                  key={item.href} 
+                  onClick={() => handleMenuItemClick(item.href)}
+                  className="cursor-pointer hover:bg-gray-100"
+                >
                   {item.title}
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 disabled={loading}
-                onSelect={(e) => {
+                onClick={(e) => {
                   e.preventDefault();
                   handleSignOut();
                   setIsDropdownOpen(false);
-                }}>
+                }}
+                className="cursor-pointer hover:bg-gray-100"
+              >
                 {loading ? (
                   <div className="flex items-center gap-2">
                     <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
