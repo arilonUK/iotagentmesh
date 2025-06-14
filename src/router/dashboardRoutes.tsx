@@ -33,9 +33,4 @@ export const dashboardRoutes = [
       </ProtectedRoute>
     ),
   },
-  // Redirect /dashboard/* routes that don't match to the main dashboard
-  {
-    path: "/dashboard/*",
-    element: <Navigate to="/dashboard" replace />,
-  },
 ];

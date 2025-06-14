@@ -25,7 +25,6 @@ import { publicRoutes } from './publicRoutes';
 
 // Import components using lazy loading for pages that exist
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
-const Billing = lazy(() => import('@/pages/Billing'));
 
 // Define routes
 export const routes: RouteObject[] = [
@@ -38,7 +37,7 @@ export const routes: RouteObject[] = [
     element: <ProtectedRoute><Navigate to="/dashboard" replace /></ProtectedRoute>,
   },
   
-  // Dashboard routes (includes /dashboard and sub-routes)
+  // Dashboard routes (includes /dashboard, /billing and sub-routes)
   ...dashboardRoutes,
   
   // Settings routes
@@ -48,12 +47,6 @@ export const routes: RouteObject[] = [
   {
     path: '/settings',
     element: <Navigate to="/dashboard/settings" replace />,
-  },
-  
-  // Add billing route directly to ensure it's accessible
-  {
-    path: '/billing',
-    element: <ProtectedRoute><Billing /></ProtectedRoute>,
   },
   
   // Legacy routes for backward compatibility
