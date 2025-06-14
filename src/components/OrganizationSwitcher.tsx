@@ -111,6 +111,7 @@ const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: Organizat
     }
   };
 
+  // Use the actual organization name instead of fallback "My Organization"
   const displayName = displayOrganization?.name || 'Select Organization';
 
   return (

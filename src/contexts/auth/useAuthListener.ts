@@ -1,175 +1,101 @@
 
-import { useEffect, useRef } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useCallback } from 'react';
+import { Session, User } from '@supabase/supabase-js';
 import { organizationService } from '@/services/profile/organizationService';
+import { UserOrganization } from './types';
 
-type AuthListenerProps = {
-  setSession: (session: any) => void;
-  setUser: (user: any) => void;
-  setIsAuthenticated: (auth: boolean) => void;
-  setLoading: (loading: boolean) => void;
-  setUserOrganizations: (orgs: any[]) => void;
-  setCurrentOrganization: (org: any) => void;
-  setOrganization: (org: any) => void;
-  setProfile: (profile: any) => void;
+const loadUserOrganizations = async (userId: string): Promise<UserOrganization[]> => {
+  try {
+    console.log('Loading user organizations for user:', userId);
+    const organizations = await organizationService.getUserOrganizations(userId);
+    console.log('Loaded organizations:', organizations);
+    return organizations;
+  } catch (error) {
+    console.error('Failed to load user organizations:', error);
+    return [];
+  }
 };
 
-export const useAuthListener = ({
-  setSession,
-  setUser,
-  setIsAuthenticated,
-  setLoading,
-  setUserOrganizations,
-  setCurrentOrganization,
-  setOrganization,
-  setProfile,
-}: AuthListenerProps) => {
-  const initializingRef = useRef(false);
-  const listenerRef = useRef<any>(null);
-
-  const loadUserOrganizations = async (userId: string) => {
-    try {
-      console.log("Loading user organizations for user:", userId);
-      const userOrgs = await organizationService.getUserOrganizations(userId);
-      console.log("Loaded organizations:", userOrgs);
+export const useAuthListener = () => {
+  const handleAuthStateChange = useCallback(async (
+    event: string,
+    session: Session | null,
+    setSession: (session: Session | null) => void,
+    setUser: (user: User | null) => void,
+    setUserOrganizations: (orgs: UserOrganization[]) => void,
+    setCurrentOrganization: (org: UserOrganization | null) => void,
+    setLoading: (loading: boolean) => void
+  ) => {
+    console.log('Auth state change:', event, session?.user?.id);
+    
+    setSession(session);
+    setUser(session?.user || null);
+    
+    if (session?.user) {
+      console.log('User signed in, updating state');
       
-      if (userOrgs && userOrgs.length > 0) {
-        console.log("Setting organizations:", userOrgs.length);
-        setUserOrganizations(userOrgs);
-        
-        // Find default organization or use first one
-        const defaultOrg = userOrgs.find(org => org.is_default) || userOrgs[0];
-        console.log("Setting default organization:", defaultOrg);
-        
-        if (defaultOrg) {
-          setCurrentOrganization(defaultOrg);
-          setOrganization({
-            id: defaultOrg.id,
-            name: defaultOrg.name,
-            slug: defaultOrg.slug
-          });
-        }
-      } else {
-        console.log("No organizations found for user");
-        setUserOrganizations([]);
-        setCurrentOrganization(null);
-        setOrganization(null);
+      // Load organizations for authenticated user
+      const organizations = await loadUserOrganizations(session.user.id);
+      setUserOrganizations(organizations);
+      
+      // Set current organization (prefer the one marked as default, or first one)
+      const defaultOrg = organizations.find(org => org.is_default) || organizations[0] || null;
+      if (defaultOrg) {
+        console.log('Setting default organization:', defaultOrg);
+        setCurrentOrganization(defaultOrg);
       }
-    } catch (error) {
-      console.error("Error loading organizations:", error);
-      // Still set empty arrays to prevent loading state
+    } else {
+      console.log('User signed out, clearing state');
       setUserOrganizations([]);
       setCurrentOrganization(null);
-      setOrganization(null);
     }
-  };
+    
+    setLoading(false);
+  }, []);
 
-  useEffect(() => {
-    if (initializingRef.current) {
-      return;
-    }
-    initializingRef.current = true;
+  const loadInitialSession = useCallback(async (
+    setSession: (session: Session | null) => void,
+    setUser: (user: User | null) => void,
+    setUserOrganizations: (orgs: UserOrganization[]) => void,
+    setCurrentOrganization: (org: UserOrganization | null) => void,
+    setLoading: (loading: boolean) => void
+  ) => {
+    try {
+      const { data: { session }, error } = await (await import('@/integrations/supabase/client')).supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Error getting session:', error);
+        setLoading(false);
+        return;
+      }
 
-    const initializeAuth = async () => {
-      try {
-        console.log("Setting up auth listener...");
-        setLoading(true);
-
-        // Clean up any existing listener
-        if (listenerRef.current) {
-          listenerRef.current.subscription.unsubscribe();
-        }
-
-        // Set up auth state listener
-        const { data: authListener } = supabase.auth.onAuthStateChange(
-          async (event, session) => {
-            console.log("Auth state change:", event, session?.user?.id);
-            
-            if (event === 'SIGNED_IN' && session?.user) {
-              console.log("User signed in, updating state");
-              setSession(session);
-              setUser(session.user);
-              setIsAuthenticated(true);
-              
-              // Load organizations immediately, not after delay
-              await loadUserOrganizations(session.user.id);
-              setLoading(false);
-              
-            } else if (event === 'SIGNED_OUT') {
-              console.log("User signed out, clearing state");
-              setSession(null);
-              setUser(null);
-              setIsAuthenticated(false);
-              setLoading(false);
-              setUserOrganizations([]);
-              setCurrentOrganization(null);
-              setOrganization(null);
-              setProfile(null);
-              organizationService.clearCache();
-            } else if (event === 'TOKEN_REFRESHED' && session) {
-              console.log("Token refreshed");
-              setSession(session);
-              setUser(session.user);
-              setIsAuthenticated(true);
-              setLoading(false);
-            } else if (event === 'INITIAL_SESSION') {
-              if (session?.user) {
-                console.log("Initial session found");
-                setSession(session);
-                setUser(session.user);
-                setIsAuthenticated(true);
-                
-                // Load organizations for initial session
-                await loadUserOrganizations(session.user.id);
-              } else {
-                console.log("No initial session");
-                setIsAuthenticated(false);
-              }
-              setLoading(false);
-            }
-          }
-        );
-
-        listenerRef.current = authListener;
-
-        // Check for existing session
-        const { data: { session }, error } = await supabase.auth.getSession();
+      if (session?.user) {
+        console.log('Existing session found, loading organizations immediately');
         
-        if (error) {
-          console.error("Error getting session:", error);
-          setIsAuthenticated(false);
-          setLoading(false);
-          return;
+        setSession(session);
+        setUser(session.user);
+        
+        // Load organizations immediately for existing session
+        const organizations = await loadUserOrganizations(session.user.id);
+        setUserOrganizations(organizations);
+        
+        // Set current organization
+        const defaultOrg = organizations.find(org => org.is_default) || organizations[0] || null;
+        if (defaultOrg) {
+          console.log('Setting default organization:', defaultOrg);
+          setCurrentOrganization(defaultOrg);
         }
-
-        if (session?.user) {
-          console.log("Existing session found, loading organizations immediately");
-          setSession(session);
-          setUser(session.user);
-          setIsAuthenticated(true);
-          
-          // Load organizations for existing session
-          await loadUserOrganizations(session.user.id);
-        } else {
-          console.log("No existing session");
-          setIsAuthenticated(false);
-        }
-        setLoading(false);
-
-      } catch (error) {
-        console.error("Error initializing auth:", error);
-        setIsAuthenticated(false);
-        setLoading(false);
       }
-    };
+      
+      setLoading(false);
+    } catch (error) {
+      console.error('Error in loadInitialSession:', error);
+      setLoading(false);
+    }
+  }, []);
 
-    initializeAuth();
-
-    return () => {
-      if (listenerRef.current) {
-        listenerRef.current.subscription.unsubscribe();
-      }
-      initializingRef.current = false;
-    };
-  }, []); // Empty dependency array - run once only
+  return {
+    handleAuthStateChange,
+    loadInitialSession
+  };
 };

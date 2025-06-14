@@ -5,7 +5,7 @@ import { UserOrganization } from '@/contexts/auth/types';
 
 // Simple cache to prevent duplicate requests
 const organizationCache = new Map<string, { data: UserOrganization[]; timestamp: number }>();
-const CACHE_DURATION = 30000; // 30 seconds
+const CACHE_DURATION = 60000; // Increase to 60 seconds for more stability
 
 // Prevent duplicate concurrent requests
 const ongoingRequests = new Map<string, Promise<UserOrganization[]>>();
@@ -13,12 +13,13 @@ const ongoingRequests = new Map<string, Promise<UserOrganization[]>>();
 const fetchUserOrganizationsInternal = async (userId: string): Promise<UserOrganization[]> => {
   console.log('fetchUserOrganizationsInternal called for user:', userId);
   
-  // Use timeout to prevent hanging
+  // Increase timeout to 10 seconds for better reliability
   const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => reject(new Error('Organization fetch timeout')), 5000);
+    setTimeout(() => reject(new Error('Organization fetch timeout')), 10000);
   });
   
   try {
+    // Try the RPC function first
     const fetchPromise = supabase.rpc('get_user_organizations', { p_user_id: userId });
     
     const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
@@ -26,24 +27,46 @@ const fetchUserOrganizationsInternal = async (userId: string): Promise<UserOrgan
     if (error) {
       console.error('RPC error fetching user organizations:', error);
       
-      // For RLS errors or function not found, try fallback approach
+      // For RLS errors or function not found, try direct query approach
       if (error.code === '42P17' || error.message?.includes('infinite recursion') || error.message?.includes('Function not found')) {
-        console.log('RPC failed, trying fallback query');
+        console.log('RPC failed, trying direct query approach');
         
-        // Fallback: try to get organizations from user metadata or create a default one
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (user && !userError) {
-          // Create a mock organization for development
-          const mockOrganization: UserOrganization = {
-            id: 'default-org-' + userId.substring(0, 8),
-            name: 'My Organization',
-            slug: 'my-organization',
-            role: 'owner',
-            is_default: true
-          };
-          console.log('Using fallback organization:', mockOrganization);
-          return [mockOrganization];
+        // Fallback: try to get organizations directly from organization_members table
+        const { data: memberData, error: memberError } = await supabase
+          .from('organization_members')
+          .select(`
+            role,
+            organizations!inner (
+              id,
+              name,
+              slug
+            )
+          `)
+          .eq('user_id', userId);
+
+        if (memberError) {
+          console.error('Direct query also failed:', memberError);
+          throw memberError;
         }
+
+        if (memberData && memberData.length > 0) {
+          const organizations = memberData.map((member: any) => ({
+            id: member.organizations.id,
+            name: member.organizations.name,
+            slug: member.organizations.slug,
+            role: member.role,
+            is_default: false
+          }));
+          
+          // Mark the first one as default
+          if (organizations.length > 0) {
+            organizations[0].is_default = true;
+          }
+          
+          console.log('Successfully fetched organizations via direct query:', organizations);
+          return organizations;
+        }
+        
         return [];
       }
       
@@ -51,31 +74,16 @@ const fetchUserOrganizationsInternal = async (userId: string): Promise<UserOrgan
     }
 
     const organizations = data as UserOrganization[] || [];
-    console.log('Successfully fetched user organizations:', organizations);
-    
-    // If no organizations, create a default one for development
-    if (organizations.length === 0) {
-      console.log('No organizations found, creating default organization');
-      const defaultOrg: UserOrganization = {
-        id: 'default-org-' + userId.substring(0, 8),
-        name: 'My Organization',
-        slug: 'my-organization',
-        role: 'owner',
-        is_default: true
-      };
-      return [defaultOrg];
-    }
+    console.log('Successfully fetched user organizations via RPC:', organizations);
     
     return organizations;
   } catch (error: any) {
     console.error('Error in fetchUserOrganizationsInternal:', error);
     
-    // For timeout or RLS errors, create a default organization
+    // Only create fallback for timeout or connection errors
     if (error.message === 'Organization fetch timeout' || 
-        error.code === '42P17' || 
-        error.message?.includes('infinite recursion') ||
-        error.message?.includes('Function not found')) {
-      console.log('Creating fallback organization due to error');
+        error.message?.includes('fetch')) {
+      console.log('Creating fallback organization due to network error');
       const fallbackOrg: UserOrganization = {
         id: 'default-org-' + userId.substring(0, 8),
         name: 'My Organization',
@@ -86,8 +94,8 @@ const fetchUserOrganizationsInternal = async (userId: string): Promise<UserOrgan
       return [fallbackOrg];
     }
     
-    // For other errors, still return empty array to prevent blocking auth
-    console.error('Unexpected organization fetch error, returning empty array:', error);
+    // For other errors, return empty array to allow retry
+    console.error('Unexpected organization fetch error:', error);
     return [];
   }
 };
@@ -113,7 +121,7 @@ export const organizationService = {
     try {
       console.log('Getting user organizations for user ID:', userId);
       
-      // Check cache first
+      // Check cache first with shorter duration to allow more frequent updates
       const cacheKey = `user-orgs-${userId}`;
       const cached = organizationCache.get(cacheKey);
       if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
@@ -136,11 +144,13 @@ export const organizationService = {
       try {
         const result = await requestPromise;
         
-        // Cache the result
-        organizationCache.set(cacheKey, {
-          data: result,
-          timestamp: Date.now()
-        });
+        // Only cache successful results with actual data
+        if (result.length > 0 && !result[0].id.startsWith('default-org-')) {
+          organizationCache.set(cacheKey, {
+            data: result,
+            timestamp: Date.now()
+          });
+        }
         
         console.log('Final organizations result:', result);
         return result;
@@ -150,15 +160,8 @@ export const organizationService = {
       }
     } catch (error: any) {
       console.error('Error fetching user organizations:', error);
-      // Return a fallback organization instead of empty array
-      const fallbackOrg: UserOrganization = {
-        id: 'default-org-' + userId.substring(0, 8),
-        name: 'My Organization',
-        slug: 'my-organization',
-        role: 'owner',
-        is_default: true
-      };
-      return [fallbackOrg];
+      // Return empty array instead of fallback to allow retry
+      return [];
     }
   },
 
@@ -176,7 +179,7 @@ export const organizationService = {
       
       // Use timeout for switch operation
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Switch timeout')), 5000);
+        setTimeout(() => reject(new Error('Switch timeout')), 8000);
       });
 
       const switchPromise = supabase.rpc('switch_user_organization', {
