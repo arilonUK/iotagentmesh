@@ -34,7 +34,8 @@ export const useDevices = (organizationId?: string) => {
         return [];
       }
       
-      if (!isValidUUID(organizationId)) {
+      // Accept both UUID format and default org format for now
+      if (!isValidUUID(organizationId) && !organizationId.startsWith('default-org-')) {
         console.error('Invalid organization ID format:', organizationId);
         throw new Error(`Invalid organization ID format: ${organizationId}`);
       }
@@ -85,7 +86,7 @@ export const useDevices = (organizationId?: string) => {
       }
     },
     cacheConfig: 'ORGANIZATION_DATA',
-    enabled: !!organizationId && isValidUUID(organizationId),
+    enabled: !!organizationId,
     retry: (failureCount, error) => {
       console.log(`Query retry attempt ${failureCount}:`, error);
       // Don't retry if it's a function not found error

@@ -26,6 +26,7 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ id, name, type, status, last_ac
     e.preventDefault();
     e.stopPropagation();
     console.log('DeviceCard: Navigating to device details for ID:', id);
+    console.log('DeviceCard: Using route /dashboard/devices/' + id);
     navigate(`/dashboard/devices/${id}`);
   };
 
