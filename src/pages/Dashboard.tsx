@@ -1,62 +1,28 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, ArrowUp, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import DeviceCard from '@/components/DeviceCard';
-import { useOptimizedQuery } from '@/hooks/useOptimizedQuery';
+import { useDevices } from '@/hooks/useDevices';
 import { useOrganization } from '@/contexts/organization';
 import { useAuth } from '@/contexts/auth';
 import { LoadingProgress } from '@/components/LoadingProgress';
 import { useContextFactory } from '@/contexts/factory/ContextFactoryProvider';
-import { Device } from '@/types/device';
 
 const Dashboard = () => {
   const { isAuthenticated } = useAuth();
   const { organization, isLoading: orgLoading } = useOrganization();
   const { initializationProgress = 0 } = useContextFactory();
 
-  // Use optimized query for devices with caching
-  const { data: devices = [], isLoading: devicesLoading, error } = useOptimizedQuery({
-    queryKey: ['devices', organization?.id],
-    queryFn: async (): Promise<Device[]> => {
-      if (!organization?.id) return [];
-      
-      // Mock device data for demonstration with correct status types
-      return [
-        {
-          id: '1',
-          name: 'Temperature Sensor 01',
-          type: 'sensor',
-          status: 'online' as const,
-          organization_id: organization.id,
-          last_active_at: new Date().toISOString()
-        },
-        {
-          id: '2',
-          name: 'Humidity Monitor',
-          type: 'monitor', 
-          status: 'online' as const,
-          organization_id: organization.id,
-          last_active_at: new Date().toISOString()
-        },
-        {
-          id: '3',
-          name: 'Air Quality Detector',
-          type: 'detector',
-          status: 'warning' as const,
-          organization_id: organization.id,
-          last_active_at: new Date().toISOString()
-        }
-      ];
-    },
-    enabled: !!organization?.id,
-    cacheConfig: 'ORGANIZATION_DATA',
-  });
+  // Use the real devices hook instead of mock data
+  const { devices, isLoading: devicesLoading, error } = useDevices(organization?.id);
 
-  console.log('=== DASHBOARD COMPONENT DEBUG (OPTIMIZED) ===');
+  console.log('=== DASHBOARD COMPONENT DEBUG (REAL DATA) ===');
   console.log('Auth state:', { isAuthenticated });
   console.log('Organization:', organization);
   console.log('Devices:', devices);
+  console.log('Devices count:', devices?.length);
   console.log('Initialization progress:', initializationProgress);
 
   // Show enhanced loading with progress
@@ -105,7 +71,7 @@ const Dashboard = () => {
           <CardContent className="pt-6">
             <div className="text-center">
               <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Devices</h3>
-              <p className="text-red-600 mb-2">{error.message}</p>
+              <p className="text-red-600 mb-2">{error}</p>
               <p className="text-sm text-red-500">
                 Organization: {organization.name} (ID: {organization.id})
               </p>
@@ -127,12 +93,12 @@ const Dashboard = () => {
         {/* Performance indicator - remove this later */}
         {process.env.NODE_ENV === 'development' && (
           <div className="text-xs text-gray-400 mt-2">
-            Org: {organization.name} | ID: {organization.id} | Devices: {devices.length} | Cache: Optimized
+            Org: {organization.name} | ID: {organization.id} | Devices: {devices.length} | Real API Data
           </div>
         )}
       </div>
 
-      {/* Stats Cards - now with cached data */}
+      {/* Stats Cards - now with real data */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
@@ -145,7 +111,7 @@ const Dashboard = () => {
               <div className="text-2xl font-bold">{devices.length}</div>
               <div className="text-xs font-medium flex items-center text-iot-success">
                 <ArrowUp className="mr-1 h-4 w-4" />
-                Cached
+                Live Data
               </div>
             </div>
           </CardContent>
@@ -203,7 +169,7 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Recent Devices - now with optimized loading */}
+      {/* Recent Devices - now with real data */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">Recent Devices</h2>
