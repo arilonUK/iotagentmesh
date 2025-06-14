@@ -1,11 +1,11 @@
 
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { queryCache, QueryCache } from '@/services/cache/QueryCache';
+import { queryCache, QueryCacheManager } from '@/services/cache/QueryCache';
 
 interface OptimizedQueryOptions<T> extends Omit<UseQueryOptions<T>, 'queryKey' | 'queryFn'> {
   queryKey: (string | number)[];
   queryFn: () => Promise<T>;
-  cacheConfig?: keyof typeof QueryCache.CACHE_CONFIGS;
+  cacheConfig?: keyof typeof QueryCacheManager.CACHE_CONFIGS;
   enableCache?: boolean;
 }
 
@@ -16,7 +16,7 @@ export function useOptimizedQuery<T>({
   enableCache = true,
   ...options
 }: OptimizedQueryOptions<T>) {
-  const config = QueryCache.CACHE_CONFIGS[cacheConfig];
+  const config = QueryCacheManager.CACHE_CONFIGS[cacheConfig];
   const cacheKey = queryKey.join('_');
 
   return useQuery({

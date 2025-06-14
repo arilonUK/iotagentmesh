@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { devicesApiService } from '@/services/api/devicesApiService';
 import { useToast } from '@/hooks/use-toast';
 import { Device } from '@/types/device';
+import { useOptimizedQuery } from '@/hooks/useOptimizedQuery';
 
 function isValidUUID(uuid: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -23,7 +24,7 @@ export const useDevices = (organizationId?: string) => {
     error,
     refetch,
     isRefetching
-  } = useQuery({
+  } = useOptimizedQuery({
     queryKey: ['devices', organizationId],
     queryFn: async () => {
       console.log('=== DEVICES QUERY FUNCTION START ===');
@@ -83,6 +84,7 @@ export const useDevices = (organizationId?: string) => {
         return [];
       }
     },
+    cacheConfig: 'ORGANIZATION_DATA',
     enabled: !!organizationId && isValidUUID(organizationId),
     retry: (failureCount, error) => {
       console.log(`Query retry attempt ${failureCount}:`, error);
@@ -98,7 +100,6 @@ export const useDevices = (organizationId?: string) => {
       console.log(`Retry delay: ${delay}ms`);
       return delay;
     },
-    staleTime: 1000 * 30, // Consider data fresh for 30 seconds
   });
   
   console.log('=== USE DEVICES HOOK RESULT ===');
@@ -131,7 +132,7 @@ export const useDevice = (deviceId?: string) => {
     error,
     refetch,
     isRefetching
-  } = useQuery({
+  } = useOptimizedQuery({
     queryKey: ['device', deviceId],
     queryFn: async () => {
       if (!deviceId) {
@@ -167,10 +168,10 @@ export const useDevice = (deviceId?: string) => {
         throw err;
       }
     },
+    cacheConfig: 'ORGANIZATION_DATA',
     enabled: !!deviceId && isValidUUID(deviceId),
     retry: 1,
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
-    staleTime: 1000 * 60
   });
   
   return {
