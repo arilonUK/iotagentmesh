@@ -1,8 +1,8 @@
 
-import { useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { organizationService } from '@/services/profile/organizationService';
-import { UserOrganization } from './types';
+import { UserOrganization, Profile, Organization } from './types';
 
 const loadUserOrganizations = async (userId: string): Promise<UserOrganization[]> => {
   try {
@@ -16,20 +16,36 @@ const loadUserOrganizations = async (userId: string): Promise<UserOrganization[]
   }
 };
 
-export const useAuthListener = () => {
+interface UseAuthListenerProps {
+  setSession: (session: Session | null) => void;
+  setUser: (user: User | null) => void;
+  setIsAuthenticated: (authenticated: boolean) => void;
+  setLoading: (loading: boolean) => void;
+  setUserOrganizations: (orgs: UserOrganization[]) => void;
+  setCurrentOrganization: (org: UserOrganization | null) => void;
+  setOrganization: (org: Organization | null) => void;
+  setProfile: (profile: Profile | null) => void;
+}
+
+export const useAuthListener = ({
+  setSession,
+  setUser,
+  setIsAuthenticated,
+  setLoading,
+  setUserOrganizations,
+  setCurrentOrganization,
+  setOrganization,
+  setProfile,
+}: UseAuthListenerProps) => {
   const handleAuthStateChange = useCallback(async (
     event: string,
-    session: Session | null,
-    setSession: (session: Session | null) => void,
-    setUser: (user: User | null) => void,
-    setUserOrganizations: (orgs: UserOrganization[]) => void,
-    setCurrentOrganization: (org: UserOrganization | null) => void,
-    setLoading: (loading: boolean) => void
+    session: Session | null
   ) => {
     console.log('Auth state change:', event, session?.user?.id);
     
     setSession(session);
     setUser(session?.user || null);
+    setIsAuthenticated(!!session?.user);
     
     if (session?.user) {
       console.log('User signed in, updating state');
@@ -43,23 +59,24 @@ export const useAuthListener = () => {
       if (defaultOrg) {
         console.log('Setting default organization:', defaultOrg);
         setCurrentOrganization(defaultOrg);
+        setOrganization({
+          id: defaultOrg.id,
+          name: defaultOrg.name,
+          slug: defaultOrg.slug
+        });
       }
     } else {
       console.log('User signed out, clearing state');
       setUserOrganizations([]);
       setCurrentOrganization(null);
+      setOrganization(null);
+      setProfile(null);
     }
     
     setLoading(false);
-  }, []);
+  }, [setSession, setUser, setIsAuthenticated, setLoading, setUserOrganizations, setCurrentOrganization, setOrganization, setProfile]);
 
-  const loadInitialSession = useCallback(async (
-    setSession: (session: Session | null) => void,
-    setUser: (user: User | null) => void,
-    setUserOrganizations: (orgs: UserOrganization[]) => void,
-    setCurrentOrganization: (org: UserOrganization | null) => void,
-    setLoading: (loading: boolean) => void
-  ) => {
+  const loadInitialSession = useCallback(async () => {
     try {
       const { data: { session }, error } = await (await import('@/integrations/supabase/client')).supabase.auth.getSession();
       
@@ -74,6 +91,7 @@ export const useAuthListener = () => {
         
         setSession(session);
         setUser(session.user);
+        setIsAuthenticated(true);
         
         // Load organizations immediately for existing session
         const organizations = await loadUserOrganizations(session.user.id);
@@ -84,6 +102,11 @@ export const useAuthListener = () => {
         if (defaultOrg) {
           console.log('Setting default organization:', defaultOrg);
           setCurrentOrganization(defaultOrg);
+          setOrganization({
+            id: defaultOrg.id,
+            name: defaultOrg.name,
+            slug: defaultOrg.slug
+          });
         }
       }
       
@@ -92,10 +115,31 @@ export const useAuthListener = () => {
       console.error('Error in loadInitialSession:', error);
       setLoading(false);
     }
-  }, []);
+  }, [setSession, setUser, setIsAuthenticated, setLoading, setUserOrganizations, setCurrentOrganization, setOrganization]);
 
-  return {
-    handleAuthStateChange,
-    loadInitialSession
-  };
+  useEffect(() => {
+    let mounted = true;
+
+    const setupAuth = async () => {
+      const { supabase } = await import('@/integrations/supabase/client');
+      
+      // Set up auth state listener
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthStateChange);
+      
+      // Load initial session
+      if (mounted) {
+        await loadInitialSession();
+      }
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    };
+
+    setupAuth();
+
+    return () => {
+      mounted = false;
+    };
+  }, [handleAuthStateChange, loadInitialSession]);
 };
