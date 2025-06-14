@@ -56,9 +56,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             <div className="flex items-center space-x-4">
               <SidebarTrigger />
               <h1 className="text-lg font-semibold text-gray-800">{getPageTitle()}</h1>
-              <OrganizationSwitcher />
             </div>
             <div className="flex items-center gap-4">
+              <OrganizationSwitcher />
               <Button variant="ghost" size="icon" className="relative">
                 <Bell size={20} />
                 <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>

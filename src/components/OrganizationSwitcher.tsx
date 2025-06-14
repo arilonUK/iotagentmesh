@@ -21,9 +21,11 @@ interface OrganizationSwitcherProps {
 const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: OrganizationSwitcherProps) => {
   const { currentOrganization, userOrganizations, switchOrganization, loading } = useAuth();
   
-  console.log('OrganizationSwitcher - currentOrganization:', currentOrganization);
-  console.log('OrganizationSwitcher - userOrganizations:', userOrganizations);
-  console.log('OrganizationSwitcher - loading:', loading);
+  console.log('OrganizationSwitcher render:', {
+    currentOrganization,
+    userOrganizations,
+    loading
+  });
   
   // Show loading state while organizations are being fetched
   if (loading) {
@@ -57,16 +59,16 @@ const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: Organizat
 
   // Show current org name but no dropdown if only one organization
   if (userOrganizations.length === 1) {
+    const displayName = currentOrganization?.name || userOrganizations[0].name;
     return (
       <Button 
         variant="outline" 
         size="sm" 
-        className={cn("flex items-center gap-2 px-3 cursor-default", triggerClassName)}
-        disabled
+        className={cn("flex items-center gap-2 px-3", triggerClassName)}
       >
         <Building className="h-4 w-4" />
         <span className="truncate max-w-[150px]">
-          {currentOrganization?.name || userOrganizations[0].name}
+          {displayName}
         </span>
       </Button>
     );
@@ -75,9 +77,16 @@ const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: Organizat
   const handleSwitchOrg = async (orgId: string) => {
     if (switchOrganization) {
       console.log('Switching to organization:', orgId);
-      await switchOrganization(orgId);
+      try {
+        await switchOrganization(orgId);
+        console.log('Organization switch completed');
+      } catch (error) {
+        console.error('Error switching organization:', error);
+      }
     }
   };
+
+  const displayName = currentOrganization?.name || userOrganizations[0]?.name || 'Select Organization';
 
   return (
     <DropdownMenu>
@@ -85,11 +94,11 @@ const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: Organizat
         <Button 
           variant="outline" 
           size="sm" 
-          className={cn("flex items-center gap-2 px-3", triggerClassName)}
+          className={cn("flex items-center gap-2 px-3 hover:bg-gray-50", triggerClassName)}
         >
           <Building className="h-4 w-4" />
           <span className="truncate max-w-[150px]">
-            {currentOrganization?.name || userOrganizations[0]?.name || 'Select Organization'}
+            {displayName}
           </span>
           <ChevronDown className="h-4 w-4 opacity-50" />
         </Button>
@@ -101,7 +110,7 @@ const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: Organizat
           <DropdownMenuItem
             key={org.id}
             onClick={() => handleSwitchOrg(org.id)}
-            className="cursor-pointer flex items-center justify-between"
+            className="cursor-pointer flex items-center justify-between hover:bg-gray-50"
           >
             <div className="flex items-center gap-2">
               <Building className="h-4 w-4" />
