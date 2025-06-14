@@ -25,6 +25,7 @@ import { publicRoutes } from './publicRoutes';
 
 // Import components using lazy loading for pages that exist
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
+const Billing = lazy(() => import('@/pages/Billing'));
 
 // Define routes
 export const routes: RouteObject[] = [
