@@ -50,6 +50,12 @@ export const routes: RouteObject[] = [
     element: <Navigate to="/dashboard/settings" replace />,
   },
   
+  // Add billing route directly to ensure it's accessible
+  {
+    path: '/billing',
+    element: <ProtectedRoute><Billing /></ProtectedRoute>,
+  },
+  
   // Legacy routes for backward compatibility
   {
     path: '/devices',
