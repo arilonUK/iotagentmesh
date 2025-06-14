@@ -5,6 +5,60 @@ import { Database } from '@/integrations/supabase/types';
 import { organizationService } from './organizationService';
 import { organizationSetupService as organizationDefaultSetupService } from '@/services/organizationSetupService';
 
+const assignFreePlanToOrganization = async (organizationId: string): Promise<boolean> => {
+  try {
+    console.log('Assigning free plan to organization:', organizationId);
+    
+    // Get the free plan
+    const { data: freePlan, error: planError } = await supabase
+      .from('subscription_plans')
+      .select('id')
+      .eq('name', 'free')
+      .eq('is_active', true)
+      .single();
+
+    if (planError || !freePlan) {
+      console.error('Error finding free plan:', planError);
+      return false;
+    }
+
+    // Check if organization already has a subscription
+    const { data: existingSubscription } = await supabase
+      .from('organization_subscriptions')
+      .select('id')
+      .eq('organization_id', organizationId)
+      .eq('status', 'active')
+      .single();
+
+    if (existingSubscription) {
+      console.log('Organization already has an active subscription');
+      return true;
+    }
+
+    // Create subscription for the organization
+    const { error: subscriptionError } = await supabase
+      .from('organization_subscriptions')
+      .insert({
+        organization_id: organizationId,
+        subscription_plan_id: freePlan.id,
+        status: 'active',
+        current_period_start: new Date().toISOString(),
+        current_period_end: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() // 1 year from now for free plan
+      });
+
+    if (subscriptionError) {
+      console.error('Error creating subscription:', subscriptionError);
+      return false;
+    }
+
+    console.log('Successfully assigned free plan to organization:', organizationId);
+    return true;
+  } catch (error) {
+    console.error('Error assigning free plan:', error);
+    return false;
+  }
+};
+
 export const organizationSetupService = {  
   ensureUserHasOrganization: async (userId: string, userEmail: string): Promise<string | null> => {
     try {
@@ -56,6 +110,12 @@ export const organizationSetupService = {
       // Set up default permissions for the organization
       await organizationDefaultSetupService.setupDefaultPermissions(newOrg.id);
       
+      // Assign free plan to the new organization
+      const freePlanAssigned = await assignFreePlanToOrganization(newOrg.id);
+      if (!freePlanAssigned) {
+        console.warn('Failed to assign free plan to organization, but continuing...');
+      }
+      
       // Set as default organization
       const { error: profileError } = await supabase
         .from('profiles')
@@ -66,7 +126,7 @@ export const organizationSetupService = {
         console.error('Error updating default organization in profile:', profileError);
       }
       
-      toast('Default organization created', {
+      toast('Default organization created with free plan', {
         style: { backgroundColor: 'green', color: 'white' }
       });
       
