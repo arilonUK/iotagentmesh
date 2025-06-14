@@ -1727,6 +1727,15 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_timezone_info: {
+        Args: { timezone_name?: string }
+        Returns: {
+          name: string
+          abbrev: string
+          utc_offset: unknown
+          is_dst: boolean
+        }[]
+      }
       get_user_organization_role_bypass_rls: {
         Args: { p_org_id: string; p_user_id: string }
         Returns: string
