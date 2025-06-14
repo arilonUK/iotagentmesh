@@ -23,6 +23,7 @@ export const billingApiService = {
     
     return data.map(plan => ({
       ...plan,
+      billing_interval: plan.billing_interval as 'monthly' | 'yearly',
       features: {
         max_devices: plan.max_devices,
         max_api_calls_per_month: plan.max_api_calls_per_month,
@@ -45,7 +46,12 @@ export const billingApiService = {
       .single();
 
     if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    if (!data) return null;
+    
+    return {
+      ...data,
+      status: data.status as 'active' | 'past_due' | 'canceled' | 'trialing' | 'incomplete'
+    };
   },
 
   async createOrganizationSubscription(
@@ -63,7 +69,10 @@ export const billingApiService = {
       .single();
 
     if (error) throw error;
-    return data;
+    return {
+      ...data,
+      status: data.status as 'active' | 'past_due' | 'canceled' | 'trialing' | 'incomplete'
+    };
   },
 
   // Usage Tracking
@@ -110,7 +119,11 @@ export const billingApiService = {
 
     const { data, error } = await query;
     if (error) throw error;
-    return data;
+    
+    return data.map(metric => ({
+      ...metric,
+      metadata: metric.metadata as Record<string, any>
+    }));
   },
 
   // Device Connections
@@ -165,7 +178,11 @@ export const billingApiService = {
 
     const { data, error } = await query;
     if (error) throw error;
-    return data;
+    
+    return data.map(usage => ({
+      ...usage,
+      data_type: usage.data_type as 'ingestion' | 'egress' | 'storage'
+    }));
   },
 
   // Record usage data
@@ -191,7 +208,10 @@ export const billingApiService = {
       .single();
 
     if (error) throw error;
-    return data;
+    return {
+      ...data,
+      metadata: data.metadata as Record<string, any>
+    };
   },
 
   async recordDataVolumeUsage(
@@ -212,6 +232,9 @@ export const billingApiService = {
       .single();
 
     if (error) throw error;
-    return data;
+    return {
+      ...data,
+      data_type: data.data_type as 'ingestion' | 'egress' | 'storage'
+    };
   },
 };
