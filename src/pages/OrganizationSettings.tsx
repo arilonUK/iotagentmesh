@@ -1,6 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -11,8 +12,11 @@ import { Building, PaintBucket, CircleDollarSign } from 'lucide-react';
 
 const OrganizationSettings = () => {
   const { organization, userRole } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [orgName, setOrgName] = useState(organization?.name || '');
   const [isSaving, setIsSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'general');
   
   // Only owners can access organization settings
   if (!organization || userRole !== 'owner') {
@@ -29,6 +33,14 @@ const OrganizationSettings = () => {
       </div>
     );
   }
+
+  const handleTabChange = (value: string) => {
+    if (value === 'billing') {
+      navigate('/billing');
+      return;
+    }
+    setActiveTab(value);
+  };
 
   const handleSaveGeneralSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +62,7 @@ const OrganizationSettings = () => {
 
   return (
     <div className="container max-w-3xl py-8">
-      <Tabs defaultValue="general" className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="general" className="flex items-center gap-2">
             <Building className="h-4 w-4" />
@@ -134,26 +146,6 @@ const OrganizationSettings = () => {
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Recommended size: 512x512 pixels. Max file size: 2MB.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="billing">
-          <Card>
-            <CardHeader>
-              <CardTitle>Billing Information</CardTitle>
-              <CardDescription>
-                Manage billing settings for your organization
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="py-6 text-center">
-                <CircleDollarSign className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-4 text-lg font-medium">Billing settings coming soon</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Billing management features will be available in a future update.
                 </p>
               </div>
             </CardContent>
