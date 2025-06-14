@@ -3,9 +3,10 @@ import { Navigate } from "react-router-dom";
 import { lazy } from 'react';
 import ProtectedRoute from "@/components/ProtectedRoute";
 
-// Lazy load the Dashboard and DeviceDetail components
+// Lazy load components
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const DeviceDetail = lazy(() => import('@/pages/DeviceDetail'));
+const Billing = lazy(() => import('@/pages/Billing'));
 
 export const dashboardRoutes = [
   {
@@ -21,6 +22,14 @@ export const dashboardRoutes = [
     element: (
       <ProtectedRoute>
         <DeviceDetail />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/billing",
+    element: (
+      <ProtectedRoute>
+        <Billing />
       </ProtectedRoute>
     ),
   },

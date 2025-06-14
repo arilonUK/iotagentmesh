@@ -440,6 +440,99 @@ export type Database = {
           },
         ]
       }
+      data_volume_usage: {
+        Row: {
+          data_type: string
+          device_id: string | null
+          id: string
+          organization_id: string | null
+          period_date: string | null
+          recorded_at: string | null
+          volume_bytes: number
+        }
+        Insert: {
+          data_type: string
+          device_id?: string | null
+          id?: string
+          organization_id?: string | null
+          period_date?: string | null
+          recorded_at?: string | null
+          volume_bytes?: number
+        }
+        Update: {
+          data_type?: string
+          device_id?: string | null
+          id?: string
+          organization_id?: string | null
+          period_date?: string | null
+          recorded_at?: string | null
+          volume_bytes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_volume_usage_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_volume_usage_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      device_connections: {
+        Row: {
+          connection_end: string | null
+          connection_start: string | null
+          connection_type: string | null
+          created_at: string | null
+          device_id: string | null
+          duration_seconds: number | null
+          id: string
+          organization_id: string | null
+        }
+        Insert: {
+          connection_end?: string | null
+          connection_start?: string | null
+          connection_type?: string | null
+          created_at?: string | null
+          device_id?: string | null
+          duration_seconds?: number | null
+          id?: string
+          organization_id?: string | null
+        }
+        Update: {
+          connection_end?: string | null
+          connection_start?: string | null
+          connection_type?: string | null
+          created_at?: string | null
+          device_id?: string | null
+          duration_seconds?: number | null
+          id?: string
+          organization_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "device_connections_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "device_connections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       device_group_memberships: {
         Row: {
           added_at: string
@@ -845,6 +938,57 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_subscriptions: {
+        Row: {
+          created_at: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          organization_id: string | null
+          status: string | null
+          subscription_plan_id: string | null
+          trial_end: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          organization_id?: string | null
+          status?: string | null
+          subscription_plan_id?: string | null
+          trial_end?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          organization_id?: string | null
+          status?: string | null
+          subscription_plan_id?: string | null
+          trial_end?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_subscriptions_subscription_plan_id_fkey"
+            columns: ["subscription_plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
             referencedColumns: ["id"]
           },
         ]
@@ -1297,45 +1441,113 @@ export type Database = {
       }
       subscription_plans: {
         Row: {
+          advanced_analytics: boolean | null
+          billing_interval: string | null
           concurrent_connections: number | null
           created_at: string | null
+          currency: string | null
           display_name: string
           features: string[] | null
           id: string
           is_active: boolean | null
+          max_api_calls_per_month: number | null
           max_api_keys: number | null
+          max_data_retention_days: number | null
+          max_devices: number | null
           name: string
+          price: number | null
+          priority_support: boolean | null
           requests_per_hour: number | null
           requests_per_month: number | null
           updated_at: string | null
         }
         Insert: {
+          advanced_analytics?: boolean | null
+          billing_interval?: string | null
           concurrent_connections?: number | null
           created_at?: string | null
+          currency?: string | null
           display_name: string
           features?: string[] | null
           id?: string
           is_active?: boolean | null
+          max_api_calls_per_month?: number | null
           max_api_keys?: number | null
+          max_data_retention_days?: number | null
+          max_devices?: number | null
           name: string
+          price?: number | null
+          priority_support?: boolean | null
           requests_per_hour?: number | null
           requests_per_month?: number | null
           updated_at?: string | null
         }
         Update: {
+          advanced_analytics?: boolean | null
+          billing_interval?: string | null
           concurrent_connections?: number | null
           created_at?: string | null
+          currency?: string | null
           display_name?: string
           features?: string[] | null
           id?: string
           is_active?: boolean | null
+          max_api_calls_per_month?: number | null
           max_api_keys?: number | null
+          max_data_retention_days?: number | null
+          max_devices?: number | null
           name?: string
+          price?: number | null
+          priority_support?: boolean | null
           requests_per_hour?: number | null
           requests_per_month?: number | null
           updated_at?: string | null
         }
         Relationships: []
+      }
+      usage_metrics: {
+        Row: {
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          metric_type: string
+          metric_value: number
+          organization_id: string | null
+          period_end: string
+          period_start: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          metric_type: string
+          metric_value?: number
+          organization_id?: string | null
+          period_end: string
+          period_start: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          metric_type?: string
+          metric_value?: number
+          organization_id?: string | null
+          period_end?: string
+          period_start?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_metrics_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -1365,6 +1577,15 @@ export type Database = {
           p_reading_value: number
         }
         Returns: boolean
+      }
+      check_usage_limits: {
+        Args: { p_org_id: string }
+        Returns: {
+          exceeds_device_limit: boolean
+          exceeds_api_limit: boolean
+          exceeds_data_limit: boolean
+          current_plan_name: string
+        }[]
       }
       cleanup_old_api_logs: {
         Args: Record<PropertyKey, never>
@@ -1635,6 +1856,15 @@ export type Database = {
           device_name: string
           device_type: string
           endpoints: string[]
+        }[]
+      }
+      get_organization_current_usage: {
+        Args: { p_org_id: string }
+        Returns: {
+          device_count: number
+          api_calls_this_month: number
+          data_volume_mb: number
+          active_connections: number
         }[]
       }
       get_organization_members: {
