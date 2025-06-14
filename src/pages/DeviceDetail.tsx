@@ -23,17 +23,28 @@ export default function DeviceDetail() {
   const { data: temperatureData, isLoading: isLoadingTemperature, refetch: refetchTemperature } = 
     useDeviceReadings(id, 'temperature', { timeframe: 'day' });
   
-  // Log for debugging
+  // Enhanced logging for debugging
   useEffect(() => {
-    console.log('DeviceDetail component - Device ID from URL:', id);
+    console.log('=== DEVICE DETAIL DEBUG ===');
+    console.log('Device ID from URL:', id);
+    console.log('Device ID valid UUID format:', id ? /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) : false);
+    console.log('Device loading state:', isLoading);
+    console.log('Device error:', error);
+    console.log('Device data:', device);
+    console.log('Current route params:', { id });
     
     if (error) {
-      console.error('Device detail error:', error);
+      console.error('Device detail error details:', error);
     }
     if (device) {
-      console.log('Device loaded:', device);
-    } else if (!isLoading) {
+      console.log('Device loaded successfully:', {
+        id: device.id,
+        name: device.name,
+        organization_id: device.organization_id
+      });
+    } else if (!isLoading && id) {
       console.log('No device found for ID:', id);
+      console.log('This might be a non-existent device ID');
     }
   }, [device, error, id, isLoading]);
 
@@ -46,8 +57,47 @@ export default function DeviceDetail() {
   };
 
   const handleGoToDevices = () => {
-    navigate('/dashboard/devices');
+    navigate('/devices');
   };
+
+  // Validate device ID format
+  const isValidUUID = (uuid: string) => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(uuid);
+  };
+
+  // Handle invalid UUID format
+  if (id && !isValidUUID(id)) {
+    return (
+      <div className="space-y-6">
+        <Alert variant="destructive" className="my-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Invalid Device ID</AlertTitle>
+          <AlertDescription>
+            <p>The device ID format is invalid: {id}</p>
+            <p className="text-sm mt-2 text-muted-foreground">
+              Device IDs must be valid UUIDs. Please check the URL and try again.
+            </p>
+            <div className="flex gap-3 mt-4">
+              <Button 
+                variant="outline" 
+                onClick={handleGoToDevices}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Devices
+              </Button>
+              <Button 
+                variant="default" 
+                onClick={handleGoToDashboard}
+              >
+                Go to Dashboard
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -55,6 +105,7 @@ export default function DeviceDetail() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-muted-foreground">Loading device details...</p>
+          <p className="text-xs text-gray-500 mt-2">Device ID: {id}</p>
         </div>
       </div>
     );
@@ -64,11 +115,14 @@ export default function DeviceDetail() {
     return (
       <Alert variant="destructive" className="my-4">
         <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
+        <AlertTitle>Error Loading Device</AlertTitle>
         <AlertDescription>
           <p>{error}</p>
           <p className="text-sm mt-2">
-            There was a problem loading the device details.
+            Device ID: {id}
+          </p>
+          <p className="text-sm mt-1 text-muted-foreground">
+            There was a problem loading the device details. This device may not exist or you may not have access to it.
           </p>
           <div className="flex gap-3 mt-4">
             <Button 
@@ -96,11 +150,11 @@ export default function DeviceDetail() {
       <div className="space-y-6">
         <Alert variant="default" className="my-4">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Device not found</AlertTitle>
+          <AlertTitle>Device Not Found</AlertTitle>
           <AlertDescription>
-            <p>We couldn't find a device with the ID: {id}</p>
+            <p>We couldn't find a device with the ID: <code className="bg-gray-100 px-1 rounded">{id}</code></p>
             <p className="text-sm mt-2 text-muted-foreground">
-              This device may not exist or may have been deleted. You can go back to the devices list or dashboard to see available devices.
+              This device may not exist, may have been deleted, or you may not have access to it. You can go back to the devices list or dashboard to see available devices.
             </p>
             <div className="flex gap-3 mt-4">
               <Button 
