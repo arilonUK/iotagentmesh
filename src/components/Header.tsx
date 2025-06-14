@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Icons } from "@/components/icons"
 import { settingsMenuConfig } from "@/components/navigation/navConfig"
 import { NotificationBell } from './notifications/NotificationBell'
-import { OrganizationSwitcher } from '@/components/organization/OrganizationSwitcher'
+import OrganizationSwitcher from '@/components/OrganizationSwitcher'
 import { useAuth } from "@/contexts/auth"
 
 export const Header = () => {
