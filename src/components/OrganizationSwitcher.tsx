@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useAuth } from '@/contexts/auth';
+import { useOrganization } from '@/contexts/organization';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -19,12 +20,21 @@ interface OrganizationSwitcherProps {
 }
 
 const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: OrganizationSwitcherProps) => {
-  const { currentOrganization, userOrganizations, switchOrganization, loading } = useAuth();
+  // Try to get organization data from both contexts
+  const { currentOrganization, userOrganizations, switchOrganization, loading: authLoading } = useAuth();
+  const { organization, isLoading: orgLoading } = useOrganization();
+  
+  // Use organization context data as primary, auth context as fallback
+  const displayOrganization = organization || currentOrganization;
+  const availableOrganizations = userOrganizations || [];
+  const loading = authLoading || orgLoading;
   
   console.log('OrganizationSwitcher render:', {
-    currentOrganization,
-    userOrganizations,
-    loading
+    displayOrganization,
+    availableOrganizations,
+    loading,
+    authCurrentOrg: currentOrganization,
+    contextOrg: organization
   });
   
   // Show loading state while organizations are being fetched
@@ -43,7 +53,23 @@ const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: Organizat
   }
   
   // Show nothing if no organizations are available
-  if (!userOrganizations || userOrganizations.length === 0) {
+  if (!availableOrganizations || availableOrganizations.length === 0) {
+    // If we have organization from context but no userOrganizations, still show it
+    if (displayOrganization) {
+      return (
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className={cn("flex items-center gap-2 px-3", triggerClassName)}
+        >
+          <Building className="h-4 w-4" />
+          <span className="truncate max-w-[150px]">
+            {displayOrganization.name}
+          </span>
+        </Button>
+      );
+    }
+    
     return (
       <Button 
         variant="outline" 
@@ -58,8 +84,8 @@ const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: Organizat
   }
 
   // Show current org name but no dropdown if only one organization
-  if (userOrganizations.length === 1) {
-    const displayName = currentOrganization?.name || userOrganizations[0].name;
+  if (availableOrganizations.length === 1) {
+    const displayName = displayOrganization?.name || availableOrganizations[0].name;
     return (
       <Button 
         variant="outline" 
@@ -86,7 +112,7 @@ const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: Organizat
     }
   };
 
-  const displayName = currentOrganization?.name || userOrganizations[0]?.name || 'Select Organization';
+  const displayName = displayOrganization?.name || availableOrganizations[0]?.name || 'Select Organization';
 
   return (
     <DropdownMenu>
@@ -106,7 +132,7 @@ const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: Organizat
       <DropdownMenuContent align="end" className={cn("w-[220px]", dropdownClassName)}>
         <DropdownMenuLabel>Organizations</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {userOrganizations.map((org) => (
+        {availableOrganizations.map((org) => (
           <DropdownMenuItem
             key={org.id}
             onClick={() => handleSwitchOrg(org.id)}
@@ -116,7 +142,7 @@ const OrganizationSwitcher = ({ triggerClassName, dropdownClassName }: Organizat
               <Building className="h-4 w-4" />
               <span>{org.name}</span>
             </div>
-            {(currentOrganization?.id === org.id || org.is_default) && <Check className="h-4 w-4" />}
+            {(displayOrganization?.id === org.id || org.is_default) && <Check className="h-4 w-4" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
