@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Circle } from 'lucide-react';
 
 interface DeviceCardProps {
@@ -20,6 +20,15 @@ const statusColors = {
 };
 
 const DeviceCard: React.FC<DeviceCardProps> = ({ id, name, type, status, last_active_at }) => {
+  const navigate = useNavigate();
+
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('DeviceCard: Navigating to device details for ID:', id);
+    navigate(`/dashboard/devices/${id}`);
+  };
+
   return (
     <Card className="hover:shadow-md transition-shadow overflow-hidden">
       <CardHeader className="pb-2">
@@ -44,13 +53,13 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ id, name, type, status, last_ac
         </div>
       </CardContent>
       <CardFooter>
-        <Link 
-          to={`/dashboard/devices/${id}`}
-          className="text-sm text-primary flex items-center hover:underline w-full justify-end"
+        <button
+          onClick={handleViewDetails}
+          className="text-sm text-primary flex items-center hover:underline w-full justify-end cursor-pointer"
         >
           View details
           <ArrowRight className="ml-1 h-4 w-4" />
-        </Link>
+        </button>
       </CardFooter>
     </Card>
   );
