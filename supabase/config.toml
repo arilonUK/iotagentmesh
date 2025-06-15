@@ -1,5 +1,5 @@
 
-project_id = "tuevghmlxosxuszxjral"
+project_id = "your-project-id"
 
 [api]
 enabled = true
@@ -8,114 +8,84 @@ schemas = ["public", "graphql_public"]
 extra_search_path = ["public", "extensions"]
 max_rows = 1000
 
-[db]
-port = 54322
-shadow_port = 54320
-major_version = 15
-
-[db.pooler]
-enabled = false
-port = 54329
-pool_mode = "transaction"
-default_pool_size = 20
-max_client_conn = 100
-
-[realtime]
-enabled = true
-port = 54323
-tenant = "realtime"
-max_concurrent_users = 200
-
-[studio]
-enabled = true
-port = 54323
-api_url = "http://127.0.0.1:54321"
-openai_api_key = "env(OPENAI_API_KEY)"
-
-[inbucket]
-enabled = true
-port = 54324
-smtp_port = 54325
-pop3_port = 54326
-
-[storage]
-enabled = true
-port = 54325
-file_size_limit = "50MiB"
-image_transformation = true
-
 [auth]
 enabled = true
-port = 54326
-site_url = "http://127.0.0.1:3000"
-additional_redirect_urls = ["https://tuevghmlxosxuszxjral.supabase.co/auth/v1/callback"]
+port = 54324
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://lovable.dev"]
 jwt_expiry = 3600
-refresh_token_rotation_enabled = true
-secure_session_cookie = false
-persistent_session_cookie = false
-
-[auth.email]
 enable_signup = true
-double_confirm_changes = true
-enable_confirmations = false
+enable_email_confirmations = false
+enable_email_autoconfirm = false
 
-[auth.sms]
-enable_signup = false
-enable_confirmations = false
-template = "Your code is {{ .Code }} ."
+[functions.api-gateway]
+verify_jwt = false
 
-[functions.generate-api-key]
+[functions.create-checkout]
 verify_jwt = true
 
-[functions.api-auth]
+[functions.customer-portal]
+verify_jwt = true
+
+[functions.stripe-webhooks]
 verify_jwt = false
 
-[functions.api-key-validator]
+[functions.assign-free-plan]
 verify_jwt = false
 
-[functions.rate-limit-checker]
+[functions.api-alarms]
 verify_jwt = false
 
 [functions.api-auth-orchestrator]
 verify_jwt = false
 
-[functions.rate-limiter]
-verify_jwt = false
-
-[functions.usage-tracker]
-verify_jwt = false
-
-[functions.api-devices]
+[functions.api-auth]
 verify_jwt = false
 
 [functions.api-data]
 verify_jwt = false
 
-[functions.api-products]
+[functions.api-devices]
+verify_jwt = false
+
+[functions.api-endpoints]
+verify_jwt = false
+
+[functions.api-files]
 verify_jwt = false
 
 [functions.api-key-management]
-verify_jwt = true
+verify_jwt = false
 
-[functions.api-alarms]
-verify_jwt = true
+[functions.api-key-validator]
+verify_jwt = false
 
-[functions.webhook-manager]
+[functions.api-organizations]
+verify_jwt = false
+
+[functions.api-products]
+verify_jwt = false
+
+[functions.api-profiles]
+verify_jwt = false
+
+[functions.generate-api-key]
+verify_jwt = false
+
+[functions.rate-limit-checker]
+verify_jwt = false
+
+[functions.rate-limiter]
+verify_jwt = false
+
+[functions.trigger-endpoint]
+verify_jwt = false
+
+[functions.usage-tracker]
 verify_jwt = false
 
 [functions.webhook-dispatcher]
 verify_jwt = false
 
-[functions.api-gateway]
+[functions.webhook-manager]
 verify_jwt = false
-
-[edge_runtime]
-enabled = true
-port = 54327
-inspector_port = 54328
-
-[analytics]
-enabled = false
-port = 54327
-vector_port = 54328
-backend = "postgres"

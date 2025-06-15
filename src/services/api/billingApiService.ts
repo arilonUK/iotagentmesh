@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { 
   SubscriptionTier, 
@@ -9,6 +8,31 @@ import {
   DeviceConnection,
   DataVolumeUsage 
 } from '@/types/billing';
+
+export interface Payment {
+  id: string;
+  organization_id: string;
+  stripe_payment_intent_id: string;
+  amount: number;
+  currency: string;
+  status: 'pending' | 'succeeded' | 'failed' | 'canceled';
+  created_at: string;
+}
+
+export interface Invoice {
+  id: string;
+  organization_id: string;
+  stripe_invoice_id: string;
+  amount_due: number;
+  amount_paid: number;
+  currency: string;
+  status: 'draft' | 'open' | 'paid' | 'void' | 'uncollectible';
+  invoice_pdf_url?: string;
+  due_date?: string;
+  period_start?: string;
+  period_end?: string;
+  created_at: string;
+}
 
 export const billingApiService = {
   // Subscription Plans
@@ -90,6 +114,36 @@ export const billingApiService = {
 
     if (error) throw error;
     return data[0];
+  },
+
+  // Payments
+  async getPayments(organizationId: string): Promise<Payment[]> {
+    const { data, error } = await supabase
+      .from('payments')
+      .select('*')
+      .eq('organization_id', organizationId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data.map(payment => ({
+      ...payment,
+      status: payment.status as 'pending' | 'succeeded' | 'failed' | 'canceled'
+    }));
+  },
+
+  // Invoices
+  async getInvoices(organizationId: string): Promise<Invoice[]> {
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('*')
+      .eq('organization_id', organizationId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data.map(invoice => ({
+      ...invoice,
+      status: invoice.status as 'draft' | 'open' | 'paid' | 'void' | 'uncollectible'
+    }));
   },
 
   // Usage Metrics
