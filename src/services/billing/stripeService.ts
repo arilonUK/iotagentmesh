@@ -40,8 +40,10 @@ export const stripeService = {
    * Create a customer portal session for subscription management
    */
   async createCustomerPortalSession(request: CustomerPortalRequest): Promise<CustomerPortalResponse> {
+    console.log('Creating customer portal session with request:', request);
+    
     const { data, error } = await supabase.functions.invoke('customer-portal', {
-      body: request,
+      body: { organizationId: request.organizationId },
     });
 
     if (error) {
