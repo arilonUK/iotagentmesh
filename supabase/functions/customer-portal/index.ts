@@ -46,6 +46,17 @@ serve(async (req) => {
     if (!organizationId) throw new Error("organizationId is required");
 
     // Verify user has access to organization and get Stripe customer ID
+    const { data: membership, error: memberError } = await supabaseClient
+      .from('organization_members')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('organization_id', organizationId)
+      .single();
+
+    if (memberError || !membership) {
+      throw new Error("User does not have access to this organization");
+    }
+
     const { data: organization, error: orgError } = await supabaseClient
       .from('organizations')
       .select('stripe_customer_id, name')
