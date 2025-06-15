@@ -7,6 +7,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const DeviceDetail = lazy(() => import('@/pages/DeviceDetail'));
 const Billing = lazy(() => import('@/pages/Billing'));
+const TeamSettings = lazy(() => import('@/pages/TeamSettings'));
 
 export const dashboardRoutes = [
   {
@@ -22,6 +23,14 @@ export const dashboardRoutes = [
     element: (
       <ProtectedRoute>
         <DeviceDetail />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/dashboard/team",
+    element: (
+      <ProtectedRoute>
+        <TeamSettings />
       </ProtectedRoute>
     ),
   },
