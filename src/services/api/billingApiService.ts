@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { 
   SubscriptionTier, 
@@ -116,34 +117,44 @@ export const billingApiService = {
     return data[0];
   },
 
-  // Payments
+  // Payments - using type assertion since the table is new
   async getPayments(organizationId: string): Promise<Payment[]> {
-    const { data, error } = await supabase
-      .from('payments')
-      .select('*')
-      .eq('organization_id', organizationId)
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await (supabase as any)
+        .from('payments')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return data.map(payment => ({
-      ...payment,
-      status: payment.status as 'pending' | 'succeeded' | 'failed' | 'canceled'
-    }));
+      if (error) throw error;
+      return (data || []).map((payment: any) => ({
+        ...payment,
+        status: payment.status as 'pending' | 'succeeded' | 'failed' | 'canceled'
+      }));
+    } catch (error) {
+      console.error('Error fetching payments:', error);
+      return [];
+    }
   },
 
-  // Invoices
+  // Invoices - using type assertion since the table is new
   async getInvoices(organizationId: string): Promise<Invoice[]> {
-    const { data, error } = await supabase
-      .from('invoices')
-      .select('*')
-      .eq('organization_id', organizationId)
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await (supabase as any)
+        .from('invoices')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return data.map(invoice => ({
-      ...invoice,
-      status: invoice.status as 'draft' | 'open' | 'paid' | 'void' | 'uncollectible'
-    }));
+      if (error) throw error;
+      return (data || []).map((invoice: any) => ({
+        ...invoice,
+        status: invoice.status as 'draft' | 'open' | 'paid' | 'void' | 'uncollectible'
+      }));
+    } catch (error) {
+      console.error('Error fetching invoices:', error);
+      return [];
+    }
   },
 
   // Usage Metrics
