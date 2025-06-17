@@ -51,6 +51,7 @@ const SubscriptionManager = () => {
       return;
     }
 
+    console.log('Attempting to open customer portal for organization:', organization.id);
     customerPortal.mutate({
       organizationId: organization.id,
     });
@@ -233,7 +234,7 @@ const SubscriptionManager = () => {
                 className="flex items-center gap-2"
               >
                 <CreditCard className="h-4 w-4" />
-                Manage Subscription
+                {customerPortal.isPending ? 'Opening Portal...' : 'Manage Subscription'}
               </Button>
             )}
           </CardContent>
