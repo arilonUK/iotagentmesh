@@ -67,16 +67,38 @@ serve(async (req) => {
       throw new Error("Organization not found");
     }
 
-    if (!organization.stripe_customer_id) {
-      throw new Error("No Stripe customer found for this organization");
-    }
-
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
+
+    // Check if organization has a Stripe customer, create if not
+    let customerId = organization.stripe_customer_id;
+    
+    if (!customerId) {
+      logStep("Creating new Stripe customer for organization");
+      const customer = await stripe.customers.create({
+        email: user.email,
+        name: organization.name,
+        metadata: {
+          organization_id: organizationId,
+          user_id: user.id,
+        },
+      });
+      customerId = customer.id;
+
+      // Update organization with Stripe customer ID
+      await supabaseClient
+        .from('organizations')
+        .update({ stripe_customer_id: customerId })
+        .eq('id', organizationId);
+
+      logStep("Stripe customer created and organization updated", { customerId });
+    } else {
+      logStep("Using existing Stripe customer", { customerId });
+    }
 
     // Create customer portal session
     const origin = req.headers.get("origin") || "http://localhost:3000";
     const portalSession = await stripe.billingPortal.sessions.create({
-      customer: organization.stripe_customer_id,
+      customer: customerId,
       return_url: `${origin}/billing`,
     });
 
