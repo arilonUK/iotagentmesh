@@ -18,6 +18,13 @@ export interface PaginatedFunctions {
   hasPreviousPage: boolean;
 }
 
+export interface TimezoneInfo {
+  name: string;
+  abbrev: string;
+  utc_offset: string;
+  is_dst: boolean;
+}
+
 class MetadataService {
   async getFunctionsPaginated(
     page: number = 1, 
@@ -80,6 +87,66 @@ class MetadataService {
     } catch (error) {
       console.error('Error in getSchemas:', error);
       return ['public'];
+    }
+  }
+
+  /**
+   * Get timezone information using the optimized timezone_cache materialized view
+   * instead of direct pg_timezone_names queries
+   */
+  async getTimezones(timezoneName?: string): Promise<TimezoneInfo[]> {
+    try {
+      console.log('Fetching timezones using optimized function...');
+      
+      // Use the optimized get_timezone_info function instead of pg_timezone_names
+      const { data, error } = await supabase.rpc('get_timezone_info', {
+        timezone_name: timezoneName || null
+      });
+
+      if (error) {
+        console.error('Error fetching timezone info:', error);
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error in getTimezones:', error);
+      // Fallback to empty array if the optimized function fails
+      return [];
+    }
+  }
+
+  /**
+   * Get all timezone names using the optimized cache
+   */
+  async getTimezoneNames(): Promise<string[]> {
+    try {
+      const timezones = await this.getTimezones();
+      return timezones.map(tz => tz.name);
+    } catch (error) {
+      console.error('Error getting timezone names:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Refresh the timezone cache - should be called periodically
+   */
+  async refreshTimezoneCache(): Promise<void> {
+    try {
+      console.log('Refreshing timezone cache...');
+      
+      const { error } = await supabase.rpc('refresh_timezone_cache');
+      
+      if (error) {
+        console.error('Error refreshing timezone cache:', error);
+        throw error;
+      }
+      
+      console.log('Timezone cache refreshed successfully');
+    } catch (error) {
+      console.error('Error in refreshTimezoneCache:', error);
+      throw error;
     }
   }
 }
