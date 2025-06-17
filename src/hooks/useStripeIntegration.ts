@@ -10,9 +10,11 @@ export const useStripeCheckout = () => {
     mutationFn: (request: CheckoutSessionRequest) => 
       stripeService.createCheckoutSession(request),
     onSuccess: (data) => {
+      console.log('Checkout session created, opening URL:', data.url);
       stripeService.openCheckout(data.url);
     },
     onError: (error) => {
+      console.error('Checkout error:', error);
       toast({
         title: "Checkout Error",
         description: error instanceof Error ? error.message : "Failed to start checkout",
@@ -26,12 +28,16 @@ export const useCustomerPortal = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (request: CustomerPortalRequest) => 
-      stripeService.createCustomerPortalSession(request),
+    mutationFn: (request: CustomerPortalRequest) => {
+      console.log('Calling customer portal with request:', request);
+      return stripeService.createCustomerPortalSession(request);
+    },
     onSuccess: (data) => {
+      console.log('Customer portal session successful, opening URL:', data.url);
       stripeService.openCustomerPortal(data.url);
     },
     onError: (error) => {
+      console.error('Customer portal error:', error);
       toast({
         title: "Portal Error",
         description: error instanceof Error ? error.message : "Failed to open customer portal",

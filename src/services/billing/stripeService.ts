@@ -43,7 +43,7 @@ export const stripeService = {
     console.log('Creating customer portal session with request:', request);
     
     const { data, error } = await supabase.functions.invoke('customer-portal', {
-      body: { organizationId: request.organizationId },
+      body: request,
     });
 
     if (error) {
@@ -51,6 +51,7 @@ export const stripeService = {
       throw new Error(error.message || 'Failed to create customer portal session');
     }
 
+    console.log('Customer portal session created successfully:', data);
     return data;
   },
 
