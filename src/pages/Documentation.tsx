@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -72,6 +73,13 @@ const Documentation = () => {
       category: "Data Management",
       readTime: "8 min",
       link: "/dashboard/documentation/data-buckets-analytics"
+    },
+    {
+      title: "Billing & Subscription Management",
+      description: "Understand pricing plans, monitor usage, and manage your subscription",
+      category: "Account Management",
+      readTime: "7 min",
+      link: "/billing"
     },
     {
       title: "Alarm Configuration",
