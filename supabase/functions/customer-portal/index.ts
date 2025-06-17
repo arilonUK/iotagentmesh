@@ -45,7 +45,7 @@ serve(async (req) => {
     const { organizationId } = await req.json();
     if (!organizationId) throw new Error("organizationId is required");
 
-    // Verify user has access to organization and get Stripe customer ID
+    // Verify user has access to organization
     const { data: membership, error: memberError } = await supabaseClient
       .from('organization_members')
       .select('role')
@@ -53,19 +53,36 @@ serve(async (req) => {
       .eq('organization_id', organizationId)
       .single();
 
-    if (memberError || !membership) {
+    if (memberError) {
+      logStep("Membership query error", { error: memberError });
       throw new Error("User does not have access to this organization");
     }
 
+    if (!membership) {
+      logStep("No membership found");
+      throw new Error("User does not have access to this organization");
+    }
+
+    logStep("Organization access verified", { role: membership.role });
+
+    // Get organization details
     const { data: organization, error: orgError } = await supabaseClient
       .from('organizations')
       .select('stripe_customer_id, name')
       .eq('id', organizationId)
       .single();
 
-    if (orgError || !organization) {
+    if (orgError) {
+      logStep("Organization query error", { error: orgError });
       throw new Error("Organization not found");
     }
+
+    if (!organization) {
+      logStep("Organization not found in database");
+      throw new Error("Organization not found");
+    }
+
+    logStep("Organization found", { name: organization.name });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
 
