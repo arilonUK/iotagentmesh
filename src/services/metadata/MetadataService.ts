@@ -108,7 +108,15 @@ class MetadataService {
         throw error;
       }
 
-      return data || [];
+      // Convert the data to ensure proper typing, especially for utc_offset
+      const typedData: TimezoneInfo[] = (data || []).map((item: any) => ({
+        name: String(item.name),
+        abbrev: String(item.abbrev),
+        utc_offset: String(item.utc_offset), // Convert interval to string
+        is_dst: Boolean(item.is_dst)
+      }));
+
+      return typedData;
     } catch (error) {
       console.error('Error in getTimezones:', error);
       // Fallback to empty array if the optimized function fails
