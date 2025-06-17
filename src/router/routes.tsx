@@ -49,7 +49,7 @@ export const routes: RouteObject[] = [
     element: <Navigate to="/dashboard/settings" replace />,
   },
   
-  // Legacy routes for backward compatibility
+  // Legacy routes for backward compatibility - these should come AFTER dashboard routes
   {
     path: '/devices',
     element: <ProtectedRoute><Devices /></ProtectedRoute>,
