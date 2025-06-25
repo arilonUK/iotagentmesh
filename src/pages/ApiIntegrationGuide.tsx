@@ -1,28 +1,30 @@
-
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { 
   Server, 
-  Code, 
-  Settings, 
-  Key, 
-  Webhook, 
-  Database, 
-  Shield,
-  ExternalLink,
   ArrowLeft,
-  Zap,
-  FileText,
-  Globe,
-  Lock,
-  RefreshCw,
-  AlertTriangle,
-  Clock
+  Key,
+  Webhook,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+
+// Import the new section components
+import { ApiOverviewSection } from '@/components/documentation/api/ApiOverviewSection';
+import { ApiKeyManagementSection } from '@/components/documentation/api/ApiKeyManagementSection';
+import { ApiEndpointsSection } from '@/components/documentation/api/ApiEndpointsSection';
+import { RequestResponseFormatSection } from '@/components/documentation/api/RequestResponseFormatSection';
+import { ApiKeyRefreshWorkflowSection } from '@/components/documentation/api/ApiKeyRefreshWorkflowSection';
+import { WebhooksSection } from '@/components/documentation/api/WebhooksSection';
+import { RateLimitingSection } from '@/components/documentation/api/RateLimitingSection';
+import { ErrorHandlingSection } from '@/components/documentation/api/ErrorHandlingSection';
+import { SdkLibrariesSection } from '@/components/documentation/api/SdkLibrariesSection';
+import { BestPracticesSection } from '@/components/documentation/api/BestPracticesSection';
+import { QuickActionsCard } from '@/components/documentation/api/QuickActionsCard';
+import { NextStepsCard } from '@/components/documentation/api/NextStepsCard';
+import { FileText, Globe, Lock, RefreshCw, AlertTriangle, Clock, Code, Settings, Shield, Database, Zap, ExternalLink } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const ApiIntegrationGuide = () => {
   const navigate = useNavigate();
@@ -473,303 +475,70 @@ Response:
       </div>
 
       {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>
-            Jump to common API integration tasks
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            {quickActions.map((action, index) => (
-              <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-2">
-                    <action.icon className="h-5 w-5 text-primary" />
-                    <CardTitle className="text-sm">{action.title}</CardTitle>
-                  </div>
-                  <CardDescription className="text-xs">
-                    {action.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => navigate(action.link)}
-                  >
-                    {action.action}
-                    <ExternalLink className="h-3 w-3 ml-1" />
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <QuickActionsCard quickActions={quickActions} />
 
       {/* Guide Sections */}
       <div className="space-y-8">
-        {sections.map((section, index) => (
-          <div key={section.id} id={section.id}>
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <section.icon className="h-6 w-6 text-primary" />
-                  <CardTitle className="text-xl">{section.title}</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {section.content.map((paragraph, pIndex) => (
-                  <p key={pIndex} className="text-muted-foreground leading-relaxed">
-                    {paragraph}
-                  </p>
-                ))}
+        <ApiOverviewSection content={sections[0].content} />
+        <Separator />
+        
+        <ApiKeyManagementSection 
+          content={sections[1].content}
+          steps={sections[1].steps}
+          keyManagementFeatures={sections[1].keyManagementFeatures}
+        />
+        <Separator />
 
-                {section.steps && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Step-by-step Process:</h4>
-                    <ol className="space-y-2">
-                      {section.steps.map((step, stepIndex) => (
-                        <li key={stepIndex} className="flex items-start gap-3">
-                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold mt-0.5">
-                            {stepIndex + 1}
-                          </span>
-                          <span className="text-sm text-muted-foreground">{step}</span>
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                )}
+        <ApiEndpointsSection
+          content={sections[2].content}
+          endpointCategories={sections[2].endpointCategories}
+        />
+        <Separator />
 
-                {section.keyManagementFeatures && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Key Management Features:</h4>
-                    <div className="space-y-4">
-                      {section.keyManagementFeatures.map((feature, fIndex) => (
-                        <div key={fIndex} className="border rounded-lg p-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <RefreshCw className="h-4 w-4 text-primary" />
-                            <h5 className="font-medium">{feature.title}</h5>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-3">{feature.description}</p>
-                          <ul className="space-y-1">
-                            {feature.details.map((detail, dIndex) => (
-                              <li key={dIndex} className="text-xs text-muted-foreground flex items-center gap-2">
-                                <span className="h-1 w-1 rounded-full bg-primary flex-shrink-0" />
-                                {detail}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+        <RequestResponseFormatSection
+          content={sections[3].content}
+          requestExamples={sections[3].requestExamples}
+        />
+        <Separator />
 
-                {section.refreshWorkflow && (
-                  <div>
-                    <h4 className="font-semibold mb-3">API Key Refresh Process:</h4>
-                    <div className="space-y-4">
-                      {section.refreshWorkflow.map((workflow, wIndex) => (
-                        <div key={wIndex} className="border rounded-lg p-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-semibold">
-                              {wIndex + 1}
-                            </div>
-                            <div>
-                              <h5 className="font-medium">{workflow.step}</h5>
-                              <p className="text-sm text-muted-foreground">{workflow.description}</p>
-                            </div>
-                          </div>
-                          <ul className="space-y-1 ml-10">
-                            {workflow.details.map((detail, dIndex) => (
-                              <li key={dIndex} className="text-xs text-muted-foreground flex items-center gap-2">
-                                <span className="h-1 w-1 rounded-full bg-primary flex-shrink-0" />
-                                {detail}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+        <ApiKeyRefreshWorkflowSection
+          content={sections[4].content}
+          refreshWorkflow={sections[4].refreshWorkflow}
+        />
+        <Separator />
 
-                {section.endpointCategories && (
-                  <div>
-                    <h4 className="font-semibold mb-3">API Endpoint Categories:</h4>
-                    <div className="space-y-4">
-                      {section.endpointCategories.map((category, cIndex) => (
-                        <div key={cIndex} className="border rounded-lg p-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Server className="h-4 w-4 text-primary" />
-                            <h5 className="font-medium">{category.category}</h5>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-3">{category.description}</p>
-                          <ul className="space-y-1">
-                            {category.endpoints.map((endpoint, eIndex) => (
-                              <li key={eIndex} className="text-xs font-mono bg-muted px-2 py-1 rounded">
-                                {endpoint}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+        <WebhooksSection
+          content={sections[5].content}
+          webhookFeatures={sections[5].webhookFeatures}
+        />
+        <Separator />
 
-                {section.requestExamples && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Request Examples:</h4>
-                    <div className="space-y-4">
-                      {section.requestExamples.map((example, eIndex) => (
-                        <div key={eIndex}>
-                          <h5 className="text-sm font-medium mb-2">{example.title}</h5>
-                          <pre className="text-xs bg-muted p-3 rounded-lg overflow-x-auto">
-                            <code>{example.code}</code>
-                          </pre>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+        <RateLimitingSection
+          content={sections[6].content}
+          rateLimits={sections[6].rateLimits}
+        />
+        <Separator />
 
-                {section.webhookFeatures && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Webhook Features:</h4>
-                    <ul className="grid gap-2 md:grid-cols-2">
-                      {section.webhookFeatures.map((feature, fIndex) => (
-                        <li key={fIndex} className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Webhook className="h-3 w-3 text-primary flex-shrink-0" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+        <ErrorHandlingSection
+          content={sections[7].content}
+          errorTypes={sections[7].errorTypes}
+        />
+        <Separator />
 
-                {section.rateLimits && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Rate Limits by Plan:</h4>
-                    <div className="grid gap-3 md:grid-cols-3">
-                      {section.rateLimits.map((plan, pIndex) => (
-                        <div key={pIndex} className="border rounded-lg p-3">
-                          <h5 className="font-medium mb-2">{plan.plan}</h5>
-                          <ul className="space-y-1">
-                            {plan.limits.map((limit, lIndex) => (
-                              <li key={lIndex} className="text-xs text-muted-foreground">
-                                • {limit}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+        <SdkLibrariesSection
+          content={sections[8].content}
+          sdks={sections[8].sdks}
+        />
+        <Separator />
 
-                {section.errorTypes && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Common Error Codes:</h4>
-                    <div className="space-y-3">
-                      {section.errorTypes.map((error, eIndex) => (
-                        <div key={eIndex} className="border rounded-lg p-3">
-                          <div className="flex items-center gap-2 mb-1">
-                            <code className="text-sm font-mono bg-red-100 text-red-800 px-2 py-1 rounded">
-                              {error.code}
-                            </code>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-2">{error.description}</p>
-                          <p className="text-xs text-primary">Example: {error.example}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {section.sdks && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Available SDKs:</h4>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      {section.sdks.map((sdk, sIndex) => (
-                        <div key={sIndex} className="border rounded-lg p-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Code className="h-4 w-4 text-primary" />
-                            <h5 className="font-medium">{sdk.language}</h5>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-3">{sdk.description}</p>
-                          <div>
-                            <span className="text-xs font-medium">Features:</span>
-                            <ul className="text-xs text-muted-foreground mt-1">
-                              {sdk.features.map((feature, fIndex) => (
-                                <li key={fIndex} className="flex items-center gap-1">
-                                  <span className="h-1 w-1 rounded-full bg-primary flex-shrink-0" />
-                                  {feature}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {section.bestPractices && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Best Practices:</h4>
-                    <ul className="grid gap-2">
-                      {section.bestPractices.map((practice, pIndex) => (
-                        <li key={pIndex} className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Shield className="h-3 w-3 text-primary flex-shrink-0" />
-                          {practice}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            {index < sections.length - 1 && <Separator className="my-8" />}
-          </div>
-        ))}
+        <BestPracticesSection
+          content={sections[9].content}
+          bestPractices={sections[9].bestPractices}
+        />
       </div>
 
       {/* Next Steps */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Next Steps</CardTitle>
-          <CardDescription>
-            Continue your journey with these related guides
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 md:grid-cols-2">
-            <Button variant="outline" className="justify-start h-auto p-4">
-              <div className="flex items-center gap-3">
-                <Zap className="h-5 w-5" />
-                <div className="text-left">
-                  <div className="font-medium">Device Management</div>
-                  <div className="text-xs text-muted-foreground">Connect and manage your IoT devices</div>
-                </div>
-              </div>
-            </Button>
-            <Button variant="outline" className="justify-start h-auto p-4">
-              <div className="flex items-center gap-3">
-                <Database className="h-5 w-5" />
-                <div className="text-left">
-                  <div className="font-medium">Security Best Practices</div>
-                  <div className="text-xs text-muted-foreground">Secure your IoT infrastructure</div>
-                </div>
-              </div>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <NextStepsCard />
     </div>
   );
 };
