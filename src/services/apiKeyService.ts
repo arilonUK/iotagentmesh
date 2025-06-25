@@ -1,3 +1,4 @@
+
 import { ApiKey, CreateApiKeyResponse, NewApiKeyFormData, ApiUsage, SubscriptionPlan } from '@/types/apiKey';
 import { apiKeyApiService } from '@/services/apiKeyApiService';
 import { supabase } from '@/integrations/supabase/client';
@@ -29,6 +30,16 @@ export const apiKeyService = {
       return await apiKeyApiService.updateApiKey(id, updates);
     } catch (error) {
       console.error('Error updating API key:', error);
+      throw error;
+    }
+  },
+
+  async refreshApiKey(id: string): Promise<string> {
+    try {
+      console.log('Refreshing API key through API Gateway:', id);
+      return await apiKeyApiService.refreshApiKey(id);
+    } catch (error) {
+      console.error('Error refreshing API key:', error);
       throw error;
     }
   },

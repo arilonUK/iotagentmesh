@@ -146,6 +146,90 @@ export async function handleApiKeys(req: Request, path: string): Promise<Respons
       );
     }
 
+    if (method === 'POST' && segments.length === 2 && segments[1] === 'refresh') {
+      // POST /api/keys/:id/refresh - Refresh API key
+      const keyId = segments[0];
+
+      // Check if user has permission to refresh API keys
+      if (!['admin', 'owner'].includes(orgMember.role)) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Insufficient permissions to refresh API keys' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Get the existing API key to preserve settings
+      const { data: existingKey, error: fetchError } = await supabaseClient
+        .from('api_keys')
+        .select('*')
+        .eq('id', keyId)
+        .eq('organization_id', organizationId)
+        .single();
+
+      if (fetchError || !existingKey) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'API key not found' }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Generate a new secure API key
+      const newKeyId = crypto.randomUUID().replace(/-/g, '');
+      const fullKey = `iot_${newKeyId}`;
+      const prefix = `iot_${newKeyId.substring(0, 8)}...`;
+
+      // Hash the new key
+      const encoder = new TextEncoder();
+      const data = encoder.encode(fullKey);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const keyHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+      // Calculate new expiration date (extend by same period as original)
+      let newExpiresAt = null;
+      if (existingKey.expires_at) {
+        const originalExpiration = new Date(existingKey.expires_at);
+        const createdAt = new Date(existingKey.created_at);
+        const monthsDiff = (originalExpiration.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24 * 30.44); // approximate months
+        
+        const newExpirationDate = new Date();
+        newExpirationDate.setMonth(newExpirationDate.getMonth() + Math.round(monthsDiff));
+        newExpiresAt = newExpirationDate.toISOString();
+      }
+
+      // Update the API key with new values
+      const { data: refreshedKey, error: updateError } = await supabaseClient
+        .from('api_keys')
+        .update({
+          key_hash: keyHash,
+          prefix,
+          expires_at: newExpiresAt,
+          last_used: null, // Reset last used
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', keyId)
+        .eq('organization_id', organizationId)
+        .select()
+        .single();
+
+      if (updateError) {
+        console.error('Error refreshing API key:', updateError);
+        return new Response(
+          JSON.stringify({ success: false, error: 'Failed to refresh API key' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          api_key: refreshedKey,
+          full_key: fullKey
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     if (method === 'PUT' && segments.length === 1) {
       // PUT /api/keys/:id - Update API key
       const keyId = segments[0];

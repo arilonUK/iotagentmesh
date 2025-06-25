@@ -1,4 +1,3 @@
-
 import { apiGatewayService, ApiGatewayRequest, ApiGatewayResponse } from '@/services/apiGatewayService';
 import { ApiKey, CreateApiKeyResponse, NewApiKeyFormData, ApiUsage } from '@/types/apiKey';
 
@@ -72,6 +71,37 @@ export class ApiKeyApiService {
     } catch (error) {
       console.error('Error creating API key:', error);
       throw error instanceof Error ? error : new Error('Failed to create API key');
+    }
+  }
+
+  /**
+   * Refresh an existing API key (generate new key, invalidate old one)
+   */
+  async refreshApiKey(id: string): Promise<string> {
+    try {
+      const request: ApiGatewayRequest = {
+        method: 'POST',
+        endpoint: `/api/keys/${id}/refresh`,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      };
+
+      const response: ApiGatewayResponse<ApiKeyApiResponse> = await apiGatewayService.request(request);
+      
+      if (response.error) {
+        console.error('Failed to refresh API key:', response.error);
+        throw new Error(response.error);
+      }
+
+      if (!response.data?.full_key) {
+        throw new Error('No new API key returned from refresh');
+      }
+
+      return response.data.full_key;
+    } catch (error) {
+      console.error('Error refreshing API key:', error);
+      throw error instanceof Error ? error : new Error('Failed to refresh API key');
     }
   }
 

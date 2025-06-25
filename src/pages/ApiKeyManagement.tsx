@@ -67,6 +67,20 @@ export default function ApiKeyManagement() {
       toast.error('Failed to create API key');
     }
   };
+
+  const handleRefreshKey = async (id: string): Promise<string> => {
+    try {
+      const newKey = await apiKeyService.refreshApiKey(id);
+      // Reload API keys to get updated data
+      await loadApiKeys();
+      toast.success('API key refreshed successfully');
+      return newKey;
+    } catch (error) {
+      console.error('Error refreshing API key:', error);
+      toast.error('Failed to refresh API key');
+      throw error;
+    }
+  };
   
   const handleToggleKey = async (id: string, active: boolean) => {
     try {
@@ -156,7 +170,7 @@ export default function ApiKeyManagement() {
         <CardHeader>
           <CardTitle>Your API Keys</CardTitle>
           <CardDescription>
-            Manage your existing API keys and their permissions
+            Manage your existing API keys and their permissions. Refresh keys before they expire to maintain continuous access.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -169,6 +183,7 @@ export default function ApiKeyManagement() {
               apiKeys={apiKeys}
               onDeleteKey={handleDeleteKey}
               onToggleKey={handleToggleKey}
+              onRefreshKey={handleRefreshKey}
             />
           )}
         </CardContent>
