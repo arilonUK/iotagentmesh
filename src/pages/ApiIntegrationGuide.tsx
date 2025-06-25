@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +18,9 @@ import {
   FileText,
   Globe,
   Lock,
-  RefreshCw
+  RefreshCw,
+  AlertTriangle,
+  Clock
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -37,12 +40,12 @@ const ApiIntegrationGuide = () => {
     },
     {
       id: 'authentication',
-      title: 'API Authentication',
+      title: 'API Authentication & Key Management',
       icon: Key,
       content: [
         'API authentication uses bearer tokens generated from your API keys for secure access to protected endpoints.',
         'Each API key can be configured with specific scopes to limit access to only the required functionality.',
-        'API keys support expiration dates and usage tracking for enhanced security management.'
+        'API keys support expiration dates, proactive refresh capabilities, and comprehensive usage tracking for enhanced security management.'
       ],
       steps: [
         'Navigate to Settings > API Keys in your dashboard',
@@ -52,6 +55,38 @@ const ApiIntegrationGuide = () => {
         'Choose an expiration date or set to never expire',
         'Copy the generated API key securely',
         'Use the key as a Bearer token in your API requests'
+      ],
+      keyManagementFeatures: [
+        {
+          title: 'Proactive Refresh',
+          description: 'Refresh API keys before they expire to maintain continuous access',
+          details: [
+            'Visual expiration warnings appear 30 days before expiry',
+            'Quick refresh buttons for keys expiring within 14 days',
+            'One-click refresh generates new key and invalidates old one',
+            'New keys maintain same permissions and extend expiration period'
+          ]
+        },
+        {
+          title: 'Expiration Management',
+          description: 'Comprehensive lifecycle management for API keys',
+          details: [
+            'Color-coded expiration badges (green for never expires, yellow for 30+ days, red for <30 days)',
+            'Automatic notifications for keys approaching expiration',
+            'Flexible expiration periods: 1, 3, 6, 12 months, or never',
+            'Grace period handling for recently expired keys'
+          ]
+        },
+        {
+          title: 'Security Features',
+          description: 'Enterprise-grade security for API key management',
+          details: [
+            'SHA-256 hashing for secure key storage',
+            'Role-based access control (admin/owner permissions required)',
+            'Immediate invalidation of old keys during refresh',
+            'Usage tracking and audit logging for all key operations'
+          ]
+        }
       ]
     },
     {
@@ -73,6 +108,18 @@ const ApiIntegrationGuide = () => {
             'GET /api/devices/{id} - Get device details',
             'PUT /api/devices/{id} - Update device',
             'DELETE /api/devices/{id} - Delete device'
+          ]
+        },
+        {
+          category: 'API Key Management',
+          description: 'Manage and refresh API keys programmatically',
+          endpoints: [
+            'GET /api/keys - List organization API keys',
+            'POST /api/keys - Create a new API key',
+            'PUT /api/keys/{id} - Update API key settings',
+            'POST /api/keys/{id}/refresh - Refresh an existing API key',
+            'DELETE /api/keys/{id} - Delete API key',
+            'GET /api/keys/usage - Get API usage statistics'
           ]
         },
         {
@@ -137,6 +184,23 @@ Content-Type: application/json`
 }`
         },
         {
+          title: 'Refresh API Key Request',
+          code: `POST /api/keys/api-key-uuid/refresh
+Authorization: Bearer your-current-api-key
+
+Response:
+{
+  "success": true,
+  "api_key": {
+    "id": "api-key-uuid",
+    "name": "My API Key",
+    "prefix": "iot_12345678...",
+    "expires_at": "2024-12-25T00:00:00Z"
+  },
+  "full_key": "iot_new-refreshed-key-value"
+}`
+        },
+        {
           title: 'Send Data Request',
           code: `POST /api/data-buckets/bucket-id/data
 {
@@ -148,6 +212,66 @@ Content-Type: application/json`
     "pressure": 1013.25
   }
 }`
+        }
+      ]
+    },
+    {
+      id: 'key-refresh-workflow',
+      title: 'API Key Refresh Workflow',
+      icon: RefreshCw,
+      content: [
+        'The API key refresh system provides seamless key rotation without service interruption.',
+        'Proactive refresh capabilities help maintain continuous API access by refreshing keys before expiration.',
+        'The refresh process generates a completely new key while preserving all existing permissions and settings.'
+      ],
+      refreshWorkflow: [
+        {
+          step: 'Detection',
+          description: 'System identifies keys approaching expiration',
+          details: [
+            'Visual indicators appear 30 days before expiration',
+            'Email notifications sent at 30, 14, and 7 days before expiry',
+            'Dashboard shows refresh recommendations for expiring keys'
+          ]
+        },
+        {
+          step: 'Initiation',
+          description: 'Refresh process can be triggered multiple ways',
+          details: [
+            'Manual refresh via dashboard interface',
+            'Programmatic refresh using POST /api/keys/{id}/refresh',
+            'Automated refresh workflows (coming soon)'
+          ]
+        },
+        {
+          step: 'Generation',
+          description: 'New key generation with security measures',
+          details: [
+            'Cryptographically secure key generation',
+            'Same scopes and permissions as original key',
+            'Extended expiration based on original key settings',
+            'Immediate SHA-256 hashing for secure storage'
+          ]
+        },
+        {
+          step: 'Transition',
+          description: 'Seamless transition from old to new key',
+          details: [
+            'Old key remains valid during transition period',
+            'New key is immediately active for use',
+            'Applications can update to new key at their own pace',
+            'Usage tracking continues uninterrupted'
+          ]
+        },
+        {
+          step: 'Completion',
+          description: 'Finalization and cleanup',
+          details: [
+            'Old key is invalidated after successful refresh',
+            'Audit log records key refresh event',
+            'Updated key information shown in dashboard',
+            'New expiration date calculated and displayed'
+          ]
         }
       ]
     },
@@ -278,6 +402,8 @@ Content-Type: application/json`
       ],
       bestPractices: [
         'Store API keys securely using environment variables or secret management',
+        'Implement proactive API key refresh before expiration dates',
+        'Monitor key expiration dates and set up automated refresh workflows',
         'Implement exponential backoff for retry logic on failed requests',
         'Use appropriate HTTP timeouts for your application requirements',
         'Validate API responses before processing data',
@@ -286,7 +412,9 @@ Content-Type: application/json`
         'Implement proper logging for debugging and monitoring',
         'Cache frequently accessed data to reduce API calls',
         'Use bulk operations when available for better performance',
-        'Test integrations thoroughly in development environment'
+        'Test integrations thoroughly in development environment',
+        'Plan for key rotation in production systems',
+        'Keep backup keys for emergency access scenarios'
       ]
     }
   ];
@@ -339,7 +467,7 @@ Content-Type: application/json`
           </p>
           <div className="flex items-center gap-2 mt-2">
             <Badge variant="secondary">Development</Badge>
-            <span className="text-sm text-muted-foreground">10 min read</span>
+            <span className="text-sm text-muted-foreground">15 min read</span>
           </div>
         </div>
       </div>
@@ -413,6 +541,60 @@ Content-Type: application/json`
                         </li>
                       ))}
                     </ol>
+                  </div>
+                )}
+
+                {section.keyManagementFeatures && (
+                  <div>
+                    <h4 className="font-semibold mb-3">Key Management Features:</h4>
+                    <div className="space-y-4">
+                      {section.keyManagementFeatures.map((feature, fIndex) => (
+                        <div key={fIndex} className="border rounded-lg p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <RefreshCw className="h-4 w-4 text-primary" />
+                            <h5 className="font-medium">{feature.title}</h5>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-3">{feature.description}</p>
+                          <ul className="space-y-1">
+                            {feature.details.map((detail, dIndex) => (
+                              <li key={dIndex} className="text-xs text-muted-foreground flex items-center gap-2">
+                                <span className="h-1 w-1 rounded-full bg-primary flex-shrink-0" />
+                                {detail}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {section.refreshWorkflow && (
+                  <div>
+                    <h4 className="font-semibold mb-3">API Key Refresh Process:</h4>
+                    <div className="space-y-4">
+                      {section.refreshWorkflow.map((workflow, wIndex) => (
+                        <div key={wIndex} className="border rounded-lg p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-semibold">
+                              {wIndex + 1}
+                            </div>
+                            <div>
+                              <h5 className="font-medium">{workflow.step}</h5>
+                              <p className="text-sm text-muted-foreground">{workflow.description}</p>
+                            </div>
+                          </div>
+                          <ul className="space-y-1 ml-10">
+                            {workflow.details.map((detail, dIndex) => (
+                              <li key={dIndex} className="text-xs text-muted-foreground flex items-center gap-2">
+                                <span className="h-1 w-1 rounded-full bg-primary flex-shrink-0" />
+                                {detail}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
 
