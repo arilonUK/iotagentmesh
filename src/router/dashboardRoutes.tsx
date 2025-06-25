@@ -9,6 +9,12 @@ const DeviceDetail = lazy(() => import('@/pages/DeviceDetail'));
 const Billing = lazy(() => import('@/pages/Billing'));
 const TeamSettings = lazy(() => import('@/pages/TeamSettings'));
 
+// Lazy load documentation guide pages
+const DeviceManagementGuide = lazy(() => import('@/pages/DeviceManagementGuide'));
+const DataBucketsAnalyticsGuide = lazy(() => import('@/pages/DataBucketsAnalyticsGuide'));
+const AlarmConfigurationGuide = lazy(() => import('@/pages/AlarmConfigurationGuide'));
+const ApiIntegrationGuide = lazy(() => import('@/pages/ApiIntegrationGuide'));
+
 // Loading component for suspense
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center h-48">
@@ -63,6 +69,47 @@ export const dashboardRoutes = [
       <ProtectedRoute>
         <Suspense fallback={<LoadingSpinner />}>
           <Billing />
+        </Suspense>
+      </ProtectedRoute>
+    ),
+  },
+  // Documentation guide routes
+  {
+    path: "/dashboard/documentation/device-management",
+    element: (
+      <ProtectedRoute>
+        <Suspense fallback={<LoadingSpinner />}>
+          <DeviceManagementGuide />
+        </Suspense>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/dashboard/documentation/data-buckets-analytics",
+    element: (
+      <ProtectedRoute>
+        <Suspense fallback={<LoadingSpinner />}>
+          <DataBucketsAnalyticsGuide />
+        </Suspense>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/dashboard/documentation/alarm-configuration",
+    element: (
+      <ProtectedRoute>
+        <Suspense fallback={<LoadingSpinner />}>
+          <AlarmConfigurationGuide />
+        </Suspense>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/dashboard/documentation/api-integration",
+    element: (
+      <ProtectedRoute>
+        <Suspense fallback={<LoadingSpinner />}>
+          <ApiIntegrationGuide />
         </Suspense>
       </ProtectedRoute>
     ),
