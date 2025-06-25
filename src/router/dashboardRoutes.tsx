@@ -42,4 +42,12 @@ export const dashboardRoutes = [
       </ProtectedRoute>
     ),
   },
+  {
+    path: "/dashboard/billing",
+    element: (
+      <ProtectedRoute>
+        <Billing />
+      </ProtectedRoute>
+    ),
+  },
 ];
