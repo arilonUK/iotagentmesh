@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/auth';
 import UserList from './UserList';
 import { useOrganizationMembers } from '@/hooks/useOrganizationMembers';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Shield } from 'lucide-react';
+import { RefreshCw, Shield, Info } from 'lucide-react';
 import { hasPermission, PERMISSIONS } from '@/lib/permissions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
@@ -26,6 +26,7 @@ const UserManagement = () => {
   // Check if current user has permission to view this component
   const canViewTeam = hasPermission(userRole, PERMISSIONS.MANAGE_TEAM);
   const isCurrentUserOwner = userRole === 'owner';
+  const isFallbackOrg = organization?.id?.startsWith('default-org-');
 
   const handleRemoveUser = async (userId: string) => {
     if (!hasPermission(userRole, PERMISSIONS.MANAGE_TEAM)) return;
@@ -87,7 +88,17 @@ const UserManagement = () => {
         </Button>
       </div>
 
-      {!isCurrentUserOwner && (
+      {isFallbackOrg && (
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertTitle>Demo Organization</AlertTitle>
+          <AlertDescription>
+            You're viewing a demo organization. Create a real organization to invite team members and manage roles.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {!isCurrentUserOwner && !isFallbackOrg && (
         <Alert>
           <Shield className="h-4 w-4" />
           <AlertTitle>Note</AlertTitle>
