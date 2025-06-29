@@ -10,7 +10,7 @@ function isFallbackOrganization(orgId: string): boolean {
   return orgId.startsWith('default-org-');
 }
 
-// Fetch organization members from the database
+// Fetch organization members from the database using secure functions
 export async function fetchOrganizationMembers(organizationId: string): Promise<OrganizationUser[]> {
   try {
     console.log('Fetching members for organization:', organizationId);
@@ -21,13 +21,16 @@ export async function fetchOrganizationMembers(organizationId: string): Promise<
       return createFallbackMembersList();
     }
     
+    // Use the secure RPC function to get organization members
     const { data, error } = await supabase.rpc('get_organization_members', 
       { p_org_id: organizationId }
     );
     
     if (error) {
       console.error('Error fetching organization members:', error);
-      return fetchOrganizationUsersFallback(organizationId);
+      // If RPC fails, the RLS policies will handle access control
+      toast.error('Error loading team members');
+      return [];
     }
     
     if (data && Array.isArray(data)) {
@@ -49,7 +52,8 @@ export async function fetchOrganizationMembers(organizationId: string): Promise<
   } catch (err) {
     const error = err as Error;
     console.error('Error in fetchOrganizationMembers:', error);
-    return fetchOrganizationUsersFallback(organizationId);
+    toast.error('Error loading team members');
+    return [];
   }
 }
 
@@ -88,64 +92,6 @@ async function createFallbackMembersList(): Promise<OrganizationUser[]> {
   }
 }
 
-// Fallback method using separate queries
-export async function fetchOrganizationUsersFallback(organizationId: string): Promise<OrganizationUser[]> {
-  try {
-    console.log('Using fallback method to fetch organization members');
-    
-    // Handle fallback organizations
-    if (isFallbackOrganization(organizationId)) {
-      return createFallbackMembersList();
-    }
-    
-    // First get user IDs with roles from organization_members table
-    const { data: rawMembers, error: membersError } = await supabase
-      .from('organization_members')
-      .select('id, user_id, role')
-      .eq('organization_id', organizationId);
-    
-    if (membersError) {
-      console.error('Fallback error fetching members:', membersError);
-      toast.error('Error loading team members');
-      return [];
-    }
-    
-    if (!rawMembers || rawMembers.length === 0) {
-      console.log('No members found');
-      return [];
-    }
-    
-    // For each member, fetch profile info
-    const usersWithProfiles = await Promise.all(
-      rawMembers.map(async (member) => {
-        try {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('full_name, username')
-            .eq('id', member.user_id)
-            .maybeSingle();
-          
-          return {
-            ...member,
-            email: profile?.username, // Username might be email
-            full_name: profile?.full_name,
-            username: profile?.username
-          };
-        } catch (profileError) {
-          console.error('Error fetching profile:', profileError);
-          return member;
-        }
-      })
-    );
-    
-    return usersWithProfiles;
-  } catch (error) {
-    console.error('Error in fallback method:', error);
-    toast.error('Error loading team members');
-    return [];
-  }
-}
-
 // Remove a user from an organization
 export async function removeOrganizationMember(organizationId: string, userId: string): Promise<boolean> {
   try {
@@ -162,6 +108,7 @@ export async function removeOrganizationMember(organizationId: string, userId: s
       .eq('id', userId)
       .single();
     
+    // The RLS policies will automatically handle permission checking
     const { error } = await supabase
       .from('organization_members')
       .delete()
@@ -169,7 +116,8 @@ export async function removeOrganizationMember(organizationId: string, userId: s
       .eq('user_id', userId);
 
     if (error) {
-      toast.error('Error removing user'); 
+      console.error('Error removing user:', error);
+      toast.error('Error removing user - insufficient permissions or user not found'); 
       return false;
     }
     
@@ -188,6 +136,7 @@ export async function removeOrganizationMember(organizationId: string, userId: s
     return true;
   } catch (error) {
     console.error('Error removing user:', error);
+    toast.error('Error removing user');
     return false;
   }
 }
@@ -225,6 +174,7 @@ export async function updateOrganizationMemberRole(
     // Cast newRole to the correct enum type to match database constraint
     const validRole = newRole as Database["public"]["Enums"]["role_type"];
     
+    // The RLS policies will automatically handle permission checking
     const { error } = await supabase
       .from('organization_members')
       .update({ role: validRole })
@@ -232,7 +182,8 @@ export async function updateOrganizationMemberRole(
       .eq('user_id', userId);
 
     if (error) {
-      toast.error('Error updating role');
+      console.error('Error updating role:', error);
+      toast.error('Error updating role - insufficient permissions');
       return false;
     }
 
@@ -253,6 +204,7 @@ export async function updateOrganizationMemberRole(
     return true;
   } catch (error) {
     console.error('Error updating role:', error);
+    toast.error('Error updating role');
     return false;
   }
 }

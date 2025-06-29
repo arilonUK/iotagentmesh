@@ -1730,6 +1730,13 @@ export type Database = {
           user_agent: string
         }[]
       }
+      get_current_user_organizations: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          organization_id: string
+          role: string
+        }[]
+      }
       get_device_alarm_events_bypass_rls: {
         Args: { p_device_id: string }
         Returns: {
@@ -1966,6 +1973,10 @@ export type Database = {
           is_dst: boolean
         }[]
       }
+      get_user_org_role: {
+        Args: { p_org_id: string; p_user_id: string }
+        Returns: string
+      }
       get_user_organization_role_bypass_rls: {
         Args: { p_org_id: string; p_user_id: string }
         Returns: string
@@ -1985,7 +1996,7 @@ export type Database = {
         Returns: Database["public"]["Enums"]["role_type"]
       }
       is_org_admin_or_owner: {
-        Args: { org_id: string }
+        Args: { org_id: string } | { p_org_id: string; p_user_id: string }
         Returns: boolean
       }
       is_org_admin_or_owner_bypass_rls: {
@@ -1993,7 +2004,7 @@ export type Database = {
         Returns: boolean
       }
       is_org_member: {
-        Args: { org_id: string }
+        Args: { org_id: string } | { p_org_id: string; p_user_id: string }
         Returns: boolean
       }
       is_org_member_bypass_rls: {
