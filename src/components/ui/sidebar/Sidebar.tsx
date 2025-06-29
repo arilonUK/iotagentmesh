@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { useSidebar } from "./SidebarContext"
 
-const SIDEBAR_WIDTH = "16rem"
-const SIDEBAR_WIDTH_MOBILE = "18rem"
+const SIDEBAR_WIDTH = "12rem"
+const SIDEBAR_WIDTH_MOBILE = "16rem"
 
 const Sidebar = React.forwardRef<
   HTMLDivElement,
