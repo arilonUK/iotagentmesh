@@ -75,7 +75,7 @@ const PolicyTestingSection = () => {
             <ul className="space-y-1 text-sm text-muted-foreground">
               <li>• <strong>SELECT Policies:</strong> Users can only view organization members they have access to</li>
               <li>• <strong>INSERT Policies:</strong> Only admins/owners can add new members</li>
-              <li>• <strong>UPDATE Policies:</strong> Role updates respect hierarchy (owners > admins > members)</li>
+              <li>• <strong>UPDATE Policies:</strong> Role updates respect hierarchy (owners {'>'}  admins {'>'}  members)</li>
               <li>• <strong>DELETE Policies:</strong> Only authorized users can remove members</li>
               <li>• <strong>Security Functions:</strong> All SECURITY DEFINER functions work without recursion</li>
               <li>• <strong>Cross-Organization Access:</strong> Users cannot access other organizations' data</li>
