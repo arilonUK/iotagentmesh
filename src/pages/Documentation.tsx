@@ -1,6 +1,7 @@
+
 import React from 'react';
 import DashboardLayout from '@/layouts/DashboardLayout';
-import ApiDocumentation from '@/components/documentation/ApiDocumentation';
+import ApiDocumentationComponent from '@/components/ApiDocumentation';
 import DatabaseSchemaChart from '@/components/documentation/DatabaseSchemaChart';
 import StoryMap from '@/components/documentation/StoryMap';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -19,7 +20,7 @@ const Documentation = () => {
           </TabsList>
 
           <TabsContent value="api" className="mt-8">
-            <ApiDocumentation />
+            <ApiDocumentationComponent />
           </TabsContent>
 
           <TabsContent value="schema" className="mt-8">
