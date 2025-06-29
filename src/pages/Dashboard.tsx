@@ -39,9 +39,9 @@ const Dashboard = () => {
   // Show no organization state
   if (!organization?.id) {
     return (
-      <div className="space-y-8">
+      <div className="w-full max-w-7xl mx-auto px-6 py-8 space-y-8">
         <div>
-          <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
+          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
           <p className="text-muted-foreground">Welcome to your IoT control center.</p>
         </div>
         <Card className="border-yellow-200 bg-yellow-50">
@@ -62,9 +62,9 @@ const Dashboard = () => {
   // Show error state if there's an error loading devices
   if (error) {
     return (
-      <div className="space-y-8">
+      <div className="w-full max-w-7xl mx-auto px-6 py-8 space-y-8">
         <div>
-          <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
+          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
           <p className="text-muted-foreground">Welcome back to your IoT control center.</p>
         </div>
         <Card className="border-red-200 bg-red-50">
@@ -86,9 +86,9 @@ const Dashboard = () => {
   const recentDevices = devices.slice(0, 4);
 
   return (
-    <div className="space-y-8">
+    <div className="w-full max-w-7xl mx-auto px-6 py-8 space-y-8">
       <div>
-        <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
+        <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
         <p className="text-muted-foreground">Welcome back to your IoT control center.</p>
         {/* Performance indicator - remove this later */}
         {process.env.NODE_ENV === 'development' && (
@@ -98,8 +98,8 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* Stats Cards - now with real data */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Stats Cards - now with real data and better desktop layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -169,10 +169,10 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Recent Devices - now with real data */}
+      {/* Recent Devices - now with better desktop layout */}
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Recent Devices</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold">Recent Devices</h2>
           <Link to="/devices" className="text-sm text-primary flex items-center hover:underline">
             View all devices
             <ArrowRight className="ml-1 h-4 w-4" />
@@ -184,7 +184,7 @@ const Dashboard = () => {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {recentDevices.map((device) => (
               <DeviceCard 
                 key={device.id} 
