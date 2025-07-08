@@ -6,9 +6,11 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { useNotifications } from '@/hooks/useNotifications';
 import { Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export function NotificationSettings() {
   const { preferences, preferencesLoading, updatePreferences } = useNotifications();
+  const { toast } = useToast();
   const [formState, setFormState] = useState({
     notify_device_alerts: true,
     notify_system_events: true,
@@ -20,11 +22,13 @@ export function NotificationSettings() {
   // When preferences load, update the form state
   useEffect(() => {
     if (preferences) {
+      console.log('Loaded preferences:', preferences);
       setFormState(preferences);
     }
   }, [preferences]);
   
   const handleChange = (field: string) => (checked: boolean) => {
+    console.log(`Changing ${field} to ${checked}`);
     setFormState(prev => ({
       ...prev,
       [field]: checked
@@ -32,9 +36,29 @@ export function NotificationSettings() {
   };
   
   const handleSave = async () => {
+    console.log('Save button clicked with formState:', formState);
     setIsSaving(true);
     try {
-      await updatePreferences(formState);
+      const success = await updatePreferences(formState);
+      if (success) {
+        toast({
+          title: "Settings saved",
+          description: "Your notification preferences have been updated.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to save notification preferences. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error saving preferences:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsSaving(false);
     }
@@ -46,6 +70,8 @@ export function NotificationSettings() {
     preferences.notify_new_devices !== formState.notify_new_devices ||
     preferences.email_notifications !== formState.email_notifications
   );
+  
+  console.log('Component state:', { preferences, formState, hasChanges, preferencesLoading });
   
   if (preferencesLoading) {
     return (
