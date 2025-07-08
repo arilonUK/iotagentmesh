@@ -34,15 +34,12 @@ export function OrganizationFooter() {
     <div className="mt-auto pt-4 px-3">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="justify-start w-full text-left">
-            <div className="flex w-full items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Avatar className="h-7 w-7">
-                  <AvatarImage src={organization.logo} alt={organization.name} />
-                  <AvatarFallback>{organization.name.slice(0, 2)}</AvatarFallback>
-                </Avatar>
-                <span className="text-sm">{organization.name || 'My Organization'}</span>
-              </div>
+          <Button variant="ghost" className="justify-center w-full">
+            <div className="flex items-center gap-2">
+              <Avatar className="h-7 w-7">
+                <AvatarImage src={organization.logo} alt={organization.name} />
+                <AvatarFallback>{organization.name.slice(0, 2)}</AvatarFallback>
+              </Avatar>
               <Icons.chevronDown className="h-4 w-4 opacity-50" />
             </div>
           </Button>
