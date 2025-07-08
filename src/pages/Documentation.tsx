@@ -39,7 +39,7 @@ const Documentation = () => {
                 </CardHeader>
                 <CardContent>
                   <Link
-                    to="/dashboard/guides/device-management"
+                    to="/dashboard/documentation/device-management"
                     className="inline-flex items-center text-primary hover:underline"
                   >
                     Read Guide
@@ -60,7 +60,7 @@ const Documentation = () => {
                 </CardHeader>
                 <CardContent>
                   <Link
-                    to="/dashboard/guides/data-buckets-analytics"
+                    to="/dashboard/documentation/data-buckets-analytics"
                     className="inline-flex items-center text-primary hover:underline"
                   >
                     Read Guide
@@ -81,7 +81,7 @@ const Documentation = () => {
                 </CardHeader>
                 <CardContent>
                   <Link
-                    to="/dashboard/guides/alarm-configuration"
+                    to="/dashboard/documentation/alarm-configuration"
                     className="inline-flex items-center text-primary hover:underline"
                   >
                     Read Guide
@@ -102,7 +102,7 @@ const Documentation = () => {
                 </CardHeader>
                 <CardContent>
                   <Link
-                    to="/dashboard/guides/api-integration"
+                    to="/dashboard/documentation/api-integration"
                     className="inline-flex items-center text-primary hover:underline"
                   >
                     Read Guide
