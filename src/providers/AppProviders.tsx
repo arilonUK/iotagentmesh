@@ -8,7 +8,7 @@ import { router } from "@/router/router";
 export const AppProviders = () => {
   return (
     <StrictMode>
-      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <ThemeProvider defaultTheme="light" storageKey="iot-ui-theme">
         <AppProvider>
           <RouterProvider router={router} />
         </AppProvider>
