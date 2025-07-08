@@ -80,18 +80,39 @@ const fetchUserOrganizationsInternal = async (userId: string): Promise<UserOrgan
   } catch (error: any) {
     console.error('Error in fetchUserOrganizationsInternal:', error);
     
-    // Only create fallback for timeout or connection errors
+    // For any error, try to ensure user has a valid organization using our new RPC function
     if (error.message === 'Organization fetch timeout' || 
-        error.message?.includes('fetch')) {
-      console.log('Creating fallback organization due to network error');
-      const fallbackOrg: UserOrganization = {
-        id: 'default-org-' + userId.substring(0, 8),
-        name: 'My Organization',
-        slug: 'my-organization',
-        role: 'owner',
-        is_default: true
-      };
-      return [fallbackOrg];
+        error.message?.includes('fetch') ||
+        error.message?.includes('invalid') ||
+        error.message?.includes('uuid')) {
+      console.log('Ensuring user has valid organization due to error:', error.message);
+      
+      try {
+        // Use the new RPC function to ensure user has a valid organization
+        const { data: orgId, error: orgError } = await supabase.rpc('get_user_organization_id', { p_user_id: userId });
+        
+        if (!orgError && orgId) {
+          // Now fetch the organization details
+          const { data: orgData, error: fetchError } = await supabase
+            .from('organizations')
+            .select('id, name, slug')
+            .eq('id', orgId)
+            .single();
+            
+          if (!fetchError && orgData) {
+            const organization: UserOrganization = {
+              id: orgData.id,
+              name: orgData.name,
+              slug: orgData.slug,
+              role: 'owner',
+              is_default: true
+            };
+            return [organization];
+          }
+        }
+      } catch (ensureError) {
+        console.error('Error ensuring valid organization:', ensureError);
+      }
     }
     
     // For other errors, return empty array to allow retry
@@ -144,8 +165,8 @@ export const organizationService = {
       try {
         const result = await requestPromise;
         
-        // Only cache successful results with actual data
-        if (result.length > 0 && !result[0].id.startsWith('default-org-')) {
+        // Cache successful results with valid UUID organizations
+        if (result.length > 0) {
           organizationCache.set(cacheKey, {
             data: result,
             timestamp: Date.now()

@@ -1702,6 +1702,10 @@ export type Database = {
         Args: { p_id: string }
         Returns: undefined
       }
+      ensure_user_has_valid_organization: {
+        Args: { p_user_id: string }
+        Returns: string
+      }
       exec_sql: {
         Args: { sql: string }
         Returns: undefined
@@ -1980,6 +1984,10 @@ export type Database = {
       }
       get_user_org_role: {
         Args: { p_org_id: string; p_user_id: string }
+        Returns: string
+      }
+      get_user_organization_id: {
+        Args: { p_user_id?: string }
         Returns: string
       }
       get_user_organization_role_bypass_rls: {
