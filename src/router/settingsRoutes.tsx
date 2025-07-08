@@ -5,6 +5,7 @@ import OrganizationSettings from "@/pages/OrganizationSettings";
 import TeamSettings from "@/pages/TeamSettings";
 import OAuthConnections from "@/pages/OAuthConnections";
 import ApiKeyManagement from "@/pages/ApiKeyManagement";
+import NotificationSettings from "@/pages/NotificationSettings";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 export const settingsRoutes = [
@@ -49,6 +50,14 @@ export const settingsRoutes = [
     element: (
       <ProtectedRoute>
         <ApiKeyManagement />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/dashboard/notification-settings",
+    element: (
+      <ProtectedRoute>
+        <NotificationSettings />
       </ProtectedRoute>
     ),
   },

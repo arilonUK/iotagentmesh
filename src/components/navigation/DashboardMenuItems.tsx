@@ -60,7 +60,7 @@ export default function DashboardMenuItems() {
       </NavMenuItem>
       
       <NavMenuItem 
-        to="/notifications/settings" 
+        to="/dashboard/notification-settings" 
         icon={Bell}
       >
         Notifications
