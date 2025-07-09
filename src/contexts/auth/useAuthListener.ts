@@ -50,20 +50,37 @@ export const useAuthListener = ({
     if (session?.user) {
       console.log('User signed in, updating state');
       
-      // Load organizations for authenticated user
-      const organizations = await loadUserOrganizations(session.user.id);
-      setUserOrganizations(organizations);
-      
-      // Set current organization (prefer the one marked as default, or first one)
-      const defaultOrg = organizations.find(org => org.is_default) || organizations[0] || null;
-      if (defaultOrg) {
-        console.log('Setting default organization:', defaultOrg);
-        setCurrentOrganization(defaultOrg);
-        setOrganization({
-          id: defaultOrg.id,
-          name: defaultOrg.name,
-          slug: defaultOrg.slug
-        });
+      try {
+        // Load organizations for authenticated user with timeout protection
+        const organizations = await Promise.race([
+          loadUserOrganizations(session.user.id),
+          new Promise<UserOrganization[]>((resolve) => {
+            setTimeout(() => {
+              console.log('Organization loading timed out, proceeding with empty array');
+              resolve([]);
+            }, 5000); // 5 second timeout for auth flow
+          })
+        ]);
+        
+        setUserOrganizations(organizations);
+        
+        // Set current organization (prefer the one marked as default, or first one)
+        const defaultOrg = organizations.find(org => org.is_default) || organizations[0] || null;
+        if (defaultOrg) {
+          console.log('Setting default organization:', defaultOrg);
+          setCurrentOrganization(defaultOrg);
+          setOrganization({
+            id: defaultOrg.id,
+            name: defaultOrg.name,
+            slug: defaultOrg.slug
+          });
+        }
+      } catch (error) {
+        console.error('Error loading organizations during auth:', error);
+        // Continue with empty organizations to not block auth flow
+        setUserOrganizations([]);
+        setCurrentOrganization(null);
+        setOrganization(null);
       }
     } else {
       console.log('User signed out, clearing state');
@@ -73,6 +90,7 @@ export const useAuthListener = ({
       setProfile(null);
     }
     
+    // Always clear loading state regardless of organization loading success/failure
     setLoading(false);
   }, [setSession, setUser, setIsAuthenticated, setLoading, setUserOrganizations, setCurrentOrganization, setOrganization, setProfile]);
 
@@ -93,20 +111,37 @@ export const useAuthListener = ({
         setUser(session.user);
         setIsAuthenticated(true);
         
-        // Load organizations immediately for existing session
-        const organizations = await loadUserOrganizations(session.user.id);
-        setUserOrganizations(organizations);
-        
-        // Set current organization
-        const defaultOrg = organizations.find(org => org.is_default) || organizations[0] || null;
-        if (defaultOrg) {
-          console.log('Setting default organization:', defaultOrg);
-          setCurrentOrganization(defaultOrg);
-          setOrganization({
-            id: defaultOrg.id,
-            name: defaultOrg.name,
-            slug: defaultOrg.slug
-          });
+        try {
+          // Load organizations immediately for existing session with timeout protection
+          const organizations = await Promise.race([
+            loadUserOrganizations(session.user.id),
+            new Promise<UserOrganization[]>((resolve) => {
+              setTimeout(() => {
+                console.log('Initial organization loading timed out, proceeding with empty array');
+                resolve([]);
+              }, 5000); // 5 second timeout for initial load
+            })
+          ]);
+          
+          setUserOrganizations(organizations);
+          
+          // Set current organization
+          const defaultOrg = organizations.find(org => org.is_default) || organizations[0] || null;
+          if (defaultOrg) {
+            console.log('Setting default organization:', defaultOrg);
+            setCurrentOrganization(defaultOrg);
+            setOrganization({
+              id: defaultOrg.id,
+              name: defaultOrg.name,
+              slug: defaultOrg.slug
+            });
+          }
+        } catch (error) {
+          console.error('Error loading organizations during initial session:', error);
+          // Continue with empty organizations to not block auth flow
+          setUserOrganizations([]);
+          setCurrentOrganization(null);
+          setOrganization(null);
         }
       }
       
