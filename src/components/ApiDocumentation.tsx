@@ -145,6 +145,15 @@ const ApiDocumentationComponent: React.FC = () => {
           </Button>
           <Button variant="outline" asChild>
             <a 
+              href="/api-documentation-v2.md"
+              download="api-documentation-v2.md"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download API Docs
+            </a>
+          </Button>
+          <Button variant="outline" asChild>
+            <a 
               href={apiGatewayService.getDocumentationUrl()} 
               target="_blank" 
               rel="noopener noreferrer"
