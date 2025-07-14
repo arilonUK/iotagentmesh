@@ -1,5 +1,5 @@
 
-project_id = "your-project-id"
+project_id = "tuevghmlxosxuszxjral"
 
 [api]
 enabled = true
@@ -89,3 +89,12 @@ verify_jwt = false
 
 [functions.webhook-manager]
 verify_jwt = false
+
+[functions.iot-agent-mesh-proxy]
+verify_jwt = true
+
+[functions.iot-mesh-webhooks]
+verify_jwt = false
+
+[functions.iot-agent-auth]
+verify_jwt = true
