@@ -89,15 +89,19 @@ export class ApiKeyApiService {
 
       const response: ApiGatewayResponse<ApiKeyApiResponse> = await apiGatewayService.request(request);
       
+      console.log('Refresh API response:', response);
+      
       if (response.error) {
         console.error('Failed to refresh API key:', response.error);
         throw new Error(response.error);
       }
 
       if (!response.data?.full_key) {
+        console.error('No full_key in response:', response.data);
         throw new Error('No new API key returned from refresh');
       }
 
+      console.log('Returning full_key:', response.data.full_key);
       return response.data.full_key;
     } catch (error) {
       console.error('Error refreshing API key:', error);
