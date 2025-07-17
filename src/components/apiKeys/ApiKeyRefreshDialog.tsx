@@ -35,9 +35,12 @@ export const ApiKeyRefreshDialog = ({
     if (!apiKey) return;
     
     try {
+      console.log('Starting refresh for API key:', apiKey.id);
       const refreshedKey = await onRefresh(apiKey.id);
+      console.log('Received refreshed key:', refreshedKey);
       setNewKey(refreshedKey);
       setShowNewKey(true);
+      console.log('Updated dialog state - showNewKey:', true, 'newKey length:', refreshedKey.length);
       toast.success('API key refreshed successfully');
     } catch (error) {
       console.error('Error refreshing API key:', error);
