@@ -21,7 +21,7 @@ export const NextStepsCard = () => {
           <Button 
             variant="outline" 
             className="justify-start h-auto p-4"
-            onClick={() => navigate('/dashboard/devices')}
+            onClick={() => navigate('/devices')}
           >
             <div className="flex items-center gap-3">
               <Zap className="h-5 w-5" />
