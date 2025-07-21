@@ -1,10 +1,13 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Zap, Database } from 'lucide-react';
 
 export const NextStepsCard = () => {
+  const navigate = useNavigate();
+
   return (
     <Card>
       <CardHeader>
@@ -15,7 +18,11 @@ export const NextStepsCard = () => {
       </CardHeader>
       <CardContent>
         <div className="grid gap-3 md:grid-cols-2">
-          <Button variant="outline" className="justify-start h-auto p-4">
+          <Button 
+            variant="outline" 
+            className="justify-start h-auto p-4"
+            onClick={() => navigate('/dashboard/devices')}
+          >
             <div className="flex items-center gap-3">
               <Zap className="h-5 w-5" />
               <div className="text-left">
@@ -24,7 +31,11 @@ export const NextStepsCard = () => {
               </div>
             </div>
           </Button>
-          <Button variant="outline" className="justify-start h-auto p-4">
+          <Button 
+            variant="outline" 
+            className="justify-start h-auto p-4"
+            onClick={() => navigate('/dashboard/documentation')}
+          >
             <div className="flex items-center gap-3">
               <Database className="h-5 w-5" />
               <div className="text-left">
