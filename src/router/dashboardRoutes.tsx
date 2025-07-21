@@ -34,6 +34,16 @@ export const dashboardRoutes = [
     ),
   },
   {
+    path: "/dashboard/devices",
+    element: (
+      <ProtectedRoute>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Dashboard />
+        </Suspense>
+      </ProtectedRoute>
+    ),
+  },
+  {
     path: "/dashboard/devices/:id",
     element: (
       <ProtectedRoute>
