@@ -10,6 +10,7 @@ const Billing = lazy(() => import('@/pages/Billing'));
 const TeamSettings = lazy(() => import('@/pages/TeamSettings'));
 
 // Lazy load documentation guide pages
+const Documentation = lazy(() => import('@/pages/Documentation'));
 const DeviceManagementGuide = lazy(() => import('@/pages/DeviceManagementGuide'));
 const DataBucketsAnalyticsGuide = lazy(() => import('@/pages/DataBucketsAnalyticsGuide'));
 const AlarmConfigurationGuide = lazy(() => import('@/pages/AlarmConfigurationGuide'));
@@ -79,6 +80,16 @@ export const dashboardRoutes = [
       <ProtectedRoute>
         <Suspense fallback={<LoadingSpinner />}>
           <Billing />
+        </Suspense>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/dashboard/documentation",
+    element: (
+      <ProtectedRoute>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Documentation />
         </Suspense>
       </ProtectedRoute>
     ),
