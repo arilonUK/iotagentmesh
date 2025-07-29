@@ -534,8 +534,12 @@ security:
 
 ### Main Agent Controller
 
+The following snippet demonstrates a possible implementation of an agent
+controller. The file `agent-controller.js` is **not** included in the repository
+and would need to be created separately if you want to use this approach.
+
 ```javascript
-// agent-controller.js
+// agent-controller.js (example)
 class IoTTestingAgentController {
   constructor() {
     this.agents = new Map();
