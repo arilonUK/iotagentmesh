@@ -98,6 +98,7 @@ $ cd iotagentmesh
 
 # 2. Run setup script (installs dependencies and verifies environment)
 $ ./scripts/setup.sh
+# Rerun this script whenever dependencies change and before running tests or linting
 
 # 3. Copy and configure environment variables
 $ cp .env.example .env

@@ -12,6 +12,7 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
+    "pretest": "node scripts/check-deps.cjs",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest watch",

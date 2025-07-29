@@ -18,7 +18,7 @@ function main() {
   
   if (missing.length > 0) {
     console.error('❌ Missing critical dependencies:', missing.join(', '));
-    console.error('Run "npm install" to install dependencies');
+    console.error('Run "./scripts/setup.sh" to install dependencies');
     process.exit(1);
   }
   
