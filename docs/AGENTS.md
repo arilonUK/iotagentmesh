@@ -608,6 +608,8 @@ module.exports = IoTTestingAgentController;
 
 ### 1. Environment Setup
 
+This project has been tested with **Node.js 18**. Using Node 18 or later is recommended.
+
 ```bash
 # Clone the configuration
 git clone https://github.com/your-org/iot-testing-agents.git
