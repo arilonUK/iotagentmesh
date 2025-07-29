@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 function checkDependency(packageName) {
   try {

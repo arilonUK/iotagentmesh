@@ -6,7 +6,7 @@ set -e
 echo "🔧 Setting up IoT Agent Mesh development environment..."
 
 # Check if npm is available
-if ! command -v npm &> /dev/null; then
+if ! command -v npm >/dev/null 2>&1; then
     echo "❌ npm is not installed. Please install Node.js and npm first."
     exit 1
 fi
