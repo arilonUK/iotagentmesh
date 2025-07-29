@@ -333,6 +333,8 @@ agent:
 
 ### Environment Variables
 
+See `.env.example` in the project root for the list of required variables.
+
 ```bash
 # Internet Access Configuration
 export INTERNET_ACCESS_ENABLED=true
@@ -615,7 +617,7 @@ cd iot-testing-agents
 
 # Set environment variables
 cp .env.example .env
-# Edit .env with your specific values
+# Edit .env with your Supabase keys and other required values
 
 # Install dependencies
 npm install
