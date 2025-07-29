@@ -616,35 +616,19 @@ cp .env.example .env
 # Install dependencies
 npm install
 
-# Verify internet access
-npm run test:connectivity
+# Start the development server
+npm run dev
 ```
 
-### 2. Agent Initialization
+### 2. Development Scripts
+
+The previous version of this document referenced several commands such as `npm run agents:init` and `npm run pipeline:execute`. These scripts are not included in the repository. The available npm scripts are:
 
 ```bash
-# Initialize all agents
-npm run agents:init
-
-# Test individual agents
-npm run test:agent -- iot-repo-analyzer
-npm run test:agent -- iot-test-strategist
-
-# Run full pipeline
-npm run pipeline:execute
+npm run dev      # start the Vite development server
+npm run build    # build the production bundle
+npm run lint     # run ESLint on the project
+npm run preview  # preview the production build
 ```
 
-### 3. Monitoring and Logs
-
-```bash
-# View agent logs
-npm run logs:agents
-
-# Monitor agent performance
-npm run monitor:agents
-
-# View test execution status
-npm run status:tests
-```
-
-This configuration ensures all agents have proper internet access for downloading dependencies, accessing GitHub repositories, researching best practices, and integrating with external tools and services necessary for comprehensive IoT API testing.
+This configuration ensures the project can be installed and developed locally using the standard scripts above.
