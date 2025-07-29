@@ -101,7 +101,7 @@ $ npm install
 
 # 3. Copy and configure environment variables
 $ cp .env.example .env
-# Fill in SUPABASE_URL and SUPABASE_ANON_KEY
+# Fill in SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY
 
 # 4. Start development server
 $ npm run dev
