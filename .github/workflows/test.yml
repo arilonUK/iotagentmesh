@@ -23,7 +23,7 @@ jobs:
       run: ./scripts/setup.sh
     
     - name: Verify dependencies
-      run: node scripts/check-deps.js
+      run: node scripts/check-deps.cjs
     
     - name: Run tests
       run: npm test
