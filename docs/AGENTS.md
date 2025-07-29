@@ -620,11 +620,15 @@ cp .env.example .env
 # Edit .env with your specific values
 
 # Install dependencies
-npm install
+./scripts/setup.sh
 
 # Start the development server
 npm run dev
 ```
+
+Running the setup script installs dependencies using `npm ci`. Execute
+`./scripts/setup.sh` whenever dependencies change and before running
+`npm run lint` or any test command to ensure a clean environment.
 
 ### 2. Development Scripts
 
