@@ -15,7 +15,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest watch",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "pretest": "node scripts/check-deps.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
