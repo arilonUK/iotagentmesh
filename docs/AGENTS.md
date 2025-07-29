@@ -629,10 +629,13 @@ npm run dev
 The previous version of this document referenced several commands such as `npm run agents:init` and `npm run pipeline:execute`. These scripts are not included in the repository. The available npm scripts are:
 
 ```bash
-npm run dev      # start the Vite development server
-npm run build    # build the production bundle
-npm run lint     # run ESLint on the project
-npm run preview  # preview the production build
+npm run dev          # start the Vite development server
+npm run build        # build the production bundle  
+npm run lint         # run ESLint on the project
+npm run preview      # preview the production build
+npm test             # run tests with vitest
+npm run test:watch   # run tests in watch mode
+npm run test:coverage # run tests with coverage report
 ```
 
 This configuration ensures the project can be installed and developed locally using the standard scripts above.
