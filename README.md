@@ -105,3 +105,8 @@ $ cp .env.example .env
 
 # 4. Start development server
 $ npm run dev
+```
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
