@@ -631,6 +631,7 @@ The previous version of this document referenced several commands such as `npm r
 ```bash
 npm run dev          # start the Vite development server
 npm run build        # build the production bundle  
+npm run build:dev    # build in development mode
 npm run lint         # run ESLint on the project
 npm run preview      # preview the production build
 npm test             # run tests with vitest
