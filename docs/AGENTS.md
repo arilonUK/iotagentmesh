@@ -438,7 +438,7 @@ RUN git config --global url."https://github.com/".insteadOf "git@github.com:"
 
 EXPOSE 3000 8080 9090
 
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev"]
 ```
 
 ### Kubernetes Configuration
