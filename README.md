@@ -96,8 +96,8 @@ This project provides a UI and backend system for users to:
 $ git clone https://github.com/arilonUK/iotagentmesh.git
 $ cd iotagentmesh
 
-# 2. Install dependencies
-$ npm install
+# 2. Run setup script (installs dependencies and verifies environment)
+$ ./scripts/setup.sh
 
 # 3. Copy and configure environment variables
 $ cp .env.example .env

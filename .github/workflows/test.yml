@@ -19,8 +19,11 @@ jobs:
         node-version: '18'
         cache: 'npm'
     
-    - name: Install dependencies
-      run: npm ci
+    - name: Setup environment
+      run: ./scripts/setup.sh
+    
+    - name: Verify dependencies
+      run: node scripts/check-deps.js
     
     - name: Run tests
       run: npm test
