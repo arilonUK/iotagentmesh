@@ -6,6 +6,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 // Lazy load components
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const DeviceDetail = lazy(() => import('@/pages/DeviceDetail'));
+const Products = lazy(() => import('@/pages/Products'));
+const ProductDetail = lazy(() => import('@/pages/ProductDetail'));
 const Billing = lazy(() => import('@/pages/Billing'));
 const TeamSettings = lazy(() => import('@/pages/TeamSettings'));
 
@@ -50,6 +52,26 @@ export const dashboardRoutes = [
       <ProtectedRoute>
         <Suspense fallback={<LoadingSpinner />}>
           <DeviceDetail />
+        </Suspense>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/dashboard/products",
+    element: (
+      <ProtectedRoute>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Products />
+        </Suspense>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/dashboard/products/:id",
+    element: (
+      <ProtectedRoute>
+        <Suspense fallback={<LoadingSpinner />}>
+          <ProductDetail />
         </Suspense>
       </ProtectedRoute>
     ),
