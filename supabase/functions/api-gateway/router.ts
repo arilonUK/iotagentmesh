@@ -5,6 +5,7 @@ import { handleEndpoints } from './handlers/endpoints.ts';
 import { handleProducts } from './handlers/products.ts';
 import { handleProfiles } from './handlers/profiles.ts';
 import { handleApiKeys } from './handlers/keys.ts';
+import { handleData } from './handlers/data.ts';
 import { RouteHandler } from './types.ts';
 
 export function createRouter() {
@@ -23,6 +24,8 @@ export function createRouter() {
   routes.set('/api/products/*', handleProducts);
   routes.set('/api/profiles', handleProfiles);
   routes.set('/api/profiles/*', handleProfiles);
+  routes.set('/api/data', handleData);
+  routes.set('/api/data/*', handleData);
   
   // Add API keys routes
   routes.set('/api/keys', handleApiKeys);
