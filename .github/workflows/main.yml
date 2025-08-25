@@ -1,2 +1,5 @@
 - name: Install dependencies
-  run: npm instal
+  run: npm install
+
+- name: Verify dependencies
+  run: node scripts/check-deps.js
