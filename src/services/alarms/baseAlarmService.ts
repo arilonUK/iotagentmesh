@@ -2,6 +2,10 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+interface AlarmConditionValue {
+  [key: string]: unknown;
+}
+
 export interface SupabaseAlarm {
   id: string;
   name: string;
@@ -11,7 +15,7 @@ export interface SupabaseAlarm {
   enabled: boolean;
   reading_type: string;
   condition_operator: string;
-  condition_value: any;
+  condition_value: AlarmConditionValue;
   severity: string;
   cooldown_minutes: number;
   created_at: string;
@@ -33,7 +37,7 @@ export const isValidUUID = (id: string): boolean => {
   return uuidRegex.test(id);
 };
 
-export const handleServiceError = (error: any, operation: string): void => {
+export const handleServiceError = (error: unknown, operation: string): void => {
   console.error(`Error in ${operation}:`, error);
   toast.error(`Failed to ${operation}`);
 };

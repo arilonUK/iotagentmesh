@@ -72,9 +72,10 @@ const ProfileInfoForm = () => {
       toast('Profile updated successfully', {
         style: { backgroundColor: 'green', color: 'white' }
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Profile update error:', error);
-      setError(error.message || 'Failed to update profile');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update profile';
+      setError(errorMessage);
       toast('Failed to update profile', {
         style: { backgroundColor: 'red', color: 'white' }
       });
@@ -90,7 +91,7 @@ const ProfileInfoForm = () => {
       toast('Organization switched', {
         style: { backgroundColor: 'green', color: 'white' }
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error switching organization:", error);
       toast('Failed to switch organization', {
         style: { backgroundColor: 'red', color: 'white' }

@@ -52,8 +52,9 @@ const PasswordChangeForm = () => {
         // Signout after password change for security
         await signOut();
       }
-    } catch (error: any) {
-      setError(error.message || 'Failed to update password');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update password';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

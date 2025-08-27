@@ -7,11 +7,15 @@ import { rateLimiter, passwordSchema, emailSchema } from '@/lib/security';
 /**
  * Enhanced authentication hook with security measures
  */
+interface UserMetadata {
+  [key: string]: unknown;
+}
+
 export const useSecureAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
 
-  const secureSignUp = useCallback(async (email: string, password: string, userData?: any) => {
+  const secureSignUp = useCallback(async (email: string, password: string, userData?: UserMetadata) => {
     setIsLoading(true);
     
     try {
@@ -45,9 +49,12 @@ export const useSecureAuth = () => {
       
       toast.success('Account created successfully. Please check your email to verify your account.');
       return { data };
-    } catch (validationError: any) {
+    } catch (validationError: unknown) {
       console.error('Signup validation error:', validationError);
-      toast.error(validationError.errors?.[0]?.message || 'Invalid input');
+      const errorMessage = validationError instanceof Error 
+        ? (validationError as any).errors?.[0]?.message || validationError.message
+        : 'Invalid input';
+      toast.error(errorMessage);
       return { error: validationError };
     } finally {
       setIsLoading(false);
@@ -93,9 +100,12 @@ export const useSecureAuth = () => {
       
       toast.success('Successfully signed in');
       return { data };
-    } catch (validationError: any) {
+    } catch (validationError: unknown) {
       console.error('Signin validation error:', validationError);
-      toast.error(validationError.errors?.[0]?.message || 'Invalid email format');
+      const errorMessage = validationError instanceof Error 
+        ? (validationError as any).errors?.[0]?.message || validationError.message
+        : 'Invalid email format';
+      toast.error(errorMessage);
       return { error: validationError };
     } finally {
       setIsLoading(false);

@@ -98,11 +98,12 @@ const AvatarUpload = ({ initialAvatarUrl, username, onAvatarChange }: AvatarUplo
       setAvatarUrl(publicUrl);
       onAvatarChange(publicUrl);
       */
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('AvatarUpload: Upload error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
       toast({
         title: "Upload failed",
-        description: error.message || "Something went wrong",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
