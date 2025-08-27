@@ -25,5 +25,18 @@ export default defineConfig(({ mode }) => ({
   },
   optimizeDeps: {
     exclude: ['vitest']
+  },
+  build: {
+    rollupOptions: {
+      external: (id) => {
+        // Exclude test-related files and vitest from build
+        return id.includes('/test/') || 
+               id.includes('/__tests__/') || 
+               id.includes('.test.') ||
+               id.includes('.spec.') ||
+               id === 'vitest' ||
+               id.startsWith('vitest/');
+      }
+    }
   }
 }));
