@@ -1,5 +1,3 @@
-
-
 import React, { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { screen, waitFor } from '@testing-library/dom';
@@ -34,4 +32,3 @@ export { customRender as render };
 
 // Explicitly export screen and waitFor from @testing-library/dom
 export { screen, waitFor };
-

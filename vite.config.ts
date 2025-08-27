@@ -32,4 +32,11 @@ export default defineConfig(({ mode }) => ({
       ],
     },
   },
+  define: {
+    // Prevent vitest from being included in browser builds
+    'import.meta.vitest': 'undefined',
+  },
+  optimizeDeps: {
+    exclude: ['vitest']
+  }
 }));

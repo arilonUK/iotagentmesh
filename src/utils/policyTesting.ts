@@ -4,8 +4,8 @@ export interface PolicyTestResult {
   policyName: string;
   operation: string;
   success: boolean;
-  error?: string;
   expectedResult: boolean;
+  error?: string;
 }
 
 export class PolicyTester {

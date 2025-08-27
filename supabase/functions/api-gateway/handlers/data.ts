@@ -2,7 +2,6 @@ import { corsHeaders } from '../../_shared/cors.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // Forwards API gateway data requests to the api-data edge function
-
 export async function handleData(req: Request, path: string): Promise<Response> {
   const supabaseClient = createClient(
     Deno.env.get('SUPABASE_URL') ?? '',
