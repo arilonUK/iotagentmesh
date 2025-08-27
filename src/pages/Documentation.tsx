@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import ApiDocumentationComponent from '@/components/ApiDocumentation';
+import { ApiDocumentation } from '@/components/ApiDocumentation';
 import DatabaseSchemaChart from '@/components/documentation/DatabaseSchemaChart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -114,7 +114,7 @@ const Documentation = () => {
           </TabsContent>
 
           <TabsContent value="api" className="mt-0">
-            <ApiDocumentationComponent />
+            <ApiDocumentation />
           </TabsContent>
 
           <TabsContent value="schema" className="mt-0">

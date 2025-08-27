@@ -3,9 +3,11 @@ import React from 'react';
 import { SubscriptionTier } from '@/types/billing';
 import PlanCard from './PlanCard';
 
+import { OrganizationSubscription } from '@/types/billing';
+
 interface PlansListProps {
   plans: SubscriptionTier[];
-  currentSubscription?: any;
+  currentSubscription?: OrganizationSubscription;
   isPending: boolean;
   onUpgrade: (plan: SubscriptionTier) => void;
 }
@@ -30,4 +32,4 @@ const PlansList: React.FC<PlansListProps> = ({ plans, currentSubscription, isPen
   );
 };
 
-export default PlansList;
+export { PlansList };

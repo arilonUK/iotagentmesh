@@ -7,9 +7,9 @@ import { toast } from 'sonner';
 interface UseFileOperationsProps {
   organizationId: string;
   currentPath: string;
-  uploadFile: any;
-  deleteFile: any;
-  createDirectory: any;
+  uploadFile: (params: { file: File; onProgress?: (progress: number) => void }) => void;
+  deleteFile: (params: { fileName: string }) => void;
+  createDirectory: (params: { dirName: string }) => void;
   setSelectedFile: (file: StorageFile | null) => void;
   setFilePreviewUrl: (url: string | null) => void;
   setFilePreviewOpen: (open: boolean) => void;
@@ -48,16 +48,11 @@ export const useFileOperations = ({
       setShowOperationStatus(true);
     }
     
-    uploadFile.mutate(
+    uploadFile(
       { 
         file,
         onProgress: (progress: number) => {
           console.log(`Upload progress: ${progress}%`);
-        }
-      }, 
-      {
-        onSuccess: () => {
-          return { success: true };
         }
       }
     );
@@ -69,29 +64,12 @@ export const useFileOperations = ({
       return;
     }
     
-    createDirectory.mutate(
-      { dirName: newFolderName },
-      {
-        onSuccess: () => {
-          return { success: true };
-        }
-      }
-    );
+    createDirectory({ dirName: newFolderName });
   };
 
   const handleDeleteFile = (file: StorageFile, selectedFile: StorageFile | null) => {
     if (confirm(`Are you sure you want to delete ${file.name}?`)) {
-      deleteFile.mutate(
-        { fileName: file.name },
-        {
-          onSuccess: () => {
-            if (selectedFile?.id === file.id) {
-              setSelectedFile(null);
-              setFilePreviewUrl(null);
-            }
-          }
-        }
-      );
+      deleteFile({ fileName: file.name });
     }
   };
 

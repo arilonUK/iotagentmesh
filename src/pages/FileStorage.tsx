@@ -8,6 +8,7 @@ import StorageProfileCard from '@/components/fileStorage/StorageProfileCard';
 import { PlusCircle, HardDrive } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
+import { FileStorageProfile } from '@/types/storage';
 
 const FileStorage = () => {
   const { organization } = useAuth();
@@ -19,14 +20,18 @@ const FileStorage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   
-  const handleCreateProfile = (data: any) => {
+  const handleCreateProfile = (data: Partial<FileStorageProfile>) => {
     if (!organization) return;
     
     // Ensure we're not sending an ID when creating a new profile
     const { id, ...profileData } = data;
     
     createProfile.mutate({
-      ...profileData,
+      name: data.name || '',
+      description: data.description,
+      path: data.path || '',
+      public_read: data.public_read || false,
+      index_file: data.index_file || 'index.html',
       organization_id: organization.id
     }, {
       onSuccess: () => {

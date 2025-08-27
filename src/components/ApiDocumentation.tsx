@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ExternalLink, Download, Copy, Check, AlertCircle, Clock, Server } from 'lucide-react';
-import { apiGatewayService, ApiDocumentation } from '@/services/apiGatewayService';
+import { apiGatewayService } from '@/services/apiGatewayService';
+import type { ApiDocumentation, Tag, PathItem, Operation, Parameter, Response, Schema } from '@/types/api';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -258,10 +259,10 @@ const ApiDocumentationComponent: React.FC = () => {
 
           <TabsContent value="endpoints" className="space-y-4">
             {/* Group endpoints by tags */}
-            {documentation.tags?.map((tag: any) => {
-              const tagEndpoints = Object.entries(documentation.paths).filter(([path, pathItem]) => 
-                Object.values(pathItem).some((operation: any) => 
-                  operation.tags?.includes(tag.name)
+            {documentation.tags?.map((tag: Tag) => {
+              const tagEndpoints = Object.entries(documentation.paths).filter(([path, pathItem]: [string, PathItem]) => 
+                Object.values(pathItem).some((operation: Operation | Parameter[]) => 
+                  Array.isArray(operation) ? false : operation.tags?.includes(tag.name)
                 )
               );
 
@@ -279,8 +280,8 @@ const ApiDocumentationComponent: React.FC = () => {
                         <div key={path} className="border rounded-lg p-4">
                           <h4 className="font-semibold mb-3 text-lg">{path}</h4>
                           <div className="space-y-3">
-                            {Object.entries(pathItem).map(([method, operation]: [string, any]) => {
-                              if (method === 'parameters') return null;
+                            {Object.entries(pathItem).map(([method, operation]: [string, Operation | Parameter[]]) => {
+                              if (method === 'parameters' || Array.isArray(operation)) return null;
                               
                               return (
                                 <div key={method} className="border-l-4 border-l-primary/20 pl-4">
@@ -305,7 +306,7 @@ const ApiDocumentationComponent: React.FC = () => {
                                       <div>
                                         <h5 className="font-medium mb-2 text-sm">Parameters</h5>
                                         <div className="space-y-1">
-                                          {operation.parameters.map((param: any, index: number) => (
+                                          {operation.parameters?.map((param: Parameter, index: number) => (
                                             <div key={index} className="text-xs">
                                               <code className="bg-muted px-1 py-0.5 rounded font-mono">
                                                 {param.name}
@@ -322,7 +323,7 @@ const ApiDocumentationComponent: React.FC = () => {
                                     <div>
                                       <h5 className="font-medium mb-2 text-sm">Responses</h5>
                                       <div className="space-y-1">
-                                        {Object.entries(operation.responses).map(([status, response]: [string, any]) => (
+                                        {Object.entries(operation.responses).map(([status, response]: [string, Response]) => (
                                           <div key={status} className="flex items-center gap-2 text-xs">
                                             <Badge variant={getStatusCode(status)} className="text-xs">
                                               {status}
@@ -347,7 +348,7 @@ const ApiDocumentationComponent: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="schemas" className="space-y-4">
-            {documentation.components?.schemas && Object.entries(documentation.components.schemas).map(([name, schema]: [string, any]) => (
+            {documentation.components?.schemas && Object.entries(documentation.components.schemas).map(([name, schema]: [string, Schema]) => (
               <Card key={name}>
                 <CardHeader>
                   <CardTitle className="text-lg">{name}</CardTitle>
@@ -480,4 +481,4 @@ print(f"Response: {response.json()}")`}</code>
   );
 };
 
-export default ApiDocumentationComponent;
+export { ApiDocumentationComponent as ApiDocumentation };

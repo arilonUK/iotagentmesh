@@ -10,14 +10,15 @@ import { ChartTypeSelector, ChartType } from './ChartTypeSelector';
 import { DataExportMenu } from '@/components/exports/DataExportMenu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Device } from '@/types/device';
+import { ChartData, ComparisonData, TimeframeOption, ExportData } from '@/types/dashboard';
 
 interface CustomizableDashboardProps {
   device: Device;
-  temperatureData: any[];
-  humidityData: any[];
-  energyData: any[];
-  timeframe: 'hour' | 'day' | 'week' | 'month';
-  onTimeframeChange: (timeframe: 'hour' | 'day' | 'week' | 'month') => void;
+  temperatureData: ChartData[];
+  humidityData: ChartData[];
+  energyData: ChartData[];
+  timeframe: TimeframeOption;
+  onTimeframeChange: (timeframe: TimeframeOption) => void;
 }
 
 export function CustomizableDashboard({
@@ -32,8 +33,8 @@ export function CustomizableDashboard({
   const [activeTab, setActiveTab] = useState<string>('temperature');
   
   // Prepare comparison data (combining temperature and humidity)
-  const comparisonData = temperatureData.map((temp, index) => {
-    const humidity = humidityData[index] || { value: 0 };
+  const comparisonData: ComparisonData[] = temperatureData.map((temp, index) => {
+    const humidity = humidityData[index] || { name: '', value: 0 };
     return {
       name: temp.name,
       temperature: temp.value,
@@ -46,7 +47,7 @@ export function CustomizableDashboard({
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Data Dashboard for {device.name}</CardTitle>
         <div className="flex items-center gap-2">
-          <Select value={timeframe} onValueChange={(value: any) => onTimeframeChange(value)}>
+          <Select value={timeframe} onValueChange={(value: TimeframeOption) => onTimeframeChange(value)}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select timeframe" />
             </SelectTrigger>
@@ -59,13 +60,15 @@ export function CustomizableDashboard({
           </Select>
           
           <DataExportMenu 
-            data={
-              activeTab === 'temperature' ? temperatureData : 
-              activeTab === 'humidity' ? humidityData : 
-              activeTab === 'energy' ? energyData : 
-              activeTab === 'comparison' ? comparisonData : 
-              temperatureData
-            } 
+            data={(() => {
+              switch (activeTab) {
+                case 'temperature': return temperatureData as Record<string, any>[];
+                case 'humidity': return humidityData as Record<string, any>[];
+                case 'energy': return energyData as Record<string, any>[];
+                case 'comparison': return comparisonData as Record<string, any>[];
+                default: return temperatureData as Record<string, any>[];
+              }
+            })()}
             fileName={`${device.name}-${activeTab}-data`}
           />
         </div>

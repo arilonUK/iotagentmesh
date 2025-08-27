@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { EndpointConfig, EndpointFormData } from '@/types/endpoint';
 import { endpointsApiService } from '@/services/api/endpointsApiService';
 import { toast } from 'sonner';
+import { ApiError, EndpointTriggerData } from '@/types/dashboard';
 
 export const useEndpoints = (organizationId?: string) => {
   const queryClient = useQueryClient();
@@ -34,7 +35,7 @@ export const useEndpoints = (organizationId?: string) => {
       console.log('Endpoint created successfully, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['endpoints', organizationId] });
     },
-    onError: (error: any) => {
+    onError: (error: ApiError | Error) => {
       console.error('Error in createEndpointMutation:', error);
       toast.error(`Error creating endpoint: ${error?.message || 'Unknown error'}`);
     }
@@ -51,7 +52,7 @@ export const useEndpoints = (organizationId?: string) => {
       console.log('Endpoint updated successfully, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['endpoints', organizationId] });
     },
-    onError: (error: any) => {
+    onError: (error: ApiError | Error) => {
       console.error('Error in updateEndpointMutation:', error);
       toast.error(`Error updating endpoint: ${error?.message || 'Unknown error'}`);
     }
@@ -67,14 +68,14 @@ export const useEndpoints = (organizationId?: string) => {
       toast.success('Endpoint deleted successfully');
       queryClient.invalidateQueries({ queryKey: ['endpoints', organizationId] });
     },
-    onError: (error: any) => {
+    onError: (error: ApiError | Error) => {
       console.error('Error in deleteEndpointMutation:', error);
       toast.error(`Error deleting endpoint: ${error?.message || 'Unknown error'}`);
     }
   });
 
   const triggerEndpointMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data?: any }) => {
+    mutationFn: async ({ id, data }: { id: string; data?: EndpointTriggerData }) => {
       const result = await endpointsApiService.triggerEndpoint(id, data);
       if (!result) throw new Error('Failed to trigger endpoint');
       return result;
@@ -82,7 +83,7 @@ export const useEndpoints = (organizationId?: string) => {
     onSuccess: () => {
       toast.success('Endpoint triggered successfully');
     },
-    onError: (error: any) => {
+    onError: (error: ApiError | Error) => {
       console.error('Error in triggerEndpointMutation:', error);
       toast.error(`Error triggering endpoint: ${error?.message || 'Unknown error'}`);
     }
