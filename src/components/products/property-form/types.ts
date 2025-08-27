@@ -12,7 +12,7 @@ export type PropertyFormValues = {
   data_type: PropertyDataType;
   unit?: string;
   is_required: boolean;
-  default_value?: any;
+  default_value?: string | number | boolean | null;
   validation_rules?: {
     min?: number | null;
     max?: number | null;
@@ -22,7 +22,7 @@ export type PropertyFormValues = {
     max_length?: number | null;
     precision?: number | null;
     format?: string | null;
-    allowed_values?: any[] | null;
+    allowed_values?: Array<string | number | boolean> | null;
   };
 };
 
@@ -30,6 +30,6 @@ export interface PropertyFormProps {
   onSubmit: (data: PropertyFormValues) => Promise<void>;
   initialValues?: Partial<PropertyFormValues>;
   isEditing?: boolean;
-  defaultValues?: any;
+  defaultValues?: Partial<PropertyFormValues>;
   isLoading?: boolean;
 }

@@ -22,7 +22,7 @@ export type ProductProperty = {
   data_type: PropertyDataType;
   unit?: string;
   is_required: boolean;
-  default_value?: any;
+  default_value?: string | number | boolean | null;
   validation_rules?: PropertyValidationRules;
   created_at: string;
   updated_at: string;
@@ -39,10 +39,10 @@ export type PropertyValidationRules = {
   max_length?: number | null;
   precision?: number | null;
   format?: string | null;
-  allowed_values?: any[] | null;
+  allowed_values?: Array<string | number | boolean> | null;
 };
 
-export type PropertyFormValues = Omit<ProductProperty, 'id' | 'product_id' | 'created_at' | 'updated_at'>;
+export type PropertyFormValues = Omit<ProductProperty, 'id' | 'created_at' | 'updated_at'>;
 
 export type ProductService = {
   id: string;
@@ -74,13 +74,13 @@ export type ServiceConfig = {
     token?: string;
   };
   headers?: Record<string, string>;
-  parameters?: Record<string, any>;
+  parameters?: Record<string, unknown>;
   topic?: string;
   qos?: 0 | 1 | 2;
   retention_days?: number;
-  processing_rules?: any[];
+  processing_rules?: Array<Record<string, unknown>>;
   notification_channels?: string[];
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 export type ServiceFormValues = Omit<ProductService, 'id' | 'product_id' | 'created_at' | 'updated_at'>;
@@ -92,7 +92,7 @@ export type PropertyTemplate = {
   data_type: PropertyDataType;
   unit?: string;
   is_required: boolean;
-  default_value?: any;
+  default_value?: string | number | boolean | null;
   validation_rules?: PropertyValidationRules;
   category?: string;
   organization_id: string;

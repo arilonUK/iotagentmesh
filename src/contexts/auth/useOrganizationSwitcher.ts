@@ -1,11 +1,19 @@
 
 import { organizationService } from '@/services/profile/organizationService';
 
+interface OrganizationData {
+  id: string;
+  name: string;
+  slug: string;
+  role: string;
+  is_default: boolean;
+}
+
 type SwitcherProps = {
   userId: string | null;
-  setUserOrganizations: (orgs: any[]) => void;
-  setCurrentOrganization: (org: any) => void;
-  setOrganization: (org: any) => void;
+  setUserOrganizations: (orgs: OrganizationData[]) => void;
+  setCurrentOrganization: (org: OrganizationData) => void;
+  setOrganization: (org: OrganizationData) => void;
 };
 
 export const useOrganizationSwitcher = ({
@@ -31,7 +39,9 @@ export const useOrganizationSwitcher = ({
             setOrganization({
               id: switchedOrg.id,
               name: switchedOrg.name,
-              slug: switchedOrg.slug
+              slug: switchedOrg.slug,
+              role: switchedOrg.role,
+              is_default: switchedOrg.is_default
             });
           }
         }

@@ -2,6 +2,9 @@
 // Re-export the new standardized alarm API service
 export { alarmsApiService as alarmApiService } from '@/services/api/alarmsApiService';
 
+// Import types for backward compatibility
+import type { AlarmFormData, AlarmConfig, AlarmEvent } from '@/types/alarm';
+
 // Backward compatibility
 export const AlarmApiService = class {
   async getAlarms() {
@@ -9,12 +12,12 @@ export const AlarmApiService = class {
     return alarmsApiService.fetchAll();
   }
 
-  async createAlarm(formData: any) {
+  async createAlarm(formData: AlarmFormData) {
     const { alarmsApiService } = await import('@/services/api/alarmsApiService');
     return alarmsApiService.create(formData);
   }
 
-  async updateAlarm(id: string, formData: any) {
+  async updateAlarm(id: string, formData: AlarmFormData) {
     const { alarmsApiService } = await import('@/services/api/alarmsApiService');
     return alarmsApiService.update(id, formData);
   }
@@ -35,9 +38,9 @@ export const legacyAlarmApiService = new AlarmApiService();
 
 // Interface exports for backward compatibility
 export interface AlarmApiResponse {
-  alarms?: any[];
-  alarm?: any;
+  alarms?: AlarmConfig[];
+  alarm?: AlarmConfig;
   success?: boolean;
   message?: string;
-  event?: any;
+  event?: AlarmEvent;
 }

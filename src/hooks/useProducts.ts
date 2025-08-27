@@ -2,7 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productServices } from '@/services/products';
 import { useOrganization } from '@/contexts/organization';
-import { ProductTemplate, ProductProperty, ProductService, ServiceFormValues } from '@/types/product';
+import { ProductTemplate, ProductProperty, ProductService, ServiceFormValues, PropertyFormValues, PropertyTemplate } from '@/types/product';
 import { toast } from 'sonner';
 
 export function useProducts() {
@@ -94,7 +94,7 @@ export function useProducts() {
   });
 
   const createPropertyMutation = useMutation({
-    mutationFn: (propertyData: any) => {
+    mutationFn: (propertyData: PropertyFormValues) => {
       console.log('Creating property with mutation:', propertyData);
       return productServices.createProductProperty(propertyData);
     },
@@ -164,7 +164,7 @@ export function useProducts() {
   });
 
   const updateTemplateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => productServices.updatePropertyTemplate(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<PropertyTemplate> }) => productServices.updatePropertyTemplate(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['propertyTemplates', organization?.id] });
       toast.success('Property template updated successfully');
@@ -208,7 +208,7 @@ export function useProducts() {
   });
 
   const createServiceMutation = useMutation({
-    mutationFn: (serviceData: any) => {
+    mutationFn: (serviceData: ServiceFormValues & { product_id: string; organization_id: string }) => {
       console.log('Creating service with mutation:', serviceData);
       return productServices.createProductService(serviceData);
     },
@@ -307,7 +307,7 @@ export function useProducts() {
     getPropertyTemplates,
     createPropertyTemplate: createTemplateMutation.mutate,
     isCreatingTemplate: createTemplateMutation.isPending,
-    updatePropertyTemplate: (id: string, data: any) => updateTemplateMutation.mutate({ id, data }),
+    updatePropertyTemplate: (id: string, data: Partial<PropertyTemplate>) => updateTemplateMutation.mutate({ id, data }),
     isUpdatingTemplate: updateTemplateMutation.isPending,
     deletePropertyTemplate: deleteTemplateMutation.mutate,
     isDeletingTemplate: deleteTemplateMutation.isPending,

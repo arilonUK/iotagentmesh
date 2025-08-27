@@ -58,6 +58,7 @@ export async function fetchProductProperties(productId: string): Promise<Product
       return fallbackData.map(property => ({
         ...property,
         data_type: property.data_type as 'string' | 'number' | 'boolean' | 'location',
+        default_value: property.default_value as string | number | boolean | null,
         validation_rules: property.validation_rules as {
           min?: number;
           max?: number;
@@ -78,6 +79,7 @@ export async function fetchProductProperties(productId: string): Promise<Product
     return data.map(property => ({
       ...property,
       data_type: property.data_type as 'string' | 'number' | 'boolean' | 'location',
+      default_value: property.default_value as string | number | boolean | null,
       validation_rules: property.validation_rules as {
         min?: number;
         max?: number;

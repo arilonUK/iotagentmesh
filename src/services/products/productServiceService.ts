@@ -95,7 +95,10 @@ export async function createProductService(
     
     const { data, error } = await supabase
       .from('product_services')
-      .insert(service)
+      .insert({
+        ...service,
+        config: service.config as any // Cast to Json for Supabase
+      })
       .select()
       .single();
     
@@ -147,7 +150,10 @@ export async function updateProductService(
     
     const { data: updatedService, error } = await supabase
       .from('product_services')
-      .update(data)
+      .update({
+        ...data,
+        config: data.config ? (data.config as any) : undefined // Cast to Json for Supabase
+      })
       .eq('id', id)
       .select()
       .single();

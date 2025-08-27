@@ -19,7 +19,7 @@ export interface AlarmConfig {
   enabled: boolean;
   reading_type: string;
   condition_operator: ConditionOperator;
-  condition_value: any;
+  condition_value: Record<string, unknown>;
   severity: AlarmSeverity;
   cooldown_minutes: number;
   created_at: string;
@@ -57,7 +57,7 @@ export interface AlarmFormData {
   enabled: boolean;
   reading_type: string;
   condition_operator: ConditionOperator;
-  condition_value: any;
+  condition_value: Record<string, unknown>;
   severity: AlarmSeverity;
   cooldown_minutes?: number;
   endpoints: string[];

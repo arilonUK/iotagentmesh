@@ -34,11 +34,12 @@ const operatorLabels: Record<string, string> = {
 
 export function AlarmCard({ alarm, onEdit, onDelete, onToggle, onTest, isTesting }: AlarmCardProps) {
   // Format the condition value for display
-  const getConditionDisplay = () => {
+  const getConditionDisplay = (): string => {
+    const conditionValue = alarm.condition_value as Record<string, unknown>;
     if (alarm.condition_operator === 'between' || alarm.condition_operator === 'outside') {
-      return `${alarm.condition_value.min} and ${alarm.condition_value.max}`;
+      return `${conditionValue.min || ''} and ${conditionValue.max || ''}`;
     } else {
-      return alarm.condition_value.threshold;
+      return String(conditionValue.threshold || '');
     }
   };
   
