@@ -5,7 +5,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
  * Handles `/api/data` requests by reusing the authentication and
  * organization-membership checks from the devices handler, mapping the
  * remaining path segments, and forwarding the request to the `api-data`
- * edge function.
+ * edge function. The `x-organization-id` header is included so the edge
+ * function can apply organization-aware authorization.
  */
 export async function handleData(req: Request, path: string): Promise<Response> {
   const supabaseClient = createClient(
