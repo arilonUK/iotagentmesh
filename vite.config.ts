@@ -19,4 +19,11 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  define: {
+    // Prevent vitest from being included in browser builds
+    'import.meta.vitest': 'undefined',
+  },
+  optimizeDeps: {
+    exclude: ['vitest']
+  }
 }));

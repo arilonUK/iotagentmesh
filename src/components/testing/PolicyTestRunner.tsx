@@ -5,8 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, XCircle, Play, Loader2, Shield, Database } from 'lucide-react';
-import { runAllPolicyTests } from '@/test/policies/organizationMemberPolicies.test';
-import type { PolicyTestResult } from '@/test/policies/policyTestUtils';
+import { runAllPolicyTests, type PolicyTestResult } from '@/utils/policyTesting';
 
 const PolicyTestRunner = () => {
   const [isRunning, setIsRunning] = useState(false);
