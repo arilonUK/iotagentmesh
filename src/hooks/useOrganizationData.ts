@@ -1,6 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { fetchOrganizationData } from '@/services/organizationEntityService';
+import type { OrganizationData } from '@/types/organization';
 import { useToast } from '@/hooks/use-toast';
 
 export const useOrganizationData = (organizationId?: string, userId?: string) => {
@@ -11,7 +12,7 @@ export const useOrganizationData = (organizationId?: string, userId?: string) =>
     isLoading,
     error,
     refetch
-  } = useQuery({
+  } = useQuery<OrganizationData | null>({
     queryKey: ['organizationData', organizationId, userId],
     queryFn: async () => {
       if (!organizationId || !userId) {

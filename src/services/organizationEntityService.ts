@@ -1,5 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { Organization } from '@/contexts/auth/types';
+import { OrganizationData, OrganizationMember } from '@/types/organization';
 
 /**
  * Validates a UUID string format
@@ -12,7 +14,7 @@ function isValidUUID(uuid: string): boolean {
 /**
  * Fetch organization entity using bypass functions to avoid RLS recursion
  */
-export async function fetchOrganizationEntity(organizationId: string, userId: string) {
+export async function fetchOrganizationEntity(organizationId: string, userId: string): Promise<Organization | null> {
   try {
     console.log(`Fetching organization entity: ${organizationId} for user: ${userId}`);
     
@@ -45,8 +47,8 @@ export async function fetchOrganizationEntity(organizationId: string, userId: st
     }
 
     console.log('Successfully fetched organization entity:', orgWithRole);
-    return orgWithRole;
-  } catch (error) {
+    return orgWithRole as Organization;
+  } catch (error: unknown) {
     console.error('Unexpected error in fetchOrganizationEntity:', error);
     return null;
   }
@@ -55,7 +57,7 @@ export async function fetchOrganizationEntity(organizationId: string, userId: st
 /**
  * Fetch organization data including members using bypass functions
  */
-export async function fetchOrganizationData(organizationId: string, userId: string) {
+export async function fetchOrganizationData(organizationId: string, userId: string): Promise<OrganizationData | null> {
   try {
     console.log(`Fetching organization data for org: ${organizationId}, user: ${userId}`);
     
@@ -78,14 +80,14 @@ export async function fetchOrganizationData(organizationId: string, userId: stri
       // Don't fail completely if members can't be fetched
     }
 
-    const result = {
-      ...organization,
-      members: members || []
+    const result: OrganizationData = {
+      ...(organization as Organization),
+      members: (members as OrganizationMember[]) || []
     };
 
     console.log('Successfully fetched complete organization data:', result);
     return result;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Unexpected error in fetchOrganizationData:', error);
     return null;
   }

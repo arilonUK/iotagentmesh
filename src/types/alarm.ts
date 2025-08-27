@@ -9,6 +9,10 @@ export interface AlarmDevice {
   type: string;
 }
 
+export type ThresholdCondition = { threshold: number };
+export type RangeCondition = { min: number; max: number };
+export type ConditionValue = ThresholdCondition | RangeCondition;
+
 export interface AlarmConfig {
   id: string;
   name: string;
@@ -19,7 +23,7 @@ export interface AlarmConfig {
   enabled: boolean;
   reading_type: string;
   condition_operator: ConditionOperator;
-  condition_value: any;
+  condition_value: ConditionValue;
   severity: AlarmSeverity;
   cooldown_minutes: number;
   created_at: string;
@@ -57,7 +61,7 @@ export interface AlarmFormData {
   enabled: boolean;
   reading_type: string;
   condition_operator: ConditionOperator;
-  condition_value: any;
+  condition_value: ConditionValue;
   severity: AlarmSeverity;
   cooldown_minutes?: number;
   endpoints: string[];

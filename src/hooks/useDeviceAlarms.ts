@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { AlarmEvent } from '@/types/alarm';
+import { AlarmEvent, AlarmSeverity, AlarmStatus } from '@/types/alarm';
 
 /**
  * Validates a UUID string
@@ -59,12 +59,29 @@ export function useDeviceAlarms(deviceId: string) {
         
         console.log(`useDeviceAlarms: Found ${eventsData.length} alarm events for device ${deviceId}`);
         
-        // The bypass function returns structured data
-        const formattedEvents: AlarmEvent[] = eventsData.map((event: any) => ({
+        interface RawAlarmEvent {
+          id: string;
+          alarm_id: string;
+          device_id: string | null;
+          status: string;
+          triggered_at: string;
+          acknowledged_at: string | null;
+          resolved_at: string | null;
+          acknowledged_by: string | null;
+          trigger_value: number | null;
+          message: string;
+          alarm_name?: string;
+          alarm_description?: string;
+          alarm_severity?: string;
+          device_name?: string;
+          device_type?: string;
+        }
+
+        const formattedEvents: AlarmEvent[] = (eventsData as RawAlarmEvent[]).map((event) => ({
           id: event.id,
           alarm_id: event.alarm_id,
           device_id: event.device_id,
-          status: event.status,
+          status: event.status as AlarmStatus,
           triggered_at: event.triggered_at,
           acknowledged_at: event.acknowledged_at,
           resolved_at: event.resolved_at,
@@ -74,19 +91,19 @@ export function useDeviceAlarms(deviceId: string) {
           alarm: event.alarm_name ? {
             name: event.alarm_name,
             description: event.alarm_description,
-            severity: event.alarm_severity
+            severity: event.alarm_severity as AlarmSeverity
           } : undefined,
           device: event.device_name ? {
             name: event.device_name,
-            type: event.device_type
+            type: event.device_type ?? ''
           } : undefined
         }));
         
         console.log('useDeviceAlarms: Formatted events:', formattedEvents);
         setAlarmEvents(formattedEvents);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('useDeviceAlarms: Error fetching alarm events:', err);
-        setError(err.message || 'Failed to fetch alarm events');
+        setError(err instanceof Error ? err.message : 'Failed to fetch alarm events');
       } finally {
         console.log('useDeviceAlarms: Setting loading to false');
         setIsLoading(false);
@@ -122,7 +139,7 @@ export function useDeviceAlarms(deviceId: string) {
           ? { ...event, status: 'acknowledged', acknowledged_at: new Date().toISOString() } 
           : event
       ));
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('useDeviceAlarms: Error acknowledging alarm:', err);
     }
   };
@@ -153,7 +170,7 @@ export function useDeviceAlarms(deviceId: string) {
           ? { ...event, status: 'resolved', resolved_at: new Date().toISOString() } 
           : event
       ));
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('useDeviceAlarms: Error resolving alarm:', err);
     }
   };
