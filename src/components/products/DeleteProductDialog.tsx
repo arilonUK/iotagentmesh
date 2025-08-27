@@ -37,11 +37,12 @@ export function DeleteProductDialog({ productId, productName, onDelete }: Delete
       });
       setOpen(false);
       onDelete();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred while deleting the product';
       toast({
         variant: "destructive",
         title: "Error deleting product",
-        description: error.message || "An error occurred while deleting the product.",
+        description: errorMessage,
       });
     } finally {
       setIsDeleting(false);

@@ -13,7 +13,7 @@ interface DeviceAlarmsProps {
   deviceId: string;
 }
 
-export default function DeviceAlarms({ deviceId }: DeviceAlarmsProps) {
+const DeviceAlarmsComponent = function DeviceAlarms({ deviceId }: DeviceAlarmsProps) {
   const [showAll, setShowAll] = useState(false);
   const { alarmEvents, isLoading, error, acknowledgeAlarm, resolveAlarm } = useDeviceAlarms(deviceId);
 

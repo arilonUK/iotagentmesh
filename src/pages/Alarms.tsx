@@ -11,7 +11,7 @@ import { AlarmDeleteDialog } from '@/components/alarms/AlarmDeleteDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 
-export default function Alarms() {
+const AlarmsComponent = function Alarms() {
   const { profile } = useAuth();
   const organizationId = profile?.default_organization_id;
   
@@ -124,7 +124,10 @@ export default function Alarms() {
     setIsCreating(false);
     setEditAlarm(null);
     setActiveTab('list');
-  };
+};
+
+AlarmsComponent.displayName = 'Alarms';
+export default AlarmsComponent;
 
   return (
     <div className="space-y-8">

@@ -75,10 +75,11 @@ export function ProductServicesTab({ productId }: ProductServicesTabProps) {
         title: "Service created",
         description: `Service "${data.name}" has been created successfully`
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred while creating the service';
       toast({
         title: "Error creating service",
-        description: error.message || "An error occurred while creating the service",
+        description: errorMessage,
         variant: "destructive"
       });
       throw error;
@@ -95,10 +96,11 @@ export function ProductServicesTab({ productId }: ProductServicesTabProps) {
         title: "Service updated",
         description: `Service "${data.name}" has been updated successfully`
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred while updating the service';
       toast({
         title: "Error updating service",
-        description: error.message || "An error occurred while updating the service",
+        description: errorMessage,
         variant: "destructive"
       });
       throw error;
@@ -115,10 +117,11 @@ export function ProductServicesTab({ productId }: ProductServicesTabProps) {
         title: "Service deleted",
         description: "Service has been deleted successfully"
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred while deleting the service';
       toast({
         title: "Error deleting service",
-        description: error.message || "An error occurred while deleting the service",
+        description: errorMessage,
         variant: "destructive"
       });
     }
@@ -131,10 +134,11 @@ export function ProductServicesTab({ productId }: ProductServicesTabProps) {
         title: enabled ? "Service activated" : "Service deactivated",
         description: `Service has been ${enabled ? 'activated' : 'deactivated'} successfully`
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred while toggling the service';
       toast({
         title: "Error toggling service",
-        description: error.message || "An error occurred while toggling the service",
+        description: errorMessage,
         variant: "destructive"
       });
     }
