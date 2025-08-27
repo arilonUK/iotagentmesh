@@ -82,6 +82,7 @@ A modern web-based platform for managing IoT device agents, built using React, S
 
 Authenticated organization-scoped `/api/data` requests are proxied to an `api-data` edge function with an `x-organization-id` header for secure access to device readings and data buckets. These calls require a bearer token and membership in the target organization.
 Unit tests verify that both device-reading and bucket-data paths are forwarded with the correct method, path, body, and organization header.
+The handler rewrites remaining path segments so nested resources like device readings and data buckets map cleanly to the edge function.
 
 ## 🌐 Project Overview
 This project provides a UI and backend system for users to:
