@@ -19,4 +19,17 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      external: [
+        /\/test\//,
+        /__tests__/, 
+        /\.test\./,
+        /\.spec\./,
+        'vitest',
+        '@vitest/runner',
+        '@vitest/utils',
+      ],
+    },
+  },
 }));
