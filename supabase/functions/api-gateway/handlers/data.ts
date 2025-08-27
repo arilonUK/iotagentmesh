@@ -50,13 +50,12 @@ export async function handleData(req: Request, path: string): Promise<Response> 
     }
 
     const organizationId = orgMember.organization_id;
-    void organizationId; // currently unused but retained for parity
 
     const body = req.method === 'GET' ? undefined : await req.json();
 
     const { data, error: invokeError, status } = await supabaseClient.functions.invoke('api-data', {
       body,
-      headers: { Authorization: authHeader },
+      headers: { Authorization: authHeader, 'x-organization-id': organizationId },
       method: req.method,
       path: segments.join('/'),
       query: Object.fromEntries(url.searchParams.entries()),

@@ -39,7 +39,8 @@ describe('handleData', () => {
 
     expect(invokeMock).toHaveBeenCalledWith('api-data', expect.objectContaining({
       path: 'devices/dev123/readings',
-      method: 'GET'
+      method: 'GET',
+      headers: expect.objectContaining({ 'x-organization-id': 'org-1' })
     }));
   });
 
@@ -58,7 +59,8 @@ describe('handleData', () => {
     expect(invokeMock).toHaveBeenCalledWith('api-data', expect.objectContaining({
       path: 'data-buckets/bucket1/data',
       method: 'POST',
-      body
+      body,
+      headers: expect.objectContaining({ 'x-organization-id': 'org-1' })
     }));
   });
 });
