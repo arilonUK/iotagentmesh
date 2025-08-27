@@ -4,6 +4,7 @@ import { useStorageFiles } from '@/hooks/useFileStorage';
 import { useFileNavigation } from '@/hooks/useFileNavigation';
 import { useFileDialogs } from '@/hooks/useFileDialogs';
 import { useFileOperations } from '@/hooks/useFileOperations';
+import { StorageFile } from '@/services/storage/interfaces/IFileStorageService';
 import { NavigationToolbar } from './NavigationToolbar';
 import { FileOperationsToolbar } from './FileOperationsToolbar';
 import { FileContentArea } from './FileContentArea';
@@ -49,7 +50,7 @@ export const FileExplorerContainer: React.FC<FileExplorerContainerProps> = ({
     setFilePreviewOpen: dialogs.setFilePreviewOpen
   });
 
-  const handleFileClick = (file: any) => {
+  const handleFileClick = (file: StorageFile) => {
     const result = fileOps.handleFileClick(file);
     if (result.action === 'navigate') {
       navigation.navigateToFolder(result.folderName);
@@ -66,15 +67,15 @@ export const FileExplorerContainer: React.FC<FileExplorerContainerProps> = ({
     dialogs.resetFolderDialog();
   };
 
-  const handleDeleteFile = (file: any) => {
+  const handleDeleteFile = (file: StorageFile) => {
     fileOps.handleDeleteFile(file, dialogs.selectedFile);
   };
 
-  const handleMarkOffline = (file: any) => {
+  const handleMarkOffline = (file: StorageFile) => {
     markForOffline(file.name);
   };
 
-  const handleRemoveOffline = (file: any) => {
+  const handleRemoveOffline = (file: StorageFile) => {
     removeOfflineAccess(file.name);
   };
 
