@@ -1,22 +1,11 @@
 
 import { User, Session } from '@supabase/supabase-js';
 
-export interface UserOrganization {
-  id: string;
-  name: string;
-  slug: string;
-  role: string;
-  is_default: boolean;
-}
+import { OrganizationData, OrganizationMember, OrganizationEntity } from '@/types/organization';
 
-export interface Organization {
-  id: string;
-  name: string;
-  slug?: string;
-  logo?: string;
-  created_at?: string;
-  updated_at?: string;
-}
+export interface UserOrganization extends OrganizationData {}
+
+export interface Organization extends OrganizationEntity {}
 
 export interface Profile {
   id: string;

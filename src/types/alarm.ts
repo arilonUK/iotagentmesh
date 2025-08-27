@@ -3,6 +3,18 @@ export type AlarmSeverity = 'info' | 'warning' | 'critical';
 export type AlarmStatus = 'active' | 'acknowledged' | 'resolved';
 export type ConditionOperator = 'gt' | 'lt' | 'gte' | 'lte' | 'eq' | 'neq' | 'between' | 'outside';
 
+// Explicit condition value types for different operators
+export interface ThresholdValue {
+  threshold: number;
+}
+
+export interface RangeValue {
+  min: number;
+  max: number;
+}
+
+export type ConditionValue = ThresholdValue | RangeValue;
+
 export interface AlarmDevice {
   id: string;
   name: string;
@@ -19,7 +31,7 @@ export interface AlarmConfig {
   enabled: boolean;
   reading_type: string;
   condition_operator: ConditionOperator;
-  condition_value: Record<string, unknown>;
+  condition_value: ConditionValue;
   severity: AlarmSeverity;
   cooldown_minutes: number;
   created_at: string;
@@ -57,7 +69,7 @@ export interface AlarmFormData {
   enabled: boolean;
   reading_type: string;
   condition_operator: ConditionOperator;
-  condition_value: Record<string, unknown>;
+  condition_value: ConditionValue;
   severity: AlarmSeverity;
   cooldown_minutes?: number;
   endpoints: string[];

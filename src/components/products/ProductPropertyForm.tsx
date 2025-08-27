@@ -8,14 +8,14 @@ interface ProductPropertyFormProps {
   onSubmit: (data: PropertyFormValues) => Promise<void>;
   initialValues?: Partial<PropertyFormValues>;
   isEditing?: boolean;
-  defaultValues?: any;
+  defaultValues?: Partial<PropertyFormValues>;
   isLoading?: boolean;
 }
 
-const ProductPropertyForm: React.FC<ProductPropertyFormProps> = (props) => {
+export const ProductPropertyForm: React.FC<ProductPropertyFormProps> = (props) => {
   // Convert between PropertyFormValues and FormValues if needed
   const handleSubmit = async (data: FormValues): Promise<void> => {
-    return props.onSubmit(data as unknown as PropertyFormValues);
+    return props.onSubmit(data);
   };
 
   return <PropertyForm 
@@ -23,5 +23,3 @@ const ProductPropertyForm: React.FC<ProductPropertyFormProps> = (props) => {
     onSubmit={handleSubmit} 
   />;
 };
-
-export default ProductPropertyForm;

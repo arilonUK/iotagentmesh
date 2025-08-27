@@ -1,5 +1,5 @@
 
-import { AlarmConfig } from "@/types/alarm";
+import { AlarmConfig, ConditionValue, ThresholdValue, RangeValue } from "@/types/alarm";
 import { AlertCircle, Bell, BellOff, Edit, Trash2, TestTube } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,11 +35,13 @@ const operatorLabels: Record<string, string> = {
 export function AlarmCard({ alarm, onEdit, onDelete, onToggle, onTest, isTesting }: AlarmCardProps) {
   // Format the condition value for display
   const getConditionDisplay = (): string => {
-    const conditionValue = alarm.condition_value as Record<string, unknown>;
+    const conditionValue = alarm.condition_value as ConditionValue;
     if (alarm.condition_operator === 'between' || alarm.condition_operator === 'outside') {
-      return `${conditionValue.min || ''} and ${conditionValue.max || ''}`;
+      const rangeValue = conditionValue as RangeValue;
+      return `${rangeValue.min || ''} and ${rangeValue.max || ''}`;
     } else {
-      return String(conditionValue.threshold || '');
+      const thresholdValue = conditionValue as ThresholdValue;
+      return String(thresholdValue.threshold || '');
     }
   };
   

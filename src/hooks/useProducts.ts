@@ -96,7 +96,12 @@ export function useProducts() {
   const createPropertyMutation = useMutation({
     mutationFn: (propertyData: PropertyFormValues) => {
       console.log('Creating property with mutation:', propertyData);
-      return productServices.createProductProperty(propertyData);
+      // Ensure product_id is provided since it's required by the service
+      const propertyWithProductId = {
+        ...propertyData,
+        product_id: propertyData.product_id!
+      };
+      return productServices.createProductProperty(propertyWithProductId);
     },
     onSuccess: (data, variables) => {
       console.log('Property created successfully:', data);

@@ -42,7 +42,9 @@ export type PropertyValidationRules = {
   allowed_values?: Array<string | number | boolean> | null;
 };
 
-export type PropertyFormValues = Omit<ProductProperty, 'id' | 'created_at' | 'updated_at'>;
+export type PropertyFormValues = Omit<ProductProperty, 'id' | 'created_at' | 'updated_at' | 'product_id'> & {
+  product_id?: string;
+};
 
 export type ProductService = {
   id: string;
