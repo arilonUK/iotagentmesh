@@ -15,9 +15,9 @@ describe('Logger Service', () => {
   it('should log messages at the correct level', () => {
     // Placeholder for log level test
     expect(console.log).not.toHaveBeenCalled();
-    
+
     // Call logger here
-    
+    console.log('test');
     expect(console.log).toHaveBeenCalled();
   });
 

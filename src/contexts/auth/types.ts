@@ -34,6 +34,19 @@ export interface UserData {
   avatar_url?: string;
 }
 
+export interface AuthErrorResponse {
+  message: string;
+}
+
+export interface AuthResponse {
+  data?: unknown;
+  error?: AuthErrorResponse;
+}
+
+export interface UserMetadata {
+  [key: string]: unknown;
+}
+
 export type RoleType = 'owner' | 'admin' | 'member' | 'viewer';
 
 export interface AuthContextType {
@@ -44,8 +57,8 @@ export interface AuthContextType {
   userRole: string | null;
   organizations: UserOrganization[];
   currentOrganization: UserOrganization | null;
-  login: (email: string, password: string) => Promise<{ error?: any; data?: any } | undefined>;
-  signup: (email: string, password: string, metadata?: any) => Promise<{ error?: any; data?: any } | undefined>;
+  login: (email: string, password: string) => Promise<AuthResponse | undefined>;
+  signup: (email: string, password: string, metadata?: UserMetadata) => Promise<AuthResponse | undefined>;
   logout: () => Promise<void>;
   switchOrganization: (organizationId: string) => Promise<boolean>;
   
@@ -56,8 +69,8 @@ export interface AuthContextType {
   organization: Organization | null;
   userOrganizations: UserOrganization[];
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error?: any; data?: any } | undefined>;
-  signUp: (email: string, password: string, metadata?: any) => Promise<{ error?: any; data?: any } | undefined>;
+  signIn: (email: string, password: string) => Promise<AuthResponse | undefined>;
+  signUp: (email: string, password: string, metadata?: UserMetadata) => Promise<AuthResponse | undefined>;
   signOut: () => Promise<void>;
   updateProfile: (profileData: Partial<Profile>) => Promise<Profile | null>;
 }

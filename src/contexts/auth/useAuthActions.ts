@@ -1,14 +1,18 @@
 
 import { authServices } from './authServices';
 import { profileServices } from '@/services/profileServices';
-import { Profile } from './types';
+import { Profile, AuthResponse, UserMetadata } from './types';
 
 export const useAuthActions = () => {
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<AuthResponse> => {
     return authServices.signIn(email, password);
   };
 
-  const signup = async (email: string, password: string, metadata?: any) => {
+  const signup = async (
+    email: string,
+    password: string,
+    metadata?: UserMetadata,
+  ): Promise<AuthResponse> => {
     return authServices.signUp(email, password, metadata);
   };
 
@@ -16,11 +20,15 @@ export const useAuthActions = () => {
     await authServices.signOut();
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<AuthResponse> => {
     return authServices.signIn(email, password);
   };
 
-  const signUp = async (email: string, password: string, metadata?: any) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    metadata?: UserMetadata,
+  ): Promise<AuthResponse> => {
     return authServices.signUp(email, password, metadata);
   };
 

@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import type { AuthResponse, AuthErrorResponse, UserMetadata } from './types';
 
 /**
  * Authentication services
@@ -9,7 +10,7 @@ export const authServices = {
   /**
    * Sign in with email and password
    */
-  signIn: async (email: string, password: string) => {
+  signIn: async (email: string, password: string): Promise<AuthResponse> => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -18,21 +19,26 @@ export const authServices = {
 
       if (error) {
         toast.error(`Error signing in: ${error.message}`);
-        return { error };
+        return { error: { message: error.message } };
       }
 
       toast.success('Signed in successfully!');
       return { data };
-    } catch (error: any) {
-      console.error('Error signing in:', error);
-      return { error };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error signing in:', message);
+      return { error: { message } };
     }
   },
 
   /**
    * Sign up with email and password
    */
-  signUp: async (email: string, password: string, metadata?: any) => {
+  signUp: async (
+    email: string,
+    password: string,
+    metadata?: UserMetadata,
+  ): Promise<AuthResponse> => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -44,21 +50,22 @@ export const authServices = {
 
       if (error) {
         toast.error(`Error signing up: ${error.message}`);
-        return { error };
+        return { error: { message: error.message } };
       }
 
       toast.success('Account created! Check your email to verify your account.');
       return { data };
-    } catch (error: any) {
-      console.error('Error signing up:', error);
-      return { error };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error signing up:', message);
+      return { error: { message } };
     }
   },
 
   /**
    * Sign out current user with improved error handling
    */
-  signOut: async () => {
+  signOut: async (): Promise<AuthResponse> => {
     console.log('AuthServices: Starting sign out process...');
     
     try {
@@ -69,8 +76,10 @@ export const authServices = {
 
       // Race between signOut and timeout
       const signOutPromise = supabase.auth.signOut();
-      
-      const { error } = await Promise.race([signOutPromise, timeoutPromise]) as any;
+
+      const { error } = (await Promise.race([signOutPromise, timeoutPromise])) as {
+        error: AuthErrorResponse | null;
+      };
       
       if (error) {
         console.error('AuthServices: Supabase sign out error:', error);
@@ -94,8 +103,9 @@ export const authServices = {
       
       toast.success('Signed out successfully');
       return { data: { success: true } };
-    } catch (error: any) {
-      console.error('AuthServices: Error during sign out:', error);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error('AuthServices: Error during sign out:', message);
       
       // Even if there's an error, clear storage and redirect
       try {
@@ -110,7 +120,7 @@ export const authServices = {
       window.location.href = '/auth';
       
       toast.error('Signed out (with errors)');
-      return { error };
+      return { error: { message } };
     }
   }
 };

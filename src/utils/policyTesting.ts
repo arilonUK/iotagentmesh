@@ -14,7 +14,7 @@ export class PolicyTester {
   async testPolicy(
     policyName: string,
     operation: string,
-    testFn: () => Promise<any>,
+    testFn: () => Promise<{ error?: { message?: string } }>,
     expectedToSucceed: boolean = true
   ): Promise<PolicyTestResult> {
     try {
