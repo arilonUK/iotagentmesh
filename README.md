@@ -84,6 +84,7 @@ This project provides a UI and backend system for users to:
 - Add and configure IoT agents
 - View telemetry and device status
 - Configure alerts, automations, and integrations
+- Forward organisation-scoped `/api/data` requests to an edge function for data access
 
 ## ⚙️ Tech Stack
 - **Frontend**: React + Vite + TypeScript + Tailwind CSS + Shadcn/UI
