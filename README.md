@@ -78,6 +78,10 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-trick
 
 A modern web-based platform for managing IoT device agents, built using React, Supabase, Tailwind CSS, and TypeScript.
 
+## API Gateway
+
+Authenticated organization-scoped `/api/data` requests are proxied to an `api-data` edge function, allowing secure access to device readings and data buckets.
+
 ## 🌐 Project Overview
 This project provides a UI and backend system for users to:
 - Register and manage organisations and users
