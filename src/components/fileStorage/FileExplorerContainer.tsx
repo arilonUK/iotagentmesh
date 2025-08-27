@@ -41,9 +41,9 @@ export const FileExplorerContainer: React.FC<FileExplorerContainerProps> = ({
   const fileOps = useFileOperations({
     organizationId,
     currentPath: navigation.currentPath,
-    uploadFile,
-    deleteFile,
-    createDirectory,
+    uploadFile: uploadFile.mutate,
+    deleteFile: deleteFile.mutate,
+    createDirectory: createDirectory.mutate,
     setSelectedFile: dialogs.setSelectedFile,
     setFilePreviewUrl: dialogs.setFilePreviewUrl,
     setFilePreviewOpen: dialogs.setFilePreviewOpen
