@@ -34,7 +34,7 @@ interface AlarmFormProps {
   isSubmitting?: boolean;
 }
 
-const AlarmFormComponent = function AlarmForm({ organizationId, initialData, onSubmit, isSubmitting = false }: AlarmFormProps) {
+export default function AlarmForm({ organizationId, initialData, onSubmit, isSubmitting = false }: AlarmFormProps) {
   const { devices = [] } = useDevices(organizationId);
   const { endpoints = [] } = useEndpoints(organizationId);
   
@@ -69,10 +69,7 @@ const AlarmFormComponent = function AlarmForm({ organizationId, initialData, onS
   const handleOperatorChange = (value: ConditionOperator) => {
     setConditionType(value);
     form.setValue("condition_operator", value);
-};
-
-AlarmFormComponent.displayName = 'AlarmForm';
-export default AlarmFormComponent;
+  };
   
   return (
     <Form {...form}>

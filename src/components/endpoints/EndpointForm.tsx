@@ -27,7 +27,7 @@ interface EndpointFormProps {
   isSubmitting?: boolean;
 }
 
-const EndpointFormComponent = function EndpointForm({ initialData, onSubmit, isSubmitting = false }: EndpointFormProps) {
+export default function EndpointForm({ initialData, onSubmit, isSubmitting = false }: EndpointFormProps) {
   const [selectedType, setSelectedType] = useState<EndpointType>(
     initialData?.type || 'webhook'
   );
@@ -63,10 +63,7 @@ const EndpointFormComponent = function EndpointForm({ initialData, onSubmit, isS
     
     // Reset configuration when type changes
     form.setValue('configuration', {});
-};
-
-EndpointFormComponent.displayName = 'EndpointForm';
-export default EndpointFormComponent;
+  };
 
   // Check if we're editing an existing endpoint
   const isEditing = !!initialData?.id;

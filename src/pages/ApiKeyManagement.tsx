@@ -9,7 +9,7 @@ import { ApiKeyForm } from '@/components/apiKeys/ApiKeyForm';
 import { ApiKeyCreatedCard } from '@/components/apiKeys/ApiKeyCreatedCard';
 import { apiKeyService } from '@/services/apiKeyService';
 
-const ApiKeyManagementComponent = function ApiKeyManagement() {
+export default function ApiKeyManagement() {
   const { profile, organization } = useAuth();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [showNewKey, setShowNewKey] = useState('');
@@ -104,11 +104,8 @@ const ApiKeyManagementComponent = function ApiKeyManagement() {
       console.error('Error deleting API key:', error);
       toast.error('Failed to delete API key');
     }
-};
+  };
 
-ApiKeyManagementComponent.displayName = 'ApiKeyManagement';
-export default ApiKeyManagementComponent;
-  
   // Show loading state while organization is being loaded
   if (loading && !organizationId) {
     return (
