@@ -80,7 +80,7 @@ A modern web-based platform for managing IoT device agents, built using React, S
 
 ## API Gateway
 
-Authenticated organization-scoped `/api/data` requests are proxied to an `api-data` edge function with an `x-organization-id` header for secure access to device readings and data buckets.
+Authenticated organization-scoped `/api/data` requests are proxied to an `api-data` edge function with an `x-organization-id` header for secure access to device readings and data buckets. These calls require a bearer token and membership in the target organization.
 Unit tests verify that both device-reading and bucket-data paths are forwarded with the correct method, path, and organization header.
 
 ## 🌐 Project Overview
