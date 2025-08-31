@@ -32,7 +32,7 @@ export interface EndpointParameter {
   enum_values?: string[];
 }
 
-interface PostmanCollection {
+export interface PostmanCollection {
   info: {
     name: string;
     description: string;
@@ -627,7 +627,7 @@ export class IoTAgentMeshCollectionService {
   }
 
   downloadPostmanCollection(collectionId: string): void {
-    const postmanCollection = this.generatePostmanCollection(collectionId);
+    const postmanCollection: PostmanCollection | null = this.generatePostmanCollection(collectionId);
     if (!postmanCollection) return;
 
     const blob = new Blob([JSON.stringify(postmanCollection, null, 2)], {
