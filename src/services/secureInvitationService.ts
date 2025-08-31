@@ -59,7 +59,7 @@ export const secureInvitationService = {
 
       toast.success("Secure invitation created successfully");
       return data as InvitationType;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating secure invitation:', error);
       toast.error('Failed to create invitation');
       return null;
@@ -146,7 +146,7 @@ export const secureInvitationService = {
 
       toast.success('Invitation accepted successfully');
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error accepting secure invitation:', error);
       toast.error('Failed to accept invitation');
       return false;

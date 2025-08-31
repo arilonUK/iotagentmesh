@@ -131,7 +131,7 @@ export const organizationSetupService = {
       });
       
       return newOrg.id;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error ensuring user has organization:', error);
       return null;
     }

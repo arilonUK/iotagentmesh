@@ -47,7 +47,7 @@ export const invitationService = {
 
       toast.success("Invitation created successfully");
       return data as InvitationType;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating invitation:', error);
       throw error;
     }
@@ -70,7 +70,7 @@ export const invitationService = {
       }
 
       return data as InvitationType[];
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching invitations:', error);
       return [];
     }
@@ -109,7 +109,7 @@ export const invitationService = {
 
       toast.success("Invitation deleted successfully");
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting invitation:', error);
       throw error;
     }
@@ -138,7 +138,7 @@ export const invitationService = {
 
       toast.success('Invitation resent successfully');
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error resending invitation:', error);
       throw error;
     }

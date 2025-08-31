@@ -50,13 +50,16 @@ const fetchUserOrganizationsInternal = async (userId: string): Promise<UserOrgan
         }
 
         if (memberData && memberData.length > 0) {
-          const organizations = memberData.map((member: any) => ({
-            id: member.organizations.id,
-            name: member.organizations.name,
-            slug: member.organizations.slug,
-            role: member.role,
-            is_default: false
-          }));
+          const organizations = memberData.map((member: Record<string, unknown>) => {
+            const org = member.organizations as { id: string; name: string; slug: string };
+            return {
+              id: org.id,
+              name: org.name,
+              slug: org.slug,
+              role: member.role as string,
+              is_default: false
+            };
+          });
           
           // Mark the first one as default
           if (organizations.length > 0) {
@@ -77,15 +80,16 @@ const fetchUserOrganizationsInternal = async (userId: string): Promise<UserOrgan
     console.log('Successfully fetched user organizations via RPC:', organizations);
     
     return organizations;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in fetchUserOrganizationsInternal:', error);
     
     // For any error, try to ensure user has a valid organization using our new RPC function
-    if (error.message === 'Organization fetch timeout' || 
-        error.message?.includes('fetch') ||
-        error.message?.includes('invalid') ||
-        error.message?.includes('uuid')) {
-      console.log('Ensuring user has valid organization due to error:', error.message);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (errorMessage === 'Organization fetch timeout' || 
+        errorMessage.includes('fetch') ||
+        errorMessage.includes('invalid') ||
+        errorMessage.includes('uuid')) {
+      console.log('Ensuring user has valid organization due to error:', errorMessage);
       
       try {
         // Use the new RPC function to ensure user has a valid organization
@@ -179,7 +183,7 @@ export const organizationService = {
         // Clean up the ongoing request
         ongoingRequests.delete(ongoingKey);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching user organizations:', error);
       // Return empty array instead of fallback to allow retry
       return [];
@@ -222,9 +226,10 @@ export const organizationService = {
       }
 
       return false;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error switching organization:', error);
-      if (error.message !== 'Switch timeout') {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage !== 'Switch timeout') {
         toast.error('Error switching organization');
       }
       return false;

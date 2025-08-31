@@ -17,7 +17,7 @@ const endpointFormSchema = z.object({
   description: z.string().optional(),
   type: z.enum(['email', 'telegram', 'webhook', 'device_action', 'ifttt', 'whatsapp']),
   enabled: z.boolean().default(true),
-  configuration: z.record(z.any())
+  configuration: z.record(z.unknown())
 });
 
 // Extended interface that includes the id field when editing

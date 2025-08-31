@@ -37,7 +37,7 @@ export const paymentService = {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return (data || []).map((payment: any) => ({
+      return (data || []).map((payment: Record<string, unknown>) => ({
         ...payment,
         status: payment.status as 'pending' | 'succeeded' | 'failed' | 'canceled'
       }));
@@ -57,7 +57,7 @@ export const paymentService = {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return (data || []).map((invoice: any) => ({
+      return (data || []).map((invoice: Record<string, unknown>) => ({
         ...invoice,
         status: invoice.status as 'draft' | 'open' | 'paid' | 'void' | 'uncollectible'
       }));

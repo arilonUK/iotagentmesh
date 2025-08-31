@@ -21,7 +21,7 @@ const formSchema = z.object({
   enabled: z.boolean().default(true),
   reading_type: z.string().min(1, { message: "Reading type is required" }),
   condition_operator: z.enum(["gt", "lt", "gte", "lte", "eq", "neq", "between", "outside"]),
-  condition_value: z.any(),
+  condition_value: z.union([z.string(), z.number(), z.boolean(), z.array(z.union([z.string(), z.number()]))]),
   severity: z.enum(["info", "warning", "critical"]),
   cooldown_minutes: z.number().int().positive().default(15),
   endpoints: z.array(z.string()).default([]),

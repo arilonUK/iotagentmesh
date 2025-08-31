@@ -6,7 +6,7 @@
 /**
  * Convert data to CSV format
  */
-export function dataToCSV<T extends Record<string, any>>(data: T[]): string {
+export function dataToCSV<T extends Record<string, unknown>>(data: T[]): string {
   if (data.length === 0) {
     return '';
   }
@@ -44,7 +44,7 @@ export function dataToCSV<T extends Record<string, any>>(data: T[]): string {
 /**
  * Convert data to JSON format
  */
-export function dataToJSON<T extends Record<string, any>>(data: T[]): string {
+export function dataToJSON<T extends Record<string, unknown>>(data: T[]): string {
   return JSON.stringify(data, null, 2);
 }
 
@@ -70,7 +70,7 @@ export function downloadFile(data: string, filename: string, mimeType: string): 
 /**
  * Download data as CSV file
  */
-export function downloadCSV<T extends Record<string, any>>(data: T[], filename: string = 'export.csv'): void {
+export function downloadCSV<T extends Record<string, unknown>>(data: T[], filename: string = 'export.csv'): void {
   const csvData = dataToCSV(data);
   downloadFile(csvData, filename, 'text/csv');
 }
@@ -78,7 +78,7 @@ export function downloadCSV<T extends Record<string, any>>(data: T[], filename: 
 /**
  * Download data as JSON file
  */
-export function downloadJSON<T extends Record<string, any>>(data: T[], filename: string = 'export.json'): void {
+export function downloadJSON<T extends Record<string, unknown>>(data: T[], filename: string = 'export.json'): void {
   const jsonData = dataToJSON(data);
   downloadFile(jsonData, filename, 'application/json');
 }

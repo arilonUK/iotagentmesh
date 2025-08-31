@@ -8,7 +8,7 @@ export const propertyFormSchema = z.object({
   data_type: z.enum(["string", "number", "boolean", "location", "enum", "json", "datetime"]),
   unit: z.string().optional(),
   is_required: z.boolean().default(false),
-  default_value: z.any().optional(),
+  default_value: z.union([z.string(), z.number(), z.boolean(), z.null()]).optional(),
   validation_rules: z.object({
     min: z.number().nullable().optional(),
     max: z.number().nullable().optional(),
@@ -18,7 +18,7 @@ export const propertyFormSchema = z.object({
     max_length: z.number().nullable().optional(),
     precision: z.number().nullable().optional(),
     format: z.string().nullable().optional(),
-    allowed_values: z.array(z.any()).nullable().optional(),
+    allowed_values: z.array(z.union([z.string(), z.number(), z.boolean()])).nullable().optional(),
   }).optional(),
 });
 

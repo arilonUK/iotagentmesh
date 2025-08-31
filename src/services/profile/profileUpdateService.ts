@@ -27,7 +27,7 @@ export const profileUpdateService = {
       
       // Return the updated profile with the new data
       return { ...profileData, id: user.id } as Profile;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating profile:', error);
       throw error;
     }
