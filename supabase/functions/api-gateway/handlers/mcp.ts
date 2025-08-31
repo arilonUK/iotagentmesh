@@ -1,6 +1,65 @@
 import { corsHeaders } from '../../_shared/cors.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+interface OrganizationAccessResult {
+  valid: boolean;
+  reason?: string;
+  requiredRole?: string;
+}
+
+async function validateOrganizationAccess(
+  supabaseClient: any,
+  organizationId: string,
+  userId: string,
+  userRole: string,
+  method: string
+): Promise<OrganizationAccessResult> {
+  console.log(`Validating access for user ${userId} in org ${organizationId} with role ${userRole}`);
+  
+  // Define required permissions for different operations
+  const writeOperations = ['POST', 'PUT', 'PATCH', 'DELETE'];
+  const isWriteOperation = writeOperations.includes(method);
+  
+  // Admin/Owner can perform all operations
+  if (['admin', 'owner'].includes(userRole)) {
+    return { valid: true };
+  }
+  
+  // Members can only perform read operations on MCP resources
+  if (userRole === 'member' && !isWriteOperation) {
+    return { valid: true };
+  }
+  
+  // Check organization status and user membership
+  const { data: orgData, error: orgError } = await supabaseClient
+    .from('organizations')
+    .select('id, name')
+    .eq('id', organizationId)
+    .single();
+    
+  if (orgError || !orgData) {
+    return {
+      valid: false,
+      reason: 'Organization not found or inaccessible'
+    };
+  }
+  
+  // For write operations, require admin/owner role
+  if (isWriteOperation) {
+    return {
+      valid: false,
+      reason: 'Write operations require admin or owner role',
+      requiredRole: 'admin'
+    };
+  }
+  
+  return {
+    valid: false,
+    reason: 'Insufficient permissions for this operation',
+    requiredRole: 'member'
+  };
+}
+
 export async function handleMcp(req: Request, path: string): Promise<Response> {
   console.log(`=== MCP HANDLER START ===`);
   console.log(`Processing MCP request: ${req.method} ${path}`);
@@ -56,27 +115,77 @@ export async function handleMcp(req: Request, path: string): Promise<Response> {
     const organizationId = orgMember.organization_id;
     console.log(`Organization: ${organizationId}, Role: ${orgMember.role}`);
 
-    // Get request body safely if applicable
-    let body: unknown = undefined;
-    if (req.method !== 'GET') {
-      try {
-        const bodyText = await req.text();
-        if (bodyText.trim()) {
-          body = JSON.parse(bodyText);
+    // Enhanced body parsing with content-type validation
+    let requestBody: Record<string, unknown> = {};
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      const contentType = req.headers.get('content-type') || '';
+      
+      if (contentType.includes('application/json')) {
+        try {
+          const bodyText = await req.text();
+          if (bodyText.trim()) {
+            const parsedBody = JSON.parse(bodyText);
+            if (typeof parsedBody === 'object' && parsedBody !== null) {
+              requestBody = parsedBody as Record<string, unknown>;
+            } else {
+              console.warn('Request body is not an object, ignoring');
+            }
+          }
+        } catch (parseError) {
+          console.error('Failed to parse JSON request body:', parseError);
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: 'Invalid JSON in request body',
+              details: parseError instanceof Error ? parseError.message : 'Unknown parsing error'
+            }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
         }
-      } catch (parseError) {
-        console.log('Failed to parse request body as JSON, treating as text');
-        body = bodyText;
+      } else if (contentType && !contentType.includes('application/x-www-form-urlencoded')) {
+        console.warn(`Unsupported content-type: ${contentType}`);
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'Unsupported content-type. Expected application/json',
+            received: contentType
+          }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
     }
-    console.log(`Request body: ${body ? JSON.stringify(body) : 'none'}`);
 
-    // Merge body with user context for the forwarded request
+    console.log(`Parsed request body keys: ${Object.keys(requestBody).join(', ')}`);
+
+    // Enhanced organization scoping - validate access permissions
+    const hasRequiredPermissions = await validateOrganizationAccess(
+      supabaseClient,
+      organizationId,
+      user.id,
+      orgMember.role,
+      req.method
+    );
+
+    if (!hasRequiredPermissions.valid) {
+      console.log(`Access denied: ${hasRequiredPermissions.reason}`);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: hasRequiredPermissions.reason,
+          required_role: hasRequiredPermissions.requiredRole
+        }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Merge request body with validated user context
     const forwardedBody = {
-      ...(typeof body === 'object' && body !== null ? body : {}),
+      ...requestBody,
       organizationId,
       userId: user.id,
-      userRole: orgMember.role
+      userRole: orgMember.role,
+      requestMethod: req.method,
+      timestamp: new Date().toISOString()
     };
 
     // Forward to api-mcp function

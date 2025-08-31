@@ -6,14 +6,17 @@ vi.stubGlobal('Deno', { env: { get: vi.fn(() => '') } });
 const invokeMock = vi.fn();
 const getUserMock = vi.fn();
 const singleMock = vi.fn();
+const selectMock = vi.fn().mockReturnThis();
+const eqMock = vi.fn().mockReturnThis();
 
 vi.mock('https://esm.sh/@supabase/supabase-js@2', () => ({
   createClient: () => ({
     auth: { getUser: getUserMock },
-    from: vi.fn().mockReturnThis(),
-    select: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    single: singleMock,
+    from: vi.fn(() => ({
+      select: selectMock,
+      eq: eqMock,
+      single: singleMock
+    })),
     functions: { invoke: invokeMock }
   })
 }));
@@ -25,6 +28,10 @@ describe('handleMcp', () => {
     invokeMock.mockReset();
     getUserMock.mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null });
     singleMock.mockResolvedValue({ data: { organization_id: 'org-1', role: 'admin' }, error: null });
+    
+    // Mock organization lookup for access validation
+    selectMock.mockReturnThis();
+    eqMock.mockReturnThis();
   });
 
   it('should require authorization header', async () => {
@@ -301,5 +308,237 @@ describe('handleMcp', () => {
     expect(result.success).toBe(false);
     expect(result.error).toBe('Internal server error');
     expect(result.details).toBe('Database connection failed');
+  });
+
+  // Enhanced error handling and validation tests
+  describe('Enhanced Body Parsing', () => {
+    it('should reject malformed JSON in request body', async () => {
+      const req = new Request('https://example.com/api/mcp/tools', {
+        method: 'POST',
+        headers: { 
+          Authorization: 'Bearer token',
+          'Content-Type': 'application/json'
+        },
+        body: '{ invalid json'
+      });
+
+      const response = await handleMcp(req, '/api/mcp/tools');
+      const result = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Invalid JSON in request body');
+    });
+
+    it('should reject unsupported content-type', async () => {
+      const req = new Request('https://example.com/api/mcp/tools', {
+        method: 'POST',
+        headers: { 
+          Authorization: 'Bearer token',
+          'Content-Type': 'text/plain'
+        },
+        body: 'some text'
+      });
+
+      const response = await handleMcp(req, '/api/mcp/tools');
+      const result = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Unsupported content-type. Expected application/json');
+      expect(result.received).toBe('text/plain');
+    });
+
+    it('should handle empty body gracefully', async () => {
+      invokeMock.mockResolvedValue({ 
+        data: { success: true }, 
+        error: null, 
+        status: 200 
+      });
+
+      const req = new Request('https://example.com/api/mcp/tools', {
+        method: 'POST',
+        headers: { 
+          Authorization: 'Bearer token',
+          'Content-Type': 'application/json'
+        },
+        body: ''
+      });
+
+      await handleMcp(req, '/api/mcp/tools');
+
+      expect(invokeMock).toHaveBeenCalledWith('api-mcp', expect.objectContaining({
+        body: expect.objectContaining({
+          organizationId: 'org-1',
+          userId: 'user-1',
+          userRole: 'admin'
+        })
+      }));
+    });
+
+    it('should ignore non-object JSON bodies', async () => {
+      invokeMock.mockResolvedValue({ 
+        data: { success: true }, 
+        error: null, 
+        status: 200 
+      });
+
+      const req = new Request('https://example.com/api/mcp/tools', {
+        method: 'POST',
+        headers: { 
+          Authorization: 'Bearer token',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify("just a string")
+      });
+
+      await handleMcp(req, '/api/mcp/tools');
+
+      expect(invokeMock).toHaveBeenCalledWith('api-mcp', expect.objectContaining({
+        body: expect.objectContaining({
+          organizationId: 'org-1',
+          userId: 'user-1', 
+          userRole: 'admin'
+        })
+      }));
+    });
+  });
+
+  describe('Organization Access Control', () => {
+    beforeEach(() => {
+      // Mock successful organization lookup for access validation
+      singleMock.mockImplementation((arg) => {
+        if (arg?.toString()?.includes('organization_members')) {
+          return Promise.resolve({ data: { organization_id: 'org-1', role: 'member' }, error: null });
+        } else {
+          return Promise.resolve({ data: { id: 'org-1', name: 'Test Org' }, error: null });
+        }
+      });
+    });
+
+    it('should allow member role for GET requests', async () => {
+      invokeMock.mockResolvedValue({ 
+        data: { resources: [] }, 
+        error: null, 
+        status: 200 
+      });
+
+      const req = new Request('https://example.com/api/mcp/resources', {
+        method: 'GET',
+        headers: { Authorization: 'Bearer token' }
+      });
+
+      const response = await handleMcp(req, '/api/mcp/resources');
+      expect(response.status).toBe(200);
+    });
+
+    it('should deny member role for POST requests', async () => {
+      singleMock.mockImplementation((arg) => {
+        if (arg?.toString()?.includes('organization_members')) {
+          return Promise.resolve({ data: { organization_id: 'org-1', role: 'member' }, error: null });
+        } else {
+          return Promise.resolve({ data: { id: 'org-1', name: 'Test Org' }, error: null });
+        }
+      });
+
+      const req = new Request('https://example.com/api/mcp/tools/execute', {
+        method: 'POST',
+        headers: { 
+          Authorization: 'Bearer token',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ action: 'test' })
+      });
+
+      const response = await handleMcp(req, '/api/mcp/tools/execute');
+      const result = await response.json();
+
+      expect(response.status).toBe(403);
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Write operations require admin or owner role');
+      expect(result.required_role).toBe('admin');
+    });
+
+    it('should allow admin role for all operations', async () => {
+      invokeMock.mockResolvedValue({ 
+        data: { success: true }, 
+        error: null, 
+        status: 200 
+      });
+
+      singleMock.mockImplementation((arg) => {
+        if (arg?.toString()?.includes('organization_members')) {
+          return Promise.resolve({ data: { organization_id: 'org-1', role: 'admin' }, error: null });
+        } else {
+          return Promise.resolve({ data: { id: 'org-1', name: 'Test Org' }, error: null });
+        }
+      });
+
+      const req = new Request('https://example.com/api/mcp/tools/execute', {
+        method: 'POST',
+        headers: { 
+          Authorization: 'Bearer token',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ action: 'test' })
+      });
+
+      const response = await handleMcp(req, '/api/mcp/tools/execute');
+      expect(response.status).toBe(200);
+    });
+
+    it('should deny access when organization not found', async () => {
+      singleMock.mockImplementation((arg) => {
+        if (arg?.toString()?.includes('organization_members')) {
+          return Promise.resolve({ data: { organization_id: 'org-1', role: 'admin' }, error: null });
+        } else {
+          return Promise.resolve({ data: null, error: new Error('Org not found') });
+        }
+      });
+
+      const req = new Request('https://example.com/api/mcp/resources', {
+        method: 'GET',
+        headers: { Authorization: 'Bearer token' }
+      });
+
+      const response = await handleMcp(req, '/api/mcp/resources');
+      const result = await response.json();
+
+      expect(response.status).toBe(403);
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Organization not found or inaccessible');
+    });
+  });
+
+  describe('Enhanced Context Forwarding', () => {
+    it('should include timestamp and request method in forwarded body', async () => {
+      invokeMock.mockResolvedValue({ 
+        data: { success: true }, 
+        error: null, 
+        status: 200 
+      });
+
+      const req = new Request('https://example.com/api/mcp/tools', {
+        method: 'POST',
+        headers: { 
+          Authorization: 'Bearer token',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ test: 'data' })
+      });
+
+      await handleMcp(req, '/api/mcp/tools');
+
+      expect(invokeMock).toHaveBeenCalledWith('api-mcp', expect.objectContaining({
+        body: expect.objectContaining({
+          test: 'data',
+          organizationId: 'org-1',
+          userId: 'user-1',
+          userRole: 'admin',
+          requestMethod: 'POST',
+          timestamp: expect.any(String)
+        })
+      }));
+    });
   });
 });
