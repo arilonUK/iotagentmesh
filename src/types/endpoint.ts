@@ -1,5 +1,15 @@
 
-export type EndpointType = 'email' | 'telegram' | 'webhook' | 'device_action' | 'ifttt' | 'whatsapp';
+import { z } from 'zod';
+
+export const endpointTypeSchema = z.enum([
+  'email',
+  'telegram',
+  'webhook',
+  'device_action',
+  'ifttt',
+  'whatsapp',
+]);
+export type EndpointType = z.infer<typeof endpointTypeSchema>;
 
 export interface EndpointConfig {
   id: string;
@@ -8,7 +18,7 @@ export interface EndpointConfig {
   type: EndpointType;
   organization_id: string;
   enabled: boolean;
-  configuration: EmailEndpointConfig | TelegramEndpointConfig | WebhookEndpointConfig | DeviceActionEndpointConfig | IftttEndpointConfig | WhatsappEndpointConfig;
+  configuration: EndpointConfiguration;
   created_at: string;
   updated_at: string;
 }
@@ -70,11 +80,73 @@ export interface WhatsappEndpointConfig {
   message_template: string;
 }
 
+export type EndpointConfiguration =
+  | EmailEndpointConfig
+  | TelegramEndpointConfig
+  | WebhookEndpointConfig
+  | DeviceActionEndpointConfig
+  | IftttEndpointConfig
+  | WhatsappEndpointConfig;
+
 export interface EndpointFormData {
   id?: string; // Added for editing
   name: string;
   description?: string;
   type: EndpointType;
   enabled: boolean;
-  configuration: Partial<EmailEndpointConfig | TelegramEndpointConfig | WebhookEndpointConfig | DeviceActionEndpointConfig | IftttEndpointConfig | WhatsappEndpointConfig>;
+  configuration: Partial<EndpointConfiguration>;
 }
+
+// Zod schemas for runtime validation of endpoint configurations
+
+const endpointParameterValueSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+const endpointParametersSchema = z.record(endpointParameterValueSchema);
+
+const emailEndpointConfigSchema: z.ZodType<EmailEndpointConfig> = z.object({
+  to: z.array(z.string()),
+  subject: z.string(),
+  body_template: z.string(),
+});
+
+const telegramEndpointConfigSchema: z.ZodType<TelegramEndpointConfig> = z.object({
+  bot_token: z.string(),
+  chat_id: z.string(),
+  message_template: z.string(),
+});
+
+const webhookEndpointConfigSchema: z.ZodType<WebhookEndpointConfig> = z.object({
+  url: z.string().url(),
+  method: z.enum(['GET', 'POST', 'PUT', 'DELETE']),
+  headers: z.record(z.string()).optional(),
+  body_template: z.string().optional(),
+});
+
+const deviceActionEndpointConfigSchema: z.ZodType<DeviceActionEndpointConfig> = z.object({
+  target_device_id: z.string(),
+  action: z.string(),
+  parameters: endpointParametersSchema.optional(),
+});
+
+const iftttEndpointConfigSchema: z.ZodType<IftttEndpointConfig> = z.object({
+  webhook_key: z.string(),
+  event_name: z.string(),
+  value1: z.string().optional(),
+  value2: z.string().optional(),
+  value3: z.string().optional(),
+});
+
+const whatsappEndpointConfigSchema: z.ZodType<WhatsappEndpointConfig> = z.object({
+  phone_number_id: z.string(),
+  access_token: z.string(),
+  to_phone_number: z.string(),
+  message_template: z.string(),
+});
+
+export const endpointConfigurationSchema: z.ZodType<EndpointConfiguration> = z.union([
+  emailEndpointConfigSchema,
+  telegramEndpointConfigSchema,
+  webhookEndpointConfigSchema,
+  deviceActionEndpointConfigSchema,
+  iftttEndpointConfigSchema,
+  whatsappEndpointConfigSchema,
+]);

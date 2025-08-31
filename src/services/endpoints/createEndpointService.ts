@@ -1,11 +1,16 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { EndpointConfig, EndpointFormData } from '@/types/endpoint';
-import { SupabaseEndpoint, handleServiceError } from './baseEndpointService';
+import {
+  EndpointConfig,
+  EndpointFormData,
+  endpointConfigurationSchema,
+  endpointTypeSchema,
+} from '@/types/endpoint';
+import { handleServiceError } from './baseEndpointService';
 import { toast } from 'sonner';
 
 /**
- * Create a new endpoint
+ * Create a new endpoint with runtime configuration validation
  */
 export async function createEndpoint(
   organizationId: string, 
@@ -20,16 +25,21 @@ export async function createEndpoint(
       return null;
     }
     
+    const configurationInput = endpointConfigurationSchema.parse(
+      endpointData.configuration
+    );
+    const typeInput = endpointTypeSchema.parse(endpointData.type);
+
     // Using generic query to avoid TypeScript issues
     const { error, data } = await supabase
       .from('endpoints')
       .insert({
         name: endpointData.name,
         description: endpointData.description || null,
-        type: endpointData.type,
+        type: typeInput,
         organization_id: organizationId,
         enabled: endpointData.enabled,
-        configuration: endpointData.configuration || {},
+        configuration: configurationInput,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
@@ -50,21 +60,20 @@ export async function createEndpoint(
 
     console.log('Created endpoint successfully:', data);
     toast.success('Endpoint created successfully');
-    
-    // First convert to unknown, then to the expected type to satisfy TypeScript
-    // This is safe because we know the shape of the configuration matches our endpoint types
-    const typedConfiguration = (data.configuration as unknown) as EndpointConfig['configuration'];
-    
+
+    const configuration = endpointConfigurationSchema.parse(data.configuration);
+    const type = endpointTypeSchema.parse(data.type);
+
     return {
       id: data.id,
       name: data.name,
       description: data.description || undefined,
-      type: data.type as EndpointConfig['type'],
+      type,
       organization_id: data.organization_id,
       enabled: data.enabled,
-      configuration: typedConfiguration,
+      configuration,
       created_at: data.created_at,
-      updated_at: data.updated_at
+      updated_at: data.updated_at,
     };
   } catch (error) {
     console.error('Unexpected error in createEndpoint:', error);
