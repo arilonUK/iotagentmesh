@@ -9,7 +9,7 @@ export interface TelemetryEntry {
   timestamp: string;
   reading_type: string;
   value: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   mesh_synced: boolean;
   quality?: 'good' | 'bad' | 'uncertain';
   unit?: string;
@@ -119,7 +119,7 @@ export class TelemetryDataService {
 
       // Convert to TelemetryEntry format
       const telemetryEntries: TelemetryEntry[] = (localData || []).map(reading => {
-        const metadata = reading.metadata as Record<string, any> || {};
+        const metadata = reading.metadata as Record<string, unknown> || {};
         return {
           id: reading.id,
           device_id: reading.device_id,
@@ -128,9 +128,9 @@ export class TelemetryDataService {
           reading_type: reading.reading_type,
           value: reading.value,
           metadata: metadata,
-          mesh_synced: metadata.mesh_synced || false,
-          quality: metadata.quality || 'good',
-          unit: metadata.unit
+          mesh_synced: Boolean(metadata.mesh_synced),
+          quality: (metadata.quality as 'good' | 'bad' | 'uncertain') || 'good',
+          unit: metadata.unit as string | undefined
         };
       });
 
@@ -221,7 +221,7 @@ export class TelemetryDataService {
     }
   }
 
-  async getAggregatedData(options: TelemetryQueryOptions & { aggregation: 'avg' | 'min' | 'max' | 'sum' | 'count' }): Promise<any[]> {
+  async getAggregatedData(options: TelemetryQueryOptions & { aggregation: 'avg' | 'min' | 'max' | 'sum' | 'count' }): Promise<TelemetryReading[]> {
     try {
       console.log('Fetching aggregated telemetry data:', options);
       
