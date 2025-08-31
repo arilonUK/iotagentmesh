@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { EndpointConfig, EndpointFormData } from '@/types/endpoint';
 import { SupabaseEndpoint, handleServiceError } from './baseEndpointService';
+import { endpointConfigurationSchema } from './endpointConfigSchema';
 import { toast } from 'sonner';
 
 /**
@@ -20,7 +21,6 @@ export async function createEndpoint(
       return null;
     }
     
-    // Using generic query to avoid TypeScript issues
     const { error, data } = await supabase
       .from('endpoints')
       .insert({
@@ -31,10 +31,10 @@ export async function createEndpoint(
         enabled: endpointData.enabled,
         configuration: endpointData.configuration || {},
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .select('*')
-      .single();
+      .single<SupabaseEndpoint>();
 
     if (error) {
       console.error('Error creating endpoint:', error);
@@ -50,10 +50,9 @@ export async function createEndpoint(
 
     console.log('Created endpoint successfully:', data);
     toast.success('Endpoint created successfully');
-    
-    // First convert to unknown, then to the expected type to satisfy TypeScript
-    // This is safe because we know the shape of the configuration matches our endpoint types
-    const typedConfiguration = (data.configuration as unknown) as EndpointConfig['configuration'];
+
+    const typedConfiguration: EndpointConfig['configuration'] =
+      endpointConfigurationSchema.parse(data.configuration);
     
     return {
       id: data.id,
