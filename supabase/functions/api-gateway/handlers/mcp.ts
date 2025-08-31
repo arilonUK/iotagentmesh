@@ -56,19 +56,33 @@ export async function handleMcp(req: Request, path: string): Promise<Response> {
     const organizationId = orgMember.organization_id;
     console.log(`Organization: ${organizationId}, Role: ${orgMember.role}`);
 
-    // Get request body if applicable
-    const body = req.method === 'GET' ? undefined : await req.json();
+    // Get request body safely if applicable
+    let body: unknown = undefined;
+    if (req.method !== 'GET') {
+      try {
+        const bodyText = await req.text();
+        if (bodyText.trim()) {
+          body = JSON.parse(bodyText);
+        }
+      } catch (parseError) {
+        console.log('Failed to parse request body as JSON, treating as text');
+        body = bodyText;
+      }
+    }
     console.log(`Request body: ${body ? JSON.stringify(body) : 'none'}`);
+
+    // Merge body with user context for the forwarded request
+    const forwardedBody = {
+      ...(typeof body === 'object' && body !== null ? body : {}),
+      organizationId,
+      userId: user.id,
+      userRole: orgMember.role
+    };
 
     // Forward to api-mcp function
     console.log('Forwarding to api-mcp function...');
     const { data, error: invokeError, status } = await supabaseClient.functions.invoke('api-mcp', {
-      body: {
-        ...body,
-        organizationId,
-        userId: user.id,
-        userRole: orgMember.role
-      },
+      body: forwardedBody,
       headers: { 
         Authorization: authHeader,
         'Content-Type': 'application/json'

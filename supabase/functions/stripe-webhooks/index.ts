@@ -8,7 +8,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const logStep = (step: string, details?: any) => {
+const logStep = (step: string, details?: unknown) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[STRIPE-WEBHOOKS] ${step}${detailsStr}`);
 };
@@ -87,7 +87,53 @@ serve(async (req) => {
   }
 });
 
-async function handleCheckoutCompleted(session: any, supabaseClient: any, stripe: Stripe) {
+interface StripeWebhookSession {
+  id: string;
+  metadata?: { organization_id?: string };
+  subscription?: string;
+  customer?: string;
+}
+
+interface StripeWebhookSubscription {
+  id: string;
+  customer: string;
+  status: string;
+  items: { data: Array<{ price: { id: string } }> };
+  current_period_start: number;
+  current_period_end: number;
+  cancel_at_period_end: boolean;
+}
+
+interface StripeWebhookInvoice {
+  id: string;
+  customer: string;
+  subscription: string;
+  amount_paid: number;
+  amount_due: number;
+  currency: string;
+  status: string;
+  invoice_pdf?: string;
+  due_date?: number;
+  period_start?: number;
+  period_end?: number;
+}
+
+interface SupabaseWebhookClient {
+  from: (table: string) => {
+    select: (columns: string) => {
+      eq: (column: string, value: string) => {
+        single: () => Promise<{ data: unknown; error: unknown }>;
+      };
+    };
+    update: (data: Record<string, unknown>) => {
+      eq: (column: string, value: string) => Promise<{ data: unknown; error: unknown }>;
+    };
+    upsert: (data: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
+    insert: (data: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
+  };
+}
+
+async function handleCheckoutCompleted(session: StripeWebhookSession, supabaseClient: SupabaseWebhookClient, stripe: Stripe) {
   logStep("Handling checkout completed", { sessionId: session.id });
   
   const organizationId = session.metadata?.organization_id;
@@ -103,7 +149,7 @@ async function handleCheckoutCompleted(session: any, supabaseClient: any, stripe
   }
 }
 
-async function handleSubscriptionUpdated(subscription: any, supabaseClient: any, stripe: Stripe) {
+async function handleSubscriptionUpdated(subscription: StripeWebhookSubscription, supabaseClient: SupabaseWebhookClient, stripe: Stripe) {
   logStep("Handling subscription updated", { subscriptionId: subscription.id });
 
   // Get customer and organization
@@ -179,7 +225,7 @@ async function handleSubscriptionUpdated(subscription: any, supabaseClient: any,
   }
 }
 
-async function handleSubscriptionDeleted(subscription: any, supabaseClient: any) {
+async function handleSubscriptionDeleted(subscription: StripeWebhookSubscription, supabaseClient: SupabaseWebhookClient) {
   logStep("Handling subscription deleted", { subscriptionId: subscription.id });
 
   // Update subscription status to canceled
@@ -196,7 +242,7 @@ async function handleSubscriptionDeleted(subscription: any, supabaseClient: any)
   }
 }
 
-async function handleInvoicePaymentSucceeded(invoice: any, supabaseClient: any) {
+async function handleInvoicePaymentSucceeded(invoice: StripeWebhookInvoice, supabaseClient: SupabaseWebhookClient) {
   logStep("Handling invoice payment succeeded", { invoiceId: invoice.id });
 
   // Update or create invoice record
@@ -222,7 +268,7 @@ async function handleInvoicePaymentSucceeded(invoice: any, supabaseClient: any) 
   }
 }
 
-async function handleInvoicePaymentFailed(invoice: any, supabaseClient: any) {
+async function handleInvoicePaymentFailed(invoice: StripeWebhookInvoice, supabaseClient: SupabaseWebhookClient) {
   logStep("Handling invoice payment failed", { invoiceId: invoice.id });
 
   // Update invoice status

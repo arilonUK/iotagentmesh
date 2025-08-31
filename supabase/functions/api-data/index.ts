@@ -11,13 +11,13 @@ interface ReadingData {
   reading_type: string;
   value: number;
   timestamp?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 interface DataBucketData {
-  data: any[];
+  data: Array<Record<string, unknown>>;
   timestamp?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 serve(async (req) => {

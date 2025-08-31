@@ -2,14 +2,14 @@
 export interface ParsedRequest {
   httpMethod: string;
   deviceId: string | null;
-  requestBody: any;
+  requestBody: Record<string, unknown>;
 }
 
 export function parseRequest(req: Request, url: URL): ParsedRequest {
   const pathParts = url.pathname.split('/').filter(part => part && part !== 'api-devices');
   let deviceId: string | null = pathParts.length > 0 ? pathParts[0] : null;
   let httpMethod = req.method;
-  let requestBody: any = {};
+  let requestBody: Record<string, unknown> = {};
 
   console.log('URL pathname:', url.pathname);
   console.log('Path parts:', pathParts);
@@ -37,14 +37,14 @@ export async function parseRequestBody(req: Request, parsedRequest: ParsedReques
           if (parsedBody.path && parsedBody.path !== '') {
             parsedRequest.deviceId = parsedBody.path.replace('/', '');
           }
-          parsedRequest.requestBody = parsedBody.data || {};
+          parsedRequest.requestBody = (parsedBody.data as Record<string, unknown>) || {};
         } else if (parsedBody.data) {
           // Handle Supabase client format with data
-          parsedRequest.requestBody = parsedBody.data;
+          parsedRequest.requestBody = parsedBody.data as Record<string, unknown>;
           console.log('Supabase client format with data detected');
         } else {
           // Handle direct API calls
-          parsedRequest.requestBody = parsedBody;
+          parsedRequest.requestBody = parsedBody as Record<string, unknown>;
           console.log('Direct API call format detected');
         }
       } else {

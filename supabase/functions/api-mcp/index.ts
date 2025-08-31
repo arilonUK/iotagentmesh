@@ -105,7 +105,7 @@ serve(async (req) => {
 });
 
 // Handle root MCP endpoint - return server capabilities
-async function handleMcpRoot(req: Request, body: any, organizationId: string): Promise<Response> {
+async function handleMcpRoot(req: Request, body: unknown, organizationId: string): Promise<Response> {
   console.log('=== HANDLING MCP ROOT ===');
   
   const capabilities = {
@@ -152,7 +152,7 @@ async function handleMcpRoot(req: Request, body: any, organizationId: string): P
 }
 
 // Handle MCP tools - executable functions
-async function handleMcpTools(req: Request, pathParts: string[], body: any, organizationId: string): Promise<Response> {
+async function handleMcpTools(req: Request, pathParts: string[], body: unknown, organizationId: string): Promise<Response> {
   console.log('=== HANDLING MCP TOOLS ===');
   console.log(`Tool path parts: ${JSON.stringify(pathParts)}`);
 
@@ -248,7 +248,7 @@ async function handleMcpTools(req: Request, pathParts: string[], body: any, orga
 }
 
 // Handle MCP resources - readable data sources
-async function handleMcpResources(req: Request, pathParts: string[], body: any, organizationId: string): Promise<Response> {
+async function handleMcpResources(req: Request, pathParts: string[], body: unknown, organizationId: string): Promise<Response> {
   console.log('=== HANDLING MCP RESOURCES ===');
   
   if (req.method === 'GET' && pathParts.length === 0) {
@@ -306,7 +306,7 @@ async function handleMcpResources(req: Request, pathParts: string[], body: any, 
 }
 
 // Handle MCP prompts - templated conversation starters
-async function handleMcpPrompts(req: Request, pathParts: string[], body: any, organizationId: string): Promise<Response> {
+async function handleMcpPrompts(req: Request, pathParts: string[], body: unknown, organizationId: string): Promise<Response> {
   console.log('=== HANDLING MCP PROMPTS ===');
   
   const prompts = [
@@ -336,8 +336,22 @@ async function handleMcpPrompts(req: Request, pathParts: string[], body: any, or
   );
 }
 
+interface SupabaseClientInterface {
+  from: (table: string) => {
+    select: (columns: string, options?: { count?: string; head?: boolean }) => {
+      eq: (column: string, value: string) => {
+        single?: () => Promise<{ data: unknown; error: unknown }>;
+        order?: (column: string, options: { ascending: boolean }) => {
+          limit: (limit: number) => Promise<{ data: unknown[]; error: unknown }>;
+        };
+        limit?: (limit: number) => Promise<{ data: unknown[]; error: unknown }>;
+      } & Promise<{ count?: number; data?: unknown[]; error?: unknown }>;
+    };
+  };
+}
+
 // Handle MCP context - real-time system context
-async function handleMcpContext(req: Request, pathParts: string[], body: any, organizationId: string, supabaseClient: any): Promise<Response> {
+async function handleMcpContext(req: Request, pathParts: string[], body: unknown, organizationId: string, supabaseClient: SupabaseClientInterface): Promise<Response> {
   console.log('=== HANDLING MCP CONTEXT ===');
   
   try {
@@ -396,8 +410,17 @@ async function handleMcpContext(req: Request, pathParts: string[], body: any, or
   }
 }
 
+interface McpRequestBody {
+  device_id?: string;
+  reading_type?: string;
+  limit?: number;
+  endpoint_id?: string;
+  payload?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 // Tool execution functions
-async function executeGetDeviceStatus(body: any, organizationId: string): Promise<Response> {
+async function executeGetDeviceStatus(body: unknown, organizationId: string): Promise<Response> {
   console.log('Executing get_device_status tool');
   
   const supabaseClient = createClient(
@@ -405,7 +428,8 @@ async function executeGetDeviceStatus(body: any, organizationId: string): Promis
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
   );
 
-  const deviceId = body?.device_id;
+  const requestBody = body as McpRequestBody;
+  const deviceId = requestBody?.device_id;
   if (!deviceId) {
     return new Response(
       JSON.stringify({ success: false, error: 'device_id parameter is required' }),
@@ -452,7 +476,7 @@ async function executeGetDeviceStatus(body: any, organizationId: string): Promis
   }
 }
 
-async function executeGetDeviceReadings(body: any, organizationId: string): Promise<Response> {
+async function executeGetDeviceReadings(body: unknown, organizationId: string): Promise<Response> {
   console.log('Executing get_device_readings tool');
   
   const supabaseClient = createClient(
@@ -460,9 +484,10 @@ async function executeGetDeviceReadings(body: any, organizationId: string): Prom
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
   );
 
-  const deviceId = body?.device_id;
-  const readingType = body?.reading_type;
-  const limit = body?.limit || 10;
+  const requestBody = body as McpRequestBody;
+  const deviceId = requestBody?.device_id;
+  const readingType = requestBody?.reading_type;
+  const limit = requestBody?.limit || 10;
 
   if (!deviceId) {
     return new Response(
@@ -508,7 +533,7 @@ async function executeGetDeviceReadings(body: any, organizationId: string): Prom
   }
 }
 
-async function executeTriggerEndpoint(body: any, organizationId: string): Promise<Response> {
+async function executeTriggerEndpoint(body: unknown, organizationId: string): Promise<Response> {
   console.log('Executing trigger_endpoint tool');
   
   const supabaseClient = createClient(
@@ -516,8 +541,9 @@ async function executeTriggerEndpoint(body: any, organizationId: string): Promis
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
   );
 
-  const endpointId = body?.endpoint_id;
-  const payload = body?.payload || {};
+  const requestBody = body as McpRequestBody;
+  const endpointId = requestBody?.endpoint_id;
+  const payload = requestBody?.payload || {};
 
   if (!endpointId) {
     return new Response(

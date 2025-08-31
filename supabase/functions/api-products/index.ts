@@ -22,8 +22,8 @@ interface PropertyData {
   data_type: string;
   unit?: string;
   is_required?: boolean;
-  default_value?: any;
-  validation_rules?: any;
+  default_value?: unknown;
+  validation_rules?: Record<string, unknown>;
 }
 
 serve(async (req) => {

@@ -7,6 +7,14 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+interface AlarmConditionValue {
+  threshold?: number;
+  comparison?: string;
+  range?: { min: number; max: number };
+  pattern?: string;
+  [key: string]: unknown;
+}
+
 interface CreateAlarmRequest {
   name: string;
   description?: string;
@@ -14,7 +22,7 @@ interface CreateAlarmRequest {
   enabled: boolean;
   reading_type: string;
   condition_operator: string;
-  condition_value: any;
+  condition_value: AlarmConditionValue;
   severity: string;
   cooldown_minutes?: number;
   endpoints: string[];
@@ -27,7 +35,7 @@ interface UpdateAlarmRequest {
   enabled?: boolean;
   reading_type?: string;
   condition_operator?: string;
-  condition_value?: any;
+  condition_value?: AlarmConditionValue;
   severity?: string;
   cooldown_minutes?: number;
   endpoints?: string[];
@@ -119,7 +127,28 @@ serve(async (req) => {
   }
 })
 
-async function getAlarms(supabaseClient: any, organizationId: string) {
+interface SupabaseClient {
+  rpc: (functionName: string, params: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
+  from: (table: string) => {
+    select: (columns?: string) => {
+      eq: (column: string, value: unknown) => {
+        single: () => Promise<{ data: unknown; error: unknown }>;
+      };
+    };
+    insert: (data: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
+    update: (data: Record<string, unknown>) => {
+      eq: (column: string, value: unknown) => Promise<{ data: unknown; error: unknown }>;
+    };
+    delete: () => {
+      eq: (column: string, value: unknown) => Promise<{ data: unknown; error: unknown }>;
+    };
+  };
+  functions: {
+    invoke: (name: string, options: { body: unknown }) => Promise<{ data: unknown; error: unknown }>;
+  };
+}
+
+async function getAlarms(supabaseClient: SupabaseClient, organizationId: string) {
   try {
     const { data, error } = await supabaseClient.rpc('get_alarms_with_details', {
       p_organization_id: organizationId
@@ -140,7 +169,7 @@ async function getAlarms(supabaseClient: any, organizationId: string) {
   }
 }
 
-async function createAlarm(supabaseClient: any, organizationId: string, requestData: CreateAlarmRequest, userId: string) {
+async function createAlarm(supabaseClient: SupabaseClient, organizationId: string, requestData: CreateAlarmRequest, userId: string) {
   try {
     // Validate request data
     if (!requestData.name || !requestData.reading_type || !requestData.condition_operator) {
@@ -221,7 +250,7 @@ async function createAlarm(supabaseClient: any, organizationId: string, requestD
   }
 }
 
-async function updateAlarm(supabaseClient: any, alarmId: string, requestData: UpdateAlarmRequest, organizationId: string, userId: string) {
+async function updateAlarm(supabaseClient: SupabaseClient, alarmId: string, requestData: UpdateAlarmRequest, organizationId: string, userId: string) {
   try {
     const { data, error } = await supabaseClient
       .from('alarms')
@@ -290,7 +319,7 @@ async function updateAlarm(supabaseClient: any, alarmId: string, requestData: Up
   }
 }
 
-async function deleteAlarm(supabaseClient: any, alarmId: string, organizationId: string, userId: string) {
+async function deleteAlarm(supabaseClient: SupabaseClient, alarmId: string, organizationId: string, userId: string) {
   try {
     // Get the alarm details before deletion for audit log
     const { data: alarmData } = await supabaseClient
@@ -346,7 +375,7 @@ async function deleteAlarm(supabaseClient: any, alarmId: string, organizationId:
   }
 }
 
-async function testAlarm(supabaseClient: any, alarmId: string, organizationId: string, userId: string) {
+async function testAlarm(supabaseClient: SupabaseClient, alarmId: string, organizationId: string, userId: string) {
   try {
     // Get alarm details
     const { data: alarm, error: alarmError } = await supabaseClient
@@ -424,7 +453,7 @@ async function testAlarm(supabaseClient: any, alarmId: string, organizationId: s
   }
 }
 
-async function triggerWebhookNotification(supabaseClient: any, organizationId: string, event: any) {
+async function triggerWebhookNotification(supabaseClient: SupabaseClient, organizationId: string, event: Record<string, unknown>) {
   try {
     await supabaseClient.functions.invoke('webhook-dispatcher', {
       body: {
