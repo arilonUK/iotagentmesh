@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import type { Database } from '../_shared/database.types.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -25,7 +26,7 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
+    const supabaseClient: SupabaseClient<Database> = createClient<Database>(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
@@ -123,7 +124,7 @@ serve(async (req) => {
   }
 })
 
-async function getApiKeys(supabaseClient: ReturnType<typeof createClient>, organizationId: string) {
+async function getApiKeys(supabaseClient: SupabaseClient<Database>, organizationId: string) {
   try {
     const { data, error } = await supabaseClient
       .from('api_keys')
@@ -146,7 +147,7 @@ async function getApiKeys(supabaseClient: ReturnType<typeof createClient>, organ
   }
 }
 
-async function createApiKey(supabaseClient: ReturnType<typeof createClient>, organizationId: string, requestData: CreateApiKeyRequest, userId: string) {
+async function createApiKey(supabaseClient: SupabaseClient<Database>, organizationId: string, requestData: CreateApiKeyRequest, userId: string) {
   try {
     // Validate request data
     if (!requestData.name || !requestData.scopes || requestData.scopes.length === 0) {
@@ -226,7 +227,7 @@ async function createApiKey(supabaseClient: ReturnType<typeof createClient>, org
   }
 }
 
-async function updateApiKey(supabaseClient: ReturnType<typeof createClient>, keyId: string, requestData: UpdateApiKeyRequest, organizationId: string, userId: string) {
+async function updateApiKey(supabaseClient: SupabaseClient<Database>, keyId: string, requestData: UpdateApiKeyRequest, organizationId: string, userId: string) {
   try {
     const { data, error } = await supabaseClient
       .from('api_keys')
@@ -262,7 +263,7 @@ async function updateApiKey(supabaseClient: ReturnType<typeof createClient>, key
   }
 }
 
-async function deleteApiKey(supabaseClient: ReturnType<typeof createClient>, keyId: string, organizationId: string, userId: string) {
+async function deleteApiKey(supabaseClient: SupabaseClient<Database>, keyId: string, organizationId: string, userId: string) {
   try {
     // Get the API key name before deletion for audit log
     const { data: apiKeyData } = await supabaseClient
@@ -301,7 +302,7 @@ async function deleteApiKey(supabaseClient: ReturnType<typeof createClient>, key
   }
 }
 
-async function getApiUsage(supabaseClient: ReturnType<typeof createClient>, organizationId: string, limit: number) {
+async function getApiUsage(supabaseClient: SupabaseClient<Database>, organizationId: string, limit: number) {
   try {
     const { data, error } = await supabaseClient
       .from('api_usage')

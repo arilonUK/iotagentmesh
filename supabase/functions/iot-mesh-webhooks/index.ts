@@ -1,4 +1,5 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import type { Database } from '../_shared/database.types.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -24,7 +25,7 @@ Deno.serve(async (req) => {
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const supabase: SupabaseClient<Database> = createClient<Database>(supabaseUrl, supabaseKey)
 
     // Verify webhook signature if configured
     const webhookSecret = Deno.env.get('IOT_MESH_WEBHOOK_SECRET')
@@ -60,7 +61,7 @@ Deno.serve(async (req) => {
   }
 })
 
-async function processWebhook(supabase: ReturnType<typeof createClient>, payload: WebhookPayload) {
+async function processWebhook(supabase: SupabaseClient<Database>, payload: WebhookPayload) {
   console.log('Processing webhook:', payload.event_type)
 
   try {
@@ -108,7 +109,7 @@ async function processWebhook(supabase: ReturnType<typeof createClient>, payload
   }
 }
 
-async function handleDeviceTelemetry(supabase: ReturnType<typeof createClient>, payload: WebhookPayload) {
+async function handleDeviceTelemetry(supabase: SupabaseClient<Database>, payload: WebhookPayload) {
   if (!payload.device_id || !payload.data) return
 
   // Find the local device by mesh device ID
@@ -141,7 +142,7 @@ async function handleDeviceTelemetry(supabase: ReturnType<typeof createClient>, 
   }
 }
 
-async function handleAgentStatusChange(supabase: ReturnType<typeof createClient>, payload: WebhookPayload) {
+async function handleAgentStatusChange(supabase: SupabaseClient<Database>, payload: WebhookPayload) {
   if (!payload.agent_id) return
 
   // Update agent status in database
@@ -160,7 +161,7 @@ async function handleAgentStatusChange(supabase: ReturnType<typeof createClient>
     })
 }
 
-async function handleDeviceStatusChange(supabase: ReturnType<typeof createClient>, payload: WebhookPayload) {
+async function handleDeviceStatusChange(supabase: SupabaseClient<Database>, payload: WebhookPayload) {
   if (!payload.device_id) return
 
   // Update device status
@@ -173,7 +174,7 @@ async function handleDeviceStatusChange(supabase: ReturnType<typeof createClient
     .eq('id', payload.device_id)
 }
 
-async function handleMCPEvent(supabase: ReturnType<typeof createClient>, payload: WebhookPayload) {
+async function handleMCPEvent(supabase: SupabaseClient<Database>, payload: WebhookPayload) {
   // Log MCP events for monitoring
   await supabase
     .from('api_usage')
@@ -189,7 +190,7 @@ async function handleMCPEvent(supabase: ReturnType<typeof createClient>, payload
     })
 }
 
-async function handleAlertTriggered(supabase: ReturnType<typeof createClient>, payload: WebhookPayload) {
+async function handleAlertTriggered(supabase: SupabaseClient<Database>, payload: WebhookPayload) {
   if (!payload.device_id) return
 
   // Create alarm event
@@ -246,7 +247,7 @@ async function verifyWebhookSignature(body: string, signature: string, secret: s
   }
 }
 
-async function logWebhookEvent(supabase: ReturnType<typeof createClient>, payload: WebhookPayload) {
+async function logWebhookEvent(supabase: SupabaseClient<Database>, payload: WebhookPayload) {
   try {
     await supabase
       .from('api_usage')

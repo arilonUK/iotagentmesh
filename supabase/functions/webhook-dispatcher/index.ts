@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import type { Database } from '../_shared/database.types.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,6 +20,15 @@ interface WebhookDelivery {
   event: WebhookEvent;
   attempt?: number;
   max_retries?: number;
+}
+
+interface Webhook {
+  id: string;
+  url: string;
+  secret: string;
+  timeout_seconds: number;
+  retry_count?: number | null;
+  events: string[];
 }
 
 // Generate HMAC signature for webhook verification
@@ -46,7 +56,7 @@ function calculateDelay(attempt: number): number {
   return delay + Math.random() * 1000; // Add jitter
 }
 
-async function deliverWebhook(webhook: Record<string, unknown>, event: WebhookEvent, attempt: number = 1): Promise<boolean> {
+async function deliverWebhook(webhook: Webhook, event: WebhookEvent, attempt = 1): Promise<boolean> {
   const payload = JSON.stringify(event);
   const timestamp = Math.floor(Date.now() / 1000);
   const signaturePayload = `${timestamp}.${payload}`;
@@ -84,7 +94,7 @@ serve(async (req) => {
 
   try {
     // Initialize Supabase client
-    const supabaseClient = createClient(
+    const supabaseClient: SupabaseClient<Database> = createClient<Database>(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
@@ -106,10 +116,10 @@ serve(async (req) => {
       // Get webhook endpoint details
       const { data: webhook, error } = await supabaseClient
         .from('webhook_endpoints')
-        .select('*')
+        .select('id,url,secret,timeout_seconds,retry_count,events')
         .eq('id', deliveryData.webhook_id)
         .eq('enabled', true)
-        .single();
+        .single<Webhook>();
 
       if (error || !webhook) {
         return new Response(
@@ -255,7 +265,7 @@ serve(async (req) => {
       // Get all webhooks that subscribe to this event type
       const { data: webhooks, error } = await supabaseClient
         .from('webhook_endpoints')
-        .select('*')
+        .select('id,url,secret,timeout_seconds,retry_count,events')
         .eq('organization_id', organization_id)
         .eq('enabled', true);
 
@@ -267,7 +277,8 @@ serve(async (req) => {
         )
       }
 
-      const matchingWebhooks = webhooks.filter(webhook => 
+      const webhookList: Webhook[] = webhooks ?? [];
+      const matchingWebhooks = webhookList.filter(webhook =>
         webhook.events.includes(event.type) || webhook.events.includes('*')
       );
 

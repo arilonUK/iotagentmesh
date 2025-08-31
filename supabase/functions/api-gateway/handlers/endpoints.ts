@@ -1,9 +1,10 @@
 
 import { corsHeaders } from '../../_shared/cors.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import type { Database } from '../../_shared/database.types.ts';
 
 export async function handleEndpoints(req: Request, path: string): Promise<Response> {
-  const supabaseClient = createClient(
+  const supabaseClient: SupabaseClient<Database> = createClient<Database>(
     Deno.env.get('SUPABASE_URL') ?? '',
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
   );
@@ -73,7 +74,7 @@ export async function handleEndpoints(req: Request, path: string): Promise<Respo
 
     if (method === 'POST' && segments.length === 0) {
       // POST /api/endpoints - Create new endpoint
-      const requestData = await req.json();
+      const requestData: Record<string, unknown> = await req.json();
       
       // Validate request data
       if (!requestData.name || !requestData.type) {
@@ -138,7 +139,7 @@ export async function handleEndpoints(req: Request, path: string): Promise<Respo
     if (method === 'PUT' && segments.length === 1) {
       // PUT /api/endpoints/:id - Update endpoint
       const endpointId = segments[0];
-      const updates = await req.json();
+      const updates: Record<string, unknown> = await req.json();
 
       const { data: updatedEndpoint, error } = await supabaseClient
         .from('endpoints')

@@ -1,5 +1,6 @@
 import { corsHeaders } from '../../_shared/cors.ts';
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import type { Database } from '../../_shared/database.types.ts';
 
 interface OrganizationAccessResult {
   valid: boolean;
@@ -8,7 +9,7 @@ interface OrganizationAccessResult {
 }
 
 async function validateOrganizationAccess(
-  supabaseClient: SupabaseClient,
+  supabaseClient: SupabaseClient<Database>,
   organizationId: string,
   userId: string,
   userRole: string,
@@ -64,7 +65,7 @@ export async function handleMcp(req: Request, path: string): Promise<Response> {
   console.log(`=== MCP HANDLER START ===`);
   console.log(`Processing MCP request: ${req.method} ${path}`);
   
-  const supabaseClient = createClient(
+  const supabaseClient: SupabaseClient<Database> = createClient<Database>(
     Deno.env.get('SUPABASE_URL') ?? '',
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
   );

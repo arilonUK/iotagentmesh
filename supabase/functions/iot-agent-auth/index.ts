@@ -1,4 +1,5 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import type { Database } from '../_shared/database.types.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,7 +24,7 @@ Deno.serve(async (req) => {
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const supabase: SupabaseClient<Database> = createClient<Database>(supabaseUrl, supabaseKey)
 
     // Get auth header
     const authHeader = req.headers.get('authorization')
@@ -92,7 +93,7 @@ Deno.serve(async (req) => {
   }
 })
 
-async function registerAgent(supabase: ReturnType<typeof createClient>, organizationId: string, agentData: {
+async function registerAgent(supabase: SupabaseClient<Database>, organizationId: string, agentData: {
   agent_name?: string
   agent_type?: string
   capabilities?: string[]
@@ -182,7 +183,7 @@ async function registerAgent(supabase: ReturnType<typeof createClient>, organiza
   }
 }
 
-async function authenticateAgent(supabase: ReturnType<typeof createClient>, organizationId: string, agentId: string) {
+async function authenticateAgent(supabase: SupabaseClient<Database>, organizationId: string, agentId: string) {
   try {
     // Get IoT Agent Mesh API configuration
     const iotAgentMeshUrl = Deno.env.get('IOT_AGENT_MESH_URL') || 'https://api.iotagentmesh.com/v1'
@@ -221,7 +222,7 @@ async function authenticateAgent(supabase: ReturnType<typeof createClient>, orga
   }
 }
 
-async function revokeAgent(supabase: ReturnType<typeof createClient>, organizationId: string, agentId: string) {
+async function revokeAgent(supabase: SupabaseClient<Database>, organizationId: string, agentId: string) {
   try {
     // Get IoT Agent Mesh API configuration
     const iotAgentMeshUrl = Deno.env.get('IOT_AGENT_MESH_URL') || 'https://api.iotagentmesh.com/v1'

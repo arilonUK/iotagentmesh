@@ -1,9 +1,10 @@
 
 import { corsHeaders } from '../../_shared/cors.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import type { Database } from '../../_shared/database.types.ts';
 
 export async function handleProfiles(req: Request, path: string): Promise<Response> {
-  const supabaseClient = createClient(
+  const supabaseClient: SupabaseClient<Database> = createClient<Database>(
     Deno.env.get('SUPABASE_URL') ?? '',
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
   );
@@ -57,7 +58,7 @@ export async function handleProfiles(req: Request, path: string): Promise<Respon
 
     if (method === 'PUT' && segments.length === 0) {
       // PUT /api/profiles - Update current user profile
-      const updates = await req.json();
+      const updates: Record<string, unknown> = await req.json();
 
       const { data: updatedProfile, error } = await supabaseClient
         .from('profiles')
