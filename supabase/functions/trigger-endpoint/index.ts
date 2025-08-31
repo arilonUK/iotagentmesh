@@ -1,11 +1,12 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.6'
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.39.6'
 import { corsHeaders } from '../_shared/cors.ts'
+import type { Database } from '../_shared/database.types.ts'
 
 // Get Supabase client
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+const supabase: SupabaseClient<Database> = createClient<Database>(supabaseUrl, supabaseServiceKey)
 
 // Define interface for trigger payload
 interface TriggerPayload {
@@ -55,6 +56,47 @@ interface IftttEndpointConfig {
   value3?: string
 }
 
+interface EndpointRecord {
+  id: string
+  type: 'email' | 'telegram' | 'webhook' | 'whatsapp' | 'device_action' | 'ifttt'
+  configuration: unknown
+  enabled: boolean
+}
+
+function isTriggerPayload(data: unknown): data is TriggerPayload {
+  return typeof data === 'object' && data !== null && typeof (data as { endpointId?: unknown }).endpointId === 'string'
+}
+
+function isEmailEndpointConfig(config: unknown): config is EmailEndpointConfig {
+  const c = config as EmailEndpointConfig
+  return typeof config === 'object' && config !== null && Array.isArray(c.to) && typeof c.subject === 'string' && typeof c.body_template === 'string'
+}
+
+function isTelegramEndpointConfig(config: unknown): config is TelegramEndpointConfig {
+  const c = config as TelegramEndpointConfig
+  return typeof config === 'object' && config !== null && typeof c.bot_token === 'string' && typeof c.chat_id === 'string' && typeof c.message_template === 'string'
+}
+
+function isWebhookEndpointConfig(config: unknown): config is WebhookEndpointConfig {
+  const c = config as WebhookEndpointConfig
+  return typeof config === 'object' && config !== null && typeof c.url === 'string' && typeof c.method === 'string'
+}
+
+function isWhatsappEndpointConfig(config: unknown): config is WhatsappEndpointConfig {
+  const c = config as WhatsappEndpointConfig
+  return typeof config === 'object' && config !== null && typeof c.phone_number_id === 'string' && typeof c.access_token === 'string' && typeof c.to_phone_number === 'string' && typeof c.message_template === 'string'
+}
+
+function isDeviceActionEndpointConfig(config: unknown): config is DeviceActionEndpointConfig {
+  const c = config as DeviceActionEndpointConfig
+  return typeof config === 'object' && config !== null && typeof c.target_device_id === 'string' && typeof c.action === 'string'
+}
+
+function isIftttEndpointConfig(config: unknown): config is IftttEndpointConfig {
+  const c = config as IftttEndpointConfig
+  return typeof config === 'object' && config !== null && typeof c.webhook_key === 'string' && typeof c.event_name === 'string'
+}
+
 // Handle HTTP requests
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
@@ -72,7 +114,14 @@ Deno.serve(async (req) => {
     }
 
     // Get request data
-    const { endpointId, payload = {}, alarmEventId } = await req.json() as TriggerPayload
+    const body = await req.json()
+    if (!isTriggerPayload(body)) {
+      return new Response(JSON.stringify({ error: 'Invalid payload' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+    const { endpointId, payload = {}, alarmEventId } = body
 
     // Validate required fields
     if (!endpointId) {
@@ -89,7 +138,7 @@ Deno.serve(async (req) => {
       .from('endpoints')
       .select('*')
       .eq('id', endpointId)
-      .single()
+      .single<EndpointRecord>()
 
     if (error || !endpoint) {
       console.error('Error fetching endpoint:', error)
@@ -161,32 +210,50 @@ Deno.serve(async (req) => {
       // Execute endpoint based on type
       switch (endpoint.type) {
         case 'email': {
-          executionResult = await handleEmailEndpoint(endpoint.configuration as EmailEndpointConfig, payload)
+          if (!isEmailEndpointConfig(endpoint.configuration)) {
+            throw new Error('Invalid email endpoint configuration')
+          }
+          executionResult = await handleEmailEndpoint(endpoint.configuration, payload)
           success = true
           break
         }
         case 'telegram': {
-          executionResult = await handleTelegramEndpoint(endpoint.configuration as TelegramEndpointConfig, payload)
+          if (!isTelegramEndpointConfig(endpoint.configuration)) {
+            throw new Error('Invalid telegram endpoint configuration')
+          }
+          executionResult = await handleTelegramEndpoint(endpoint.configuration, payload)
           success = true
           break
         }
         case 'webhook': {
-          executionResult = await handleWebhookEndpoint(endpoint.configuration as WebhookEndpointConfig, payload)
+          if (!isWebhookEndpointConfig(endpoint.configuration)) {
+            throw new Error('Invalid webhook endpoint configuration')
+          }
+          executionResult = await handleWebhookEndpoint(endpoint.configuration, payload)
           success = true
           break
         }
         case 'whatsapp': {
-          executionResult = await handleWhatsappEndpoint(endpoint.configuration as WhatsappEndpointConfig, payload)
+          if (!isWhatsappEndpointConfig(endpoint.configuration)) {
+            throw new Error('Invalid whatsapp endpoint configuration')
+          }
+          executionResult = await handleWhatsappEndpoint(endpoint.configuration, payload)
           success = true
           break
         }
         case 'device_action': {
-          executionResult = await handleDeviceActionEndpoint(endpoint.configuration as DeviceActionEndpointConfig, payload)
+          if (!isDeviceActionEndpointConfig(endpoint.configuration)) {
+            throw new Error('Invalid device action endpoint configuration')
+          }
+          executionResult = await handleDeviceActionEndpoint(endpoint.configuration, payload)
           success = true
           break
         }
         case 'ifttt': {
-          executionResult = await handleIftttEndpoint(endpoint.configuration as IftttEndpointConfig, payload)
+          if (!isIftttEndpointConfig(endpoint.configuration)) {
+            throw new Error('Invalid IFTTT endpoint configuration')
+          }
+          executionResult = await handleIftttEndpoint(endpoint.configuration, payload)
           success = true
           break
         }

@@ -1,9 +1,28 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { composeMiddleware, corsMiddleware, loggingMiddleware, errorHandlingMiddleware } from '../_shared/middleware.ts';
+import type { Database } from '../_shared/database.types.ts';
 
-const rateLimitCheckMiddleware = async (ctx: Record<string, unknown>) => {
+interface RateLimitBucket {
+  id: string;
+  api_key_id: string;
+  bucket_type: 'hourly' | 'daily' | 'monthly';
+  current_count: number;
+  limit_value: number;
+  reset_time: string;
+}
+
+interface RateLimitContext {
+  request: Request;
+  response?: Response;
+  startTime?: number;
+  error?: string;
+  rateLimitAllowed?: boolean;
+  resetTime?: string;
+}
+
+const rateLimitCheckMiddleware = async (ctx: RateLimitContext): Promise<RateLimitContext> => {
   console.log('Rate limit check middleware: Starting check');
   
   const apiKeyId = ctx.request.headers.get('x-api-key-id');
@@ -13,7 +32,7 @@ const rateLimitCheckMiddleware = async (ctx: Record<string, unknown>) => {
     return ctx;
   }
   
-  const supabaseClient = createClient(
+  const supabaseClient: SupabaseClient<Database> = createClient<Database>(
     Deno.env.get('SUPABASE_URL') ?? '',
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
   );
@@ -27,14 +46,16 @@ const rateLimitCheckMiddleware = async (ctx: Record<string, unknown>) => {
       .from('rate_limit_buckets')
       .select('*')
       .eq('api_key_id', apiKeyId);
-    
-    if (!rateLimits || rateLimits.length === 0) {
+
+    const buckets: RateLimitBucket[] = rateLimits ?? [];
+
+    if (buckets.length === 0) {
       console.log('Rate limit check: No rate limits found, allowing request');
       ctx.rateLimitAllowed = true;
       return ctx;
     }
-    
-    for (const bucket of rateLimits) {
+
+    for (const bucket of buckets) {
       // Reset bucket if time has passed
       if (new Date(bucket.reset_time) <= now) {
         console.log('Rate limit check: Resetting expired bucket');
@@ -58,7 +79,7 @@ const rateLimitCheckMiddleware = async (ctx: Record<string, unknown>) => {
   }
 };
 
-const incrementRateLimitMiddleware = async (ctx: Record<string, unknown>) => {
+const incrementRateLimitMiddleware = async (ctx: RateLimitContext): Promise<RateLimitContext> => {
   if (!ctx.rateLimitAllowed) {
     return ctx;
   }
@@ -71,7 +92,7 @@ const incrementRateLimitMiddleware = async (ctx: Record<string, unknown>) => {
   
   console.log('Increment rate limit middleware: Incrementing counters');
   
-  const supabaseClient = createClient(
+  const supabaseClient: SupabaseClient<Database> = createClient<Database>(
     Deno.env.get('SUPABASE_URL') ?? '',
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
   );
@@ -83,13 +104,14 @@ const incrementRateLimitMiddleware = async (ctx: Record<string, unknown>) => {
       .from('rate_limit_buckets')
       .select('*')
       .eq('api_key_id', apiKeyId);
-    
-    if (rateLimits && rateLimits.length > 0) {
-      for (const bucket of rateLimits) {
+
+    const buckets: RateLimitBucket[] = rateLimits ?? [];
+    if (buckets.length > 0) {
+      for (const bucket of buckets) {
         if (new Date(bucket.reset_time) > now) {
           await supabaseClient
             .from('rate_limit_buckets')
-            .update({ 
+            .update({
               current_count: bucket.current_count + 1,
               updated_at: now.toISOString()
             })
@@ -107,14 +129,14 @@ const incrementRateLimitMiddleware = async (ctx: Record<string, unknown>) => {
   return ctx;
 };
 
-const rateLimitResponseMiddleware = async (ctx: Record<string, unknown>) => {
+const rateLimitResponseMiddleware = async (ctx: RateLimitContext): Promise<RateLimitContext> => {
   if (ctx.response) {
     return ctx;
   }
   
   const processingTime = Date.now() - ctx.startTime;
   
-  const responseData = {
+  const responseData: Record<string, unknown> = {
     success: true,
     rate_limit_allowed: ctx.rateLimitAllowed,
     processing_time_ms: processingTime,
@@ -140,7 +162,7 @@ const rateLimitResponseMiddleware = async (ctx: Record<string, unknown>) => {
   return ctx;
 };
 
-async function resetBucket(supabaseClient: ReturnType<typeof createClient>, bucket: Record<string, unknown>): Promise<void> {
+async function resetBucket(supabaseClient: SupabaseClient<Database>, bucket: RateLimitBucket): Promise<void> {
   const now = new Date();
   const resetTime = bucket.bucket_type === 'hourly' 
     ? new Date(now.getTime() + 60 * 60 * 1000).toISOString()
@@ -170,7 +192,7 @@ serve(async (req) => {
     errorHandlingMiddleware
   );
   
-  const response = await processRequest({ request: req });
+  const response = await processRequest({ request: req, startTime: Date.now() });
   
   console.log('=== Rate Limit Checker Function End ===');
   return response;

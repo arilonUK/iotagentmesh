@@ -1,8 +1,9 @@
 import { corsHeaders } from '../../_shared/cors.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import type { Database } from '../../_shared/database.types.ts';
 
 export async function handleData(req: Request, path: string): Promise<Response> {
-  const supabaseClient = createClient(
+  const supabaseClient: SupabaseClient<Database> = createClient<Database>(
     Deno.env.get('SUPABASE_URL') ?? '',
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
   );
@@ -46,7 +47,7 @@ export async function handleData(req: Request, path: string): Promise<Response> 
     const organizationId = orgMember.organization_id;
     void organizationId; // currently unused but retained for parity
 
-    const body = req.method === 'GET' ? undefined : await req.json();
+    const body: Record<string, unknown> | undefined = req.method === 'GET' ? undefined : await req.json();
 
     const { data, error: invokeError, status } = await supabaseClient.functions.invoke('api-data', {
       body,
