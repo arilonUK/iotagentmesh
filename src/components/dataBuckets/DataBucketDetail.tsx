@@ -10,10 +10,17 @@ import { useDataRetention } from '@/hooks/useDataRetention';
 import { DataExportMenu } from '../exports/DataExportMenu';
 import { ReportScheduler } from './ReportScheduler';
 
+interface SampleDataItem {
+  id: string;
+  timestamp: string;
+  value: number | string;
+  metadata?: Record<string, unknown>;
+}
+
 interface DataBucketDetailProps {
   bucket: DataBucketConfig;
   onBack: () => void;
-  sampleData?: any[];
+  sampleData?: SampleDataItem[];
 }
 
 export function DataBucketDetail({ bucket, onBack, sampleData = [] }: DataBucketDetailProps) {

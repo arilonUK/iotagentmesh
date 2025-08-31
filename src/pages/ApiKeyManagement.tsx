@@ -105,7 +105,7 @@ export default function ApiKeyManagement() {
       toast.error('Failed to delete API key');
     }
   };
-  
+
   // Show loading state while organization is being loaded
   if (loading && !organizationId) {
     return (

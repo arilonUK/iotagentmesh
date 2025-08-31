@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/contexts/auth';
+import { UserMetadata } from '@/contexts/auth/types';
 
 export const useAuthFormLogic = () => {
   const { signIn, signUp } = useAuth();
@@ -30,14 +31,14 @@ export const useAuthFormLogic = () => {
       
       console.log("AuthFormLogic: Login successful, auth context will handle redirect");
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("AuthFormLogic: Login exception:", error);
       setIsLoading(false);
-      return { error: error.message || 'An unexpected error occurred during sign in' };
+      return { error: (error as Error).message || 'An unexpected error occurred during sign in' };
     }
   };
 
-  const handleSignup = async (email: string, password: string, confirmPassword: string, metadata?: any) => {
+  const handleSignup = async (email: string, password: string, confirmPassword: string, metadata?: UserMetadata) => {
     if (isLoading) return;
     
     if (password !== confirmPassword) {
@@ -65,9 +66,9 @@ export const useAuthFormLogic = () => {
       }
       
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       setIsLoading(false);
-      return { error: error.message || 'Failed to sign up' };
+      return { error: (error as Error).message || 'Failed to sign up' };
     }
   };
 

@@ -19,4 +19,24 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  define: {
+    // Prevent vitest from being included in browser builds
+    'import.meta.vitest': 'undefined',
+  },
+  optimizeDeps: {
+    exclude: ['vitest']
+  },
+  build: {
+    rollupOptions: {
+      external: (id) => {
+        // Exclude test-related files and vitest from build
+        return id.includes('/test/') || 
+               id.includes('/__tests__/') || 
+               id.includes('.test.') ||
+               id.includes('.spec.') ||
+               id === 'vitest' ||
+               id.startsWith('vitest/');
+      }
+    }
+  }
 }));

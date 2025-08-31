@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { PolicyTestResult } from './policyTestUtils';
+import { type PolicyTestResult, runAllPolicyTests } from '@/utils/policyTesting';
 
 describe('Organization Member Policies', () => {
   it('should validate member permissions', () => {
@@ -17,40 +17,11 @@ describe('Organization Member Policies', () => {
   it('should handle policy inheritance', () => {
     expect(true).toBe(true);
   });
-});
 
-export const runAllPolicyTests = async (): Promise<PolicyTestResult[]> => {
-  // Placeholder implementation for policy tests
-  return [
-    {
-      policyName: 'Organization Member SELECT',
-      operation: 'SELECT',
-      success: true,
-      expectedResult: true
-    },
-    {
-      policyName: 'Organization Member INSERT',
-      operation: 'INSERT',
-      success: true,
-      expectedResult: true
-    },
-    {
-      policyName: 'Organization Member UPDATE',
-      operation: 'UPDATE',
-      success: true,
-      expectedResult: true
-    },
-    {
-      policyName: 'Organization Member DELETE',  
-      operation: 'DELETE',
-      success: true,
-      expectedResult: true
-    },
-    {
-      policyName: 'Cross-Organization Access Block',
-      operation: 'SELECT',
-      success: true,
-      expectedResult: false
-    }
-  ];
-};
+  // Test that the policy testing utility works
+  it('should run all policy tests', async () => {
+    const results = await runAllPolicyTests();
+    expect(Array.isArray(results)).toBe(true);
+    expect(results.length).toBeGreaterThan(0);
+  });
+});

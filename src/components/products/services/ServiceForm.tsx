@@ -23,9 +23,17 @@ export const serviceFormSchema = z.object({
 
 export type ServiceFormValues = z.infer<typeof serviceFormSchema>;
 
+interface ServiceDefaultValues {
+  name?: string;
+  description?: string;
+  service_type?: string;
+  enabled?: boolean;
+  config?: Record<string, unknown>;
+}
+
 interface ServiceFormProps {
   onSubmit: (data: ServiceFormValues) => Promise<void>;
-  defaultValues?: any;
+  defaultValues?: ServiceDefaultValues;
   isLoading?: boolean;
   isEditing?: boolean;
 }

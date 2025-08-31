@@ -19,7 +19,7 @@ const StorageProfileCard: React.FC<StorageProfileCardProps> = ({ profile }) => {
   const { updateProfile, deleteProfile } = useStorageProfiles();
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
   
-  const handleSubmit = (data: any) => {
+  const handleSubmit = (data: Partial<FileStorageProfile>) => {
     updateProfile.mutate({ 
       id: profile.id, 
       updates: data 

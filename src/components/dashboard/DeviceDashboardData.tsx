@@ -2,15 +2,23 @@
 import React, { useState, useMemo } from 'react';
 import { Device } from '@/types/device';
 
+import { ChartDataPoint } from '@/components/ui/charts/chart-utils';
+
+export interface MultiDataPoint {
+  name: string;
+  temperature: number;
+  humidity: number;
+}
+
 export interface DeviceDashboardDataProps {
   device: Device | null;
   isLoading: boolean;
   error: string | null;
   children: (data: {
-    temperatureData: any[];
-    humidityData: any[];
-    energyData: any[];
-    multiData: any[];
+    temperatureData: ChartDataPoint[];
+    humidityData: ChartDataPoint[];
+    energyData: ChartDataPoint[];
+    multiData: MultiDataPoint[];
   }) => React.ReactNode;
 }
 

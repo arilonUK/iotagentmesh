@@ -5,11 +5,13 @@ import { DeviceStatsCard } from '../DeviceStatsCard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Device } from '@/types/device';
 
+import { ChartDataPoint } from '@/components/ui/charts/chart-utils';
+
 interface DashboardAnalyticsTabProps {
   device: Device | null;
   isLoading: boolean;
   error: string | null;
-  energyData: any[];
+  energyData: ChartDataPoint[];
 }
 
 export const DashboardAnalyticsTab = ({

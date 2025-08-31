@@ -4,11 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 export interface ApiGatewayRequest {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   endpoint: string;
-  data?: any;
+  data?: Record<string, unknown> | Array<unknown> | string | number | boolean | null;
   headers?: Record<string, string>;
 }
 
-export interface ApiGatewayResponse<T = any> {
+export interface ApiGatewayResponse<T = unknown> {
   data?: T;
   error?: string;
   status: number;
@@ -21,7 +21,7 @@ export class ApiGatewayClient {
   /**
    * Make an API request through the gateway
    */
-  async request<T = any>(request: ApiGatewayRequest): Promise<ApiGatewayResponse<T>> {
+  async request<T = unknown>(request: ApiGatewayRequest): Promise<ApiGatewayResponse<T>> {
     try {
       console.log('API Gateway request:', request);
       

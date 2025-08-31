@@ -6,13 +6,16 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { MultiSeriesChart } from '@/components/ui/charts';
 import { Device } from '@/types/device';
 
+import { ChartDataPoint } from '@/components/ui/charts/chart-utils';
+import { MultiDataPoint } from '../DeviceDashboardData';
+
 interface DashboardChartsTabProps {
   device: Device | null;
   isLoading: boolean;
   error: string | null;
-  temperatureData: any[];
-  humidityData: any[];
-  multiData: any[];
+  temperatureData: ChartDataPoint[];
+  humidityData: ChartDataPoint[];
+  multiData: MultiDataPoint[];
 }
 
 export const DashboardChartsTab = ({

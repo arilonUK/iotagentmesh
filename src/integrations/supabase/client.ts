@@ -21,8 +21,8 @@ type CustomSupabaseClient = ReturnType<typeof createClient<Database>> & {
           'can_access_device' | 'create_audit_log_entry' | 'get_audit_logs' |
           'get_device_alarm_events_bypass_rls' | 'get_organization_alarms_bypass_rls' |
           'acknowledge_alarm_event_bypass_rls' | 'resolve_alarm_event_bypass_rls',
-      params: Record<string, any>
-    ): any;
+      params: Record<string, unknown>
+    ): Promise<{ data: unknown; error: null } | { data: null; error: unknown }>;
   }
 };
 

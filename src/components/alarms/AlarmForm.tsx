@@ -232,6 +232,7 @@ export default function AlarmForm({ organizationId, initialData, onSubmit, isSub
                             <Input 
                               type="number" 
                               {...field}
+                              value={field.value ? String(field.value) : ''}
                               onChange={(e) => field.onChange(parseFloat(e.target.value))} 
                             />
                           </FormControl>
@@ -249,6 +250,7 @@ export default function AlarmForm({ organizationId, initialData, onSubmit, isSub
                             <Input 
                               type="number" 
                               {...field}
+                              value={field.value ? String(field.value) : ''}
                               onChange={(e) => field.onChange(parseFloat(e.target.value))} 
                             />
                           </FormControl>
@@ -268,6 +270,7 @@ export default function AlarmForm({ organizationId, initialData, onSubmit, isSub
                           <Input 
                             type="number" 
                             {...field}
+                            value={field.value ? String(field.value) : ''}
                             onChange={(e) => field.onChange(parseFloat(e.target.value))} 
                           />
                         </FormControl>

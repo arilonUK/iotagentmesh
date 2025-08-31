@@ -16,17 +16,17 @@ export interface ApiDocumentation {
     url: string;
     description: string;
   }>;
-  paths: Record<string, any>;
+  paths: Record<string, Record<string, unknown>>;
   components: {
-    schemas?: Record<string, any>;
-    securitySchemes?: Record<string, any>;
-    responses?: Record<string, any>;
+    schemas?: Record<string, unknown>;
+    securitySchemes?: Record<string, unknown>;
+    responses?: Record<string, unknown>;
   };
   tags?: Array<{
     name: string;
     description: string;
   }>;
-  security?: Array<Record<string, any>>;
+  security?: Array<Record<string, unknown>>;
 }
 
 export class OpenApiDocumentationService {
@@ -47,7 +47,7 @@ export class OpenApiDocumentationService {
         return null;
       }
 
-      return response.data || null;
+      return (response.data as ApiDocumentation) || null;
     } catch (error) {
       console.error('Error fetching API documentation:', error);
       return null;

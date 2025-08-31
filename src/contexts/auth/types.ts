@@ -1,22 +1,11 @@
 
 import { User, Session } from '@supabase/supabase-js';
 
-export interface UserOrganization {
-  id: string;
-  name: string;
-  slug: string;
-  role: string;
-  is_default: boolean;
-}
+import { OrganizationData, OrganizationMember, OrganizationEntity } from '@/types/organization';
 
-export interface Organization {
-  id: string;
-  name: string;
-  slug?: string;
-  logo?: string;
-  created_at?: string;
-  updated_at?: string;
-}
+export interface UserOrganization extends OrganizationData {}
+
+export interface Organization extends OrganizationEntity {}
 
 export interface Profile {
   id: string;
@@ -36,6 +25,27 @@ export interface UserData {
 
 export type RoleType = 'owner' | 'admin' | 'member' | 'viewer';
 
+export interface AuthResponse {
+  error?: Error | null;
+  data?: {
+    user: User | null;
+    session: Session | null;
+  } | null;
+}
+
+export interface AuthErrorResponse {
+  error: Error;
+  data?: undefined;
+}
+
+export interface UserMetadata {
+  username?: string;
+  full_name?: string;
+  organization_name?: string;
+  avatar_url?: string;
+  [key: string]: unknown;
+}
+
 export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -44,8 +54,8 @@ export interface AuthContextType {
   userRole: string | null;
   organizations: UserOrganization[];
   currentOrganization: UserOrganization | null;
-  login: (email: string, password: string) => Promise<{ error?: any; data?: any } | undefined>;
-  signup: (email: string, password: string, metadata?: any) => Promise<{ error?: any; data?: any } | undefined>;
+  login: (email: string, password: string) => Promise<AuthResponse | AuthErrorResponse | undefined>;
+  signup: (email: string, password: string, metadata?: UserMetadata) => Promise<AuthResponse | AuthErrorResponse | undefined>;
   logout: () => Promise<void>;
   switchOrganization: (organizationId: string) => Promise<boolean>;
   
@@ -56,8 +66,8 @@ export interface AuthContextType {
   organization: Organization | null;
   userOrganizations: UserOrganization[];
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error?: any; data?: any } | undefined>;
-  signUp: (email: string, password: string, metadata?: any) => Promise<{ error?: any; data?: any } | undefined>;
+  signIn: (email: string, password: string) => Promise<AuthResponse | AuthErrorResponse | undefined>;
+  signUp: (email: string, password: string, metadata?: UserMetadata) => Promise<AuthResponse | AuthErrorResponse | undefined>;
   signOut: () => Promise<void>;
   updateProfile: (profileData: Partial<Profile>) => Promise<Profile | null>;
 }

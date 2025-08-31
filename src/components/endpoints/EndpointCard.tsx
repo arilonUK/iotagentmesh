@@ -8,28 +8,28 @@ import { Edit, MoreHorizontal, Play, Trash2 } from 'lucide-react';
 import { EndpointConfig, EmailEndpointConfig, TelegramEndpointConfig, WebhookEndpointConfig, DeviceActionEndpointConfig, IftttEndpointConfig, WhatsappEndpointConfig } from '@/types/endpoint';
 
 // Type guards for endpoint configurations
-const isEmailConfig = (config: any): config is EmailEndpointConfig => {
-  return config && 'to' in config && 'subject' in config && 'body_template' in config;
+const isEmailConfig = (config: unknown): config is EmailEndpointConfig => {
+  return typeof config === 'object' && config !== null && 'to' in config && 'subject' in config && 'body_template' in config;
 };
 
-const isTelegramConfig = (config: any): config is TelegramEndpointConfig => {
-  return config && 'bot_token' in config && 'chat_id' in config && 'message_template' in config;
+const isTelegramConfig = (config: unknown): config is TelegramEndpointConfig => {
+  return typeof config === 'object' && config !== null && 'bot_token' in config && 'chat_id' in config && 'message_template' in config;
 };
 
-const isWebhookConfig = (config: any): config is WebhookEndpointConfig => {
-  return config && 'url' in config && 'method' in config;
+const isWebhookConfig = (config: unknown): config is WebhookEndpointConfig => {
+  return typeof config === 'object' && config !== null && 'url' in config && 'method' in config;
 };
 
-const isDeviceActionConfig = (config: any): config is DeviceActionEndpointConfig => {
-  return config && 'target_device_id' in config && 'action' in config;
+const isDeviceActionConfig = (config: unknown): config is DeviceActionEndpointConfig => {
+  return typeof config === 'object' && config !== null && 'target_device_id' in config && 'action' in config;
 };
 
-const isIftttConfig = (config: any): config is IftttEndpointConfig => {
-  return config && 'webhook_key' in config && 'event_name' in config;
+const isIftttConfig = (config: unknown): config is IftttEndpointConfig => {
+  return typeof config === 'object' && config !== null && 'webhook_key' in config && 'event_name' in config;
 };
 
-const isWhatsappConfig = (config: any): config is WhatsappEndpointConfig => {
-  return config && 'phone_number_id' in config && 'access_token' in config && 'to_phone_number' in config;
+const isWhatsappConfig = (config: unknown): config is WhatsappEndpointConfig => {
+  return typeof config === 'object' && config !== null && 'phone_number_id' in config && 'access_token' in config && 'to_phone_number' in config;
 };
 
 interface EndpointCardProps {

@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PropertyFormProps } from './types';
+import { PropertyFormProps, PropertyFormValues } from './types';
 import { propertyFormSchema } from './schema';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Save } from 'lucide-react';
@@ -20,13 +20,13 @@ import {
 import { ValidationRuleBuilder } from './ValidationRuleBuilder';
 import { PropertyDataType } from '@/types/product';
 
-export function PropertyForm({
+export const PropertyForm: React.FC<PropertyFormProps> = ({
   onSubmit,
   initialValues,
   isEditing = false,
   defaultValues,
   isLoading = false
-}: PropertyFormProps) {
+}: PropertyFormProps) => {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -60,15 +60,15 @@ export function PropertyForm({
 
   const dataType = form.watch('data_type') as PropertyDataType;
 
-  const handleFormSubmit = async (values: any) => {
+  const handleFormSubmit = async (values: PropertyFormValues) => {
     setIsSubmitting(true);
     setError(null);
     
     try {
       console.log("Submitting form with values:", values);
       await onSubmit(values);
-    } catch (err: any) {
-      setError(err.message || 'An error occurred while saving the property');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred while saving the property');
     } finally {
       setIsSubmitting(false);
     }
@@ -126,4 +126,4 @@ export function PropertyForm({
       </Form>
     </div>
   );
-}
+};

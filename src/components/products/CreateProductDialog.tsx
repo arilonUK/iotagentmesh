@@ -15,12 +15,14 @@ import { useProducts } from '@/hooks/useProducts';
 import { useOrganization } from '@/contexts/organization';
 import { toast } from 'sonner';
 
+import { ProductFormValues } from '@/components/products/form/types';
+
 export function CreateProductDialog() {
   const [open, setOpen] = React.useState(false);
   const { createProduct, isCreating } = useProducts();
   const { organization } = useOrganization();
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: ProductFormValues) => {
     try {
       if (!organization) {
         console.error('No organization selected');
@@ -28,9 +30,14 @@ export function CreateProductDialog() {
         return;
       }
       
-      // Explicitly add organization_id to the product data
+      // Ensure all required fields are present
       const productData = {
-        ...data,
+        name: data.name || '',
+        description: data.description,
+        version: data.version || '1.0',
+        category: data.category,
+        tags: data.tags,
+        status: data.status || 'draft',
         organization_id: organization.id,
       };
       

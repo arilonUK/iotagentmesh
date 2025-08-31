@@ -2,17 +2,21 @@
 import { ApiService } from '../base/ApiService';
 import { AlarmConfig, AlarmFormData } from '@/types/alarm';
 
+interface AlarmTestEvent {
+  [key: string]: unknown;
+}
+
 export class AlarmsApiService extends ApiService<AlarmConfig, AlarmFormData, Partial<AlarmFormData>> {
   protected readonly endpoint = 'api-alarms';
   protected readonly entityName = 'Alarm';
   protected readonly dataKey = 'alarms';
   protected readonly singleDataKey = 'alarm';
 
-  async testAlarm(id: string): Promise<{ success: boolean; message: string; event?: any }> {
+  async testAlarm(id: string): Promise<{ success: boolean; message: string; event?: AlarmTestEvent }> {
     try {
       console.log(`Testing alarm ${id}`);
       
-      const response = await this.makeRequest<{ success: boolean; message: string; event?: any }>({
+      const response = await this.makeRequest<{ success: boolean; message: string; event?: AlarmTestEvent }>({
         method: 'POST',
         endpoint: `${this.endpoint}/${id}/test`
       });

@@ -2,6 +2,10 @@
 import { ApiService } from '../base/ApiService';
 import { EndpointConfig, EndpointFormData } from '@/types/endpoint';
 
+interface TriggerPayload {
+  [key: string]: unknown;
+}
+
 export class EndpointsApiService extends ApiService<EndpointConfig, EndpointFormData, Partial<EndpointFormData>> {
   protected readonly endpoint = 'api-endpoints';
   protected readonly entityName = 'Endpoint';
@@ -25,7 +29,7 @@ export class EndpointsApiService extends ApiService<EndpointConfig, EndpointForm
     return this.delete(id);
   }
 
-  async triggerEndpoint(id: string, payload: any = {}): Promise<boolean> {
+  async triggerEndpoint(id: string, payload: TriggerPayload = {}): Promise<boolean> {
     try {
       console.log(`Triggering endpoint ${id} with payload:`, payload);
       

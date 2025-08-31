@@ -1,12 +1,22 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+interface FilterValue {
+  [key: string]: unknown;
+}
+
 export interface QueryParams {
   limit?: number;
   offset?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
-  filters?: Record<string, any>;
+  filters?: Record<string, FilterValue>;
+}
+
+interface RequestBody {
+  method?: string;
+  path?: string;
+  data?: unknown;
 }
 
 export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<T>> {
@@ -15,10 +25,10 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
   protected abstract readonly dataKey: string;
   protected abstract readonly singleDataKey: string;
 
-  protected async makeRequest<R = any>(options: {
+  protected async makeRequest<R = unknown>(options: {
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
     endpoint: string;
-    data?: any;
+    data?: unknown;
     headers?: Record<string, string>;
     pathSuffix?: string;
   }): Promise<R> {
@@ -33,7 +43,7 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       console.log(`Function name: ${functionName}`);
       
       // For Supabase functions.invoke, we need to send the data directly in the body
-      let requestBody: any = null;
+      let requestBody: RequestBody | null = null;
       
       if (options.method === 'GET' && !options.pathSuffix) {
         // For simple GET requests (like fetching all devices), don't send any body
@@ -102,7 +112,7 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
     }
   }
 
-  protected handleError(error: any, operation: string): never {
+  protected handleError(error: unknown, operation: string): never {
     const message = error instanceof Error ? error.message : `Failed to ${operation}`;
     console.error(`${this.entityName} service error in ${operation}:`, error);
     toast.error(message);
@@ -114,7 +124,7 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       console.log(`=== FETCHALL START - ${this.entityName} ===`);
       console.log(`Fetching all ${this.entityName} items`);
       
-      const response = await this.makeRequest<any>({
+      const response = await this.makeRequest<unknown>({
         method: 'GET',
         endpoint: this.endpoint
       });
@@ -127,12 +137,12 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       let items: T[];
       if (Array.isArray(response)) {
         console.log(`Response is direct array with ${response.length} items`);
-        items = response;
-      } else if (response && typeof response === 'object' && response[this.dataKey]) {
+        items = response as T[];
+      } else if (response && typeof response === 'object' && (response as any)[this.dataKey]) {
         console.log(`Response is wrapped object, extracting ${this.dataKey}`);
-        console.log(`${this.dataKey} value:`, response[this.dataKey]);
-        console.log(`${this.dataKey} is array:`, Array.isArray(response[this.dataKey]));
-        items = response[this.dataKey];
+        console.log(`${this.dataKey} value:`, (response as any)[this.dataKey]);
+        console.log(`${this.dataKey} is array:`, Array.isArray((response as any)[this.dataKey]));
+        items = (response as any)[this.dataKey] as T[];
       } else {
         console.log(`Response format not recognized, defaulting to empty array`);
         console.log(`Looking for dataKey: ${this.dataKey}`);
@@ -160,7 +170,7 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
     try {
       console.log(`Fetching ${this.entityName} with ID: ${id}`);
       
-      const response = await this.makeRequest<any>({
+      const response = await this.makeRequest<unknown>({
         method: 'GET',
         endpoint: this.endpoint,
         pathSuffix: `/${id}`
@@ -169,11 +179,11 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       // Handle both wrapped and direct object responses
       let item: T | null;
       if (response && typeof response === 'object') {
-        if (response[this.singleDataKey]) {
-          item = response[this.singleDataKey];
+        if ((response as any)[this.singleDataKey]) {
+          item = (response as any)[this.singleDataKey] as T;
         } else {
           // Assume the response is the item itself
-          item = response;
+          item = response as T;
         }
       } else {
         item = null;
@@ -195,7 +205,7 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
     try {
       console.log(`Creating ${this.entityName}:`, data);
       
-      const response = await this.makeRequest<any>({
+      const response = await this.makeRequest<unknown>({
         method: 'POST',
         endpoint: this.endpoint,
         data
@@ -204,11 +214,11 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       // Handle both wrapped and direct object responses
       let created: T;
       if (response && typeof response === 'object') {
-        if (response[this.singleDataKey]) {
-          created = response[this.singleDataKey];
+        if ((response as any)[this.singleDataKey]) {
+          created = (response as any)[this.singleDataKey] as T;
         } else {
           // Assume the response is the created item itself
-          created = response;
+          created = response as T;
         }
       } else {
         throw new Error('No data returned from creation');
@@ -227,7 +237,7 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
     try {
       console.log(`Updating ${this.entityName} ${id}:`, data);
       
-      const response = await this.makeRequest<any>({
+      const response = await this.makeRequest<unknown>({
         method: 'PUT',
         endpoint: this.endpoint,
         pathSuffix: `/${id}`,
@@ -237,11 +247,11 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       // Handle both wrapped and direct object responses
       let updated: T;
       if (response && typeof response === 'object') {
-        if (response[this.singleDataKey]) {
-          updated = response[this.singleDataKey];
+        if ((response as any)[this.singleDataKey]) {
+          updated = (response as any)[this.singleDataKey] as T;
         } else {
           // Assume the response is the updated item itself
-          updated = response;
+          updated = response as T;
         }
       } else {
         throw new Error('No data returned from update');

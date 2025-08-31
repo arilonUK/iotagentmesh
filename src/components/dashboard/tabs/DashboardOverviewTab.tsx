@@ -7,11 +7,13 @@ import { DeviceStatsCard } from '../DeviceStatsCard';
 import { useToast } from '@/hooks/use-toast';
 import { Device } from '@/types/device';
 
+import { ChartDataPoint } from '@/components/ui/charts/chart-utils';
+
 interface DashboardOverviewTabProps {
   device: Device | null;
   isLoading: boolean;
   error: string | null;
-  temperatureData: any[];
+  temperatureData: ChartDataPoint[];
 }
 
 export const DashboardOverviewTab = ({

@@ -1,4 +1,6 @@
 
+import { AlarmFormData } from '@/types/alarm';
+
 // Re-export simplified alarm service functions
 export { alarmsApiService } from '../api/alarmsApiService';
 
@@ -8,12 +10,12 @@ export const fetchAlarms = async () => {
   return alarmsApiService.fetchAll();
 };
 
-export const createAlarm = async (data: any) => {
+export const createAlarm = async (data: AlarmFormData) => {
   const { alarmsApiService } = await import('../api/alarmsApiService');
   return alarmsApiService.create(data);
 };
 
-export const updateAlarm = async (id: string, data: any) => {
+export const updateAlarm = async (id: string, data: Partial<AlarmFormData>) => {
   const { alarmsApiService } = await import('../api/alarmsApiService');
   return alarmsApiService.update(id, data);
 };

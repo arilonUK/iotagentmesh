@@ -6,7 +6,7 @@ import { screen, waitFor } from '@testing-library/dom';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { ToastProvider } from '@/contexts/toast';
-import { AuthProvider } from '@/contexts/auth/AuthProvider';
+import { MockAuthProvider } from './mocks/AuthProvider';
 
 // A custom render function that includes providers our components need
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
@@ -14,9 +14,9 @@ const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
     <BrowserRouter>
       <ThemeProvider>
         <ToastProvider>
-          <AuthProvider>
+          <MockAuthProvider>
             {children}
-          </AuthProvider>
+          </MockAuthProvider>
         </ToastProvider>
       </ThemeProvider>
     </BrowserRouter>

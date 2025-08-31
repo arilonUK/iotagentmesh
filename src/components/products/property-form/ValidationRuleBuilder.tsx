@@ -30,7 +30,7 @@ export function ValidationRuleBuilder({ form, dataType }: ValidationRuleBuilderP
     const currentOptions = validationRules.options || [];
     form.setValue(
       'validation_rules.options',
-      currentOptions.filter((_: any, i: number) => i !== index)
+      currentOptions.filter((_: string, i: number) => i !== index)
     );
   };
   
