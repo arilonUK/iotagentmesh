@@ -24,7 +24,7 @@ export const useContextFactory = () => {
 
 export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<ContextFactoryState>({
-    contexts: new Map(),
+    contexts: new Map(), // Ensure contexts is always initialized as Map
     initializationOrder: [
       ContextType.QUERY_CLIENT,
       ContextType.TOAST,
@@ -83,14 +83,16 @@ export const ContextFactoryProvider: React.FC<{ children: React.ReactNode }> = (
     if (type) {
       await initializeContext(type, state.contexts);
     } else {
-      // Use optimized parallel retry
-      await optimizedInitializer.retryFailedContexts();
+      // Use optimized parallel retry only if optimizedInitializer exists
+      if (optimizedInitializer && state.contexts && state.contexts.size > 0) {
+        await optimizedInitializer.retryFailedContexts();
+      }
     }
   }, [initializeContext, optimizedInitializer, state.contexts]);
 
   // Optimized parallel initialization
   useEffect(() => {
-    if (state.contexts.size === 0 || initializationRef.current.inProgress) {
+    if (!state.contexts || state.contexts.size === 0 || initializationRef.current.inProgress) {
       return;
     }
 

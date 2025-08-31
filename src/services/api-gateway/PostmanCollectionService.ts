@@ -162,7 +162,8 @@ export class PostmanCollectionService {
 
     // Add auth if required
     if (operation.security) {
-      request.request.auth = {
+      const requestObj = request.request as Record<string, unknown>;
+      requestObj.auth = {
         type: "bearer",
         bearer: {
           token: "{{api_key}}"
@@ -171,12 +172,16 @@ export class PostmanCollectionService {
     }
 
     // Add request body for POST/PUT requests
-    if (operation.requestBody && ['post', 'put'].includes(method)) {
-      const schema = operation.requestBody.content?.['application/json']?.schema;
+    const requestBody = operation.requestBody as Record<string, unknown>;
+    if (requestBody && ['post', 'put'].includes(method)) {
+      const content = requestBody.content as Record<string, unknown>;
+      const jsonContent = content?.['application/json'] as Record<string, unknown>;
+      const schema = jsonContent?.schema;
       if (schema) {
-        request.request.body = {
+        const requestObj = request.request as Record<string, unknown>;
+        requestObj.body = {
           mode: "raw",
-          raw: JSON.stringify(this.generateExampleFromSchema(schema), null, 2),
+          raw: JSON.stringify(this.generateExampleFromSchema(schema as Record<string, unknown>), null, 2),
           options: {
             raw: {
               language: "json"
@@ -187,18 +192,24 @@ export class PostmanCollectionService {
     }
 
     // Add query parameters
-    if (operation.parameters) {
-      const queryParams = operation.parameters
-        .filter((param: any) => param.in === 'query')
-        .map((param: any) => ({
-          key: param.name,
-          value: this.getExampleValue(param.schema),
-          description: param.description || '',
-          disabled: !param.required
-        }));
+    const parameters = operation.parameters as unknown[];
+    if (Array.isArray(parameters)) {
+      const queryParams = parameters
+        .filter((param: unknown) => (param as Record<string, unknown>).in === 'query')
+        .map((param: unknown) => {
+          const p = param as Record<string, unknown>;
+          return {
+            key: p.name as string,
+            value: this.getExampleValue((p.schema as Record<string, unknown>) || {}),
+            description: (p.description as string) || '',
+            disabled: !(p.required as boolean)
+          };
+        });
       
       if (queryParams.length > 0) {
-        request.request.url.query = queryParams;
+        const requestObj = request.request as Record<string, unknown>;
+        const urlObj = requestObj.url as Record<string, unknown>;
+        urlObj.query = queryParams;
       }
     }
 
@@ -216,7 +227,11 @@ export class PostmanCollectionService {
       return example;
     }
     
-    return this.getExampleValue(schema);
+    // For non-object types, return a simple wrapper object
+    const exampleValue = this.getExampleValue(schema);
+    return typeof exampleValue === 'object' && exampleValue !== null 
+      ? exampleValue as Record<string, unknown>
+      : { value: exampleValue };
   }
 
   private getExampleValue(schema: Record<string, unknown>): unknown {
@@ -237,7 +252,8 @@ export class PostmanCollectionService {
       case 'boolean':
         return true;
       case 'array':
-        return [this.getExampleValue(schema.items)];
+        const items = (schema.items as Record<string, unknown>) || { type: 'string' };
+        return [this.getExampleValue(items)];
       case 'object':
         return {};
       default:
