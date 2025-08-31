@@ -10,7 +10,7 @@ export interface IoTAgent {
   capabilities: string[];
   endpoint: string;
   last_seen: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface IoTDevice {
@@ -19,7 +19,7 @@ export interface IoTDevice {
   name: string;
   type: string;
   status: 'active' | 'inactive' | 'error';
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   telemetry_config: {
     interval: number;
     metrics: string[];
@@ -38,17 +38,17 @@ export interface TelemetryData {
       quality?: 'good' | 'bad' | 'uncertain';
     };
   };
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface AgentCommand {
   id: string;
   agent_id: string;
   command: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   timeout: number;
   status: 'pending' | 'executing' | 'completed' | 'failed' | 'timeout';
-  result?: any;
+  result?: unknown;
   error?: string;
   created_at: string;
   updated_at: string;
@@ -69,7 +69,7 @@ export interface CreateAgentRequest {
   type: 'device' | 'gateway' | 'edge';
   endpoint: string;
   capabilities?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface UpdateAgentRequest {
@@ -77,14 +77,14 @@ export interface UpdateAgentRequest {
   status?: 'online' | 'offline' | 'error' | 'maintenance';
   capabilities?: string[];
   endpoint?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface CreateDeviceRequest {
   agent_id: string;
   name: string;
   type: string;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
   telemetry_config?: {
     interval: number;
     metrics: string[];
@@ -94,7 +94,7 @@ export interface CreateDeviceRequest {
 export interface UpdateDeviceRequest {
   name?: string;
   status?: 'active' | 'inactive' | 'error';
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
   telemetry_config?: {
     interval: number;
     metrics: string[];
@@ -103,7 +103,7 @@ export interface UpdateDeviceRequest {
 
 export interface SendCommandRequest {
   command: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   timeout?: number;
 }
 
@@ -117,14 +117,14 @@ export interface TelemetryUploadRequest {
     };
   };
   timestamp?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface MCPEventRequest {
   event_type: string;
   source_agent_id: string;
   target_agent_ids?: string[];
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
   priority?: 'low' | 'normal' | 'high' | 'critical';
 }
 
@@ -241,12 +241,12 @@ export class IoTAgentMeshApiService extends ExternalApiService<IoTAgent, CreateA
   }
 
   // Agent Status
-  async getAgentStatus(agentId: string): Promise<{ status: string; last_seen: string; metadata: Record<string, any> } | null> {
+  async getAgentStatus(agentId: string): Promise<{ status: string; last_seen: string; metadata: Record<string, unknown> } | null> {
     try {
       console.log(`Getting agent status: ${agentId}`);
       
       const response = await this.retryRequest(() =>
-        this.makeExternalRequest<{ status: string; last_seen: string; metadata: Record<string, any> }>({
+        this.makeExternalRequest<{ status: string; last_seen: string; metadata: Record<string, unknown> }>({
           method: 'GET',
           endpoint: `/agents/${agentId}/status`
         })
@@ -435,7 +435,7 @@ export class IoTAgentMeshApiService extends ExternalApiService<IoTAgent, CreateA
     }
   }
 
-  async coordinateAgents(agentIds: string[], coordination: Record<string, any>): Promise<boolean> {
+  async coordinateAgents(agentIds: string[], coordination: Record<string, unknown>): Promise<boolean> {
     try {
       console.log('Coordinating agents:', { agentIds, coordination });
       

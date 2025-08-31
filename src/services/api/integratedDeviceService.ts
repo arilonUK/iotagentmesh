@@ -54,7 +54,7 @@ export class IntegratedDeviceService {
       meshDevices.forEach(meshDevice => {
         // Assuming mesh devices have a property linking back to local device ID
         if (meshDevice.properties?.local_device_id) {
-          meshDeviceMap.set(meshDevice.properties.local_device_id, meshDevice);
+          meshDeviceMap.set(meshDevice.properties.local_device_id as string, meshDevice);
         }
       });
 
@@ -95,7 +95,7 @@ export class IntegratedDeviceService {
       let meshDevice: IoTDevice | null = null;
       try {
         const meshDevices = await this.meshService.getDevices();
-        meshDevice = meshDevices.find(d => d.properties?.local_device_id === id) || null;
+        meshDevice = meshDevices.find(d => d.properties?.local_device_id as string === id) || null;
       } catch (error) {
         console.warn('Mesh service not available for device fetch:', error);
       }
