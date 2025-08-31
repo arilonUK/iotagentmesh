@@ -1553,6 +1553,97 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      },
+      payments: {
+        Row: {
+          id: string
+          organization_id: string
+          stripe_payment_intent_id: string
+          amount: number
+          currency: string
+          status: 'pending' | 'succeeded' | 'failed' | 'canceled'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          stripe_payment_intent_id: string
+          amount: number
+          currency: string
+          status?: 'pending' | 'succeeded' | 'failed' | 'canceled'
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          stripe_payment_intent_id?: string
+          amount?: number
+          currency?: string
+          status?: 'pending' | 'succeeded' | 'failed' | 'canceled'
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      },
+      invoices: {
+        Row: {
+          id: string
+          organization_id: string
+          stripe_invoice_id: string
+          amount_due: number
+          amount_paid: number
+          currency: string
+          status: 'draft' | 'open' | 'paid' | 'void' | 'uncollectible'
+          invoice_pdf_url: string | null
+          due_date: string | null
+          period_start: string | null
+          period_end: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          stripe_invoice_id: string
+          amount_due: number
+          amount_paid?: number
+          currency: string
+          status?: 'draft' | 'open' | 'paid' | 'void' | 'uncollectible'
+          invoice_pdf_url?: string | null
+          due_date?: string | null
+          period_start?: string | null
+          period_end?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          stripe_invoice_id?: string
+          amount_due?: number
+          amount_paid?: number
+          currency?: string
+          status?: 'draft' | 'open' | 'paid' | 'void' | 'uncollectible'
+          invoice_pdf_url?: string | null
+          due_date?: string | null
+          period_start?: string | null
+          period_end?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
