@@ -11,7 +11,7 @@ interface WebhookEvent {
   id: string;
   type: string;
   created: string;
-  data: any;
+  data: Record<string, unknown>;
 }
 
 interface WebhookDelivery {
@@ -46,7 +46,7 @@ function calculateDelay(attempt: number): number {
   return delay + Math.random() * 1000; // Add jitter
 }
 
-async function deliverWebhook(webhook: any, event: WebhookEvent, attempt: number = 1): Promise<boolean> {
+async function deliverWebhook(webhook: Record<string, unknown>, event: WebhookEvent, attempt: number = 1): Promise<boolean> {
   const payload = JSON.stringify(event);
   const timestamp = Math.floor(Date.now() / 1000);
   const signaturePayload = `${timestamp}.${payload}`;

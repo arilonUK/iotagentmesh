@@ -35,7 +35,7 @@ export interface WebhookEndpointConfig {
 export interface DeviceActionEndpointConfig {
   target_device_id: string;
   action: string;
-  parameters?: Record<string, any>;
+  parameters?: Record<string, string | number | boolean | null>;
 }
 
 export interface IftttEndpointConfig {

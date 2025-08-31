@@ -3,7 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { composeMiddleware, corsMiddleware, loggingMiddleware, errorHandlingMiddleware } from '../_shared/middleware.ts';
 
-const rateLimitCheckMiddleware = async (ctx: any) => {
+const rateLimitCheckMiddleware = async (ctx: Record<string, unknown>) => {
   console.log('Rate limit check middleware: Starting check');
   
   const apiKeyId = ctx.request.headers.get('x-api-key-id');
@@ -58,7 +58,7 @@ const rateLimitCheckMiddleware = async (ctx: any) => {
   }
 };
 
-const incrementRateLimitMiddleware = async (ctx: any) => {
+const incrementRateLimitMiddleware = async (ctx: Record<string, unknown>) => {
   if (!ctx.rateLimitAllowed) {
     return ctx;
   }
@@ -107,7 +107,7 @@ const incrementRateLimitMiddleware = async (ctx: any) => {
   return ctx;
 };
 
-const rateLimitResponseMiddleware = async (ctx: any) => {
+const rateLimitResponseMiddleware = async (ctx: Record<string, unknown>) => {
   if (ctx.response) {
     return ctx;
   }
@@ -140,7 +140,7 @@ const rateLimitResponseMiddleware = async (ctx: any) => {
   return ctx;
 };
 
-async function resetBucket(supabaseClient: any, bucket: any): Promise<void> {
+async function resetBucket(supabaseClient: ReturnType<typeof createClient>, bucket: Record<string, unknown>): Promise<void> {
   const now = new Date();
   const resetTime = bucket.bucket_type === 'hourly' 
     ? new Date(now.getTime() + 60 * 60 * 1000).toISOString()

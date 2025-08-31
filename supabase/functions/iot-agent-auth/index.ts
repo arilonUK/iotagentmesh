@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
   }
 })
 
-async function registerAgent(supabase: any, organizationId: string, agentData: {
+async function registerAgent(supabase: ReturnType<typeof createClient>, organizationId: string, agentData: {
   agent_name?: string
   agent_type?: string
   capabilities?: string[]
@@ -182,7 +182,7 @@ async function registerAgent(supabase: any, organizationId: string, agentData: {
   }
 }
 
-async function authenticateAgent(supabase: any, organizationId: string, agentId: string) {
+async function authenticateAgent(supabase: ReturnType<typeof createClient>, organizationId: string, agentId: string) {
   try {
     // Get IoT Agent Mesh API configuration
     const iotAgentMeshUrl = Deno.env.get('IOT_AGENT_MESH_URL') || 'https://api.iotagentmesh.com/v1'
@@ -221,7 +221,7 @@ async function authenticateAgent(supabase: any, organizationId: string, agentId:
   }
 }
 
-async function revokeAgent(supabase: any, organizationId: string, agentId: string) {
+async function revokeAgent(supabase: ReturnType<typeof createClient>, organizationId: string, agentId: string) {
   try {
     // Get IoT Agent Mesh API configuration
     const iotAgentMeshUrl = Deno.env.get('IOT_AGENT_MESH_URL') || 'https://api.iotagentmesh.com/v1'

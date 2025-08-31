@@ -10,7 +10,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
 // Define interface for trigger payload
 interface TriggerPayload {
   endpointId: string
-  payload?: any
+  payload?: Record<string, unknown>
   alarmEventId?: string
 }
 
@@ -44,7 +44,7 @@ interface WhatsappEndpointConfig {
 interface DeviceActionEndpointConfig {
   target_device_id: string
   action: string
-  parameters?: Record<string, any>
+  parameters?: Record<string, string | number | boolean | null>
 }
 
 interface IftttEndpointConfig {
@@ -244,7 +244,7 @@ Deno.serve(async (req) => {
 })
 
 // Handler for email endpoints
-async function handleEmailEndpoint(config: EmailEndpointConfig, payload: any) {
+async function handleEmailEndpoint(config: EmailEndpointConfig, payload: Record<string, unknown>) {
   console.log('Simulating email send to:', config.to)
   // Replace with actual email sending code
   // Would integrate with a service like SendGrid, AWS SES, etc.
@@ -262,7 +262,7 @@ async function handleEmailEndpoint(config: EmailEndpointConfig, payload: any) {
 }
 
 // Handler for Telegram endpoints
-async function handleTelegramEndpoint(config: TelegramEndpointConfig, payload: any) {
+async function handleTelegramEndpoint(config: TelegramEndpointConfig, payload: Record<string, unknown>) {
   console.log('Sending Telegram message to chat:', config.chat_id)
   
   // Process the message template with payload data
@@ -289,7 +289,7 @@ async function handleTelegramEndpoint(config: TelegramEndpointConfig, payload: a
 }
 
 // Handler for webhook endpoints
-async function handleWebhookEndpoint(config: WebhookEndpointConfig, payload: any) {
+async function handleWebhookEndpoint(config: WebhookEndpointConfig, payload: Record<string, unknown>) {
   console.log('Calling webhook:', config.url, 'method:', config.method)
   
   // Prepare request options
@@ -327,7 +327,7 @@ async function handleWebhookEndpoint(config: WebhookEndpointConfig, payload: any
 }
 
 // Handler for WhatsApp endpoints
-async function handleWhatsappEndpoint(config: WhatsappEndpointConfig, payload: any) {
+async function handleWhatsappEndpoint(config: WhatsappEndpointConfig, payload: Record<string, unknown>) {
   console.log('Sending WhatsApp message to:', config.to_phone_number)
   
   // Process the message template with payload data
@@ -358,7 +358,7 @@ async function handleWhatsappEndpoint(config: WhatsappEndpointConfig, payload: a
 }
 
 // Handler for device action endpoints
-async function handleDeviceActionEndpoint(config: DeviceActionEndpointConfig, payload: any) {
+async function handleDeviceActionEndpoint(config: DeviceActionEndpointConfig, payload: Record<string, unknown>) {
   console.log('Executing device action on device:', config.target_device_id)
   
   // In a real implementation, this would interact with your device management API
@@ -376,7 +376,7 @@ async function handleDeviceActionEndpoint(config: DeviceActionEndpointConfig, pa
 }
 
 // Handler for IFTTT endpoints
-async function handleIftttEndpoint(config: IftttEndpointConfig, payload: any) {
+async function handleIftttEndpoint(config: IftttEndpointConfig, payload: Record<string, unknown>) {
   console.log('Triggering IFTTT webhook:', config.event_name)
   
   // Process values with payload data
@@ -401,7 +401,7 @@ async function handleIftttEndpoint(config: IftttEndpointConfig, payload: any) {
 }
 
 // Utility function to process templates with payload data
-function processTemplate(template: string, data: any): string {
+function processTemplate(template: string, data: Record<string, unknown>): string {
   return template.replace(/\{\{(.*?)\}\}/g, (_, key) => {
     const keys = key.trim().split('.')
     let value = data
@@ -417,7 +417,7 @@ function processTemplate(template: string, data: any): string {
 }
 
 // Utility function to process JSON template with payload data
-function processTemplateObject(templateStr: string, data: any): any {
+function processTemplateObject(templateStr: string, data: Record<string, unknown>): unknown {
   try {
     // Try to parse the template as JSON
     const template = JSON.parse(templateStr)
@@ -431,13 +431,13 @@ function processTemplateObject(templateStr: string, data: any): any {
 }
 
 // Process object values recursively
-function processObjectValues(obj: any, data: any): any {
+function processObjectValues(obj: unknown, data: Record<string, unknown>): unknown {
   if (typeof obj === 'string') {
     return processTemplate(obj, data)
   } else if (Array.isArray(obj)) {
     return obj.map(item => processObjectValues(item, data))
   } else if (obj !== null && typeof obj === 'object') {
-    const result: Record<string, any> = {}
+    const result: Record<string, unknown> = {}
     for (const key in obj) {
       result[key] = processObjectValues(obj[key], data)
     }

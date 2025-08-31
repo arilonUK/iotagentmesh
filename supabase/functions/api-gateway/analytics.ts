@@ -27,7 +27,7 @@ export interface AnalyticsData {
 }
 
 export class AnalyticsCollector {
-  private supabaseClient: any;
+  private supabaseClient: ReturnType<typeof createClient>;
   private metricsBuffer: RequestMetrics[] = [];
   private bufferFlushInterval = 5000; // 5 seconds
   private maxBufferSize = 100;
@@ -103,7 +103,7 @@ export class AnalyticsCollector {
     }
   }
 
-  private processAnalyticsData(requests: any[]): AnalyticsData {
+  private processAnalyticsData(requests: Record<string, unknown>[]): AnalyticsData {
     const totalRequests = requests.length;
     const avgResponseTime = requests.reduce((sum, req) => sum + (req.processing_time_ms || 0), 0) / totalRequests || 0;
     const errorRequests = requests.filter(req => req.response_status >= 400);

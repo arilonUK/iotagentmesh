@@ -10,7 +10,7 @@ interface WebhookPayload {
   timestamp: string
   agent_id?: string
   device_id?: string
-  data: any
+  data: Record<string, unknown>
   organization_id?: string
 }
 
@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
   }
 })
 
-async function processWebhook(supabase: any, payload: WebhookPayload) {
+async function processWebhook(supabase: ReturnType<typeof createClient>, payload: WebhookPayload) {
   console.log('Processing webhook:', payload.event_type)
 
   try {
@@ -108,7 +108,7 @@ async function processWebhook(supabase: any, payload: WebhookPayload) {
   }
 }
 
-async function handleDeviceTelemetry(supabase: any, payload: WebhookPayload) {
+async function handleDeviceTelemetry(supabase: ReturnType<typeof createClient>, payload: WebhookPayload) {
   if (!payload.device_id || !payload.data) return
 
   // Find the local device by mesh device ID
@@ -141,7 +141,7 @@ async function handleDeviceTelemetry(supabase: any, payload: WebhookPayload) {
   }
 }
 
-async function handleAgentStatusChange(supabase: any, payload: WebhookPayload) {
+async function handleAgentStatusChange(supabase: ReturnType<typeof createClient>, payload: WebhookPayload) {
   if (!payload.agent_id) return
 
   // Update agent status in database
@@ -160,7 +160,7 @@ async function handleAgentStatusChange(supabase: any, payload: WebhookPayload) {
     })
 }
 
-async function handleDeviceStatusChange(supabase: any, payload: WebhookPayload) {
+async function handleDeviceStatusChange(supabase: ReturnType<typeof createClient>, payload: WebhookPayload) {
   if (!payload.device_id) return
 
   // Update device status
@@ -173,7 +173,7 @@ async function handleDeviceStatusChange(supabase: any, payload: WebhookPayload) 
     .eq('id', payload.device_id)
 }
 
-async function handleMCPEvent(supabase: any, payload: WebhookPayload) {
+async function handleMCPEvent(supabase: ReturnType<typeof createClient>, payload: WebhookPayload) {
   // Log MCP events for monitoring
   await supabase
     .from('api_usage')
@@ -189,7 +189,7 @@ async function handleMCPEvent(supabase: any, payload: WebhookPayload) {
     })
 }
 
-async function handleAlertTriggered(supabase: any, payload: WebhookPayload) {
+async function handleAlertTriggered(supabase: ReturnType<typeof createClient>, payload: WebhookPayload) {
   if (!payload.device_id) return
 
   // Create alarm event
@@ -246,7 +246,7 @@ async function verifyWebhookSignature(body: string, signature: string, secret: s
   }
 }
 
-async function logWebhookEvent(supabase: any, payload: WebhookPayload) {
+async function logWebhookEvent(supabase: ReturnType<typeof createClient>, payload: WebhookPayload) {
   try {
     await supabase
       .from('api_usage')

@@ -123,7 +123,7 @@ serve(async (req) => {
   }
 })
 
-async function getApiKeys(supabaseClient: any, organizationId: string) {
+async function getApiKeys(supabaseClient: ReturnType<typeof createClient>, organizationId: string) {
   try {
     const { data, error } = await supabaseClient
       .from('api_keys')
@@ -146,7 +146,7 @@ async function getApiKeys(supabaseClient: any, organizationId: string) {
   }
 }
 
-async function createApiKey(supabaseClient: any, organizationId: string, requestData: CreateApiKeyRequest, userId: string) {
+async function createApiKey(supabaseClient: ReturnType<typeof createClient>, organizationId: string, requestData: CreateApiKeyRequest, userId: string) {
   try {
     // Validate request data
     if (!requestData.name || !requestData.scopes || requestData.scopes.length === 0) {
@@ -226,7 +226,7 @@ async function createApiKey(supabaseClient: any, organizationId: string, request
   }
 }
 
-async function updateApiKey(supabaseClient: any, keyId: string, requestData: UpdateApiKeyRequest, organizationId: string, userId: string) {
+async function updateApiKey(supabaseClient: ReturnType<typeof createClient>, keyId: string, requestData: UpdateApiKeyRequest, organizationId: string, userId: string) {
   try {
     const { data, error } = await supabaseClient
       .from('api_keys')
@@ -262,7 +262,7 @@ async function updateApiKey(supabaseClient: any, keyId: string, requestData: Upd
   }
 }
 
-async function deleteApiKey(supabaseClient: any, keyId: string, organizationId: string, userId: string) {
+async function deleteApiKey(supabaseClient: ReturnType<typeof createClient>, keyId: string, organizationId: string, userId: string) {
   try {
     // Get the API key name before deletion for audit log
     const { data: apiKeyData } = await supabaseClient
@@ -301,7 +301,7 @@ async function deleteApiKey(supabaseClient: any, keyId: string, organizationId: 
   }
 }
 
-async function getApiUsage(supabaseClient: any, organizationId: string, limit: number) {
+async function getApiUsage(supabaseClient: ReturnType<typeof createClient>, organizationId: string, limit: number) {
   try {
     const { data, error } = await supabaseClient
       .from('api_usage')

@@ -19,7 +19,7 @@ export interface RateLimitResult {
 
 export class AdvancedRateLimiter {
   private config: RateLimitConfig;
-  private supabaseClient: any;
+  private supabaseClient: ReturnType<typeof createClient>;
 
   constructor(config: RateLimitConfig) {
     this.config = config;

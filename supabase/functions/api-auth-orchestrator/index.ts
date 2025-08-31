@@ -4,7 +4,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { composeMiddleware, corsMiddleware, loggingMiddleware, errorHandlingMiddleware, responseFormattingMiddleware } from '../_shared/middleware.ts';
 import { createValidationMiddleware, apiKeyAuthSchema } from '../_shared/validation.ts';
 
-const orchestratorMiddleware = async (ctx: any) => {
+const orchestratorMiddleware = async (ctx: Record<string, unknown>) => {
   console.log('Orchestrator middleware: Starting API auth orchestration');
   
   const authHeader = ctx.request.headers.get('Authorization');
@@ -61,7 +61,7 @@ const orchestratorMiddleware = async (ctx: any) => {
   }
 };
 
-const orchestratorResponseMiddleware = async (ctx: any) => {
+const orchestratorResponseMiddleware = async (ctx: Record<string, unknown>) => {
   if (ctx.response) {
     return ctx;
   }
