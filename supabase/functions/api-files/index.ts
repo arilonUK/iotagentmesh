@@ -84,7 +84,7 @@ serve(async (req) => {
       })
     }
 
-    const profileIdMatch = path.match(/^\/api\/files\/profiles\/([^\/]+)$/)
+    const profileIdMatch = path.match(/^\/api\/files\/profiles\/([^/]+)$/)
     if (profileIdMatch && method === 'GET') {
       const profileId = profileIdMatch[1]
       const { data, error } = await supabaseClient

@@ -1,8 +1,17 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+interface RateLimitBucket {
+  id: string;
+  bucket_type: string;
+  reset_time: string;
+  current_count: number;
+  limit_value: number;
+}
 
 export class RateLimiter {
-  private supabaseClient;
+  private supabaseClient: SupabaseClient;
 
   constructor() {
     this.supabaseClient = createClient(
@@ -23,12 +32,12 @@ export class RateLimiter {
       return { allowed: true };
     }
 
-    for (const bucket of rateLimits) {
+    for (const bucket of rateLimits as RateLimitBucket[]) {
       // Reset bucket if time has passed
       if (new Date(bucket.reset_time) <= now) {
         await this.resetBucket(bucket);
       } else if (bucket.current_count >= bucket.limit_value) {
-        return { 
+        return {
           allowed: false, 
           resetTime: bucket.reset_time 
         };
@@ -47,11 +56,11 @@ export class RateLimiter {
       .eq('api_key_id', apiKeyId);
 
     if (rateLimits && rateLimits.length > 0) {
-      for (const bucket of rateLimits) {
+      for (const bucket of rateLimits as RateLimitBucket[]) {
         if (new Date(bucket.reset_time) > now) {
           await this.supabaseClient
             .from('rate_limit_buckets')
-            .update({ 
+            .update({
               current_count: bucket.current_count + 1,
               updated_at: now.toISOString()
             })
@@ -61,7 +70,7 @@ export class RateLimiter {
     }
   }
 
-  private async resetBucket(bucket: any): Promise<void> {
+  private async resetBucket(bucket: RateLimitBucket): Promise<void> {
     const now = new Date();
     const resetTime = bucket.bucket_type === 'hourly' 
       ? new Date(now.getTime() + 60 * 60 * 1000).toISOString()
