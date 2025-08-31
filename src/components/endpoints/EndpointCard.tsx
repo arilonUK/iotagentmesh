@@ -5,7 +5,16 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Switch } from '@/components/ui/switch';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Edit, MoreHorizontal, Play, Trash2 } from 'lucide-react';
-import { EndpointConfig, EmailEndpointConfig, TelegramEndpointConfig, WebhookEndpointConfig, DeviceActionEndpointConfig, IftttEndpointConfig, WhatsappEndpointConfig } from '@/types/endpoint';
+import {
+  EndpointConfig,
+  EmailEndpointConfig,
+  TelegramEndpointConfig,
+  WebhookEndpointConfig,
+  DeviceActionEndpointConfig,
+  IftttEndpointConfig,
+  WhatsappEndpointConfig,
+  isEndpointParameters,
+} from '@/types/endpoint';
 
 // Type guards for endpoint configurations
 const isEmailConfig = (config: unknown): config is EmailEndpointConfig => {
@@ -21,7 +30,13 @@ const isWebhookConfig = (config: unknown): config is WebhookEndpointConfig => {
 };
 
 const isDeviceActionConfig = (config: unknown): config is DeviceActionEndpointConfig => {
-  return typeof config === 'object' && config !== null && 'target_device_id' in config && 'action' in config;
+  if (typeof config !== 'object' || config === null) return false;
+  const c = config as DeviceActionEndpointConfig;
+  return (
+    typeof c.target_device_id === 'string' &&
+    typeof c.action === 'string' &&
+    (c.parameters === undefined || isEndpointParameters(c.parameters))
+  );
 };
 
 const isIftttConfig = (config: unknown): config is IftttEndpointConfig => {

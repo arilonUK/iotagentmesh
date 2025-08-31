@@ -2,6 +2,8 @@
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.39.6'
 import { corsHeaders } from '../_shared/cors.ts'
 import type { Database } from '../_shared/database.types.ts'
+import type { EndpointParameters } from '../../../src/types/endpoint.ts'
+import { isEndpointParameters } from '../../../src/types/endpoint.ts'
 
 // Get Supabase client
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
@@ -45,7 +47,7 @@ interface WhatsappEndpointConfig {
 interface DeviceActionEndpointConfig {
   target_device_id: string
   action: string
-  parameters?: Record<string, string | number | boolean | null>
+  parameters?: EndpointParameters
 }
 
 interface IftttEndpointConfig {
@@ -89,7 +91,13 @@ function isWhatsappEndpointConfig(config: unknown): config is WhatsappEndpointCo
 
 function isDeviceActionEndpointConfig(config: unknown): config is DeviceActionEndpointConfig {
   const c = config as DeviceActionEndpointConfig
-  return typeof config === 'object' && config !== null && typeof c.target_device_id === 'string' && typeof c.action === 'string'
+  return (
+    typeof config === 'object' &&
+    config !== null &&
+    typeof c.target_device_id === 'string' &&
+    typeof c.action === 'string' &&
+    (c.parameters === undefined || isEndpointParameters(c.parameters))
+  )
 }
 
 function isIftttEndpointConfig(config: unknown): config is IftttEndpointConfig {

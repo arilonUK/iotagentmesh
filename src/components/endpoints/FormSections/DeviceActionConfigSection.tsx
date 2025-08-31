@@ -4,7 +4,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { UseFormReturn } from 'react-hook-form';
-import { EndpointFormData } from '@/types/endpoint';
+import { EndpointFormData, isEndpointParameters } from '@/types/endpoint';
 
 interface DeviceActionConfigSectionProps {
   form: UseFormReturn<EndpointFormData>;
@@ -51,11 +51,19 @@ export function DeviceActionConfigSection({ form }: DeviceActionConfigSectionPro
               <Textarea 
                 placeholder={'{\n  "value": true\n}'}
                 className="min-h-[100px] font-mono"
-                value={typeof field.value === 'object' ? JSON.stringify(field.value, null, 2) : field.value || ''}
+                value={
+                  typeof field.value === 'object'
+                    ? JSON.stringify(field.value, null, 2)
+                    : field.value || ''
+                }
                 onChange={(e) => {
                   try {
-                    const params = e.target.value ? JSON.parse(e.target.value) : {};
-                    field.onChange(params);
+                    const parsed = e.target.value ? JSON.parse(e.target.value) : {};
+                    if (isEndpointParameters(parsed)) {
+                      field.onChange(parsed);
+                    } else {
+                      field.onChange(e.target.value);
+                    }
                   } catch {
                     field.onChange(e.target.value);
                   }
