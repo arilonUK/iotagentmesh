@@ -90,7 +90,7 @@ serve(async (req) => {
       })
     }
 
-    const endpointIdMatch = path.match(/^\/api\/endpoints\/([^\/]+)$/)
+    const endpointIdMatch = path.match(/^\/api\/endpoints\/([^/]+)$/)
     if (endpointIdMatch) {
       const endpointId = endpointIdMatch[1]
 

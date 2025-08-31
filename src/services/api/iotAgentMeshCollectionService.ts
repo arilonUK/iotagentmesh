@@ -32,6 +32,16 @@ export interface EndpointParameter {
   enum_values?: string[];
 }
 
+interface PostmanCollection {
+  info: {
+    name: string;
+    description: string;
+    schema: string;
+  };
+  variable: { key: string; value: string; type: string }[];
+  item: Record<string, unknown>[];
+}
+
 export class IoTAgentMeshCollectionService {
   private readonly collections: Map<string, IoTAgentMeshCollection> = new Map();
 
@@ -542,11 +552,11 @@ export class IoTAgentMeshCollectionService {
     return collection.endpoints.find(endpoint => endpoint.id === endpointId) || null;
   }
 
-  generatePostmanCollection(collectionId: string): Record<string, unknown> {
+  generatePostmanCollection(collectionId: string): PostmanCollection | null {
     const collection = this.getCollection(collectionId);
     if (!collection) return null;
 
-    const postmanCollection = {
+    const postmanCollection: PostmanCollection = {
       info: {
         name: collection.name,
         description: collection.description,
@@ -626,7 +636,7 @@ export class IoTAgentMeshCollectionService {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${(postmanCollection as any).info.name.replace(/[^a-zA-Z0-9]/g, '_')}.postman_collection.json`;
+    a.download = `${postmanCollection.info.name.replace(/[^a-zA-Z0-9]/g, '_')}.postman_collection.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
