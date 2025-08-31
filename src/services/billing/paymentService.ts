@@ -1,37 +1,40 @@
-// Payment and invoice handling is not implemented yet because the
-// corresponding tables do not exist in the Supabase schema. We provide
-// placeholder types and stubbed service methods so the application can
-// compile without database tables. These stubs log warnings so the missing
-// functionality is visible during development.
+import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 
-// Placeholder Payment and Invoice types until Supabase tables are available
-export type Payment = {
-  id: string;
-  organization_id: string;
-  amount: number;
-  status: 'succeeded' | 'failed' | 'canceled';
-  created_at: string;
-};
-
-export type Invoice = {
-  id: string;
-  organization_id: string;
-  amount_due: number;
-  status: string;
-  created_at: string;
-};
+export type Payment = Database['public']['Tables']['payments']['Row'];
+export type Invoice = Database['public']['Tables']['invoices']['Row'];
 
 export const paymentService = {
-  async getPayments(_organizationId: string): Promise<Payment[]> {
-    // TODO: Replace with actual implementation once payments table exists
-    console.warn('Supabase payments table not implemented - returning empty array');
-    return [];
+  async getPayments(organizationId: string): Promise<Payment[]> {
+    try {
+      const { data, error } = await supabase
+        .from<Database['public']['Tables']['payments']['Row']>('payments')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data ?? [];
+    } catch (error) {
+      console.error('Error fetching payments:', error);
+      return [];
+    }
   },
 
-  async getInvoices(_organizationId: string): Promise<Invoice[]> {
-    // TODO: Replace with actual implementation once invoices table exists
-    console.warn('Supabase invoices table not implemented - returning empty array');
-    return [];
+  async getInvoices(organizationId: string): Promise<Invoice[]> {
+    try {
+      const { data, error } = await supabase
+        .from<Database['public']['Tables']['invoices']['Row']>('invoices')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data ?? [];
+    } catch (error) {
+      console.error('Error fetching invoices:', error);
+      return [];
+    }
   },
 };
 
