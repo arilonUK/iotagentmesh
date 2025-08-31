@@ -144,7 +144,7 @@ export const useRecordUsageMetric = () => {
       metricValue: number;
       periodStart: string;
       periodEnd: string;
-      metadata?: Record<string, any>;
+      metadata?: Record<string, unknown>;
     }) => {
       if (!organization?.id) throw new Error('No organization selected');
       return billingApiService.recordUsageMetric(

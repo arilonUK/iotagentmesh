@@ -1,5 +1,3 @@
-
-
 import { ContextType, ContextFactoryState, InitializationState } from './types';
 
 export const createContextHooks = (state: ContextFactoryState) => {

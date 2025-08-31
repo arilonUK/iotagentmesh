@@ -11,7 +11,7 @@ export const securityService = {
    */
   logSecurityEvent: async (
     eventType: 'failed_login' | 'suspicious_activity' | 'permission_denied' | 'data_access_violation',
-    details: Record<string, any>
+    details: Record<string, unknown>
   ) => {
     try {
       // Get current user if available

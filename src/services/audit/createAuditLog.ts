@@ -8,7 +8,7 @@ import { AuditLogAction } from './types';
 export const createAuditLog = async (
   organizationId: string,
   action: AuditLogAction,
-  details: Record<string, any> = {}
+  details: Record<string, unknown> = {}
 ): Promise<boolean> => {
   try {
     // Get current user

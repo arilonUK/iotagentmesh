@@ -3,9 +3,13 @@ import { User, Session } from '@supabase/supabase-js';
 
 import { OrganizationData, OrganizationMember, OrganizationEntity } from '@/types/organization';
 
-export type UserOrganization = OrganizationData;
+export interface UserOrganization extends OrganizationData {
+  id: string;
+}
 
-export type Organization = OrganizationEntity;
+export interface Organization extends OrganizationEntity {
+  id: string;
+}
 
 export interface Profile {
   id: string;

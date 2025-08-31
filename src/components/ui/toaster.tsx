@@ -8,19 +8,13 @@ import {
   ToastTitle,
   ToastViewport,
 } from "@/components/ui/toast"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 
 export function Toaster() {
-  // Safely access the toast context
-  let toastList = [];
-  try {
-    const { toasts } = useToast();
-    toastList = toasts || [];
-  } catch (error) {
-    console.warn('Toast context not available yet');
-  }
-
+  const { toasts } = useToast();
   const [idToasts, setIdToasts] = useState([]);
+  
+  const toastList = useMemo(() => toasts || [], [toasts]);
 
   // Add unique ids to toasts if they don't have one
   useEffect(() => {

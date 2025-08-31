@@ -29,7 +29,7 @@ export interface AuditLogEntry {
   organization_id: string;
   user_id: string;
   action: AuditLogAction;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   created_at: string;
   ip_address?: string;
   user_agent?: string;
