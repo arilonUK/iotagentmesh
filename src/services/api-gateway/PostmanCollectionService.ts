@@ -19,7 +19,7 @@ export interface PostmanCollection {
     value: string;
     type: string;
   }>;
-  item: Array<any>;
+  item: Array<unknown>;
 }
 
 export class PostmanCollectionService {
@@ -69,7 +69,7 @@ export class PostmanCollectionService {
       if (documentation.paths) {
         for (const [path, pathItem] of Object.entries(documentation.paths)) {
           const folderName = this.getFolderNameFromPath(path);
-          let folder = collection.item.find(item => item.name === folderName);
+          let folder = collection.item.find((item: unknown) => (item as Record<string, unknown>).name === folderName);
           
           if (!folder) {
             folder = {
@@ -83,7 +83,9 @@ export class PostmanCollectionService {
             if (method === 'parameters') continue;
             
             const request = this.createPostmanRequest(path, method, operation as Record<string, unknown>);
-            folder.item.push(request);
+            if (folder && typeof folder === 'object' && 'item' in folder) {
+              (folder.item as unknown[]).push(request);
+            }
           }
         }
       }
@@ -251,9 +253,10 @@ export class PostmanCollectionService {
         return 0;
       case 'boolean':
         return true;
-      case 'array':
+      case 'array': {
         const items = (schema.items as Record<string, unknown>) || { type: 'string' };
         return [this.getExampleValue(items)];
+      }
       case 'object':
         return {};
       default:

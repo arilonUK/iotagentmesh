@@ -30,17 +30,25 @@ export const paymentService = {
   // Payments - using type assertion since the table is new
   async getPayments(organizationId: string): Promise<Payment[]> {
     try {
-      const { data, error } = await (supabase as any)
-        .from('payments')
+      // Note: payments table may not exist in current schema
+      const query = (supabase as unknown as { from: (table: string) => unknown }).from('payments') as unknown as {
+        select: (columns: string) => {
+          eq: (column: string, value: string) => {
+            order: (column: string, options?: { ascending?: boolean }) => Promise<{ data?: unknown[]; error?: unknown }>
+          }
+        }
+      };
+      
+      const { data, error } = await query
         .select('*')
         .eq('organization_id', organizationId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return (data || []).map((payment: Record<string, unknown>) => ({
-        ...payment,
-        status: payment.status as 'pending' | 'succeeded' | 'failed' | 'canceled'
-      }));
+      return ((data as unknown[]) || []).map((payment) => ({
+        ...(payment as Record<string, unknown>),
+        status: (payment as Record<string, unknown>).status as 'pending' | 'succeeded' | 'failed' | 'canceled'
+      })) as Payment[];
     } catch (error) {
       console.error('Error fetching payments:', error);
       return [];
@@ -50,17 +58,25 @@ export const paymentService = {
   // Invoices - using type assertion since the table is new
   async getInvoices(organizationId: string): Promise<Invoice[]> {
     try {
-      const { data, error } = await (supabase as any)
-        .from('invoices')
+      // Note: invoices table may not exist in current schema
+      const query = (supabase as unknown as { from: (table: string) => unknown }).from('invoices') as unknown as {
+        select: (columns: string) => {
+          eq: (column: string, value: string) => {
+            order: (column: string, options?: { ascending?: boolean }) => Promise<{ data?: unknown[]; error?: unknown }>
+          }
+        }
+      };
+      
+      const { data, error } = await query
         .select('*')
         .eq('organization_id', organizationId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return (data || []).map((invoice: Record<string, unknown>) => ({
-        ...invoice,
-        status: invoice.status as 'draft' | 'open' | 'paid' | 'void' | 'uncollectible'
-      }));
+      return ((data as unknown[]) || []).map((invoice) => ({
+        ...(invoice as Record<string, unknown>),
+        status: (invoice as Record<string, unknown>).status as 'draft' | 'open' | 'paid' | 'void' | 'uncollectible'
+      })) as Invoice[];
     } catch (error) {
       console.error('Error fetching invoices:', error);
       return [];

@@ -138,11 +138,11 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       if (Array.isArray(response)) {
         console.log(`Response is direct array with ${response.length} items`);
         items = response as T[];
-      } else if (response && typeof response === 'object' && (response as any)[this.dataKey]) {
+      } else if (response && typeof response === 'object' && (response as Record<string, unknown>)[this.dataKey]) {
         console.log(`Response is wrapped object, extracting ${this.dataKey}`);
-        console.log(`${this.dataKey} value:`, (response as any)[this.dataKey]);
-        console.log(`${this.dataKey} is array:`, Array.isArray((response as any)[this.dataKey]));
-        items = (response as any)[this.dataKey] as T[];
+        console.log(`${this.dataKey} value:`, (response as Record<string, unknown>)[this.dataKey]);
+        console.log(`${this.dataKey} is array:`, Array.isArray((response as Record<string, unknown>)[this.dataKey]));
+        items = (response as Record<string, unknown>)[this.dataKey] as T[];
       } else {
         console.log(`Response format not recognized, defaulting to empty array`);
         console.log(`Looking for dataKey: ${this.dataKey}`);
@@ -179,8 +179,8 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       // Handle both wrapped and direct object responses
       let item: T | null;
       if (response && typeof response === 'object') {
-        if ((response as any)[this.singleDataKey]) {
-          item = (response as any)[this.singleDataKey] as T;
+        if ((response as Record<string, unknown>)[this.singleDataKey]) {
+          item = (response as Record<string, unknown>)[this.singleDataKey] as T;
         } else {
           // Assume the response is the item itself
           item = response as T;
@@ -214,8 +214,8 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       // Handle both wrapped and direct object responses
       let created: T;
       if (response && typeof response === 'object') {
-        if ((response as any)[this.singleDataKey]) {
-          created = (response as any)[this.singleDataKey] as T;
+        if ((response as Record<string, unknown>)[this.singleDataKey]) {
+          created = (response as Record<string, unknown>)[this.singleDataKey] as T;
         } else {
           // Assume the response is the created item itself
           created = response as T;
@@ -247,8 +247,8 @@ export abstract class ApiService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<
       // Handle both wrapped and direct object responses
       let updated: T;
       if (response && typeof response === 'object') {
-        if ((response as any)[this.singleDataKey]) {
-          updated = (response as any)[this.singleDataKey] as T;
+        if ((response as Record<string, unknown>)[this.singleDataKey]) {
+          updated = (response as Record<string, unknown>)[this.singleDataKey] as T;
         } else {
           // Assume the response is the updated item itself
           updated = response as T;

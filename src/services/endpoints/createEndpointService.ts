@@ -59,7 +59,7 @@ export async function createEndpoint(
       id: data.id,
       name: data.name,
       description: data.description || undefined,
-      type: data.type as any,
+      type: data.type as EndpointConfig['type'],
       organization_id: data.organization_id,
       enabled: data.enabled,
       configuration: typedConfiguration,

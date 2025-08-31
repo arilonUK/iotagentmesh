@@ -215,7 +215,7 @@ export class AgentManagementService {
     }
   }
 
-  async updateAgentConfig(agentId: string, config: Record<string, any>): Promise<boolean> {
+  async updateAgentConfig(agentId: string, config: Record<string, unknown>): Promise<boolean> {
     try {
       console.log(`Updating agent ${agentId} configuration:`, config);
       

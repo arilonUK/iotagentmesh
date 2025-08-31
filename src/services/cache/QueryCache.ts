@@ -12,7 +12,7 @@ interface CacheConfig {
 }
 
 class QueryCacheManager {
-  private cache = new Map<string, CacheEntry<any>>();
+  private cache = new Map<string, CacheEntry<unknown>>();
   private readonly DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
   private readonly DEFAULT_STALE_TIME = 1 * 60 * 1000; // 1 minute
   private readonly DEFAULT_CACHE_TIME = 10 * 60 * 1000; // 10 minutes
@@ -63,7 +63,7 @@ class QueryCacheManager {
       return null;
     }
 
-    return entry.data;
+    return entry.data as T;
   }
 
   isStale(key: string, staleTime: number = this.DEFAULT_STALE_TIME): boolean {

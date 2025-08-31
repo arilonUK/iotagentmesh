@@ -50,7 +50,7 @@ export const usageService = {
     
     return data.map(metric => ({
       ...metric,
-      metadata: metric.metadata as Record<string, any>
+      metadata: metric.metadata as Record<string, unknown>
     }));
   },
 
@@ -61,7 +61,7 @@ export const usageService = {
     metricValue: number,
     periodStart: string,
     periodEnd: string,
-    metadata: Record<string, any> = {}
+    metadata: Record<string, unknown> = {}
   ): Promise<UsageMetrics> {
     const { data, error } = await supabase
       .from('usage_metrics')
@@ -71,7 +71,7 @@ export const usageService = {
         metric_value: metricValue,
         period_start: periodStart,
         period_end: periodEnd,
-        metadata,
+        metadata: JSON.stringify(metadata),
       })
       .select()
       .single();
@@ -79,7 +79,7 @@ export const usageService = {
     if (error) throw error;
     return {
       ...data,
-      metadata: data.metadata as Record<string, any>
+      metadata: data.metadata as Record<string, unknown>
     };
   },
 };

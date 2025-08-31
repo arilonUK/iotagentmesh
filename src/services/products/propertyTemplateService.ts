@@ -182,7 +182,7 @@ export async function updatePropertyTemplate(
       unit: (parsedMetadata as Record<string, unknown>).unit as string || '',
       is_required: (parsedMetadata as Record<string, unknown>).is_required as boolean || false,
       default_value: (parsedMetadata as Record<string, unknown>).default_value as string | number | boolean || null,
-      validation_rules: (parsedMetadata as Record<string, unknown>).validation_rules as any || {},
+      validation_rules: (parsedMetadata as Record<string, unknown>).validation_rules as Record<string, unknown> || {},
       category: updatedTemplate.category,
       organization_id: updatedTemplate.organization_id,
       created_at: updatedTemplate.created_at,
@@ -227,7 +227,7 @@ export async function deletePropertyTemplate(id: string): Promise<void> {
 export async function applyTemplateToProduct(
   templateId: string,
   productId: string
-): Promise<any> {
+): Promise<unknown> {
   try {
     console.log(`Applying template ${templateId} to product ${productId}`);
     
@@ -265,7 +265,7 @@ export async function applyTemplateToProduct(
       unit: (metadata as Record<string, unknown>).unit as string || '',
       is_required: (metadata as Record<string, unknown>).is_required as boolean || false,
       default_value: (metadata as Record<string, unknown>).default_value as string | number | boolean || null,
-      validation_rules: (metadata as Record<string, unknown>).validation_rules as any || {},
+      validation_rules: JSON.stringify((metadata as Record<string, unknown>).validation_rules || {}),
       is_template: true,
       template_id: templateId
     };

@@ -434,10 +434,11 @@ export class TelemetryDataService {
     switch (interval) {
       case '1m':
         return timestamp.toISOString().substring(0, 16); // YYYY-MM-DDTHH:MM
-      case '5m':
+      case '5m': {
         const minutes = Math.floor(timestamp.getMinutes() / 5) * 5;
         timestamp.setMinutes(minutes, 0, 0);
         return timestamp.toISOString().substring(0, 16);
+      }
       case '1h':
         return timestamp.toISOString().substring(0, 13); // YYYY-MM-DDTHH
       case '1d':

@@ -96,7 +96,7 @@ export async function createProductService(
       .from('product_services')
       .insert({
         ...service,
-        config: service.config as any // Cast to Json for Supabase
+        config: JSON.stringify(service.config) // Cast to Json for Supabase
       })
       .select()
       .single();
@@ -151,7 +151,7 @@ export async function updateProductService(
       .from('product_services')
       .update({
         ...data,
-        config: data.config ? (data.config as any) : undefined // Cast to Json for Supabase
+        config: data.config ? JSON.stringify(data.config) : undefined // Cast to Json for Supabase
       })
       .eq('id', id)
       .select()

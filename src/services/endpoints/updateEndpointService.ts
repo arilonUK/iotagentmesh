@@ -21,7 +21,7 @@ export async function updateEndpoint(
     }
     
     // Create an update object with only the fields that are provided
-    const updateData: Record<string, any> = {
+    const updateData: Record<string, unknown> = {
       updated_at: new Date().toISOString()
     };
     

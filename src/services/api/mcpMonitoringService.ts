@@ -36,7 +36,7 @@ export interface CoordinationTask {
   completed_at?: string;
   progress_percentage: number;
   error_message?: string;
-  configuration: Record<string, any>;
+  configuration: Record<string, unknown>;
 }
 
 export interface SystemAlert {
@@ -48,7 +48,7 @@ export interface SystemAlert {
   source: string;
   acknowledged: boolean;
   resolved: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class MCPMonitoringService {
@@ -146,15 +146,15 @@ export class MCPMonitoringService {
     }
   }
 
-  async coordinateAgents(agentIds: string[], coordination: Record<string, any>): Promise<CoordinationTask> {
+  async coordinateAgents(agentIds: string[], coordination: Record<string, unknown>): Promise<CoordinationTask> {
     try {
       console.log('Starting agent coordination:', { agentIds, coordination });
       
       // Create coordination task
       const task: CoordinationTask = {
         id: `coord_${Date.now()}`,
-        name: coordination.name || 'Agent Coordination Task',
-        description: coordination.description || 'Coordinated action across multiple agents',
+        name: (coordination.name as string) || 'Agent Coordination Task',
+        description: (coordination.description as string) || 'Coordinated action across multiple agents',
         agent_ids: agentIds,
         status: 'pending',
         created_at: new Date().toISOString(),
@@ -199,7 +199,7 @@ export class MCPMonitoringService {
             title: 'Critical Event Processed',
             message: `Critical event "${event.event_type}" from agent ${event.source_agent_id}`,
             source: 'MCP Event Processor',
-            metadata: event
+            metadata: event as unknown as Record<string, unknown>
           });
         }
       } else {
