@@ -1,7 +1,15 @@
 
 import { z } from 'zod';
 
-export type EndpointType = 'email' | 'telegram' | 'webhook' | 'device_action' | 'ifttt' | 'whatsapp';
+export const endpointTypeSchema = z.enum([
+  'email',
+  'telegram',
+  'webhook',
+  'device_action',
+  'ifttt',
+  'whatsapp',
+]);
+export type EndpointType = z.infer<typeof endpointTypeSchema>;
 
 export interface EndpointConfig {
   id: string;

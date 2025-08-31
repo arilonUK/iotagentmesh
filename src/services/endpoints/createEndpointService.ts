@@ -1,6 +1,11 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { EndpointConfig, EndpointFormData, endpointConfigurationSchema } from '@/types/endpoint';
+import {
+  EndpointConfig,
+  EndpointFormData,
+  endpointConfigurationSchema,
+  endpointTypeSchema,
+} from '@/types/endpoint';
 import { SupabaseEndpoint, handleServiceError } from './baseEndpointService';
 import { toast } from 'sonner';
 
@@ -52,12 +57,13 @@ export async function createEndpoint(
     toast.success('Endpoint created successfully');
 
     const configuration = endpointConfigurationSchema.parse(data.configuration);
+    const type = endpointTypeSchema.parse(data.type);
 
     return {
       id: data.id,
       name: data.name,
       description: data.description || undefined,
-      type: data.type as EndpointConfig['type'],
+      type,
       organization_id: data.organization_id,
       enabled: data.enabled,
       configuration,

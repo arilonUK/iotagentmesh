@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { EndpointConfig, endpointConfigurationSchema } from '@/types/endpoint';
+import { EndpointConfig, endpointConfigurationSchema, endpointTypeSchema } from '@/types/endpoint';
 import { SupabaseEndpoint, handleServiceError } from './baseEndpointService';
 
 /**
@@ -24,12 +24,13 @@ export async function fetchEndpoints(organizationId: string): Promise<EndpointCo
     
     return (data || []).map(endpoint => {
       const configuration = endpointConfigurationSchema.parse(endpoint.configuration);
+      const type = endpointTypeSchema.parse(endpoint.type);
 
       return {
         id: endpoint.id,
         name: endpoint.name,
         description: endpoint.description || undefined,
-        type: endpoint.type as EndpointConfig['type'],
+        type,
         organization_id: endpoint.organization_id,
         enabled: endpoint.enabled,
         configuration,
