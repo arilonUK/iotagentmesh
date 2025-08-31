@@ -21,8 +21,9 @@ export async function fetchEndpoints(organizationId: string): Promise<EndpointCo
     }
     
     return (data || []).map(endpoint => {
-      const configuration: EndpointConfig['configuration'] =
-        endpointConfigurationSchema.parse(endpoint.configuration);
+      // Parse and validate configuration
+      const parsedConfiguration = endpointConfigurationSchema.parse(endpoint.configuration);
+      const configuration = parsedConfiguration as EndpointConfig['configuration'];
 
       return {
         id: endpoint.id,

@@ -51,8 +51,9 @@ export async function createEndpoint(
     console.log('Created endpoint successfully:', data);
     toast.success('Endpoint created successfully');
 
-    const typedConfiguration: EndpointConfig['configuration'] =
-      endpointConfigurationSchema.parse(data.configuration);
+    // Parse and validate configuration
+    const parsedConfiguration = endpointConfigurationSchema.parse(data.configuration);
+    const typedConfiguration = parsedConfiguration as EndpointConfig['configuration'];
     
     return {
       id: data.id,
