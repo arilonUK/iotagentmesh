@@ -4,7 +4,7 @@ import { Device } from '@/types/device';
 
 import { ChartDataPoint } from '@/components/ui/charts/chart-utils';
 
-export interface MultiDataPoint {
+export interface MultiDataPoint extends Record<string, unknown> {
   name: string;
   temperature: number;
   humidity: number;

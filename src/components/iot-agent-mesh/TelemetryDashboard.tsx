@@ -19,7 +19,7 @@ import {
   Eye
 } from 'lucide-react';
 import { telemetryDataService, TelemetryEntry, TelemetryMetrics } from '@/services/api/telemetryDataService';
-import { integratedDeviceService, Device } from '@/services/api/integratedDeviceService';
+import { integratedDeviceService, IntegratedDevice } from '@/services/api/integratedDeviceService';
 import { toast } from 'sonner';
 
 interface TelemetryDashboardProps {
@@ -29,7 +29,7 @@ interface TelemetryDashboardProps {
 export const TelemetryDashboard: React.FC<TelemetryDashboardProps> = ({ className }) => {
   const [telemetryData, setTelemetryData] = useState<TelemetryEntry[]>([]);
   const [metrics, setMetrics] = useState<TelemetryMetrics | null>(null);
-  const [devices, setDevices] = useState<Device[]>([]);
+  const [devices, setDevices] = useState<IntegratedDevice[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDevice, setSelectedDevice] = useState<string>('all');
   const [selectedMetric, setSelectedMetric] = useState<string>('all');

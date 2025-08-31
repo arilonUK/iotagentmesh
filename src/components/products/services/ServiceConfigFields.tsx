@@ -13,7 +13,7 @@ import { Plus, Trash2 } from 'lucide-react';
 
 interface ServiceConfigFieldsProps {
   serviceType: ServiceType;
-  form: UseFormReturn<ServiceFormValues>;
+  form: UseFormReturn<Partial<ServiceFormValues>>;
 }
 
 export function ServiceConfigFields({ serviceType, form }: ServiceConfigFieldsProps) {
@@ -54,7 +54,7 @@ export function ServiceConfigFields({ serviceType, form }: ServiceConfigFieldsPr
             <FormItem>
               <FormLabel>Broker URL *</FormLabel>
               <FormControl>
-                <Input placeholder="mqtt://example.com:1883" {...field} value={field.value || ''} />
+                <Input placeholder="mqtt://example.com:1883" {...field} value={(field.value as string) || ''} />
               </FormControl>
               <FormDescription>MQTT broker URL with port</FormDescription>
               <FormMessage />
@@ -70,7 +70,7 @@ export function ServiceConfigFields({ serviceType, form }: ServiceConfigFieldsPr
               <FormItem>
                 <FormLabel>Base Topic</FormLabel>
                 <FormControl>
-                  <Input placeholder="devices/{device_id}" {...field} value={field.value || ''} />
+                  <Input placeholder="devices/{device_id}" {...field} value={(field.value as string) || ''} />
                 </FormControl>
                 <FormDescription>The base topic pattern</FormDescription>
                 <FormMessage />
@@ -113,7 +113,7 @@ export function ServiceConfigFields({ serviceType, form }: ServiceConfigFieldsPr
               <FormLabel>Authentication Type</FormLabel>
               <Select 
                 onValueChange={field.onChange} 
-                value={field.value || 'none'}
+                 value={(field.value as string) || 'none'}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -185,7 +185,7 @@ export function ServiceConfigFields({ serviceType, form }: ServiceConfigFieldsPr
 
   // HTTP config fields
   const renderHttpFields = () => {
-    const headers = form.watch('config.headers') || {};
+    const headers = (form.watch('config.headers') as Record<string, string>) || {};
     const headerKeys = Object.keys(headers);
 
     const addHeader = () => {
@@ -212,7 +212,7 @@ export function ServiceConfigFields({ serviceType, form }: ServiceConfigFieldsPr
               <FormItem>
                 <FormLabel>API Endpoint URL *</FormLabel>
                 <FormControl>
-                  <Input placeholder="https://api.example.com/v1" {...field} value={field.value || ''} />
+                  <Input placeholder="https://api.example.com/v1" {...field} value={(field.value as string) || ''} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -225,7 +225,7 @@ export function ServiceConfigFields({ serviceType, form }: ServiceConfigFieldsPr
             render={({ field }) => (
               <FormItem>
                 <FormLabel>HTTP Method</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value || 'POST'}>
+                <Select onValueChange={field.onChange} value={(field.value as string) || 'POST'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select HTTP method" />
@@ -250,7 +250,7 @@ export function ServiceConfigFields({ serviceType, form }: ServiceConfigFieldsPr
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Authentication Type</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value || 'none'}>
+                <Select onValueChange={field.onChange} value={(field.value as string) || 'none'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select authentication type" />
@@ -375,9 +375,9 @@ export function ServiceConfigFields({ serviceType, form }: ServiceConfigFieldsPr
                           <Input 
                             placeholder="Value" 
                             value={field.value} 
-                            onChange={(e) => {
-                              form.setValue(`config.headers.${key}`, e.target.value);
-                            }} 
+                             onChange={(e) => {
+                               form.setValue(`config.headers.${key}` as keyof Partial<ServiceFormValues>, e.target.value);
+                             }}
                           />
                         </FormControl>
                       </FormItem>
@@ -417,7 +417,7 @@ export function ServiceConfigFields({ serviceType, form }: ServiceConfigFieldsPr
           render={({ field }) => (
             <FormItem>
               <FormLabel>Processing Type</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value || 'transform'}>
+              <Select onValueChange={field.onChange} value={(field.value as string) || 'transform'}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select processing type" />
@@ -453,7 +453,7 @@ function process(data) {
   };
 }" 
                   {...field}
-                  value={field.value || ''} 
+                  value={(field.value as string) || ''}
                 />
               </FormControl>
               <FormDescription>
@@ -483,11 +483,11 @@ function process(data) {
               <FormLabel>Notification Channels</FormLabel>
               <Select 
                 onValueChange={(value) => {
-                  const channels = field.value || [];
+                  const channels = (field.value as string[]) || [];
                   if (!channels.includes(value)) {
                     field.onChange([...channels, value]);
                   }
-                }} 
+                }}
                 value=""
               >
                 <FormControl>
@@ -515,7 +515,7 @@ function process(data) {
         <div className="space-y-2">
           <FormLabel>Selected Channels</FormLabel>
           <div className="flex flex-wrap gap-2">
-            {(form.watch('config.notification_channels') || []).map((channel: string) => (
+            {((form.watch('config.notification_channels') as string[]) || []).map((channel: string) => (
               <div 
                 key={channel} 
                 className="bg-primary-100 text-primary-800 rounded-md px-2 py-1 text-sm flex items-center gap-1"
@@ -525,7 +525,7 @@ function process(data) {
                   type="button" 
                   className="text-primary-600 hover:text-primary-900"
                   onClick={() => {
-                    const channels = form.watch('config.notification_channels') || [];
+                    const channels = (form.watch('config.notification_channels') as string[]) || [];
                     form.setValue(
                       'config.notification_channels', 
                       channels.filter((c: string) => c !== channel)
@@ -536,7 +536,7 @@ function process(data) {
                 </button>
               </div>
             ))}
-            {!(form.watch('config.notification_channels') || []).length && (
+            {!((form.watch('config.notification_channels') as string[]) || []).length && (
               <div className="text-sm text-muted-foreground">No channels selected</div>
             )}
           </div>
@@ -553,7 +553,7 @@ function process(data) {
                   placeholder="Device {{device_id}} reported {{value}} at {{timestamp}}" 
                   className="min-h-[100px]"
                   {...field}
-                  value={field.value || ''} 
+                  value={(field.value as string) || ''}
                 />
               </FormControl>
               <FormDescription>
@@ -581,7 +581,7 @@ function process(data) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Storage Type</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value || 'database'}>
+              <Select onValueChange={field.onChange} value={(field.value as string) || 'database'}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select storage type" />
@@ -610,7 +610,7 @@ function process(data) {
                   type="number" 
                   min="1" 
                   {...field} 
-                  value={field.value || ''} 
+                  value={(field.value as string) || ''}
                   onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}  
                 />
               </FormControl>
@@ -635,7 +635,7 @@ function process(data) {
               </div>
               <FormControl>
                 <Switch
-                  checked={field.value || false}
+                  checked={(field.value as boolean) || false}
                   onCheckedChange={field.onChange}
                 />
               </FormControl>
@@ -654,7 +654,7 @@ function process(data) {
                   type="number" 
                   min="0" 
                   {...field} 
-                  value={field.value || ''} 
+                  value={(field.value as string) || ''}
                   onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}  
                 />
               </FormControl>
@@ -683,7 +683,7 @@ function process(data) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Analytics Type</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value || 'basic'}>
+              <Select onValueChange={field.onChange} value={(field.value as string) || 'basic'}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select analytics type" />
@@ -712,7 +712,7 @@ function process(data) {
                   type="number" 
                   min="1" 
                   {...field} 
-                  value={field.value || ''} 
+                  value={(field.value as string) || ''}
                   onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}  
                 />
               </FormControl>
@@ -735,7 +735,7 @@ function process(data) {
                   type="number" 
                   step="0.01" 
                   {...field} 
-                  value={field.value || ''} 
+                  value={(field.value as string) || ''}
                   onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}  
                 />
               </FormControl>
@@ -760,7 +760,7 @@ function process(data) {
               </div>
               <FormControl>
                 <Switch
-                  checked={field.value || false}
+                  checked={(field.value as boolean) || false}
                   onCheckedChange={field.onChange}
                 />
               </FormControl>
@@ -786,7 +786,7 @@ function process(data) {
             <FormItem>
               <FormLabel>Custom Service Type</FormLabel>
               <FormControl>
-                <Input placeholder="Enter service type identifier" {...field} value={field.value || ''} />
+                <Input placeholder="Enter service type identifier" {...field} value={(field.value as string) || ''} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -807,7 +807,7 @@ function process(data) {
   "key2": "value2"
 }' 
                   {...field}
-                  value={field.value || ''} 
+                  value={(field.value as string) || ''}
                 />
               </FormControl>
               <FormDescription>

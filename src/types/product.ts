@@ -42,9 +42,16 @@ export type PropertyValidationRules = {
   allowed_values?: Array<string | number | boolean> | null;
 };
 
-export type PropertyFormValues = Omit<ProductProperty, 'id' | 'created_at' | 'updated_at' | 'product_id'> & {
+export type PropertyFormValues = {
+  name: string;
+  description?: string;
+  data_type: PropertyDataType;
+  unit?: string;
+  is_required: boolean;
+  default_value?: string | number | boolean | null;
+  validation_rules?: PropertyValidationRules;
   product_id?: string;
-};
+} & Record<string, unknown>;
 
 export type ProductService = {
   id: string;
@@ -85,7 +92,13 @@ export type ServiceConfig = {
   [key: string]: unknown;
 };
 
-export type ServiceFormValues = Omit<ProductService, 'id' | 'product_id' | 'created_at' | 'updated_at'>;
+export type ServiceFormValues = {
+  name: string;
+  description?: string;
+  service_type: ServiceType;
+  enabled: boolean;
+  config: Record<string, unknown>;
+};
 
 export type PropertyTemplate = {
   id: string;

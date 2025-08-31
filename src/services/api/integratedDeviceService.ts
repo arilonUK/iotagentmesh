@@ -3,6 +3,8 @@ import { iotAgentMeshApiService, CreateDeviceRequest as MeshCreateDeviceRequest,
 import { Device } from '@/types/device';
 import { toast } from 'sonner';
 
+export type { Device } from '@/types/device';
+
 export interface IntegratedDevice extends Device {
   mesh_device_id?: string;
   mesh_agent_id?: string;

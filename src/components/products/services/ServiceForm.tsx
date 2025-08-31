@@ -16,9 +16,9 @@ import { ServiceConfigFields } from './ServiceConfigFields';
 export const serviceFormSchema = z.object({
   name: z.string().min(1, 'Service name is required'),
   description: z.string().optional(),
-  service_type: z.string().min(1, 'Service type is required'),
+  service_type: z.enum(['mqtt', 'http', 'data_processing', 'notification', 'storage', 'analytics', 'custom']),
   enabled: z.boolean().default(true),
-  config: z.record(z.any()).default({})
+  config: z.record(z.unknown()).default({})
 });
 
 export type ServiceFormValues = z.infer<typeof serviceFormSchema>;
@@ -26,7 +26,7 @@ export type ServiceFormValues = z.infer<typeof serviceFormSchema>;
 interface ServiceDefaultValues {
   name?: string;
   description?: string;
-  service_type?: string;
+  service_type?: 'mqtt' | 'http' | 'data_processing' | 'notification' | 'storage' | 'analytics' | 'custom';
   enabled?: boolean;
   config?: Record<string, unknown>;
 }

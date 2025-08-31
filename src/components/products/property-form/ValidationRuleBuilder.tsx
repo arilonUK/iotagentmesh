@@ -11,7 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Plus, Trash } from 'lucide-react';
 
 interface ValidationRuleBuilderProps {
-  form: UseFormReturn<PropertyFormValues>;
+  form: UseFormReturn<Partial<PropertyFormValues>>;
   dataType: PropertyDataType;
 }
 
@@ -289,7 +289,7 @@ export function ValidationRuleBuilder({ form, dataType }: ValidationRuleBuilderP
           <div className="space-y-4">
             <FormField
               control={form.control}
-              name="validation_rules.schema"
+              name="validation_rules.max"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>JSON Schema</FormLabel>
@@ -297,8 +297,8 @@ export function ValidationRuleBuilder({ form, dataType }: ValidationRuleBuilderP
                     <Textarea 
                       placeholder="JSON schema definition" 
                       className="min-h-[150px] font-mono text-sm"
-                      {...field} 
-                      value={field.value || ''} 
+                      {...field}
+                      value={String(field.value || '')}
                     />
                   </FormControl>
                   <FormDescription>
