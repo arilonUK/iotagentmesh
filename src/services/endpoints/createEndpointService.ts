@@ -6,7 +6,7 @@ import {
   endpointConfigurationSchema,
   endpointTypeSchema,
 } from '@/types/endpoint';
-import { SupabaseEndpoint, handleServiceError } from './baseEndpointService';
+import { handleServiceError } from './baseEndpointService';
 import { toast } from 'sonner';
 
 /**
