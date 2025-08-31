@@ -19,7 +19,7 @@ export const useOrganizationMembership = (): OrganizationMembershipReturn => {
         .insert({
           organization_id: orgId,
           user_id: userId,
-          role: role as any // Default role
+          role: role as 'owner' | 'admin' | 'member' // Default role
         });
         
       if (createRoleError) {

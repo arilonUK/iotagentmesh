@@ -34,10 +34,9 @@ export async function fetchProductProperties(productId: string): Promise<Product
     }
     
     // Call the RPC function to get properties (bypassing the problematic RLS)
-    const { data, error } = await (supabase.rpc as any)(
-      'get_product_properties', 
-      { p_product_id: productId }
-    );
+    const { data, error } = await supabase.rpc('get_product_properties', {
+      p_product_id: productId
+    });
     
     if (error) {
       console.error('Error fetching product properties using RPC:', error);

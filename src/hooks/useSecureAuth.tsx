@@ -52,7 +52,7 @@ export const useSecureAuth = () => {
     } catch (validationError: unknown) {
       console.error('Signup validation error:', validationError);
       const errorMessage = validationError instanceof Error 
-        ? (validationError as any).errors?.[0]?.message || validationError.message
+        ? (validationError as { errors?: Array<{ message: string }> }).errors?.[0]?.message || (validationError as Error).message
         : 'Invalid input';
       toast.error(errorMessage);
       return { error: validationError };
@@ -103,7 +103,7 @@ export const useSecureAuth = () => {
     } catch (validationError: unknown) {
       console.error('Signin validation error:', validationError);
       const errorMessage = validationError instanceof Error 
-        ? (validationError as any).errors?.[0]?.message || validationError.message
+        ? (validationError as { errors?: Array<{ message: string }> }).errors?.[0]?.message || (validationError as Error).message
         : 'Invalid email format';
       toast.error(errorMessage);
       return { error: validationError };

@@ -20,7 +20,7 @@ export interface IoTAgentMeshEndpoint {
   parameters: EndpointParameter[];
   headers: Record<string, string>;
   body_template?: string;
-  response_example?: any;
+  response_example?: unknown;
 }
 
 export interface EndpointParameter {
@@ -28,7 +28,7 @@ export interface EndpointParameter {
   type: 'string' | 'number' | 'boolean' | 'object' | 'array';
   required: boolean;
   description: string;
-  default_value?: any;
+  default_value?: unknown;
   enum_values?: string[];
 }
 
@@ -542,7 +542,7 @@ export class IoTAgentMeshCollectionService {
     return collection.endpoints.find(endpoint => endpoint.id === endpointId) || null;
   }
 
-  generatePostmanCollection(collectionId: string): any {
+  generatePostmanCollection(collectionId: string): Record<string, unknown> {
     const collection = this.getCollection(collectionId);
     if (!collection) return null;
 
@@ -626,7 +626,7 @@ export class IoTAgentMeshCollectionService {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${postmanCollection.info.name.replace(/[^a-zA-Z0-9]/g, '_')}.postman_collection.json`;
+    a.download = `${(postmanCollection as any).info.name.replace(/[^a-zA-Z0-9]/g, '_')}.postman_collection.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

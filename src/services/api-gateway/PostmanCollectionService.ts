@@ -82,7 +82,7 @@ export class PostmanCollectionService {
           for (const [method, operation] of Object.entries(pathItem)) {
             if (method === 'parameters') continue;
             
-            const request = this.createPostmanRequest(path, method, operation as any);
+            const request = this.createPostmanRequest(path, method, operation as Record<string, unknown>);
             folder.item.push(request);
           }
         }
@@ -137,14 +137,14 @@ export class PostmanCollectionService {
     return 'General';
   }
 
-  private createPostmanRequest(path: string, method: string, operation: any) {
+  private createPostmanRequest(path: string, method: string, operation: Record<string, unknown>) {
     const url = {
       raw: `{{base_url}}${path}`,
       host: ["{{base_url}}"],
       path: path.split('/').filter(segment => segment)
     };
 
-    const request: any = {
+    const request: Record<string, unknown> = {
       name: operation.summary || `${method.toUpperCase()} ${path}`,
       request: {
         method: method.toUpperCase(),
@@ -205,21 +205,21 @@ export class PostmanCollectionService {
     return request;
   }
 
-  private generateExampleFromSchema(schema: any): any {
+  private generateExampleFromSchema(schema: Record<string, unknown>): Record<string, unknown> {
     if (!schema) return {};
 
     if (schema.type === 'object' && schema.properties) {
-      const example: any = {};
-      for (const [key, prop] of Object.entries(schema.properties)) {
-        example[key] = this.getExampleValue(prop as any);
+      const example: Record<string, unknown> = {};
+      for (const [key, prop] of Object.entries(schema.properties as Record<string, unknown>)) {
+        example[key] = this.getExampleValue(prop as Record<string, unknown>);
       }
       return example;
     }
-
+    
     return this.getExampleValue(schema);
   }
 
-  private getExampleValue(schema: any): any {
+  private getExampleValue(schema: Record<string, unknown>): unknown {
     if (!schema) return '';
 
     if (schema.example !== undefined) return schema.example;

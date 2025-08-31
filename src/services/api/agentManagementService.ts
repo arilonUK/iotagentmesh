@@ -29,7 +29,7 @@ export interface CommandHistory {
   created_at: string;
   completed_at?: string;
   duration_ms?: number;
-  result?: any;
+  result?: unknown;
   error?: string;
 }
 

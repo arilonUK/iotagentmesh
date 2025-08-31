@@ -19,7 +19,7 @@ export interface WebhookDelivery {
   webhook_id: string;
   event_id: string;
   event_type: string;
-  payload: any;
+  payload: Record<string, unknown>;
   attempt: number;
   status: 'pending' | 'delivered' | 'failed' | 'dead_letter';
   created_at: string;
@@ -33,7 +33,7 @@ export interface WebhookEvent {
   id: string;
   type: string;
   created: string;
-  data: any;
+  data: Record<string, unknown>;
 }
 
 export const webhookService = {

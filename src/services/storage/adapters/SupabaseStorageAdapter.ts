@@ -226,7 +226,7 @@ export class SupabaseStorageAdapter extends BaseStorageAdapter {
       const fullPath = `${organizationId}/${path}/${fileName}`.replace(/\/+/g, '/');
       
       // For images, we can use transform options
-      const transformOptions: any = {};
+      const transformOptions: Record<string, number> = {};
       if (options?.width) transformOptions.width = options.width;
       if (options?.height) transformOptions.height = options.height;
       if (options?.quality) transformOptions.quality = options.quality;

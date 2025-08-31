@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { PropertyTemplate } from '@/types/product';
+import { PropertyTemplate, PropertyDataType } from '@/types/product';
 import { databaseServices } from '@/services/databaseService';
 
 /**
@@ -141,7 +141,7 @@ export async function updatePropertyTemplate(
     if (data.validation_rules) metadata = { ...metadata, validation_rules: data.validation_rules };
     
     // Prepare update payload
-    const updatePayload: any = {
+    const updatePayload: Record<string, unknown> = {
       tags: JSON.stringify(metadata)
     };
     
@@ -178,11 +178,11 @@ export async function updatePropertyTemplate(
       id: updatedTemplate.id,
       name: updatedTemplate.name,
       description: updatedTemplate.description,
-      data_type: (parsedMetadata as any).data_type || 'string',
-      unit: (parsedMetadata as any).unit || '',
-      is_required: (parsedMetadata as any).is_required || false,
-      default_value: (parsedMetadata as any).default_value,
-      validation_rules: (parsedMetadata as any).validation_rules || {},
+      data_type: ((parsedMetadata as Record<string, unknown>).data_type as PropertyDataType) || 'string',
+      unit: (parsedMetadata as Record<string, unknown>).unit as string || '',
+      is_required: (parsedMetadata as Record<string, unknown>).is_required as boolean || false,
+      default_value: (parsedMetadata as Record<string, unknown>).default_value as string | number | boolean || null,
+      validation_rules: (parsedMetadata as Record<string, unknown>).validation_rules as any || {},
       category: updatedTemplate.category,
       organization_id: updatedTemplate.organization_id,
       created_at: updatedTemplate.created_at,
@@ -261,11 +261,11 @@ export async function applyTemplateToProduct(
       product_id: productId,
       name: template.name,
       description: template.description,
-      data_type: (metadata as any).data_type || 'string',
-      unit: (metadata as any).unit || '',
-      is_required: (metadata as any).is_required || false,
-      default_value: (metadata as any).default_value || null,
-      validation_rules: (metadata as any).validation_rules || {},
+      data_type: ((metadata as Record<string, unknown>).data_type as PropertyDataType) || 'string',
+      unit: (metadata as Record<string, unknown>).unit as string || '',
+      is_required: (metadata as Record<string, unknown>).is_required as boolean || false,
+      default_value: (metadata as Record<string, unknown>).default_value as string | number | boolean || null,
+      validation_rules: (metadata as Record<string, unknown>).validation_rules as any || {},
       is_template: true,
       template_id: templateId
     };

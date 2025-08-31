@@ -27,7 +27,7 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     id: currentOrganization.id,
     name: currentOrganization.name,
     slug: currentOrganization.slug,
-    role: currentOrganization.role as any,
+    role: currentOrganization.role as 'owner' | 'admin' | 'member',
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   } : null;

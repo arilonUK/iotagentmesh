@@ -6,7 +6,7 @@ export type ToastEvent = {
   title: string;
   description?: string;
   variant?: 'default' | 'destructive';
-  action?: any;
+  action?: React.ReactNode;
 };
 
 // Global event system for handling toast notifications

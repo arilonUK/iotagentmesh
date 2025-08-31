@@ -28,5 +28,5 @@ export interface ServiceLifecycle {
 }
 
 export interface ServiceDependencies {
-  [key: string]: any;
+  [key: string]: unknown;
 }

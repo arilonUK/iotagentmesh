@@ -36,10 +36,9 @@ export async function fetchProductServices(productId: string): Promise<ProductSe
     }
     
     // Call the RPC function to get services
-    const { data, error } = await (supabase.rpc as any)(
-      'get_product_services', 
-      { p_product_id: productId }
-    );
+    const { data, error } = await supabase.rpc('get_product_services', {
+      p_product_id: productId
+    });
     
     if (error) {
       console.error('Error fetching product services using RPC:', error);

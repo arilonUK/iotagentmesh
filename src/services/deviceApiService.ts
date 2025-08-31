@@ -3,6 +3,17 @@
 export { devicesApiService as deviceApiService } from '@/services/api/devicesApiService';
 export type { CreateDeviceRequest, UpdateDeviceRequest } from '@/services/api/devicesApiService';
 
+interface DeviceData {
+  name: string;
+  type: string;
+  agent_id?: string;
+  properties?: Record<string, unknown>;
+  telemetry_config?: {
+    interval: number;
+    metrics: string[];
+  };
+}
+
 // Backward compatibility exports
 export const DeviceApiService = class {
   async fetchDevices() {
@@ -15,12 +26,12 @@ export const DeviceApiService = class {
     return devicesApiService.fetchById(deviceId);
   }
 
-  async createDevice(deviceData: any) {
+  async createDevice(deviceData: DeviceData) {
     const { devicesApiService } = await import('@/services/api/devicesApiService');
     return devicesApiService.create(deviceData);
   }
 
-  async updateDevice(deviceId: string, deviceData: any) {
+  async updateDevice(deviceId: string, deviceData: Partial<DeviceData>) {
     const { devicesApiService } = await import('@/services/api/devicesApiService');
     return devicesApiService.update(deviceId, deviceData);
   }

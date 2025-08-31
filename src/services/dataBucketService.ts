@@ -16,7 +16,7 @@ interface SupabaseDataBucket {
   created_at: string;
   updated_at: string;
   enabled: boolean;
-  s3_config: any | null;
+  s3_config: { bucketName: string; region: string; path?: string } | null;
 }
 
 /**
@@ -131,7 +131,7 @@ export async function updateDataBucket(
   try {
     console.log('Updating data bucket:', bucketId, 'with data:', bucketData);
     
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     
     // Only include fields that are provided
     if (bucketData.name !== undefined) updateData.name = bucketData.name;
