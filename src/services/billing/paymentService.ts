@@ -3,7 +3,7 @@
 // placeholder types and stubbed service methods so the application can
 // compile without database tables.
 
-// Payment and Invoice types - using placeholder definitions since tables don't exist in schema
+// Placeholder Payment and Invoice types until Supabase tables are available
 export type Payment = {
   id: string;
   organization_id: string;
