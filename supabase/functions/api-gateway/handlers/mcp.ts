@@ -1,5 +1,5 @@
 import { corsHeaders } from '../../_shared/cors.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 interface OrganizationAccessResult {
   valid: boolean;
@@ -8,7 +8,7 @@ interface OrganizationAccessResult {
 }
 
 async function validateOrganizationAccess(
-  supabaseClient: any,
+  supabaseClient: SupabaseClient,
   organizationId: string,
   userId: string,
   userRole: string,
@@ -192,9 +192,10 @@ export async function handleMcp(req: Request, path: string): Promise<Response> {
     console.log('Forwarding to api-mcp function...');
     const { data, error: invokeError, status } = await supabaseClient.functions.invoke('api-mcp', {
       body: forwardedBody,
-      headers: { 
+      headers: {
         Authorization: authHeader,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-Organization-Id': organizationId
       },
       method: req.method,
       path: segments.join('/'),

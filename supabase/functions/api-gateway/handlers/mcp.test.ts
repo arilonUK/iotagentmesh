@@ -96,12 +96,17 @@ describe('handleMcp', () => {
     });
 
     const response = await handleMcp(req, '/api/mcp');
-    
+
     expect(invokeMock).toHaveBeenCalledWith('api-mcp', expect.objectContaining({
       body: expect.objectContaining({
         organizationId: 'org-1',
         userId: 'user-1',
         userRole: 'admin'
+      }),
+      headers: expect.objectContaining({
+        Authorization: 'Bearer token',
+        'Content-Type': 'application/json',
+        'X-Organization-Id': 'org-1'
       }),
       path: '',
       method: 'GET'
@@ -267,9 +272,9 @@ describe('handleMcp', () => {
       status: 200 
     });
 
-    singleMock.mockResolvedValue({ 
-      data: { organization_id: 'org-123', role: 'member' }, 
-      error: null 
+    singleMock.mockResolvedValue({
+      data: { organization_id: 'org-123', role: 'admin' },
+      error: null
     });
 
     const req = new Request('https://example.com/api/mcp/tools', {
@@ -288,7 +293,7 @@ describe('handleMcp', () => {
         test: 'data',
         organizationId: 'org-123',
         userId: 'user-1',
-        userRole: 'member'
+        userRole: 'admin'
       })
     }));
   });
@@ -406,14 +411,11 @@ describe('handleMcp', () => {
 
   describe('Organization Access Control', () => {
     beforeEach(() => {
-      // Mock successful organization lookup for access validation
-      singleMock.mockImplementation((arg) => {
-        if (arg?.toString()?.includes('organization_members')) {
-          return Promise.resolve({ data: { organization_id: 'org-1', role: 'member' }, error: null });
-        } else {
-          return Promise.resolve({ data: { id: 'org-1', name: 'Test Org' }, error: null });
-        }
-      });
+      // First call: organization membership, second: organization lookup
+      singleMock.mockReset();
+      singleMock
+        .mockResolvedValueOnce({ data: { organization_id: 'org-1', role: 'member' }, error: null })
+        .mockResolvedValue({ data: { id: 'org-1', name: 'Test Org' }, error: null });
     });
 
     it('should allow member role for GET requests', async () => {
@@ -433,13 +435,10 @@ describe('handleMcp', () => {
     });
 
     it('should deny member role for POST requests', async () => {
-      singleMock.mockImplementation((arg) => {
-        if (arg?.toString()?.includes('organization_members')) {
-          return Promise.resolve({ data: { organization_id: 'org-1', role: 'member' }, error: null });
-        } else {
-          return Promise.resolve({ data: { id: 'org-1', name: 'Test Org' }, error: null });
-        }
-      });
+      singleMock.mockReset();
+      singleMock
+        .mockResolvedValueOnce({ data: { organization_id: 'org-1', role: 'member' }, error: null })
+        .mockResolvedValue({ data: { id: 'org-1', name: 'Test Org' }, error: null });
 
       const req = new Request('https://example.com/api/mcp/tools/execute', {
         method: 'POST',
@@ -460,19 +459,16 @@ describe('handleMcp', () => {
     });
 
     it('should allow admin role for all operations', async () => {
-      invokeMock.mockResolvedValue({ 
-        data: { success: true }, 
-        error: null, 
-        status: 200 
+      invokeMock.mockResolvedValue({
+        data: { success: true },
+        error: null,
+        status: 200
       });
 
-      singleMock.mockImplementation((arg) => {
-        if (arg?.toString()?.includes('organization_members')) {
-          return Promise.resolve({ data: { organization_id: 'org-1', role: 'admin' }, error: null });
-        } else {
-          return Promise.resolve({ data: { id: 'org-1', name: 'Test Org' }, error: null });
-        }
-      });
+      singleMock.mockReset();
+      singleMock
+        .mockResolvedValueOnce({ data: { organization_id: 'org-1', role: 'admin' }, error: null })
+        .mockResolvedValue({ data: { id: 'org-1', name: 'Test Org' }, error: null });
 
       const req = new Request('https://example.com/api/mcp/tools/execute', {
         method: 'POST',
@@ -488,13 +484,10 @@ describe('handleMcp', () => {
     });
 
     it('should deny access when organization not found', async () => {
-      singleMock.mockImplementation((arg) => {
-        if (arg?.toString()?.includes('organization_members')) {
-          return Promise.resolve({ data: { organization_id: 'org-1', role: 'admin' }, error: null });
-        } else {
-          return Promise.resolve({ data: null, error: new Error('Org not found') });
-        }
-      });
+      singleMock.mockReset();
+      singleMock
+        .mockResolvedValueOnce({ data: { organization_id: 'org-1', role: 'viewer' }, error: null })
+        .mockResolvedValue({ data: null, error: new Error('Org not found') });
 
       const req = new Request('https://example.com/api/mcp/resources', {
         method: 'GET',
