@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { EndpointConfig, EndpointFormData } from '@/types/endpoint';
+import { EndpointConfig, EndpointFormData, endpointConfigurationSchema } from '@/types/endpoint';
 import { SupabaseEndpoint, handleServiceError } from './baseEndpointService';
 import { toast } from 'sonner';
 
@@ -50,11 +50,9 @@ export async function createEndpoint(
 
     console.log('Created endpoint successfully:', data);
     toast.success('Endpoint created successfully');
-    
-    // First convert to unknown, then to the expected type to satisfy TypeScript
-    // This is safe because we know the shape of the configuration matches our endpoint types
-    const typedConfiguration = (data.configuration as unknown) as EndpointConfig['configuration'];
-    
+
+    const configuration = endpointConfigurationSchema.parse(data.configuration);
+
     return {
       id: data.id,
       name: data.name,
@@ -62,9 +60,9 @@ export async function createEndpoint(
       type: data.type as EndpointConfig['type'],
       organization_id: data.organization_id,
       enabled: data.enabled,
-      configuration: typedConfiguration,
+      configuration,
       created_at: data.created_at,
-      updated_at: data.updated_at
+      updated_at: data.updated_at,
     };
   } catch (error) {
     console.error('Unexpected error in createEndpoint:', error);
