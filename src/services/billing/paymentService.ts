@@ -1,7 +1,8 @@
 // Payment and invoice handling is not implemented yet because the
 // corresponding tables do not exist in the Supabase schema. We provide
 // placeholder types and stubbed service methods so the application can
-// compile without database tables.
+// compile without database tables. These stubs log warnings so the missing
+// functionality is visible during development.
 
 // Placeholder Payment and Invoice types until Supabase tables are available
 export type Payment = {
