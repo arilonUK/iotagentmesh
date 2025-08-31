@@ -10,7 +10,7 @@ export interface EndpointConfig {
   type: EndpointType;
   organization_id: string;
   enabled: boolean;
-  configuration: EmailEndpointConfig | TelegramEndpointConfig | WebhookEndpointConfig | DeviceActionEndpointConfig | IftttEndpointConfig | WhatsappEndpointConfig;
+  configuration: EndpointConfiguration;
   created_at: string;
   updated_at: string;
 }
@@ -72,13 +72,21 @@ export interface WhatsappEndpointConfig {
   message_template: string;
 }
 
+export type EndpointConfiguration =
+  | EmailEndpointConfig
+  | TelegramEndpointConfig
+  | WebhookEndpointConfig
+  | DeviceActionEndpointConfig
+  | IftttEndpointConfig
+  | WhatsappEndpointConfig;
+
 export interface EndpointFormData {
   id?: string; // Added for editing
   name: string;
   description?: string;
   type: EndpointType;
   enabled: boolean;
-  configuration: Partial<EmailEndpointConfig | TelegramEndpointConfig | WebhookEndpointConfig | DeviceActionEndpointConfig | IftttEndpointConfig | WhatsappEndpointConfig>;
+  configuration: Partial<EndpointConfiguration>;
 }
 
 // Zod schemas for runtime validation
@@ -126,7 +134,7 @@ const whatsappEndpointConfigSchema: z.ZodType<WhatsappEndpointConfig> = z.object
   message_template: z.string(),
 });
 
-export const endpointConfigurationSchema: z.ZodType<EndpointConfig['configuration']> = z.union([
+export const endpointConfigurationSchema: z.ZodType<EndpointConfiguration> = z.union([
   emailEndpointConfigSchema,
   telegramEndpointConfigSchema,
   webhookEndpointConfigSchema,
