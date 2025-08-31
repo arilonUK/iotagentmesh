@@ -31,29 +31,62 @@ serve(async (req) => {
     const pathParts = url.pathname.replace('/api-mcp', '').split('/').filter(Boolean);
     console.log(`Path parts: ${JSON.stringify(pathParts)}`);
 
-    // Get request body
-    let requestBody = null;
-    const rawBody = await req.text();
-    console.log(`Raw request body: ${rawBody}`);
-    
-    if (rawBody) {
-      try {
-        requestBody = JSON.parse(rawBody);
-        console.log(`Parsed request body: ${JSON.stringify(requestBody)}`);
-      } catch (e) {
-        console.log(`Failed to parse request body as JSON: ${e.message}`);
-        requestBody = rawBody;
+    // Safely parse request body
+    let requestBody: Record<string, unknown> = {};
+    try {
+      const contentType = req.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const bodyText = await req.text();
+        if (bodyText.trim()) {
+          requestBody = JSON.parse(bodyText);
+          console.log(`Parsed request body: ${JSON.stringify(requestBody)}`);
+        }
       }
+    } catch (parseError) {
+      console.error(`Failed to parse request body: ${parseError.message}`);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Invalid JSON in request body'
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
     }
 
-    // Extract user context from request body if available
-    const organizationId = requestBody?.organizationId;
-    const userId = requestBody?.userId;
-    const userRole = requestBody?.userRole;
+    // Extract and validate organization context
+    const organizationId = requestBody.organizationId as string;
+    const userId = requestBody.userId as string;
+    const userRole = requestBody.userRole as string;
     
     console.log(`Organization ID: ${organizationId}`);
     console.log(`User ID: ${userId}`);
     console.log(`User Role: ${userRole}`);
+
+    // Validate organization access if organizationId is provided
+    if (organizationId && userId) {
+      const { data: membership } = await supabaseClient
+        .from('organization_members')
+        .select('role')
+        .eq('organization_id', organizationId)
+        .eq('user_id', userId)
+        .single();
+
+      if (!membership) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'Access denied: User not member of organization'
+          }),
+          { 
+            status: 403, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+    }
 
     // Route based on path
     if (pathParts.length === 0) {

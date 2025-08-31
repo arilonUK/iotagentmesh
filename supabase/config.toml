@@ -21,6 +21,9 @@ enable_email_autoconfirm = false
 [functions.api-gateway]
 verify_jwt = false
 
+[functions.api-mcp]
+verify_jwt = true
+
 [functions.create-checkout]
 verify_jwt = true
 
@@ -58,9 +61,6 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.api-key-validator]
-verify_jwt = false
-
-[functions.api-mcp]
 verify_jwt = false
 
 [functions.api-organizations]
