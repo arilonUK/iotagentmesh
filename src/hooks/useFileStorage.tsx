@@ -23,7 +23,7 @@ export const useStorageFiles = (
   useEffect(() => {
     // Subscribe to operation changes
     const unsubscribe = fileStorageService.onOperationsChange((newOperations) => {
-      setOperations(newOperations);
+      setOperations(newOperations as FileOperation[]);
     });
 
     return unsubscribe;
