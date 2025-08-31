@@ -22,7 +22,7 @@ enable_email_autoconfirm = false
 verify_jwt = false
 
 [functions.api-mcp]
-verify_jwt = true
+verify_jwt = false
 
 [functions.create-checkout]
 verify_jwt = true
