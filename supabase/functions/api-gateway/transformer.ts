@@ -4,11 +4,11 @@ export interface TransformationRule {
   method: string;
   requestTransforms?: {
     headers?: Record<string, string>;
-    body?: (body: any) => any;
+    body?: (body: unknown) => unknown;
   };
   responseTransforms?: {
     headers?: Record<string, string>;
-    body?: (body: any) => any;
+    body?: (body: unknown) => unknown;
   };
 }
 
@@ -19,7 +19,7 @@ export class RequestResponseTransformer {
     this.rules.push(rule);
   }
 
-  transformRequest(path: string, method: string, headers: Headers, body: any): { headers: Record<string, string>; body: any } {
+  transformRequest(path: string, method: string, headers: Headers, body: unknown): { headers: Record<string, string>; body: unknown } {
     const rule = this.rules.find(r => 
       new RegExp(r.path).test(path) && r.method.toLowerCase() === method.toLowerCase()
     );
@@ -34,7 +34,7 @@ export class RequestResponseTransformer {
     return { headers: transformedHeaders, body: transformedBody };
   }
 
-  transformResponse(path: string, method: string, responseBody: any): { headers: Record<string, string>; body: any } {
+  transformResponse(path: string, method: string, responseBody: unknown): { headers: Record<string, string>; body: unknown } {
     const rule = this.rules.find(r => 
       new RegExp(r.path).test(path) && r.method.toLowerCase() === method.toLowerCase()
     );
@@ -57,7 +57,7 @@ export const defaultTransformationRules: TransformationRule[] = [
     method: 'GET',
     responseTransforms: {
       headers: { 'X-Data-Source': 'devices-api' },
-      body: (body: any) => ({
+      body: (body: unknown) => ({
         ...body,
         meta: {
           timestamp: new Date().toISOString(),

@@ -194,7 +194,15 @@ serve(async (req) => {
   }
 })
 
-function generateDailyBreakdown(usageData: any[], days: number) {
+interface UsageDataItem {
+  created_at: string;
+  response_time_ms?: number;
+  status_code: number;
+  endpoint: string;
+  [key: string]: unknown;
+}
+
+function generateDailyBreakdown(usageData: UsageDataItem[], days: number) {
   const breakdown: { [key: string]: number } = {}
   
   for (let i = 0; i < days; i++) {
@@ -206,7 +214,7 @@ function generateDailyBreakdown(usageData: any[], days: number) {
 
   usageData.forEach(usage => {
     const dateKey = usage.created_at.split('T')[0]
-    if (breakdown.hasOwnProperty(dateKey)) {
+    if (Object.prototype.hasOwnProperty.call(breakdown, dateKey)) {
       breakdown[dateKey]++
     }
   })

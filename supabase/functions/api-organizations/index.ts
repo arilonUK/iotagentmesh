@@ -49,7 +49,7 @@ serve(async (req) => {
       })
     }
 
-    const orgIdMatch = path.match(/^\/api\/organizations\/([^\/]+)$/)
+    const orgIdMatch = path.match(/^\/api\/organizations\/([^/]+)$/)
     if (orgIdMatch && method === 'GET') {
       const orgId = orgIdMatch[1]
       const { data, error } = await supabaseClient.rpc('get_organization_with_role', {

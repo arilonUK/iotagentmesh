@@ -2,7 +2,11 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 export interface AuthContext {
-  user: any;
+  user: {
+    id: string;
+    email?: string;
+    [key: string]: unknown;
+  } | null;
   organization_id?: string;
   api_key_id?: string;
 }

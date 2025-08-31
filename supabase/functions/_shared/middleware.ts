@@ -4,8 +4,17 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 export interface MiddlewareContext {
   request: Request;
   response?: Response;
-  user?: any;
-  apiKey?: any;
+  user?: {
+    id: string;
+    email?: string;
+    [key: string]: unknown;
+  };
+  apiKey?: {
+    id: string;
+    organization_id: string;
+    scopes?: string[];
+    [key: string]: unknown;
+  };
   organizationId?: string;
   error?: string;
   startTime: number;

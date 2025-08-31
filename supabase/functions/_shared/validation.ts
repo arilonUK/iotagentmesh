@@ -1,5 +1,6 @@
 
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
+import { MiddlewareContext } from './middleware.ts';
 
 // Request validation schemas
 export const apiKeyAuthSchema = z.object({
@@ -34,7 +35,7 @@ export const sanitizeInput = (input: string): string => {
 
 // Validation middleware factory
 export const createValidationMiddleware = (schema: z.ZodSchema) => {
-  return async (ctx: any) => {
+  return async (ctx: MiddlewareContext) => {
     try {
       const authHeader = ctx.request.headers.get('Authorization');
       

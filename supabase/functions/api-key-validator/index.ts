@@ -12,7 +12,19 @@ interface ApiKeyValidationResult {
   error?: string;
 }
 
-const apiKeyValidationMiddleware = async (ctx: any) => {
+interface ValidationContext {
+  request: Request;
+  apiKey?: {
+    id: string;
+    organization_id: string;
+    scopes?: string[];
+    [key: string]: unknown;
+  };
+  organizationId?: string;
+  error?: string;
+}
+
+const apiKeyValidationMiddleware = async (ctx: ValidationContext) => {
   console.log('API Key validation middleware: Starting validation');
   
   const authHeader = ctx.request.headers.get('Authorization');
@@ -85,7 +97,7 @@ const apiKeyValidationMiddleware = async (ctx: any) => {
   }
 };
 
-const updateLastUsedMiddleware = async (ctx: any) => {
+const updateLastUsedMiddleware = async (ctx: ValidationContext) => {
   if (!ctx.apiKey) {
     return ctx;
   }
