@@ -25,16 +25,21 @@ export async function createEndpoint(
       return null;
     }
     
+    const configurationInput = endpointConfigurationSchema.parse(
+      endpointData.configuration
+    );
+    const typeInput = endpointTypeSchema.parse(endpointData.type);
+
     // Using generic query to avoid TypeScript issues
     const { error, data } = await supabase
       .from('endpoints')
       .insert({
         name: endpointData.name,
         description: endpointData.description || null,
-        type: endpointData.type,
+        type: typeInput,
         organization_id: organizationId,
         enabled: endpointData.enabled,
-        configuration: endpointData.configuration || {},
+        configuration: configurationInput,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
