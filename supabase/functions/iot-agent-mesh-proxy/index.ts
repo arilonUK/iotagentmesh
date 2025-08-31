@@ -1,4 +1,5 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import type { Database } from '../_shared/database.types.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,7 +9,7 @@ const corsHeaders = {
 interface IoTAgentMeshRequest {
   endpoint: string
   method: string
-  data?: any
+  data?: Record<string, unknown>
   agentId?: string
 }
 
@@ -22,7 +23,7 @@ Deno.serve(async (req) => {
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const supabase = createClient<Database>(supabaseUrl, supabaseKey)
 
     // Get auth header
     const authHeader = req.headers.get('authorization')
@@ -125,14 +126,17 @@ Deno.serve(async (req) => {
   }
 })
 
-async function logApiUsage(supabase: any, usage: {
-  organizationId: string
-  userId: string
-  endpoint: string
-  method: string
-  statusCode: number
-  responseTime: number
-}) {
+async function logApiUsage(
+  supabase: SupabaseClient<Database>,
+  usage: {
+    organizationId: string
+    userId: string
+    endpoint: string
+    method: string
+    statusCode: number
+    responseTime: number
+  }
+) {
   try {
     await supabase
       .from('api_usage')
