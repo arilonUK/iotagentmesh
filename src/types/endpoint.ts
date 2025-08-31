@@ -32,10 +32,27 @@ export interface WebhookEndpointConfig {
   body_template?: string;
 }
 
+export type EndpointParameterValue = string | number | boolean | null;
+export type EndpointParameters = Record<string, EndpointParameterValue>;
+
+export function isEndpointParameters(value: unknown): value is EndpointParameters {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    Object.values(value as Record<string, unknown>).every(
+      (v) =>
+        typeof v === 'string' ||
+        typeof v === 'number' ||
+        typeof v === 'boolean' ||
+        v === null
+    )
+  );
+}
+
 export interface DeviceActionEndpointConfig {
   target_device_id: string;
   action: string;
-  parameters?: Record<string, string | number | boolean | null>;
+  parameters?: EndpointParameters;
 }
 
 export interface IftttEndpointConfig {
