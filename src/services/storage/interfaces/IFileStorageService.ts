@@ -2,7 +2,7 @@
 export interface FileUploadOptions {
   onProgress?: (progress: number) => void;
   chunkSize?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   overwrite?: boolean;
 }
 
@@ -25,7 +25,7 @@ export interface StorageFile {
   created_at: string;
   updated_at: string;
   path: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   chunks?: number;
   isOfflineAvailable?: boolean;
 }
