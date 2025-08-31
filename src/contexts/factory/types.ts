@@ -36,7 +36,7 @@ export interface ContextFactoryState {
 }
 
 export interface ContextFactoryValue extends ContextFactoryState {
-  getContext: <T = any>(type: ContextType) => T | null;
+  getContext: <T = unknown>(type: ContextType) => T | null;
   isReady: (type: ContextType) => boolean;
   getError: (type: ContextType) => Error | null;
   setSession: (session: Session | null) => void;

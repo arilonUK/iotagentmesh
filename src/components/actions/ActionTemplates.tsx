@@ -69,7 +69,7 @@ interface ActionTemplate {
   name: string;
   description?: string;
   type: 'device_control' | 'notification' | 'integration' | 'webhook' | 'email';
-  template_data: Record<string, any>;
+  template_data: Record<string, unknown>;
   tags: string[];
   usage_count: number;
   created_at: string;
@@ -189,7 +189,7 @@ export function ActionTemplates() {
   const watchType = form.watch('type');
   
   const handleCreateTemplate = (data: z.infer<typeof actionTemplateSchema>) => {
-    let templateData: Record<string, any>;
+    let templateData: Record<string, unknown>;
     try {
       templateData = JSON.parse(data.template_data);
     } catch (error) {

@@ -14,7 +14,7 @@ interface ChartSeries {
 }
 
 export interface MultiSeriesChartProps {
-  data: Array<Record<string, any>>;
+  data: Array<Record<string, unknown>>;
   index: string;
   series: ChartSeries[];
   height?: number | string;

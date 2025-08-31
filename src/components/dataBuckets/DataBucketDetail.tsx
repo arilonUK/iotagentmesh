@@ -46,7 +46,7 @@ export function DataBucketDetail({ bucket, onBack, sampleData = [] }: DataBucket
           </Button>
           
           <DataExportMenu 
-            data={sampleData} 
+            data={sampleData as unknown as Record<string, unknown>[]} 
             fileName={`${bucket.name}-data`}
           />
           

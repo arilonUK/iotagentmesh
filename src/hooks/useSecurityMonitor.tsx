@@ -5,7 +5,7 @@ import { securityService } from '@/services/securityService';
 interface SecurityEvent {
   type: 'failed_login' | 'suspicious_activity' | 'permission_denied' | 'data_access_violation';
   timestamp: Date;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
 }
 
 /**
@@ -17,7 +17,7 @@ export const useSecurityMonitor = () => {
 
   const addSecurityEvent = useCallback((
     type: SecurityEvent['type'],
-    details: Record<string, any>
+    details: Record<string, unknown>
   ) => {
     const event: SecurityEvent = {
       type,

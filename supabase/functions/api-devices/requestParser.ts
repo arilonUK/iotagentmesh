@@ -7,9 +7,9 @@ export interface ParsedRequest {
 
 export function parseRequest(req: Request, url: URL): ParsedRequest {
   const pathParts = url.pathname.split('/').filter(part => part && part !== 'api-devices');
-  let deviceId: string | null = pathParts.length > 0 ? pathParts[0] : null;
-  let httpMethod = req.method;
-  let requestBody: Record<string, unknown> = {};
+  const deviceId: string | null = pathParts.length > 0 ? pathParts[0] : null;
+  const httpMethod = req.method;
+  const requestBody: Record<string, unknown> = {};
 
   console.log('URL pathname:', url.pathname);
   console.log('Path parts:', pathParts);

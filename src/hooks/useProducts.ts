@@ -4,6 +4,10 @@ import { productServices } from '@/services/products';
 import { useOrganization } from '@/contexts/organization';
 import { ProductTemplate, ProductProperty, ProductService, ServiceFormValues, PropertyFormValues, PropertyTemplate } from '@/types/product';
 import { toast } from 'sonner';
+import { useProductById } from './useProductById';
+import { useProductProperties } from './useProductProperties';
+import { usePropertyTemplates } from './usePropertyTemplates';
+import { useProductServices } from './useProductServices';
 
 export function useProducts() {
   const { organization } = useOrganization();
@@ -20,11 +24,7 @@ export function useProducts() {
     enabled: !!organization?.id,
   });
 
-  const getProductById = (productId: string) => useQuery({
-    queryKey: ['product', productId],
-    queryFn: () => productServices.fetchProduct(productId),
-    enabled: !!productId,
-  });
+  const getProductById = useProductById;
 
   const createProductMutation = useMutation({
     mutationFn: (productData: Omit<ProductTemplate, 'id' | 'created_at' | 'updated_at'>) => {
@@ -87,11 +87,7 @@ export function useProducts() {
   });
 
   // Product Properties Queries & Mutations
-  const getProductProperties = (productId: string) => useQuery({
-    queryKey: ['productProperties', productId],
-    queryFn: () => productServices.fetchProductProperties(productId),
-    enabled: !!productId,
-  });
+  const getProductProperties = useProductProperties;
 
   const createPropertyMutation = useMutation({
     mutationFn: (propertyData: PropertyFormValues) => {
@@ -150,11 +146,7 @@ export function useProducts() {
   });
 
   // Property Templates Queries & Mutations
-  const getPropertyTemplates = () => useQuery({
-    queryKey: ['propertyTemplates', organization?.id],
-    queryFn: () => organization?.id ? productServices.fetchPropertyTemplates(organization.id) : Promise.resolve([]),
-    enabled: !!organization?.id,
-  });
+  const getPropertyTemplates = usePropertyTemplates;
 
   const createTemplateMutation = useMutation({
     mutationFn: productServices.createPropertyTemplate,
@@ -206,11 +198,7 @@ export function useProducts() {
   });
 
   // Product Services Queries & Mutations
-  const getProductServices = (productId: string) => useQuery({
-    queryKey: ['productServices', productId],
-    queryFn: () => productServices.fetchProductServices(productId),
-    enabled: !!productId,
-  });
+  const getProductServices = useProductServices;
 
   const createServiceMutation = useMutation({
     mutationFn: (serviceData: ServiceFormValues & { product_id: string; organization_id: string }) => {

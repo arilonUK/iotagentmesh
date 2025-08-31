@@ -3,7 +3,7 @@ import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { ServiceType } from '@/types/product';
+import { ServiceType, ServiceFormValues } from '@/types/product';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,7 +13,7 @@ import { Plus, Trash2 } from 'lucide-react';
 
 interface ServiceConfigFieldsProps {
   serviceType: ServiceType;
-  form: UseFormReturn<any>;
+  form: UseFormReturn<ServiceFormValues>;
 }
 
 export function ServiceConfigFields({ serviceType, form }: ServiceConfigFieldsProps) {

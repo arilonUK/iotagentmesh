@@ -13,14 +13,14 @@ import { Download, FileJson, FileSpreadsheet, CalendarClock } from 'lucide-react
 import { downloadCSV, downloadJSON } from '@/utils/export';
 import { toast } from 'sonner';
 
-interface DataExportMenuProps<T extends Record<string, any>> {
+interface DataExportMenuProps<T extends Record<string, unknown>> {
   data: T[];
   fileName?: string;
   triggerText?: string;
   triggerClassName?: string;
 }
 
-export function DataExportMenu<T extends Record<string, any>>({
+export function DataExportMenu<T extends Record<string, unknown>>({
   data,
   fileName = 'export',
   triggerText = 'Export',

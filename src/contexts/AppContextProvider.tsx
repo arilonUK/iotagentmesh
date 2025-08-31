@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { ContextFactoryProvider, useContextFactory, ContextType } from './ContextFactory';
 import { ContextErrorBoundary } from './ContextErrorBoundary';
 import { CoreProvider } from './CoreProvider';
@@ -24,7 +24,7 @@ const AppContextProviderInner: React.FC<{ children: React.ReactNode }> = ({ chil
   const { getContext, isReady, getError, globalState } = useContextFactory();
 
   // Get the query client from context factory
-  const queryClient = getContext(ContextType.QUERY_CLIENT);
+  const queryClient = getContext<QueryClient>(ContextType.QUERY_CLIENT);
 
   // Show loading while contexts are initializing
   if (globalState === 'loading' || globalState === 'pending') {

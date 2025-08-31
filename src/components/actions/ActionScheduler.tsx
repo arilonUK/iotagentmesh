@@ -77,7 +77,7 @@ interface ScheduledAction {
     id: string;
     name: string;
   };
-  action_payload: Record<string, any>;
+  action_payload: Record<string, unknown>;
   next_execution: string | null;
   last_execution?: string;
   enabled: boolean;

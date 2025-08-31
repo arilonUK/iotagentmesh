@@ -4,7 +4,7 @@ export interface QueryParams {
   offset?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
 }
 
 export interface ServiceResponse<T> {

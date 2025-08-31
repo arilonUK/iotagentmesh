@@ -47,39 +47,27 @@ export const useStorageFiles = (
 
   const uploadFile = {
     mutate: async ({ file, onProgress }: { file: File; onProgress?: (progress: number) => void }) => {
-      try {
-        await fileStorageService.uploadFile(organizationId, currentPath, file, {
-          onProgress,
-          chunkSize: file.size > 5 * 1024 * 1024 ? 1024 * 1024 * 2 : undefined // 2MB chunks for files > 5MB
-        });
-        await loadFiles(); // Refresh the file list
-      } catch (error) {
-        throw error;
-      }
+      await fileStorageService.uploadFile(organizationId, currentPath, file, {
+        onProgress,
+        chunkSize: file.size > 5 * 1024 * 1024 ? 1024 * 1024 * 2 : undefined // 2MB chunks for files > 5MB
+      });
+      await loadFiles(); // Refresh the file list
     },
     isPending: operations.some(op => op.type === 'upload' && op.status === 'in-progress')
   };
 
   const deleteFile = {
     mutate: async ({ fileName }: { fileName: string }) => {
-      try {
-        await fileStorageService.deleteFile(organizationId, currentPath, fileName);
-        await loadFiles(); // Refresh the file list
-      } catch (error) {
-        throw error;
-      }
+      await fileStorageService.deleteFile(organizationId, currentPath, fileName);
+      await loadFiles(); // Refresh the file list
     },
     isPending: operations.some(op => op.type === 'delete' && op.status === 'in-progress')
   };
 
   const createDirectory = {
     mutate: async ({ dirName }: { dirName: string }) => {
-      try {
-        await fileStorageService.createDirectory(organizationId, currentPath, dirName);
-        await loadFiles(); // Refresh the file list
-      } catch (error) {
-        throw error;
-      }
+      await fileStorageService.createDirectory(organizationId, currentPath, dirName);
+      await loadFiles(); // Refresh the file list
     },
     isPending: false
   };

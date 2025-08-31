@@ -62,11 +62,11 @@ export function CustomizableDashboard({
           <DataExportMenu 
             data={(() => {
               switch (activeTab) {
-                case 'temperature': return temperatureData as Record<string, any>[];
-                case 'humidity': return humidityData as Record<string, any>[];
-                case 'energy': return energyData as Record<string, any>[];
-                case 'comparison': return comparisonData as Record<string, any>[];
-                default: return temperatureData as Record<string, any>[];
+                case 'temperature': return temperatureData as unknown as Record<string, unknown>[];
+                case 'humidity': return humidityData as unknown as Record<string, unknown>[];
+                case 'energy': return energyData as unknown as Record<string, unknown>[];
+                case 'comparison': return comparisonData as unknown as Record<string, unknown>[];
+                default: return temperatureData as unknown as Record<string, unknown>[];
               }
             })()}
             fileName={`${device.name}-${activeTab}-data`}
@@ -121,7 +121,7 @@ export function CustomizableDashboard({
           
           <TabsContent value="comparison" className="h-[300px]">
             <MultiSeriesChart
-              data={comparisonData}
+              data={comparisonData as unknown as Record<string, unknown>[]}
               index="name"
               series={[
                 { dataKey: 'temperature', type: 'line', color: '#7E69AB', yAxisId: 'left' },

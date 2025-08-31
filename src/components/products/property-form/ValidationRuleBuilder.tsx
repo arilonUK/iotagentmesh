@@ -4,14 +4,14 @@ import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessa
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { UseFormReturn } from 'react-hook-form';
-import { PropertyDataType } from '@/types/product';
+import { PropertyDataType, PropertyFormValues } from '@/types/product';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Plus, Trash } from 'lucide-react';
 
 interface ValidationRuleBuilderProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<PropertyFormValues>;
   dataType: PropertyDataType;
 }
 
