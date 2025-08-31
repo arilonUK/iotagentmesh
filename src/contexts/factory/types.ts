@@ -18,11 +18,11 @@ export enum InitializationState {
 
 export interface ContextRegistration {
   type: ContextType;
-  factory: () => Promise<any>;
+  factory: () => Promise<unknown>;
   dependencies: ContextType[];
   lazy: boolean;
   state: InitializationState;
-  instance?: any;
+  instance?: unknown;
   error?: Error;
 }
 

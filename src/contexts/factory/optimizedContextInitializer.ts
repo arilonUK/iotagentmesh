@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { ContextType, InitializationState } from './types';
+import { ContextType, InitializationState, ContextRegistration, ContextFactoryState } from './types';
 
 interface ContextInitializationResult {
   success: boolean;
@@ -15,8 +15,8 @@ interface OptimizedInitializer {
 }
 
 export const createOptimizedContextInitializer = (
-  contextRegistrations: Map<ContextType, any>,
-  onStateChange: (state: any) => void
+  contextRegistrations: Map<ContextType, ContextRegistration>,
+  onStateChange: (state: ContextFactoryState) => void
 ): OptimizedInitializer => {
   
   const initializeContextsParallel = async (): Promise<Map<ContextType, ContextInitializationResult>> => {
@@ -84,12 +84,12 @@ export const createOptimizedContextInitializer = (
       await Promise.allSettled(levelPromises);
       
       // Update global state after each level
-      onStateChange(prev => ({
-        ...prev,
+      onStateChange({
+        ...({} as ContextFactoryState),
         globalState: level === contextLevels.length - 1 
           ? InitializationState.READY 
           : InitializationState.LOADING
-      }));
+      });
     }
 
     const successCount = Array.from(results.values()).filter(r => r.success).length;
@@ -148,7 +148,7 @@ export const createOptimizedContextInitializer = (
 
 // Helper function to group contexts by dependency level
 function groupContextsByDependencyLevel(
-  registrations: Map<ContextType, any>
+  registrations: Map<ContextType, ContextRegistration>
 ): ContextType[][] {
   const levels: ContextType[][] = [];
   const processed = new Set<ContextType>();

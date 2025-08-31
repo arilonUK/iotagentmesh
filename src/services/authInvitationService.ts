@@ -8,7 +8,7 @@ import { UserData } from '@/contexts/auth/types';
 const createAuditLog = async (
   organizationId: string,
   action: string,
-  details: Record<string, any>
+  details: Record<string, unknown>
 ) => {
   try {
     await supabase.rpc('create_audit_log_entry', {
@@ -129,7 +129,7 @@ export const authInvitationService = {
       }
 
       toast.success("Account created successfully. Check your email to verify your account.");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error signing up:', error);
       throw error;
     }
@@ -185,7 +185,7 @@ export const authInvitationService = {
       
       toast.success('Invitation accepted successfully');
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error accepting invitation:', error);
       return false;
     }

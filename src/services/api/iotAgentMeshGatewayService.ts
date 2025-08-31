@@ -3,11 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 export interface IoTMeshGatewayRequest {
   endpoint: string;
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  data?: any;
+  data?: unknown;
   agentId?: string;
 }
 
-export interface IoTMeshGatewayResponse<T = any> {
+export interface IoTMeshGatewayResponse<T = unknown> {
   data?: T;
   error?: string;
   status: number;
@@ -21,7 +21,7 @@ export class IoTAgentMeshGatewayService {
     this.baseUrl = `${import.meta.env.VITE_SUPABASE_URL || 'https://tuevghmlxosxuszxjral.supabase.co'}/functions/v1`;
   }
 
-  async makeRequest<T = any>(request: IoTMeshGatewayRequest): Promise<IoTMeshGatewayResponse<T>> {
+  async makeRequest<T = unknown>(request: IoTMeshGatewayRequest): Promise<IoTMeshGatewayResponse<T>> {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -65,7 +65,7 @@ export class IoTAgentMeshGatewayService {
     });
   }
 
-  async createDevice(deviceData: any, agentId: string): Promise<IoTMeshGatewayResponse> {
+  async createDevice(deviceData: Record<string, unknown>, agentId: string): Promise<IoTMeshGatewayResponse> {
     return this.makeRequest({
       endpoint: '/devices',
       method: 'POST',
@@ -74,7 +74,7 @@ export class IoTAgentMeshGatewayService {
     });
   }
 
-  async updateDevice(deviceId: string, updates: any, agentId?: string): Promise<IoTMeshGatewayResponse> {
+  async updateDevice(deviceId: string, updates: Record<string, unknown>, agentId?: string): Promise<IoTMeshGatewayResponse> {
     return this.makeRequest({
       endpoint: `/devices/${deviceId}`,
       method: 'PUT',
@@ -107,7 +107,7 @@ export class IoTAgentMeshGatewayService {
     });
   }
 
-  async sendAgentCommand(agentId: string, command: any): Promise<IoTMeshGatewayResponse> {
+  async sendAgentCommand(agentId: string, command: Record<string, unknown>): Promise<IoTMeshGatewayResponse> {
     return this.makeRequest({
       endpoint: `/agents/${agentId}/commands`,
       method: 'POST',
@@ -117,7 +117,7 @@ export class IoTAgentMeshGatewayService {
   }
 
   // Telemetry through Gateway
-  async uploadTelemetry(telemetryData: any, agentId?: string): Promise<IoTMeshGatewayResponse> {
+  async uploadTelemetry(telemetryData: Record<string, unknown>, agentId?: string): Promise<IoTMeshGatewayResponse> {
     return this.makeRequest({
       endpoint: '/telemetry',
       method: 'POST',
@@ -126,7 +126,7 @@ export class IoTAgentMeshGatewayService {
     });
   }
 
-  async queryTimeSeries(query: any): Promise<IoTMeshGatewayResponse> {
+  async queryTimeSeries(query: Record<string, unknown>): Promise<IoTMeshGatewayResponse> {
     return this.makeRequest({
       endpoint: '/data/timeseries',
       method: 'GET',
@@ -142,7 +142,7 @@ export class IoTAgentMeshGatewayService {
     });
   }
 
-  async coordinateAgents(coordinationRequest: any): Promise<IoTMeshGatewayResponse> {
+  async coordinateAgents(coordinationRequest: Record<string, unknown>): Promise<IoTMeshGatewayResponse> {
     return this.makeRequest({
       endpoint: '/mcp/coordinate',
       method: 'POST',
@@ -150,7 +150,7 @@ export class IoTAgentMeshGatewayService {
     });
   }
 
-  async processEvent(eventData: any): Promise<IoTMeshGatewayResponse> {
+  async processEvent(eventData: Record<string, unknown>): Promise<IoTMeshGatewayResponse> {
     return this.makeRequest({
       endpoint: '/mcp/events',
       method: 'POST',

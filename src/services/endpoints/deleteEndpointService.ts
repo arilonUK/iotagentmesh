@@ -12,7 +12,7 @@ export async function deleteEndpoint(endpointId: string): Promise<boolean> {
     const { error } = await supabase
       .from('endpoints')
       .delete()
-      .eq('id', endpointId) as { error: any };
+      .eq('id', endpointId) as { error: unknown };
 
     if (error) {
       handleServiceError(error, 'deleting endpoint');

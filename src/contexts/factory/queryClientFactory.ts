@@ -10,8 +10,9 @@ export const createQueryClient = () => {
       defaultOptions: {
         queries: {
           staleTime: 1000 * 60 * 5, // 5 minutes
-          retry: (failureCount, error: any) => {
-            if (error?.status >= 400 && error?.status < 500) {
+          retry: (failureCount, error: unknown) => {
+            const err = error as any;
+            if (err?.status >= 400 && err?.status < 500) {
               return false;
             }
             return failureCount < 3;

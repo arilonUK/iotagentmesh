@@ -83,7 +83,7 @@ export const rateLimitService = {
     }
   },
 
-  async getUsageStats(organizationId: string, apiKeyId?: string, days: number = 7): Promise<{ summary: UsageStats; usage_data: any[] }> {
+  async getUsageStats(organizationId: string, apiKeyId?: string, days: number = 7): Promise<{ summary: UsageStats; usage_data: Record<string, unknown>[] }> {
     try {
       const params = new URLSearchParams({
         organization_id: organizationId,

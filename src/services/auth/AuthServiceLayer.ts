@@ -28,7 +28,7 @@ export class AuthServiceLayer {
     return this.authenticationService.signIn(email, password);
   }
 
-  async signUp(email: string, password: string, metadata?: any) {
+  async signUp(email: string, password: string, metadata?: Record<string, unknown>) {
     return this.authenticationService.signUp(email, password, metadata);
   }
 
@@ -36,7 +36,7 @@ export class AuthServiceLayer {
     return this.authenticationService.signOut();
   }
 
-  async updateProfile(profileData: any) {
+  async updateProfile(profileData: Record<string, unknown>) {
     return this.profileService.updateProfile(profileData);
   }
 

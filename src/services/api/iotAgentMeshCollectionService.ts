@@ -563,7 +563,7 @@ export class IoTAgentMeshCollectionService {
     return postmanCollection;
   }
 
-  private generatePostmanItems(endpoints: IoTAgentMeshEndpoint[]): any[] {
+  private generatePostmanItems(endpoints: IoTAgentMeshEndpoint[]): Record<string, unknown>[] {
     const categories = [...new Set(endpoints.map(e => e.category))];
     
     return categories.map(category => ({

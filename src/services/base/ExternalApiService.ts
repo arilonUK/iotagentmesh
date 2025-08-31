@@ -12,7 +12,7 @@ export interface ExternalApiConfig {
 export interface ExternalApiRequestOptions {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   endpoint: string;
-  data?: any;
+  data?: unknown;
   headers?: Record<string, string>;
   timeout?: number;
 }
@@ -21,7 +21,7 @@ export abstract class ExternalApiService<T, CreateDTO = Partial<T>, UpdateDTO = 
   protected abstract readonly config: ExternalApiConfig;
   protected abstract readonly entityName: string;
 
-  protected async makeExternalRequest<R = any>(options: ExternalApiRequestOptions): Promise<R> {
+  protected async makeExternalRequest<R = unknown>(options: ExternalApiRequestOptions): Promise<R> {
     const { method, endpoint, data, headers = {}, timeout = 30000 } = options;
     
     try {
@@ -166,7 +166,7 @@ export abstract class ExternalApiService<T, CreateDTO = Partial<T>, UpdateDTO = 
     throw lastError!;
   }
 
-  protected handleError(error: any, operation: string): never {
+  protected handleError(error: unknown, operation: string): never {
     const message = error instanceof Error ? error.message : `Failed to ${operation}`;
     console.error(`${this.entityName} external service error in ${operation}:`, error);
     toast.error(message);

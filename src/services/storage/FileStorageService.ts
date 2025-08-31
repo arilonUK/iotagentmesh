@@ -119,7 +119,7 @@ class FileStorageService {
     this.adapter = adapter;
   }
 
-  onOperationsChange(listener: (operations: any[]) => void): () => void {
+  onOperationsChange(listener: (operations: unknown[]) => void): () => void {
     if ('onOperationsChange' in this.adapter && typeof this.adapter.onOperationsChange === 'function') {
       return this.adapter.onOperationsChange(listener);
     }

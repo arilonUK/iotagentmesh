@@ -9,12 +9,12 @@ export interface SupabaseEndpoint {
   type: string;
   organization_id: string;
   enabled: boolean;
-  configuration: any;
+  configuration: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
 
-export const handleServiceError = (error: any, operation: string): void => {
+export const handleServiceError = (error: unknown, operation: string): void => {
   console.error(`Error in ${operation}:`, error);
   toast.error(`Failed to ${operation}`);
 };

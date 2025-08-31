@@ -27,14 +27,14 @@ export class AuthenticationService {
 
       toast.success('Signed in successfully!');
       return { data };
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Authentication error';
       this.stateManager.dispatch({ type: 'SET_ERROR', payload: errorMessage });
       return { error };
     }
   }
 
-  async signUp(email: string, password: string, metadata?: any) {
+  async signUp(email: string, password: string, metadata?: Record<string, unknown>) {
     try {
       this.stateManager.dispatch({ type: 'SET_LOADING' });
       
@@ -54,7 +54,7 @@ export class AuthenticationService {
 
       toast.success('Account created! Check your email to verify your account.');
       return { data };
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Authentication error';
       this.stateManager.dispatch({ type: 'SET_ERROR', payload: errorMessage });
       return { error };
@@ -90,7 +90,7 @@ export class AuthenticationService {
       window.location.href = '/auth';
       toast.success('Signed out successfully');
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('AuthenticationService: Error during sign out:', error);
       
       // Even on error, clear everything and redirect

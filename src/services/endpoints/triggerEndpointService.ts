@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 /**
  * Trigger an endpoint with data
  */
-export async function triggerEndpoint(endpointId: string, data: any = {}): Promise<boolean> {
+export async function triggerEndpoint(endpointId: string, data: Record<string, unknown> = {}): Promise<boolean> {
   try {
     const { error } = await supabase.functions.invoke('trigger-endpoint', {
       body: { endpointId, payload: data },

@@ -38,6 +38,12 @@ export interface TelemetryMetrics {
   };
 }
 
+interface TelemetryReading {
+  timestamp: string;
+  value: number;
+  count?: number;
+}
+
 export class TelemetryDataService {
   private readonly meshService = iotAgentMeshApiService;
 
@@ -408,8 +414,8 @@ export class TelemetryDataService {
     }
   }
 
-  private groupDataByInterval(data: any[], interval: string): Map<string, any[]> {
-    const groups = new Map<string, any[]>();
+  private groupDataByInterval(data: TelemetryReading[], interval: string): Map<string, TelemetryReading[]> {
+    const groups = new Map<string, TelemetryReading[]>();
     
     for (const item of data) {
       const timestamp = new Date(item.timestamp);
@@ -441,8 +447,8 @@ export class TelemetryDataService {
     }
   }
 
-  private aggregateGroupedData(groups: Map<string, any[]>, aggregation: string): any[] {
-    const result: any[] = [];
+  private aggregateGroupedData(groups: Map<string, TelemetryReading[]>, aggregation: string): TelemetryReading[] {
+    const result: TelemetryReading[] = [];
     
     for (const [intervalKey, items] of groups.entries()) {
       const values = items.map(item => item.value);

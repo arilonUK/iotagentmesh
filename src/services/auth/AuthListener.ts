@@ -59,7 +59,7 @@ export class AuthListener {
     }
   }
 
-  private handleAuthError(error: any): void {
+  private handleAuthError(error: unknown): void {
     const errorMessage = error instanceof Error ? error.message : 'Authentication error';
     
     if (this.retryCount < this.maxRetries) {
