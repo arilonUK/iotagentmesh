@@ -6,6 +6,10 @@
 		{
 			"name": "iotagentmesh-2",
 			"path": "../iotagentmesh-2"
+		},
+		{
+			"name": "iotagentmesh",
+			"path": "../../../../IOTAgentMesh/iotAgentMesh/iotagentmesh"
 		}
 	],
 	"settings": {}
