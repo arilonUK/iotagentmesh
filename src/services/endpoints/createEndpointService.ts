@@ -10,7 +10,7 @@ import { SupabaseEndpoint, handleServiceError } from './baseEndpointService';
 import { toast } from 'sonner';
 
 /**
- * Create a new endpoint
+ * Create a new endpoint with runtime configuration validation
  */
 export async function createEndpoint(
   organizationId: string, 

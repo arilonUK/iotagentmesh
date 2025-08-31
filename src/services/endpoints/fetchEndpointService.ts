@@ -4,7 +4,7 @@ import { EndpointConfig, endpointConfigurationSchema, endpointTypeSchema } from 
 import { SupabaseEndpoint, handleServiceError } from './baseEndpointService';
 
 /**
- * Fetch all endpoints for an organization
+ * Fetch all endpoints for an organization with configuration validation
  */
 export async function fetchEndpoints(organizationId: string): Promise<EndpointConfig[]> {
   try {
