@@ -6,6 +6,7 @@ import { handleProducts } from './handlers/products.ts';
 import { handleProfiles } from './handlers/profiles.ts';
 import { handleApiKeys } from './handlers/keys.ts';
 import { handleData } from './handlers/data.ts';
+import { handleMcp } from './handlers/mcp.ts';
 import { RouteHandler } from './types.ts';
 
 export function createRouter() {
@@ -26,6 +27,10 @@ export function createRouter() {
   routes.set('/api/profiles/*', handleProfiles);
   routes.set('/api/data', handleData);
   routes.set('/api/data/*', handleData);
+  
+  // Add MCP routes
+  routes.set('/api/mcp', handleMcp);
+  routes.set('/api/mcp/*', handleMcp);
   
   // Add API keys routes
   routes.set('/api/keys', handleApiKeys);

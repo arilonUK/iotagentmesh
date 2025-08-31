@@ -60,6 +60,9 @@ verify_jwt = false
 [functions.api-key-validator]
 verify_jwt = false
 
+[functions.api-mcp]
+verify_jwt = false
+
 [functions.api-organizations]
 verify_jwt = false
 
