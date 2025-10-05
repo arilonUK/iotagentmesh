@@ -2,8 +2,24 @@
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.39.6'
 import { corsHeaders } from '../_shared/cors.ts'
 import type { Database } from '../_shared/database.types.ts'
-import type { EndpointParameters } from '../../../src/types/endpoint.ts'
-import { isEndpointParameters } from '../../../src/types/endpoint.ts'
+
+// Define endpoint parameter types (cannot import from src/ in edge functions)
+type EndpointParameterValue = string | number | boolean | null;
+type EndpointParameters = Record<string, EndpointParameterValue>;
+
+function isEndpointParameters(value: unknown): value is EndpointParameters {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    Object.values(value as Record<string, unknown>).every(
+      (v) =>
+        typeof v === 'string' ||
+        typeof v === 'number' ||
+        typeof v === 'boolean' ||
+        v === null
+    )
+  );
+}
 
 // Get Supabase client
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
