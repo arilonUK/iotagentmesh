@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -1553,91 +1553,35 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      },
-      payments: {
+      }
+      user_roles: {
         Row: {
+          created_at: string
           id: string
           organization_id: string
-          stripe_payment_intent_id: string
-          amount: number
-          currency: string
-          status: 'pending' | 'succeeded' | 'failed' | 'canceled'
-          created_at: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+          user_id: string
         }
         Insert: {
+          created_at?: string
           id?: string
           organization_id: string
-          stripe_payment_intent_id: string
-          amount: number
-          currency: string
-          status?: 'pending' | 'succeeded' | 'failed' | 'canceled'
-          created_at?: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id: string
         }
         Update: {
+          created_at?: string
           id?: string
           organization_id?: string
-          stripe_payment_intent_id?: string
-          amount?: number
-          currency?: string
-          status?: 'pending' | 'succeeded' | 'failed' | 'canceled'
-          created_at?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "payments_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      },
-      invoices: {
-        Row: {
-          id: string
-          organization_id: string
-          stripe_invoice_id: string
-          amount_due: number
-          amount_paid: number
-          currency: string
-          status: 'draft' | 'open' | 'paid' | 'void' | 'uncollectible'
-          invoice_pdf_url: string | null
-          due_date: string | null
-          period_start: string | null
-          period_end: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          organization_id: string
-          stripe_invoice_id: string
-          amount_due: number
-          amount_paid?: number
-          currency: string
-          status?: 'draft' | 'open' | 'paid' | 'void' | 'uncollectible'
-          invoice_pdf_url?: string | null
-          due_date?: string | null
-          period_start?: string | null
-          period_end?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          organization_id?: string
-          stripe_invoice_id?: string
-          amount_due?: number
-          amount_paid?: number
-          currency?: string
-          status?: 'draft' | 'open' | 'paid' | 'void' | 'uncollectible'
-          invoice_pdf_url?: string | null
-          due_date?: string | null
-          period_start?: string | null
-          period_end?: string | null
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "invoices_organization_id_fkey"
+            foreignKeyName: "user_roles_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -1663,24 +1607,24 @@ export type Database = {
         Returns: undefined
       }
       can_access_device: {
-        Args: { p_user_id: string; p_device_id: string }
+        Args: { p_device_id: string; p_user_id: string }
         Returns: boolean
       }
       check_alarm_condition: {
         Args: {
           p_operator: Database["public"]["Enums"]["condition_operator"]
-          p_value: Json
           p_reading_value: number
+          p_value: Json
         }
         Returns: boolean
       }
       check_usage_limits: {
         Args: { p_org_id: string }
         Returns: {
-          exceeds_device_limit: boolean
+          current_plan_name: string
           exceeds_api_limit: boolean
           exceeds_data_limit: boolean
-          current_plan_name: string
+          exceeds_device_limit: boolean
         }[]
       }
       cleanup_old_api_logs: {
@@ -1693,21 +1637,21 @@ export type Database = {
       }
       create_audit_log_entry: {
         Args: {
-          p_organization_id: string
-          p_user_id: string
           p_action: string
           p_details?: Json
+          p_organization_id: string
+          p_user_id: string
         }
         Returns: boolean
       }
       create_device_bypass_rls: {
         Args: {
-          p_name: string
-          p_type: string
-          p_status: string
           p_description: string
+          p_name: string
           p_organization_id: string
           p_product_template_id: string
+          p_status: string
+          p_type: string
         }
         Returns: {
           description: string | null
@@ -1722,26 +1666,26 @@ export type Database = {
       }
       create_notification: {
         Args: {
-          p_user_id: string
-          p_title: string
           p_content: string
-          p_type?: string
-          p_priority?: string
-          p_related_entity_type?: string
-          p_related_entity_id?: string
           p_expires_at?: string
+          p_priority?: string
+          p_related_entity_id?: string
+          p_related_entity_type?: string
+          p_title: string
+          p_type?: string
+          p_user_id: string
         }
         Returns: string
       }
       create_product_bypass_rls: {
         Args: {
-          p_name: string
-          p_description: string
-          p_version: string
           p_category: string
-          p_tags: string
-          p_status: string
+          p_description: string
+          p_name: string
           p_organization_id: string
+          p_status: string
+          p_tags: string
+          p_version: string
         }
         Returns: {
           category: string | null
@@ -1758,13 +1702,13 @@ export type Database = {
       }
       create_property_bypass_rls: {
         Args: {
-          p_product_id: string
-          p_name: string
-          p_description: string
           p_data_type: string
-          p_unit: string
-          p_is_required: boolean
           p_default_value: Json
+          p_description: string
+          p_is_required: boolean
+          p_name: string
+          p_product_id: string
+          p_unit: string
           p_validation_rules: Json
         }
         Returns: {
@@ -1811,23 +1755,23 @@ export type Database = {
       }
       get_audit_logs: {
         Args: {
-          p_organization_id: string
+          p_action?: string
+          p_end_date?: string
           p_limit?: number
           p_offset?: number
-          p_action?: string
-          p_user_id?: string
+          p_organization_id: string
           p_start_date?: string
-          p_end_date?: string
+          p_user_id?: string
         }
         Returns: {
-          id: string
-          organization_id: string
-          user_id: string
           action: string
-          details: Json
           created_at: string
+          details: Json
+          id: string
           ip_address: string
+          organization_id: string
           user_agent: string
+          user_id: string
         }[]
       }
       get_current_user_organizations: {
@@ -1840,21 +1784,21 @@ export type Database = {
       get_device_alarm_events_bypass_rls: {
         Args: { p_device_id: string }
         Returns: {
-          id: string
-          alarm_id: string
-          device_id: string
-          status: string
-          triggered_at: string
           acknowledged_at: string
-          resolved_at: string
           acknowledged_by: string
-          trigger_value: number
-          message: string
-          alarm_name: string
           alarm_description: string
+          alarm_id: string
+          alarm_name: string
           alarm_severity: string
+          device_id: string
           device_name: string
           device_type: string
+          id: string
+          message: string
+          resolved_at: string
+          status: string
+          trigger_value: number
+          triggered_at: string
         }[]
       }
       get_device_by_id_bypass_rls: {
@@ -1872,12 +1816,12 @@ export type Database = {
       }
       get_device_readings_aggregate: {
         Args: {
+          p_aggregation_type?: string
           p_device_id: string
-          p_reading_type: string
-          p_start_time: string
           p_end_time: string
           p_interval: unknown
-          p_aggregation_type?: string
+          p_reading_type: string
+          p_start_time: string
         }
         Returns: {
           time_bucket: string
@@ -1887,33 +1831,33 @@ export type Database = {
       get_device_readings_delta: {
         Args: {
           p_device_id: string
+          p_end_time: string
           p_reading_type: string
           p_start_time: string
-          p_end_time: string
         }
         Returns: {
-          start_timestamp: string
-          end_timestamp: string
-          start_value: number
-          end_value: number
           delta: number
+          end_timestamp: string
+          end_value: number
+          start_timestamp: string
+          start_value: number
         }[]
       }
       get_device_readings_optimized: {
         Args: {
           p_device_id: string
-          p_reading_type?: string
-          p_start_time?: string
           p_end_time?: string
           p_limit?: number
+          p_reading_type?: string
+          p_start_time?: string
         }
         Returns: {
-          id: string
           device_id: string
+          id: string
+          metadata: Json
+          reading_timestamp: string
           reading_type: string
           value: number
-          reading_timestamp: string
-          metadata: Json
         }[]
       }
       get_devices_by_org_id: {
@@ -1947,42 +1891,42 @@ export type Database = {
       get_organization_alarms_bypass_rls: {
         Args: { p_org_id: string }
         Returns: {
-          id: string
-          name: string
-          description: string
-          organization_id: string
-          device_id: string
-          enabled: boolean
-          reading_type: string
           condition_operator: string
           condition_value: Json
-          severity: string
           cooldown_minutes: number
           created_at: string
-          updated_at: string
+          description: string
+          device_id: string
           device_name: string
           device_type: string
+          enabled: boolean
           endpoints: string[]
+          id: string
+          name: string
+          organization_id: string
+          reading_type: string
+          severity: string
+          updated_at: string
         }[]
       }
       get_organization_current_usage: {
         Args: { p_org_id: string }
         Returns: {
-          device_count: number
+          active_connections: number
           api_calls_this_month: number
           data_volume_mb: number
-          active_connections: number
+          device_count: number
         }[]
       }
       get_organization_members: {
         Args: { p_org_id: string }
         Returns: {
-          id: string
-          user_id: string
-          role: string
-          username: string
-          full_name: string
           email: string
+          full_name: string
+          id: string
+          role: string
+          user_id: string
+          username: string
         }[]
       }
       get_organization_members_bypass_rls: {
@@ -1999,24 +1943,24 @@ export type Database = {
       get_organization_summary: {
         Args: { p_organization_id: string }
         Returns: {
-          total_devices: number
-          active_devices: number
-          total_alarms: number
           active_alarms: number
-          total_endpoints: number
+          active_devices: number
           active_endpoints: number
           recent_readings_count: number
+          total_alarms: number
+          total_devices: number
+          total_endpoints: number
         }[]
       }
       get_organization_with_role: {
         Args: { p_org_id: string; p_user_id: string }
         Returns: {
+          created_at: string
           id: string
           name: string
-          slug: string
-          created_at: string
-          updated_at: string
           role: string
+          slug: string
+          updated_at: string
         }[]
       }
       get_product_by_id: {
@@ -2067,10 +2011,10 @@ export type Database = {
       get_timezone_info: {
         Args: { timezone_name?: string }
         Returns: {
-          name: string
           abbrev: string
-          utc_offset: unknown
           is_dst: boolean
+          name: string
+          utc_offset: unknown
         }[]
       }
       get_user_org_role: {
@@ -2089,15 +2033,27 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: {
           id: string
-          name: string
-          slug: string
-          role: string
           is_default: boolean
+          name: string
+          role: string
+          slug: string
         }[]
       }
       get_user_role: {
         Args: { org_id: string; user_id: string }
         Returns: Database["public"]["Enums"]["role_type"]
+      }
+      get_user_role_secure: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_role: {
+        Args: {
+          _org_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
       is_org_admin_or_owner: {
         Args: { org_id: string } | { p_org_id: string; p_user_id: string }
@@ -2107,12 +2063,20 @@ export type Database = {
         Args: { p_org_id: string; p_user_id: string }
         Returns: boolean
       }
+      is_org_admin_or_owner_secure: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_org_member: {
         Args: { org_id: string } | { p_org_id: string; p_user_id: string }
         Returns: boolean
       }
       is_org_member_bypass_rls: {
         Args: { p_org_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      is_org_member_secure: {
+        Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
       is_organization_admin_bypass_rls: {
@@ -2144,11 +2108,11 @@ export type Database = {
         Returns: undefined
       }
       switch_user_organization: {
-        Args: { p_user_id: string; p_org_id: string }
+        Args: { p_org_id: string; p_user_id: string }
         Returns: boolean
       }
       update_device_bypass_rls: {
-        Args: { p_device_id: string; p_data: Json }
+        Args: { p_data: Json; p_device_id: string }
         Returns: {
           description: string | null
           id: string
@@ -2161,7 +2125,7 @@ export type Database = {
         }
       }
       update_product_bypass_rls: {
-        Args: { p_id: string; p_data: Json }
+        Args: { p_data: Json; p_id: string }
         Returns: {
           category: string | null
           created_at: string
@@ -2176,7 +2140,7 @@ export type Database = {
         }
       }
       update_property_bypass_rls: {
-        Args: { p_id: string; p_data: Json }
+        Args: { p_data: Json; p_id: string }
         Returns: {
           created_at: string
           data_type: string
@@ -2195,6 +2159,7 @@ export type Database = {
     Enums: {
       alarm_severity: "info" | "warning" | "critical"
       alarm_status: "active" | "acknowledged" | "resolved"
+      app_role: "owner" | "admin" | "member" | "viewer"
       condition_operator:
         | "gt"
         | "lt"
@@ -2334,6 +2299,7 @@ export const Constants = {
     Enums: {
       alarm_severity: ["info", "warning", "critical"],
       alarm_status: ["active", "acknowledged", "resolved"],
+      app_role: ["owner", "admin", "member", "viewer"],
       condition_operator: [
         "gt",
         "lt",

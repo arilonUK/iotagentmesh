@@ -18,11 +18,12 @@ enable_signup = true
 enable_email_confirmations = false
 enable_email_autoconfirm = false
 
+# API Gateway - handles its own JWT validation internally
 [functions.api-gateway]
-verify_jwt = false
+verify_jwt = true
 
 [functions.api-mcp]
-verify_jwt = false
+verify_jwt = true
 
 [functions.create-checkout]
 verify_jwt = true
@@ -30,72 +31,76 @@ verify_jwt = true
 [functions.customer-portal]
 verify_jwt = true
 
+# Webhook handlers verify their own signatures
 [functions.stripe-webhooks]
 verify_jwt = false
 
 [functions.assign-free-plan]
-verify_jwt = false
+verify_jwt = true
 
 [functions.api-alarms]
-verify_jwt = false
+verify_jwt = true
 
 [functions.api-auth-orchestrator]
-verify_jwt = false
+verify_jwt = true
 
+# Auth function handles login - must be public
 [functions.api-auth]
 verify_jwt = false
 
 [functions.api-data]
-verify_jwt = false
+verify_jwt = true
 
 [functions.api-devices]
-verify_jwt = false
+verify_jwt = true
 
 [functions.api-endpoints]
-verify_jwt = false
+verify_jwt = true
 
 [functions.api-files]
-verify_jwt = false
+verify_jwt = true
 
 [functions.api-key-management]
-verify_jwt = false
+verify_jwt = true
 
+# Key validator is called by other functions
 [functions.api-key-validator]
 verify_jwt = false
 
 [functions.api-organizations]
-verify_jwt = false
+verify_jwt = true
 
 [functions.api-products]
-verify_jwt = false
+verify_jwt = true
 
 [functions.api-profiles]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-api-key]
-verify_jwt = false
+verify_jwt = true
 
 [functions.rate-limit-checker]
-verify_jwt = false
+verify_jwt = true
 
 [functions.rate-limiter]
-verify_jwt = false
+verify_jwt = true
 
 [functions.trigger-endpoint]
-verify_jwt = false
+verify_jwt = true
 
 [functions.usage-tracker]
-verify_jwt = false
+verify_jwt = true
 
 [functions.webhook-dispatcher]
-verify_jwt = false
+verify_jwt = true
 
 [functions.webhook-manager]
-verify_jwt = false
+verify_jwt = true
 
 [functions.iot-agent-mesh-proxy]
 verify_jwt = true
 
+# IoT Mesh webhook validates its own signature
 [functions.iot-mesh-webhooks]
 verify_jwt = false
 
