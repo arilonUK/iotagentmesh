@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
+import logo from "@/assets/iotagentmesh-logo.png";
 
 const SiteFooter = () => (
   <footer className="border-t border-gray-100 py-12">
@@ -8,9 +9,7 @@ const SiteFooter = () => (
       <div className="grid md:grid-cols-4 gap-8">
         <div>
           <Link to="/" className="flex items-center gap-2 mb-4">
-            <div className="size-8 rounded-lg iot-gradient-bg flex items-center justify-center">
-              <span className="font-bold text-lg">I</span>
-            </div>
+            <img src={logo} alt="IoTAgentMesh" className="size-8 rounded-lg" />
             <span className="text-xl font-semibold">IoTAgentMesh</span>
           </Link>
           <p className="text-sm text-muted-foreground">

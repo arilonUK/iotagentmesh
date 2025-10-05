@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
+import logo from "@/assets/iotagentmesh-logo.png";
 
 const LandingHeader = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -11,9 +12,7 @@ const LandingHeader = () => {
       <div className="container mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="size-9 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-              <span className="font-bold text-lg text-primary-foreground">I</span>
-            </div>
+            <img src={logo} alt="IoTAgentMesh" className="size-9 rounded-lg" />
             <span className="text-xl font-bold">IoTAgentMesh</span>
           </Link>
 
