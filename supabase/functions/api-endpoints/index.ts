@@ -56,7 +56,7 @@ serve(async (req) => {
       })
     }
 
-    if (path === '/api/endpoints' && method === 'GET') {
+    if (path === '/api-endpoints' && method === 'GET') {
       const { data, error } = await supabaseClient
         .from('endpoints')
         .select('*')
@@ -69,7 +69,7 @@ serve(async (req) => {
       })
     }
 
-    if (path === '/api/endpoints' && method === 'POST') {
+    if (path === '/api-endpoints' && method === 'POST') {
       const body = await req.json()
       const { data, error } = await supabaseClient
         .from('endpoints')
@@ -90,7 +90,7 @@ serve(async (req) => {
       })
     }
 
-    const endpointIdMatch = path.match(/^\/api\/endpoints\/([^/]+)$/)
+    const endpointIdMatch = path.match(/^\/api-endpoints\/([^/]+)$/)
     if (endpointIdMatch) {
       const endpointId = endpointIdMatch[1]
 
@@ -129,7 +129,7 @@ serve(async (req) => {
       }
     }
 
-    if (path.startsWith('/api/endpoints/') && path.endsWith('/trigger') && method === 'POST') {
+    if (path.startsWith('/api-endpoints/') && path.endsWith('/trigger') && method === 'POST') {
       const endpointId = path.split('/')[3]
       const body = await req.json()
 

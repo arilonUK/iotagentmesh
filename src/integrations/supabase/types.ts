@@ -1596,7 +1596,7 @@ export type Database = {
           abbrev: string | null
           is_dst: boolean | null
           name: string | null
-          utc_offset: unknown | null
+          utc_offset: unknown
         }
         Relationships: []
       }
@@ -1627,14 +1627,8 @@ export type Database = {
           exceeds_device_limit: boolean
         }[]
       }
-      cleanup_old_api_logs: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      cleanup_old_data: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      cleanup_old_api_logs: { Args: never; Returns: undefined }
+      cleanup_old_data: { Args: never; Returns: undefined }
       create_audit_log_entry: {
         Args: {
           p_action: string
@@ -1662,6 +1656,12 @@ export type Database = {
           product_template_id: string | null
           status: string
           type: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "devices"
+          isOneToOne: true
+          isSetofReturn: false
         }
       }
       create_notification: {
@@ -1699,6 +1699,12 @@ export type Database = {
           updated_at: string
           version: string
         }
+        SetofOptions: {
+          from: "*"
+          to: "product_templates"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       create_property_bypass_rls: {
         Args: {
@@ -1724,35 +1730,26 @@ export type Database = {
           updated_at: string
           validation_rules: Json | null
         }
+        SetofOptions: {
+          from: "*"
+          to: "product_properties"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       delete_device_bypass_rls: {
         Args: { p_device_id: string }
         Returns: undefined
       }
-      delete_expired_notifications: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      delete_property_bypass_rls: {
-        Args: { p_id: string }
-        Returns: undefined
-      }
+      delete_expired_notifications: { Args: never; Returns: number }
+      delete_property_bypass_rls: { Args: { p_id: string }; Returns: undefined }
       ensure_user_has_valid_organization: {
         Args: { p_user_id: string }
         Returns: string
       }
-      exec_sql: {
-        Args: { sql: string }
-        Returns: undefined
-      }
-      function_exists: {
-        Args: { function_name: string }
-        Returns: boolean
-      }
-      generate_api_key_prefix: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      exec_sql: { Args: { sql: string }; Returns: undefined }
+      function_exists: { Args: { function_name: string }; Returns: boolean }
+      generate_api_key_prefix: { Args: never; Returns: string }
       get_audit_logs: {
         Args: {
           p_action?: string
@@ -1775,7 +1772,7 @@ export type Database = {
         }[]
       }
       get_current_user_organizations: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           organization_id: string
           role: string
@@ -1813,6 +1810,12 @@ export type Database = {
           status: string
           type: string
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "devices"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_device_readings_aggregate: {
         Args: {
@@ -1872,6 +1875,12 @@ export type Database = {
           status: string
           type: string
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "devices"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_org_products: {
         Args: { p_org_id: string }
@@ -1887,6 +1896,12 @@ export type Database = {
           updated_at: string
           version: string
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "product_templates"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_organization_alarms_bypass_rls: {
         Args: { p_org_id: string }
@@ -1939,6 +1954,12 @@ export type Database = {
           updated_at: string
           user_id: string
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "organization_members"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_organization_summary: {
         Args: { p_organization_id: string }
@@ -1977,6 +1998,12 @@ export type Database = {
           updated_at: string
           version: string
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "product_templates"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_product_properties: {
         Args: { p_product_id: string }
@@ -1993,6 +2020,12 @@ export type Database = {
           updated_at: string
           validation_rules: Json | null
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "product_properties"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_product_services: {
         Args: { p_product_id: string }
@@ -2007,6 +2040,12 @@ export type Database = {
           service_type: string
           updated_at: string
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "product_services"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_timezone_info: {
         Args: { timezone_name?: string }
@@ -2055,10 +2094,9 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_org_admin_or_owner: {
-        Args: { org_id: string } | { p_org_id: string; p_user_id: string }
-        Returns: boolean
-      }
+      is_org_admin_or_owner:
+        | { Args: { p_org_id: string; p_user_id: string }; Returns: boolean }
+        | { Args: { org_id: string }; Returns: boolean }
       is_org_admin_or_owner_bypass_rls: {
         Args: { p_org_id: string; p_user_id: string }
         Returns: boolean
@@ -2067,10 +2105,9 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
-      is_org_member: {
-        Args: { org_id: string } | { p_org_id: string; p_user_id: string }
-        Returns: boolean
-      }
+      is_org_member:
+        | { Args: { p_org_id: string; p_user_id: string }; Returns: boolean }
+        | { Args: { org_id: string }; Returns: boolean }
       is_org_member_bypass_rls: {
         Args: { p_org_id: string; p_user_id: string }
         Returns: boolean
@@ -2095,14 +2132,8 @@ export type Database = {
         Args: { p_notification_id: string; p_user_id: string }
         Returns: boolean
       }
-      refresh_timezone_cache: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      reset_expired_rate_limits: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      refresh_timezone_cache: { Args: never; Returns: undefined }
+      reset_expired_rate_limits: { Args: never; Returns: undefined }
       resolve_alarm_event_bypass_rls: {
         Args: { p_event_id: string }
         Returns: undefined
@@ -2123,6 +2154,12 @@ export type Database = {
           status: string
           type: string
         }
+        SetofOptions: {
+          from: "*"
+          to: "devices"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       update_product_bypass_rls: {
         Args: { p_data: Json; p_id: string }
@@ -2137,6 +2174,12 @@ export type Database = {
           tags: string | null
           updated_at: string
           version: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "product_templates"
+          isOneToOne: true
+          isSetofReturn: false
         }
       }
       update_property_bypass_rls: {
@@ -2153,6 +2196,12 @@ export type Database = {
           unit: string | null
           updated_at: string
           validation_rules: Json | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "product_properties"
+          isOneToOne: true
+          isSetofReturn: false
         }
       }
     }
